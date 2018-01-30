@@ -1,0 +1,7 @@
+*.log
+*.pyc
+.idea/*
+docs/_build/*
+.coverage
+.coveragerc
+venv/*
