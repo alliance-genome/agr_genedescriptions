@@ -1,5 +1,9 @@
+import argparse
+import configparser
 import urllib
 import json
+
+from data_fetcher import DataFetcher
 
 
 def generate_go_sentences(go_type: str, gene, sentence_header):
@@ -15,9 +19,28 @@ def generate_go_sentences(go_type: str, gene, sentence_header):
 
 
 def main():
-    species = "Mus+musculus"
-    limit = 100
-    offset = 0
+    parser = argparse.ArgumentParser(description="Generate gene descriptions for wormbase")
+    parser.add_argument("-c", "--config-file", metavar="config_file", dest="config_file", type=str,
+                        default="genedesc.ini", help="configuration file")
+    parser.add_argument("-v", "--output-version", metavar="version_number", dest="version_number", type=str,
+                        help="release version number")
+    parser.add_argument("-w", "--wormbase-version", metavar="wormbase_number", dest="wormbase_number", type=str,
+                        help="wormbase input files version number")
+
+    args = parser.parse_args()
+
+    config = configparser.ConfigParser()
+    config.read(args.config_file)
+
+    raw_files_source = config.get("data_fetcher", "raw_files_source")
+    species = config.get("generic", "species").split(",")
+    project_ids = config.get("generic", "project_ids").split(",")
+
+    df = DataFetcher(raw_files_source=raw_files_source, release_version=args.wormbase_number, species=species[0],
+                     project_id=project_ids[0])
+    for geneid in df.get_gene_data():
+        print(geneid)
+
     with urllib.request.urlopen(
             "http://www.alliancegenome.org/api/search?category=gene&limit=100&offset=0&species=" + species) as url:
         data = json.loads(url.read().decode())
