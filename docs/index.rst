@@ -8,9 +8,13 @@ Welcome to wb_genedescriptions's documentation!
 
 This program generates gene descriptions for `WormBase <http://wormbase.org>`_.
 
-The main program, `generate_descriptions.py <generate_descriptions>`_, combines the functions of three sub-modules to
-get the raw data from WormBase and generate the gene descriptions. The following section links to the modules of the
+The main program, `generate_descriptions.py <generate_descriptions.html>`_, combines the functions of three sub-modules to
+get the raw data from WormBase and generate the gene descriptions. The following diagram shows the work flow of the
 project.
+
+.. image:: images/index/General_WF.jpg
+
+Each rectangle in the diagram corresponds to a sub-module, documented in the following.
 
 .. toctree::
    :maxdepth: 2
