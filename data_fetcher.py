@@ -33,13 +33,13 @@ class WBRawDataFetcher:
         self.go_ontology = {}
 
     def get_gene_data(self, include_dead_genes: bool = False, include_pseudo_genes: bool = False) -> Gene:
-        """fetch gene data
+        """get all gene data from the fetcher, returning one gene per call
 
         :param include_dead_genes: whether to include dead genes in the results
         :type include_dead_genes: bool
         :param include_pseudo_genes: whether to include pseudo genes in the results
         :type include_dead_genes: bool
-        :return: data for one gene at each call, including gene_id and gene_name
+        :return: data for one gene per each call, including gene_id and gene_name
         :rtype: Gene
         """
         address = self.raw_files_source + '/' + self.release_version + '/species/' + self.species + '/' + \
