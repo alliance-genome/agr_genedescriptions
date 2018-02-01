@@ -1,8 +1,7 @@
 import argparse
 import configparser
-import urllib
-import json
-from data_fetcher import WBDataFetcher
+from data_fetcher import WBRawDataFetcher
+from descriptions_rules import *
 
 
 def main():
@@ -23,10 +22,14 @@ def main():
     species = config.get("generic", "species").split(",")
     project_ids = config.get("generic", "project_ids").split(",")
 
-    df = WBDataFetcher(raw_files_source=raw_files_source, release_version=args.wormbase_number, species=species[0],
-                       project_id=project_ids[0])
+    df = WBRawDataFetcher(raw_files_source=raw_files_source, release_version=args.wormbase_number, species=species[3],
+                          project_id=project_ids[3])
+    df.read_go_data()
     for gene in df.get_gene_data():
-        print(gene.id)
+        go_annotations = df.get_go_annotations(gene.id, GO_ASPECT.BIOLOGICAL_PROCESS)
+        sentences = generate_go_sentence([annotation.go_name for annotation in go_annotations],
+                                         go_type=GO_ASPECT.BIOLOGICAL_PROCESS)
+        print(sentences)
 
 
 if __name__ == '__main__':

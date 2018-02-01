@@ -2,24 +2,24 @@ from typing import List
 from enum import Enum
 
 
-class GO_TYPE(Enum):
+class GO_ASPECT(Enum):
     MOLECULAR_FUNCTION = 0
-    BIOLOGYCAL_PROCESS = 1
+    BIOLOGICAL_PROCESS = 1
     CELLULAR_COMPONENT = 2
 
 
-GO_HEADER_SENTENCES = {GO_TYPE.MOLECULAR_FUNCTION: "encodes product that exhibits",
-                       GO_TYPE.BIOLOGYCAL_PROCESS: "is involved in",
-                       GO_TYPE.CELLULAR_COMPONENT: "localizes to"}
+GO_HEADER_SENTENCES = {GO_ASPECT.MOLECULAR_FUNCTION: "encodes product that exhibits",
+                       GO_ASPECT.BIOLOGICAL_PROCESS: "is involved in",
+                       GO_ASPECT.CELLULAR_COMPONENT: "localizes to"}
 
 
-def generate_go_sentence(functions: List[str], go_type: GO_TYPE) -> str:
-    """generate GO sentences from a list of GO functions
+def generate_go_sentence(functions: List[str], go_type: GO_ASPECT) -> str:
+    """generate GO sentences from a list of GO terms names
 
-    :param functions: the list of GO functions for a gene
+    :param functions: the list of GO term names linked to a gene through a go annotation
     :type functions: List[str]
     :param go_type: type of GO function
-    :type go_type: GO_TYPE
+    :type go_type: GO_ASPECT
     :return: a string containing the go sentence
     :rtype: str
     """
