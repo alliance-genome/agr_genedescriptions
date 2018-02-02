@@ -26,10 +26,23 @@ def main():
                           project_id=project_ids[3])
     df.read_go_data()
     for gene in df.get_gene_data():
-        go_annotations = df.get_go_annotations(gene.id, GO_ASPECT.BIOLOGICAL_PROCESS)
-        sentences = generate_go_sentence([annotation.go_name for annotation in go_annotations],
-                                         go_type=GO_ASPECT.BIOLOGICAL_PROCESS)
-        print(sentences)
+        print(gene.id, gene.name)
+        sentences = generate_go_sentence(df.get_go_annotations(gene.id))
+        if sentences:
+            joined_sent = []
+            proc_sent = "; ".join([sent.text for sent in sentences.get_sentences(GO_ASPECT.BIOLOGICAL_PROCESS)])
+            if proc_sent:
+                joined_sent.append(proc_sent.capitalize())
+            func_sent = "; ".join([sent.text for sent in sentences.get_sentences(GO_ASPECT.MOLECULAR_FUNCTION)])
+            if func_sent:
+                joined_sent.append(func_sent.capitalize())
+            comp_sent = "; ".join([sent.text for sent in sentences.get_sentences(GO_ASPECT.CELLULAR_COMPONENT)])
+            if comp_sent:
+                joined_sent.append(comp_sent.capitalize())
+
+            print(". ".join(joined_sent) + ".")
+        else:
+            print("No description available")
 
 
 if __name__ == '__main__':

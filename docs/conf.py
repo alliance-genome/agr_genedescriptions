@@ -46,7 +46,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'wb_genedescriptions'
+project = 'genedescriptions'
 copyright = '2018, Valerio Arnaboldi'
 author = 'Valerio Arnaboldi'
 
