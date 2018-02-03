@@ -2,7 +2,7 @@ import configparser
 import unittest
 import os
 from data_fetcher import WBRawDataFetcher
-from descriptions_rules import generate_go_sentences, GOSentencesCollection
+from descriptions_rules import generate_go_sentences
 
 
 class TestDescriptionsRules(unittest.TestCase):
