@@ -1,5 +1,5 @@
 import gzip
-import urllib
+import urllib.request
 from collections import namedtuple, defaultdict
 from enum import Enum
 
