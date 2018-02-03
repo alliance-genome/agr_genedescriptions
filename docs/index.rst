@@ -6,11 +6,12 @@
 Welcome to genedescriptions's documentation!
 ===============================================
 
-This program generates gene descriptions for `WormBase <http://wormbase.org>`_.
+This program generates gene descriptions for `AGR <http://alliancegenome.org>`_ and other Model Organism Databases
+(e.g., `WormBase <http://wormbase.org>`_).
 
-The main program, `generate_descriptions.py <generate_descriptions.html>`_, combines the functions of three sub-modules to
-get the raw data from WormBase and generate the gene descriptions. The following diagram shows the work flow of the
-project.
+The main program of the project, `generate_descriptions.py <generate_descriptions.html>`_, combines the functions of
+three sub-modules to get the raw data from WormBase and generate the gene descriptions. The following diagram shows the
+high level flow of the project.
 
 .. image:: images/index/general_WF.jpg
 

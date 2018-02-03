@@ -1,32 +1,60 @@
 import gzip
 import urllib
 from collections import namedtuple, defaultdict
+from enum import Enum
+
+import os
+from urllib.parse import urlparse
+
 from namedlist import namedlist
 from typing import List
-from descriptions_rules import GO_ASPECT
-from mappers import Gene, GOAnnotation, GOOntologyEntry
+
+Gene = namedtuple('Gene', ['id', 'name'])
+GOAnnotation = namedtuple('GOAnnotation', ['go_id', 'qualifier', 'paper_reference', 'evidence_code', 'aspect',
+                                           'annotation_ext', 'go_name', 'is_obsolete'])
+GOOntologyEntry = namedlist('GOOntologyEntry', 'name is_obsolete')
+
+
+class GO_ASPECT(Enum):
+    MOLECULAR_FUNCTION = 0
+    BIOLOGICAL_PROCESS = 1
+    CELLULAR_COMPONENT = 2
 
 
 class WBRawDataFetcher:
     """data fetcher for WormBase raw files for a single species"""
-    def __init__(self, raw_files_source: str, release_version: str, species: str, project_id: str):
+    def __init__(self, raw_files_source: str, cache_location: str, release_version: str, species: str, project_id: str,
+                 use_cache: bool, ):
         """create a new data fetcher
 
         :param raw_files_source: base url where to fetch the raw files
         :type raw_files_source: str
+        :param cache_location: path to cache directory
+        :type cache_location: str
         :param release_version: WormBase release version for the input files
         :type release_version: str
         :param species: WormBase species to fetch
         :type species: str
         :param project_id: project id associated with the species
         :type project_id: str
+        :param use_cache: whether to use cached files. If cache is empty, files are downloading from source and stored
+            in cache
+        :type use_cache: bool
         """
         self.raw_files_source = raw_files_source
+        self.cache_location = cache_location
         self.release_version = release_version
         self.species = species
         self.project_id = project_id
         self.go_data = defaultdict(set)
         self.go_ontology = {}
+        self.use_cache = use_cache
+
+    def _fill_cache_if_empty_and_activated(self, cache_url, file_source_url):
+        cache_url_parsed = urlparse(cache_url)
+        if self.use_cache and not os.path.isfile(cache_url_parsed.path):
+            os.makedirs(os.path.dirname(cache_url_parsed.path), exist_ok=True)
+            urllib.request.urlretrieve(file_source_url, cache_url_parsed.path)
 
     def get_gene_data(self, include_dead_genes: bool = False, include_pseudo_genes: bool = False) -> Gene:
         """get all gene data from the fetcher, returning one gene per call
@@ -38,9 +66,14 @@ class WBRawDataFetcher:
         :return: data for one gene per each call, including gene_id and gene_name
         :rtype: Gene
         """
-        address = self.raw_files_source + '/' + self.release_version + '/species/' + self.species + '/' + \
-                  self.project_id + '/annotation/' + self.species + '.' + self.project_id + '.' + self.release_version \
-                  + '.geneIDs.txt.gz'
+        cache_url = os.path.join(self.cache_location, self.release_version, "species", self.species, self.project_id,
+                                 "annotation", self.species + '.' + self.project_id + '.' + self.release_version +
+                                 ".geneIDs.txt.gz")
+        source_address = self.raw_files_source + '/' + self.release_version + '/species/' + self.species + '/' + \
+                         self.project_id + '/annotation/' + self.species + '.' + self.project_id + '.' + \
+                         self.release_version + '.geneIDs.txt.gz'
+        self._fill_cache_if_empty_and_activated(cache_url=cache_url, file_source_url=source_address)
+        address = cache_url if self.use_cache else source_address
         # TODO if include_pseudo_genes == False exclude it - get pseudo gene data from another file
         with urllib.request.urlopen(address) as url:
             gzip_file = gzip.GzipFile(fileobj=url)
@@ -50,14 +83,19 @@ class WBRawDataFetcher:
                     name = fields[2] if fields[2] != '' else fields[3]
                     yield Gene(fields[1], name)
 
-    def read_go_data(self) -> None:
+    def load_go_data(self) -> None:
         """read go data and gene ontology. After calling this function, go annotations containing mapped go names can
         be retrieved by using the :meth:`data_fetcher.WBRawDataFetcher.get_go_annotations` function
         """
-        self._read_go_ontology()
-        address = self.raw_files_source + '/' + self.release_version + '/species/' + self.species + '/' + \
-                  self.project_id + '/annotation/' + self.species + '.' + self.project_id + '.' + self.release_version \
-                  + '.go_annotations.gaf.gz'
+        self._load_go_ontology()
+        cache_url = os.path.join(self.cache_location, self.release_version, "species", self.species, self.project_id,
+                                 "annotation", self.species + '.' + self.project_id + '.' + self.release_version +
+                                 ".go_annotations.gaf.gz")
+        source_address = self.raw_files_source + '/' + self.release_version + '/species/' + self.species + '/' + \
+                         self.project_id + '/annotation/' + self.species + '.' + self.project_id + '.' + \
+                         self.release_version + '.go_annotations.gaf.gz'
+        self._fill_cache_if_empty_and_activated(cache_url=cache_url, file_source_url=source_address)
+        address = cache_url if self.use_cache else source_address
         with urllib.request.urlopen(address) as url:
             gzip_file = gzip.GzipFile(fileobj=url)
             for line in gzip_file:
@@ -78,10 +116,14 @@ class WBRawDataFetcher:
                                                                 fields[15], self.go_ontology[fields[4]].name,
                                                                 is_obsolete))
 
-    def _read_go_ontology(self):
+    def _load_go_ontology(self):
         """read go ontology data"""
-        address = self.raw_files_source + '/' + self.release_version + '/ONTOLOGY/gene_ontology.' + \
-                  self.release_version + '.obo'
+        cache_url = os.path.join(self.cache_location, self.release_version, "ONTOLOGY", "gene_ontology." +
+                                       self.release_version + ".obo")
+        source_address = self.raw_files_source + '/' + self.release_version + '/ONTOLOGY/gene_ontology.' + \
+                         self.release_version + '.obo'
+        self._fill_cache_if_empty_and_activated(cache_url=cache_url, file_source_url=source_address)
+        address = cache_url if self.use_cache else source_address
         with urllib.request.urlopen(address) as url:
             go_id = None
             go_entry = GOOntologyEntry(None, None)
