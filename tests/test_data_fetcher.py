@@ -17,7 +17,7 @@ class TestWBRawDataFetcher(unittest.TestCase):
 
     def test_get_gene_data(self):
         df = WBRawDataFetcher(raw_files_source=self.raw_files_source, release_version="WS263", species=self.species,
-                              project_id=self.project_id, cache_location=self.cache_location, use_cache=True)
+                              project_id=self.project_id, cache_location=self.cache_location, use_cache=False)
         df.load_go_data()
         self.assertEqual(len([gene for gene in df.get_gene_data()]), 48678)
 
