@@ -10,9 +10,9 @@ The complete documentation of the project can be found
 
 ## Installation
 
-To install the software, clone the repository and install the dependencies by running the following command from the
+To install the software, clone the repository and run the following command from the
 root directory of the project:
 
 ```bash
-$ pip3 install -r requirements.txt
+$ pip3 install .
 ```
