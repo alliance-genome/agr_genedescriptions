@@ -51,7 +51,7 @@ class GOSentencesCollection(object):
         return self.sentences_map[go_aspect]
 
 
-def generate_go_sentence(go_annotations: List[GOAnnotation]) -> GOSentencesCollection:
+def generate_go_sentences(go_annotations: List[GOAnnotation]) -> GOSentencesCollection:
     """generate GO sentences from a list of GO annotations
 
     :param go_annotations: the list of GO annotations for a given gene

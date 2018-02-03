@@ -31,7 +31,7 @@ def main():
     df.load_go_data()
     for gene in df.get_gene_data():
         print(gene.id, gene.name)
-        sentences = generate_go_sentence(df.get_go_annotations(gene.id))
+        sentences = generate_go_sentences(df.get_go_annotations(gene.id))
         if sentences:
             joined_sent = []
             proc_sent = "; ".join([sent.text for sent in sentences.get_sentences(GO_ASPECT.BIOLOGICAL_PROCESS)])
