@@ -2,11 +2,10 @@
 
 ## Introduction
 
-This project generates gene descriptions for WormBase project, fetching
-gene data from its main ftp site.
+This project generates gene descriptions for Model Organism Databases within the Alliance of Genome Resources project.
 
-The complete documentation of the project can be found 
-[here](http://wb-genedescriptions.readthedocs.io/en/latest/)
+The complete documentation of the project can be found on
+[ReadTheDocs](http://wb-genedescriptions.readthedocs.io/en/latest/)
 
 ## Installation
 
@@ -16,3 +15,16 @@ root directory of the project:
 ```bash
 $ pip3 install .
 ```
+
+## Generating Descriptions
+
+TBD
+
+### Configuring the main script
+
+the main script can be configured through a configuration file in .ini format. The default file is *genedesc.ini*, but a
+different file can be provided by the argument -c.
+
+#### Species
+
+#### Other options
