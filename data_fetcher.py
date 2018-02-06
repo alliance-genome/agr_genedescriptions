@@ -144,9 +144,9 @@ class WBRawDataFetcher:
                         go_entry.is_obsolete = fields[1]
 
     def get_go_annotations(self, geneid: str, include_obsolete: bool = False,
-                           priority_list: tuple = ("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "ISS", "ISO", "ISA", "ISM",
-                                                   "IGC", "IBA", "IBD", "IKR", "IRD", "RCA",
-                                                   "IC")) -> List[GOAnnotation]:
+                           priority_list: tuple = ("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "IC", "ISS", "ISO", "ISA",
+                                                   "ISM", "IGC", "IBA", "IBD", "IKR", "IRD", "RCA", "IEA"
+                                                   )) -> List[GOAnnotation]:
         """retrieve go annotations for a given gene id and for a given aspect. The annotations are unique for each pair
         <gene_id, go_term_id>. This means that when multiple annotations for the same pair are found in the go data, the
         one with the evidence code with highest priority is returned (see the *priority_list* parameter to set the

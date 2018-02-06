@@ -34,17 +34,21 @@ def main():
         sentences = generate_go_sentences(df.get_go_annotations(gene.id))
         if sentences:
             joined_sent = []
-            proc_sent = "; ".join([sent.text for sent in sentences.get_sentences(GO_ASPECT.BIOLOGICAL_PROCESS)])
-            if proc_sent:
-                joined_sent.append(proc_sent.capitalize())
-            func_sent = "; ".join([sent.text for sent in sentences.get_sentences(GO_ASPECT.MOLECULAR_FUNCTION)])
+            func_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
+                GO_ASPECT.MOLECULAR_FUNCTION)])
             if func_sent:
-                joined_sent.append(func_sent.capitalize())
-            comp_sent = "; ".join([sent.text for sent in sentences.get_sentences(GO_ASPECT.CELLULAR_COMPONENT)])
+                joined_sent.append(func_sent)
+            proc_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
+                GO_ASPECT.BIOLOGICAL_PROCESS)])
+            if proc_sent:
+                joined_sent.append(proc_sent)
+            comp_sent = "and ".join([sentence.text for sentence in sentences.get_sentences(
+                GO_ASPECT.CELLULAR_COMPONENT)])
             if comp_sent:
-                joined_sent.append(comp_sent.capitalize())
+                joined_sent.append(comp_sent)
 
-            print(". ".join(joined_sent) + ".")
+            go_desc = "; ".join(joined_sent) + "."
+            print(go_desc.capitalize())
         else:
             print("No description available")
         print()
