@@ -24,31 +24,35 @@ EVIDENCE_GROUPS_MAP = {
     "IC": EVIDENCE_GROUP.EXPERIMENTAL, "IEA": EVIDENCE_GROUP.ELECTRONIC
 }
 
-GO_HEADER_SENTENCES_MAP = {(GO_ASPECT.MOLECULAR_FUNCTION, EVIDENCE_GROUP.EXPERIMENTAL):
-                               ("exhibits", ""),
-                           (GO_ASPECT.MOLECULAR_FUNCTION,
-                            EVIDENCE_GROUP.SEQUENCE_BASED_ANALYSIS):
+GO_PREPOSTFIX_SENTENCES_MAP = {(GO_ASPECT.MOLECULAR_FUNCTION, EVIDENCE_GROUP.EXPERIMENTAL): ("exhibits", ""),
+                               (GO_ASPECT.MOLECULAR_FUNCTION, EVIDENCE_GROUP.SEQUENCE_BASED_ANALYSIS):
                                ("is predicted to have", "based on sequence-based analysis"),
-                           (GO_ASPECT.MOLECULAR_FUNCTION, EVIDENCE_GROUP.PHYLOGENETIC_ANALYSIS):
+                               (GO_ASPECT.MOLECULAR_FUNCTION, EVIDENCE_GROUP.PHYLOGENETIC_ANALYSIS):
                                ("is predicted to have", "based on phylogenetic analysis"),
-                           (GO_ASPECT.MOLECULAR_FUNCTION, EVIDENCE_GROUP.ELECTRONIC):
+                               (GO_ASPECT.MOLECULAR_FUNCTION, EVIDENCE_GROUP.ELECTRONIC):
                                ("is predicted to have", "based on protein domain information"),
-                           (GO_ASPECT.BIOLOGICAL_PROCESS, EVIDENCE_GROUP.EXPERIMENTAL):
+                               (GO_ASPECT.MOLECULAR_FUNCTION, EVIDENCE_GROUP.COMPUTATIONAL_ANALYSIS):
+                               ("is predicted to have", "based on computational analysis"),
+                               (GO_ASPECT.BIOLOGICAL_PROCESS, EVIDENCE_GROUP.EXPERIMENTAL):
                                ("is involved in", ""),
-                           (GO_ASPECT.BIOLOGICAL_PROCESS, EVIDENCE_GROUP.SEQUENCE_BASED_ANALYSIS):
+                               (GO_ASPECT.BIOLOGICAL_PROCESS, EVIDENCE_GROUP.SEQUENCE_BASED_ANALYSIS):
                                ("is predicted to be involved in", "based on sequence-based analysis"),
-                           (GO_ASPECT.BIOLOGICAL_PROCESS, EVIDENCE_GROUP.PHYLOGENETIC_ANALYSIS):
+                               (GO_ASPECT.BIOLOGICAL_PROCESS, EVIDENCE_GROUP.PHYLOGENETIC_ANALYSIS):
                                ("is predicted to be involved in", "based on phylogenetic analysis"),
-                           (GO_ASPECT.BIOLOGICAL_PROCESS, EVIDENCE_GROUP.ELECTRONIC):
+                               (GO_ASPECT.BIOLOGICAL_PROCESS, EVIDENCE_GROUP.ELECTRONIC):
                                ("is predicted to be involved in", "based on protein domain information"),
-                           (GO_ASPECT.CELLULAR_COMPONENT, EVIDENCE_GROUP.EXPERIMENTAL):
+                               (GO_ASPECT.BIOLOGICAL_PROCESS, EVIDENCE_GROUP.COMPUTATIONAL_ANALYSIS):
+                               ("is predicted to be involved in", "based on computational analysis"),
+                               (GO_ASPECT.CELLULAR_COMPONENT, EVIDENCE_GROUP.EXPERIMENTAL):
                                ("localizes to", ""),
-                           (GO_ASPECT.CELLULAR_COMPONENT, EVIDENCE_GROUP.SEQUENCE_BASED_ANALYSIS):
+                               (GO_ASPECT.CELLULAR_COMPONENT, EVIDENCE_GROUP.SEQUENCE_BASED_ANALYSIS):
                                ("is predicted to localize to", "based on sequence-based analysis"),
-                           (GO_ASPECT.CELLULAR_COMPONENT, EVIDENCE_GROUP.PHYLOGENETIC_ANALYSIS):
+                               (GO_ASPECT.CELLULAR_COMPONENT, EVIDENCE_GROUP.PHYLOGENETIC_ANALYSIS):
                                ("is predicted to localize to", "based on phylogenetic analysis"),
-                           (GO_ASPECT.CELLULAR_COMPONENT, EVIDENCE_GROUP.ELECTRONIC):
-                               ("is predicted to localize to", "based on protein domain information")}
+                               (GO_ASPECT.CELLULAR_COMPONENT, EVIDENCE_GROUP.ELECTRONIC):
+                               ("is predicted to localize to", "based on protein domain information"),
+                               (GO_ASPECT.CELLULAR_COMPONENT, EVIDENCE_GROUP.COMPUTATIONAL_ANALYSIS):
+                               ("is predicted to localize to", "based on computational analysis")}
 
 GOSentence = namedtuple('GOSentence', ['text', 'go_aspect', 'evidence_group'])
 
@@ -102,11 +106,11 @@ def generate_go_sentences(go_annotations: List[GOAnnotation]) -> GOSentencesColl
 
 def _get_single_go_sentence(go_term_names: List[str], go_aspect: GO_ASPECT, evidence_group: EVIDENCE_GROUP):
     if len(go_term_names) > 0:
-        prefix = GO_HEADER_SENTENCES_MAP[(go_aspect, evidence_group)][0] + " "
-        if GO_HEADER_SENTENCES_MAP[(go_aspect, evidence_group)][1] == "":
+        prefix = GO_PREPOSTFIX_SENTENCES_MAP[(go_aspect, evidence_group)][0] + " "
+        if GO_PREPOSTFIX_SENTENCES_MAP[(go_aspect, evidence_group)][1] == "":
             postfix = ""
         else:
-            postfix = " " + GO_HEADER_SENTENCES_MAP[(go_aspect, evidence_group)][1]
+            postfix = " " + GO_PREPOSTFIX_SENTENCES_MAP[(go_aspect, evidence_group)][1]
         if len(go_term_names) > 1:
             return GOSentence(text=prefix + ", ".join(go_term_names[0:-1]) + ", and " +
                               go_term_names[len(go_term_names) - 1] + postfix,
