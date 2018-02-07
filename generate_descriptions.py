@@ -29,7 +29,7 @@ def main():
     project_ids = config.get("generic", "project_ids").split(",")
 
     df = WBRawDataFetcher(raw_files_source=raw_files_source, release_version=args.wormbase_number, species=species[3],
-                          project_id=project_ids[3], cache_location=cache_location, use_cache=True)
+                          project_id=project_ids[3], cache_location=cache_location, use_cache=args.use_cache)
     df.load_go_data()
     for gene in df.get_gene_data():
         print(gene.id, gene.name)
