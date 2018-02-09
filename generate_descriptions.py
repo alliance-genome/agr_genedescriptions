@@ -35,6 +35,19 @@ def main():
     cache_location = config.get("data_fetcher", "cache_location")
     species = config.get("generic", "species").split(",")
     project_ids = config.get("generic", "project_ids").split(",")
+    evidence_codes = config.get("go_sentences_options", "evidence_codes").split(",")
+    evidence_codes = dict(zip(evidence_codes, range(len(evidence_codes))))
+    evidence_groups = config.get("go_sentences_options", "evidence_groups").split(",")
+    evidence_groups = dict(zip(evidence_groups, range(len(evidence_groups))))
+    evidence_codes_groups_map = config.get("go_sentences_options", "evidence_codes_groups_map").split(",")
+    evidence_codes_groups_map = dict(zip(evidence_codes, [int(num) for num in evidence_codes_groups_map]))
+    go_prepostfix_sentences_list = config.get("go_sentences_options", "go_prepostfix_sentences_map").split(";")
+    go_prepostfix_sentences_map = {}
+    for go_prepostfix_sentence in go_prepostfix_sentences_list:
+        indices, values = go_prepostfix_sentence.split(":")
+        aspect, group = indices.split(",")
+        prefix, postfix = values.split(",")
+        go_prepostfix_sentences_map[(GO_ASPECT[aspect], evidence_groups[group])] = (prefix, postfix)
 
     df = WBRawDataFetcher(raw_files_source=raw_files_source, chebi_file_url=chebi_files_source,
                           release_version=args.wormbase_number, species=species[3],
@@ -43,19 +56,20 @@ def main():
     df.load_go_data()
     for gene in df.get_gene_data():
         print(gene.id, gene.name)
-        sentences = generate_go_sentences(df.get_go_annotations(gene.id))
+        sentences = generate_go_sentences(df.get_go_annotations(gene.id), evidence_groups, go_prepostfix_sentences_map,
+                                          evidence_codes_groups_map)
         if sentences:
             joined_sent = []
             func_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
-                GO_ASPECT.MOLECULAR_FUNCTION)])
+                GO_ASPECT["MOLECULAR_FUNCTION"])])
             if func_sent:
                 joined_sent.append(func_sent)
             proc_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
-                GO_ASPECT.BIOLOGICAL_PROCESS)])
+                GO_ASPECT["BIOLOGICAL_PROCESS"])])
             if proc_sent:
                 joined_sent.append(proc_sent)
             comp_sent = "and ".join([sentence.text for sentence in sentences.get_sentences(
-                GO_ASPECT.CELLULAR_COMPONENT)])
+                GO_ASPECT["CELLULAR_COMPONENT"])])
             if comp_sent:
                 joined_sent.append(comp_sent)
 

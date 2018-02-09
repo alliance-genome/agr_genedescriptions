@@ -13,10 +13,7 @@ GOAnnotation = namedtuple('GOAnnotation', ['go_id', 'qualifier', 'paper_referenc
                                            'annotation_ext', 'go_name', 'is_obsolete'])
 
 
-class GO_ASPECT(Enum):
-    MOLECULAR_FUNCTION = 0
-    BIOLOGICAL_PROCESS = 1
-    CELLULAR_COMPONENT = 2
+GO_ASPECT = {"MOLECULAR_FUNCTION": 0, "BIOLOGICAL_PROCESS": 1, "CELLULAR_COMPONENT": 2}
 
 
 class WBRawDataFetcher:
@@ -136,11 +133,11 @@ class WBRawDataFetcher:
                     fields = line.strip("\n").split('\t')
                     go_aspect = None
                     if fields[8] == 'C':
-                        go_aspect = GO_ASPECT.CELLULAR_COMPONENT
+                        go_aspect = GO_ASPECT["CELLULAR_COMPONENT"]
                     elif fields[8] == 'F':
-                        go_aspect = GO_ASPECT.MOLECULAR_FUNCTION
+                        go_aspect = GO_ASPECT["MOLECULAR_FUNCTION"]
                     elif fields[8] == 'P':
-                        go_aspect = GO_ASPECT.BIOLOGICAL_PROCESS
+                        go_aspect = GO_ASPECT["BIOLOGICAL_PROCESS"]
                     is_obsolete = False
                     if "is_obsolete" in self.go_ontology[fields[4]]["is_obsolete"] and \
                             self.go_ontology[fields[4]]["is_obsolete"] == 'true':
