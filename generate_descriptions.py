@@ -36,7 +36,7 @@ def main():
     species = config.get("generic", "species").split(",")
     project_ids = config.get("generic", "project_ids").split(",")
 
-    df = WBRawDataFetcher(raw_files_source=raw_files_source, chebi_files_source=chebi_files_source,
+    df = WBRawDataFetcher(raw_files_source=raw_files_source, chebi_file_url=chebi_files_source,
                           release_version=args.wormbase_number, species=species[3],
                           project_id=project_ids[3], cache_location=cache_location, use_cache=args.use_cache)
 

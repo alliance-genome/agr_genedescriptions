@@ -21,14 +21,12 @@ class GO_ASPECT(Enum):
 
 class WBRawDataFetcher:
     """data fetcher for WormBase raw files for a single species"""
-    def __init__(self, raw_files_source: str, chebi_files_source: str, cache_location: str, release_version: str,
-                 species: str, project_id: str, use_cache: bool, ):
+    def __init__(self, raw_files_source: str, cache_location: str, release_version: str,
+                 species: str, project_id: str, use_cache: bool, chebi_file_url: str = ""):
         """create a new data fetcher
 
         :param raw_files_source: base url where to fetch the raw files
         :type raw_files_source: str
-        :param chebi_files_source: base url where to fetch the chebi files
-        :type chebi_files_source: str
         :param cache_location: path to cache directory
         :type cache_location: str
         :param release_version: WormBase release version for the input files
@@ -40,9 +38,11 @@ class WBRawDataFetcher:
         :param use_cache: whether to use cached files. If cache is empty, files are downloading from source and stored
             in cache
         :type use_cache: bool
+        :param chebi_file_url: url where to fetch the chebi file
+        :type chebi_file_url: str
         """
         self.raw_files_source = raw_files_source
-        self.chebi_files_source = chebi_files_source
+        self.chebi_file_url = chebi_file_url
         self.cache_location = cache_location
         self.release_version = release_version
         self.species = species
@@ -105,18 +105,20 @@ class WBRawDataFetcher:
                                                                                         self.release_version + ".obo"),
                                  field_names=["name", "is_obsolete"], ontology_dict=self.go_ontology, gzip_file=False)
         self._load_ontology_data(url=self.raw_files_source + '/' + self.release_version +
-                                     '/ONTOLOGY/development_ontology.' + self.release_version + '.obo',
+                                 '/ONTOLOGY/development_ontology.' + self.release_version + '.obo',
                                  cache_path=os.path.join(self.cache_location, self.release_version, "ONTOLOGY",
                                                          "development_ontology." + self.release_version + ".obo"),
                                  field_names=["name"], ontology_dict=self.ls_ontology, gzip_file=False)
         self._load_ontology_data(url=self.raw_files_source + '/' + self.release_version +
-                                     '/ONTOLOGY/anatomy_ontology.' + self.release_version + '.obo',
+                                 '/ONTOLOGY/anatomy_ontology.' + self.release_version + '.obo',
                                  cache_path=os.path.join(self.cache_location, self.release_version, "ONTOLOGY",
                                                          "anatomy_ontology." + self.release_version + ".obo"),
                                  field_names=["name"], ontology_dict=self.an_ontology, gzip_file=False)
-        self._load_ontology_data(url=self.chebi_files_source + '/' + 'chebi_lite.obo.gz',
-                                 cache_path=os.path.join(self.cache_location, "CHEBI", "chebi_lite.obo.gz"),
-                                 field_names=["name"], ontology_dict=self.chebi_ontology, gzip_file=True)
+        if self.chebi_file_url != "":
+            self._load_ontology_data(url=self.chebi_file_url,
+                                     cache_path=os.path.join(self.cache_location, "CHEBI", "chebi_lite.obo.gz"),
+                                     field_names=["name"], ontology_dict=self.chebi_ontology,
+                                     gzip_file=True if self.chebi_file_url.endswith(".gz") else False)
         self._load_gene_data()
         cache_url = os.path.join(self.cache_location, self.release_version, "species", self.species, self.project_id,
                                  "annotation", self.species + '.' + self.project_id + '.' + self.release_version +
