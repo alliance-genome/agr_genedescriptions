@@ -48,6 +48,7 @@ def main():
         aspect, group = indices.split(",")
         prefix, postfix = values.split(",")
         go_prepostfix_sentences_map[(GO_ASPECT[aspect], evidence_groups[group])] = (prefix, postfix)
+    go_annotations_priority = config.get("go_sentences_options", "go_annotations_priority").split(",")
 
     df = WBRawDataFetcher(raw_files_source=raw_files_source, chebi_file_url=chebi_files_source,
                           release_version=args.wormbase_number, species=species[3],
@@ -56,7 +57,8 @@ def main():
     df.load_go_data()
     for gene in df.get_gene_data():
         print(gene.id, gene.name)
-        sentences = generate_go_sentences(df.get_go_annotations(gene.id), evidence_groups, go_prepostfix_sentences_map,
+        sentences = generate_go_sentences(df.get_go_annotations(gene.id, priority_list=go_annotations_priority),
+                                          evidence_groups, go_prepostfix_sentences_map,
                                           evidence_codes_groups_map)
         if sentences:
             joined_sent = []
