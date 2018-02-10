@@ -1,1 +1,3 @@
 namedlist
+goatools
+biopython

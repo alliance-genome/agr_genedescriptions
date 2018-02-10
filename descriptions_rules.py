@@ -1,8 +1,6 @@
 from collections import namedtuple, defaultdict
 from enum import Enum
 from typing import List
-from data_fetcher import GO_ASPECT, GOAnnotation
-
 
 GOSentence = namedtuple('GOSentence', ['text', 'go_aspect', 'evidence_group'])
 
@@ -21,7 +19,7 @@ class GOSentencesCollection(object):
         """
         self.sentences_map[(sentence.go_aspect, sentence.evidence_group)] = sentence
 
-    def get_sentences(self, go_aspect: GO_ASPECT) -> List[GOSentence]:
+    def get_sentences(self, go_aspect: str) -> List[GOSentence]:
         """get all sentences containing the specified aspect
 
         :param go_aspect: a GO aspect
@@ -36,7 +34,7 @@ class GOSentencesCollection(object):
         return sentences
 
 
-def generate_go_sentences(go_annotations: List[GOAnnotation], evidence_groups:dict, go_prepostfix_sentences_map: dict,
+def generate_go_sentences(go_annotations: List[dict], evidence_groups: list, go_prepostfix_sentences_map: dict,
                           evidence_codes_groups_map: dict) -> GOSentencesCollection:
     """generate GO sentences from a list of GO annotations
 
@@ -48,9 +46,9 @@ def generate_go_sentences(go_annotations: List[GOAnnotation], evidence_groups:di
     if len(go_annotations) > 0:
         go_terms_groups = defaultdict(list)
         for annotation in go_annotations:
-            go_terms_groups[(annotation.aspect, evidence_codes_groups_map[annotation.evidence_code])].append(
-                annotation.go_name)
-        sentences = GOSentencesCollection(evidence_groups.values())
+            go_terms_groups[(annotation["Aspect"], evidence_codes_groups_map[annotation["Evidence"]])].append(
+                annotation["GO_Name"])
+        sentences = GOSentencesCollection(evidence_groups)
         for ((go_aspect, evidence_group), go_terms) in go_terms_groups.items():
             sentences.set_sentence(_get_single_go_sentence(go_term_names=go_terms, go_aspect=go_aspect,
                                                            evidence_group=evidence_group,

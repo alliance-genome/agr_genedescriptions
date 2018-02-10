@@ -1,0 +1,239 @@
+{
+  "generic_data_fetcher_options": {
+    "cache_location": "/home/valerio/workspace/caltech/test_data/gene_descriptions_cache"
+  },
+  "wb_data_fetcher_options": {
+    "raw_files_source": "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases",
+    "chebi_file_source": "ftp://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi_lite.obo.gz",
+    "species": [
+      {
+        "name": "b_malayi",
+        "project_id": "PRJNA10729"
+      },
+      {
+        "name": "c_brenneri",
+        "project_id": "PRJNA20035"
+      },
+      {
+        "name": "c_briggsae",
+        "project_id": "PRJNA10731"
+      },
+      {
+        "name": "c_elegans",
+        "project_id": "PRJNA13758"
+      },
+      {
+        "name": "c_japonica",
+        "project_id": "PRJNA12591"
+      },
+      {
+        "name": "c_remanei",
+        "project_id": "PRJNA53967"
+      },
+      {
+        "name": "o_volvulus",
+        "project_id": "PRJEB513"
+      },
+      {
+        "name": "p_pacificus",
+        "project_id": "PRJNA12644"
+      },
+      {
+        "name": "s_ratti",
+        "project_id": "PRJEB125"
+      }
+    ]
+  },
+  "go_sentences_options": {
+    "evidence_codes": [
+      {
+        "name": "EXP",
+        "group": "EXPERIMENTAL",
+        "priority" : 1
+      },
+      {
+        "name": "IDA",
+        "group": "EXPERIMENTAL",
+        "priority": 2
+      },
+      {
+        "name": "IPI",
+        "group": "EXPERIMENTAL",
+        "priority": 3
+      },
+      {
+        "name": "IMP",
+        "group": "EXPERIMENTAL",
+        "priority": 4
+      },
+      {
+        "name": "IGI",
+        "group": "EXPERIMENTAL",
+        "priority": 5
+      },
+      {
+        "name": "IEP",
+        "group": "EXPERIMENTAL",
+        "priority": 6
+        },
+      {
+        "name": "ISS",
+        "group": "SEQUENCE_BASED_ANALYSIS",
+        "priority": 8
+      },
+      {
+        "name": "ISO",
+        "group": "SEQUENCE_BASED_ANALYSIS",
+        "priority": 9
+        },
+      {
+        "name": "ISA",
+        "group": "SEQUENCE_BASED_ANALYSIS",
+        "priority": 10
+      },
+      {
+        "name": "ISM",
+        "group": "SEQUENCE_BASED_ANALYSIS",
+        "priority": 11
+      },
+      {
+        "name": "IGC",
+        "group": "COMPUTATIONAL_ANALYSIS",
+        "priority": 12
+      },
+      {
+        "name": "IBA",
+        "group": "PHYLOGENETIC_ANALYSIS",
+        "priority": 13
+      },
+      {
+        "name": "IBD",
+          "group": "PHYLOGENETIC_ANALYSIS",
+        "priority": 14
+      },
+      {
+        "name": "IKR",
+        "group": "COMPUTATIONAL_ANALYSIS",
+        "priority": 15
+        },
+      {
+        "name": "IRD",
+        "group": "COMPUTATIONAL_ANALYSIS",
+        "priority": 16
+      },
+      {
+        "name": "RCA",
+        "group": "COMPUTATIONAL_ANALYSIS",
+        "priority": 17
+      },
+      {
+        "name": "IC",
+        "group": "EXPERIMENTAL",
+        "priority": 7
+        },
+      {
+        "name": "IEA",
+        "group": "ELECTRONIC",
+        "priority": 18
+      }
+    ],
+    "go_prepostfix_sentences_map": [
+      {
+        "aspect": "F",
+        "group": "EXPERIMENTAL",
+        "prefix": "exhibits",
+        "postfix": ""
+      },
+      {
+        "aspect": "F",
+        "group": "SEQUENCE_BASED_ANALYSIS",
+        "prefix": "is predicted to have",
+        "postfix": "based on sequence-based analysis"
+      },
+      {
+        "aspect": "F",
+        "group": "PHYLOGENETIC_ANALYSIS",
+        "prefix": "is predicted to have",
+        "postfix": "based on phylogenetic analysis"
+      },
+      {
+        "aspect": "F",
+        "group": "ELECTRONIC",
+        "prefix": "is predicted to have",
+        "postfix": "based on protein domain information"
+      },
+      {
+        "aspect": "F",
+        "group": "COMPUTATIONAL_ANALYSIS",
+        "prefix": "is predicted to have",
+        "postfix": "based on computational analysis"
+      },
+      {
+        "aspect": "F",
+        "group": "COMPUTATIONAL_ANALYSIS",
+        "prefix": "is predicted to have",
+        "postfix": "based on computational analysis"
+      },
+      {
+        "aspect": "P",
+        "group": "EXPERIMENTAL",
+        "prefix": "is involved in",
+        "postfix": ""
+      },
+      {
+        "aspect": "P",
+        "group": "SEQUENCE_BASED_ANALYSIS",
+        "prefix": "is predicted to be involved in",
+        "postfix": "based on sequence-based analysis"
+      },
+      {
+        "aspect": "P",
+        "group": "PHYLOGENETIC_ANALYSIS",
+        "prefix": "is predicted to be involved in",
+        "postfix": "based on phylogenetic analysis"
+      },
+      {
+        "aspect": "P",
+        "group": "ELECTRONIC",
+        "prefix": "is predicted to be involved in",
+        "postfix": "based on protein domain information"
+      },
+      {
+        "aspect": "P",
+        "group": "COMPUTATIONAL_ANALYSIS",
+        "prefix": "is predicted to be involved in",
+        "postfix": "based on computational analysis"
+      },
+      {
+        "aspect": "C",
+        "group": "EXPERIMENTAL",
+        "prefix": "localizes",
+        "postfix": ""
+      },
+      {
+        "aspect": "C",
+        "group": "SEQUENCE_BASED_ANALYSIS",
+        "prefix": "is predicted to localize to",
+        "postfix": "based on sequence-based analysis"
+      },
+      {
+        "aspect": "C",
+        "group": "PHYLOGENETIC_ANALYSIS",
+        "prefix": "is predicted to localize to",
+        "postfix": "based on phylogenetic analysis"
+      },
+      {
+        "aspect": "C",
+        "group": "ELECTRONIC",
+        "prefix": "is predicted to localize to",
+        "postfix": "based on protein domain information"
+      },
+      {
+        "aspect": "C",
+        "group": "COMPUTATIONAL_ANALYSIS",
+        "prefix": "is predicted to localize to",
+        "postfix": "based on computational analysis"
+      }
+    ]
+  }
+}
