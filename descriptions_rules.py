@@ -1,6 +1,6 @@
 from collections import namedtuple, defaultdict
 from enum import Enum
-from typing import List
+from typing import List, Dict, Tuple
 
 GOSentence = namedtuple('GOSentence', ['text', 'go_aspect', 'evidence_group'])
 
@@ -23,9 +23,9 @@ class GOSentencesCollection(object):
         """get all sentences containing the specified aspect
 
         :param go_aspect: a GO aspect
-        :type go_aspect: GO_ASPECT
+        :type go_aspect: str
         :return: the list of sentences containing the specified GO aspect
-        :rtype: List[Sentence]
+        :rtype: List[GOSentence]
         """
         sentences = []
         for eg in self.evicdence_groups_list:
@@ -34,12 +34,20 @@ class GOSentencesCollection(object):
         return sentences
 
 
-def generate_go_sentences(go_annotations: List[dict], evidence_groups: list, go_prepostfix_sentences_map: dict,
-                          evidence_codes_groups_map: dict) -> GOSentencesCollection:
+def generate_go_sentences(go_annotations: List[dict], evidence_groups: List[str],
+                          go_prepostfix_sentences_map: Dict[Tuple[str, str], Tuple[str, str]],
+                          evidence_codes_groups_map: Dict[str, str]) -> GOSentencesCollection:
     """generate GO sentences from a list of GO annotations
 
     :param go_annotations: the list of GO annotations for a given gene
-    :type go_annotations: List[GOAnnotation]
+    :type go_annotations: List[dict]
+    :param evidence_groups: the list of evidence groups to consider
+    :type evidence_groups: List[str]
+    :param go_prepostfix_sentences_map: a map with for the prefix and postfix, where keys are tuples of
+        go_aspect, evidence_group and values are tuples prefix, postfix
+    :type go_prepostfix_sentences_map: Dict[Tuple[str, str], Tuple[str, str]]
+    :param evidence_codes_groups_map: a map between evidence codes and the groups they belong to
+    :type evidence_codes_groups_map: Dict[str, str]
     :return: a collection of GO sentences
     :rtype: GOSentencesCollection
     """
