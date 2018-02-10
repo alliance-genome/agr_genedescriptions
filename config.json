@@ -1,6 +1,6 @@
 {
   "generic_data_fetcher_options": {
-    "cache_location": "/home/valerio/workspace/caltech/test_data/gene_descriptions_cache"
+    "cache_location": "gene_descriptions_cache"
   },
   "wb_data_fetcher_options": {
     "raw_files_source": "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases",
