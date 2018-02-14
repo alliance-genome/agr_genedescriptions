@@ -16,7 +16,7 @@ Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
 class RawDataFetcher(metaclass=ABCMeta):
 
     @abstractmethod
-    def __init__(self, use_cache: bool = False):
+    def __init__(self, go_terms_exclusion_list: List[str], use_cache: bool = False):
         self.chebi_file_url = ""
         self.chebi_file_cache_path = ""
         self.go_data = defaultdict(list)
@@ -36,6 +36,7 @@ class RawDataFetcher(metaclass=ABCMeta):
         self.anatomy_ontology_url = ""
         self.go_annotations_cache_path = ""
         self.go_annotations_url = ""
+        self.go_terms_exclusion_list = go_terms_exclusion_list
 
     @staticmethod
     def _get_cached_file(cache_path: str, file_source_url):
@@ -49,14 +50,9 @@ class RawDataFetcher(metaclass=ABCMeta):
             file_path = cache_path.replace(".gz", "")
         return file_path
 
+    @abstractmethod
     def _load_gene_data(self) -> None:
-        """load all gene data"""
-        file_path = self._get_cached_file(cache_path=self.gene_data_cache_path, file_source_url=self.gene_data_url)
-        with open(file_path) as file:
-            for line in file:
-                fields = line.strip().split(',')
-                name = fields[2] if fields[2] != '' else fields[3]
-                self.gene_data[fields[1]] = Gene(fields[1], name, fields[4] == "Dead", False)
+        pass
 
     def get_gene_data(self, include_dead_genes: bool = False, include_pseudo_genes: bool = False) -> Gene:
         """get all gene data from the fetcher, returning one gene per call
@@ -76,11 +72,11 @@ class RawDataFetcher(metaclass=ABCMeta):
 
     def _map_ont_term_to_name(self, ont_id):
         t = None
-        if ont_id.startswith("WBls:"):
+        if ont_id.startswith("WBls:") and self.ls_ontology is not None:
             t = self.ls_ontology.query_term(ont_id)
-        elif ont_id.startswith("WBbt:"):
+        elif ont_id.startswith("WBbt:") and self.an_ontology is not None:
             t = self.an_ontology.query_term(ont_id)
-        elif ont_id.startswith("GO:"):
+        elif ont_id.startswith("GO:") and self.go_ontology is not None:
             t = self.go_ontology.query_term(ont_id)
         elif ont_id.startswith("ChEBI:") and self.chebi_ontology is not None:
             t = self.chebi_ontology.query_term(ont_id)
@@ -97,10 +93,12 @@ class RawDataFetcher(metaclass=ABCMeta):
         """
         self.go_ontology = GODag(self._get_cached_file(file_source_url=self.go_ontology_url,
                                                        cache_path=self.go_ontology_cache_path))
-        self.an_ontology = GODag(self._get_cached_file(file_source_url=self.anatomy_ontology_url,
-                                                       cache_path=self.anatomy_ontology_cache_path))
-        self.ls_ontology = GODag(self._get_cached_file(file_source_url=self.development_ontology_url,
-                                                       cache_path=self.development_ontology_cache_path))
+        if self.anatomy_ontology_url != "":
+            self.an_ontology = GODag(self._get_cached_file(file_source_url=self.anatomy_ontology_url,
+                                                           cache_path=self.anatomy_ontology_cache_path))
+        if self.development_ontology_url != "":
+            self.ls_ontology = GODag(self._get_cached_file(file_source_url=self.development_ontology_url,
+                                                           cache_path=self.development_ontology_cache_path))
         if self.chebi_file_url != "":
             self.chebi_ontology = GODag(self._get_cached_file(file_source_url=self.chebi_file_url,
                                                               cache_path=self.chebi_file_cache_path))
@@ -109,21 +107,22 @@ class RawDataFetcher(metaclass=ABCMeta):
                                           file_source_url=self.go_annotations_url)
         with open(file_path) as file:
             for annotation in gafiterator(file):
-                mapped_annotation = annotation
-                mapped_annotation["GO_Name"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).name
-                mapped_annotation["Is_Obsolete"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).is_obsolete
-                if annotation["Annotation_Extension"] != "":
-                    matches = re.findall('(\([^\)]+\))', mapped_annotation["Annotation_Extension"])
-                    for match in matches:
-                        ext_id = match[1:-1]
-                        ext_translation = self._map_ont_term_to_name(ext_id)
-                        mapped_annotation["Annotation_Extension"] = mapped_annotation["Annotation_Extension"]\
-                            .replace(match, " " + ext_translation)
-                    logging.debug(
-                        "Found GO annotation with Annotation_Extension: " + str(mapped_annotation))
-                self.go_data[annotation["DB_Object_ID"]].append(mapped_annotation)
+                if annotation["GO_ID"] not in self.go_terms_exclusion_list:
+                    mapped_annotation = annotation
+                    mapped_annotation["GO_Name"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).name
+                    mapped_annotation["Is_Obsolete"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).is_obsolete
+                    if annotation["Annotation_Extension"] != "":
+                        matches = re.findall('(\([^\)]+\))', mapped_annotation["Annotation_Extension"])
+                        for match in matches:
+                            ext_id = match[1:-1]
+                            ext_translation = self._map_ont_term_to_name(ext_id)
+                            mapped_annotation["Annotation_Extension"] = mapped_annotation["Annotation_Extension"]\
+                                .replace(match, " " + ext_translation)
+                        logging.debug(
+                            "Found GO annotation with Annotation_Extension: " + str(mapped_annotation))
+                    self.go_data[annotation["DB_Object_ID"]].append(mapped_annotation)
 
-    def get_go_annotations(self, geneid: str, include_obsolete: bool = False,
+    def get_go_annotations(self, geneid: str, include_obsolete: bool = False, include_negative_results: bool = False,
                            priority_list: Iterable = ("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "IC", "ISS", "ISO",
                                                       "ISA", "ISM", "IGC", "IBA", "IBD", "IKR", "IRD", "RCA", "IEA")
                            ) -> List[dict]:
@@ -145,8 +144,9 @@ class RawDataFetcher(metaclass=ABCMeta):
         :rtype: List[GOAnnotation]
         """
         priority_map = dict(zip(priority_list, reversed(range(len(priority_list)))))
-        annotations = [annotation for annotation in self.go_data[geneid] if include_obsolete or
-                       not annotation["Is_Obsolete"]]
+        annotations = [annotation for annotation in self.go_data[geneid] if (include_obsolete or
+                       not annotation["Is_Obsolete"]) and (include_negative_results or "NOT" not in
+                                                           annotation["Qualifier"])]
         go_id_selected_annotation = {}
         for annotation in annotations:
             if annotation["Evidence"] in priority_map.keys():
@@ -162,10 +162,12 @@ class RawDataFetcher(metaclass=ABCMeta):
 
 class WBRawDataFetcher(RawDataFetcher):
     """data fetcher for WormBase raw files for a single species"""
-    def __init__(self, raw_files_source: str, cache_location: str, release_version: str,
+    def __init__(self, go_terms_exclusion_list: List[str], raw_files_source: str, cache_location: str, release_version: str,
                  species: str, project_id: str, use_cache: bool = False, chebi_file_url: str = ""):
         """create a new data fetcher
 
+        :param go_terms_exclusion_list: list of go ids for terms to exclude
+        :type go_terms_exclusion_list: List[str]
         :param raw_files_source: base url where to fetch the raw files
         :type raw_files_source: str
         :param cache_location: path to cache directory
@@ -182,32 +184,91 @@ class WBRawDataFetcher(RawDataFetcher):
         :param chebi_file_url: url where to fetch the chebi file
         :type chebi_file_url: str
         """
-        super().__init__(use_cache=use_cache)
-        self.gene_data_cache_path = os.path.join(cache_location, release_version, "species", species,
+        super().__init__(go_terms_exclusion_list=go_terms_exclusion_list, use_cache=use_cache)
+        self.gene_data_cache_path = os.path.join(cache_location, "wormbase", release_version, "species", species,
                                                  project_id, "annotation", species + '.' + project_id +
                                                  '.' + release_version + ".geneIDs.txt.gz")
         self.gene_data_url = raw_files_source + '/' + release_version + '/species/' + species + '/' + project_id + \
                              '/annotation/' + species + '.' + project_id + '.' + release_version + '.geneIDs.txt.gz'
-        self.go_ontology_cache_path = os.path.join(cache_location, release_version, "ONTOLOGY", "gene_ontology." +
-                                                   release_version + ".obo")
+        self.go_ontology_cache_path = os.path.join(cache_location, "wormbase", release_version, "ONTOLOGY",
+                                                   "gene_ontology." + release_version + ".obo")
         self.go_ontology_url = raw_files_source + '/' + release_version + '/ONTOLOGY/gene_ontology.' + \
                                release_version + '.obo'
-        self.development_ontology_cache_path = os.path.join(cache_location, release_version, "ONTOLOGY",
+        self.development_ontology_cache_path = os.path.join(cache_location, "wormbase", release_version, "ONTOLOGY",
                                                             "development_ontology." + release_version + ".obo")
         self.development_ontology_url = raw_files_source + '/' + release_version + '/ONTOLOGY/development_ontology.' + \
                                         release_version + '.obo'
-        self.anatomy_ontology_cache_path = os.path.join(cache_location, release_version, "ONTOLOGY",
+        self.anatomy_ontology_cache_path = os.path.join(cache_location, "wormbase", release_version, "ONTOLOGY",
                                                         "anatomy_ontology." + release_version + ".obo")
         self.anatomy_ontology_url = raw_files_source + '/' + release_version + '/ONTOLOGY/anatomy_ontology.' + \
                                     release_version + '.obo'
-        self.chebi_file_cache_path = os.path.join(cache_location, "CHEBI", "chebi_lite.obo.gz")
+        self.chebi_file_cache_path = os.path.join(cache_location, "wormbase", "CHEBI", "chebi_lite.obo.gz")
         self.chebi_file_url = chebi_file_url
-        self.go_annotations_cache_path = os.path.join(cache_location, release_version, "species", species, project_id,
-                                                      "annotation", species + '.' + project_id + '.' + release_version +
-                                                      ".go_annotations.gaf.gz")
+        self.go_annotations_cache_path = os.path.join(cache_location, "wormbase", release_version, "species", species,
+                                                      project_id, "annotation", species + '.' + project_id + '.' +
+                                                      release_version + ".go_annotations.gaf.gz")
         self.go_annotations_url = raw_files_source + '/' + release_version + '/species/' + species + '/' + \
                                   project_id + '/annotation/' + species + '.' + project_id + '.' + release_version + \
                                   '.go_annotations.gaf.gz'
 
+    def _load_gene_data(self) -> None:
+        """load all gene data"""
+        file_path = self._get_cached_file(cache_path=self.gene_data_cache_path, file_source_url=self.gene_data_url)
+        with open(file_path) as file:
+            for line in file:
+                fields = line.strip().split(',')
+                name = fields[2] if fields[2] != '' else fields[3]
+                self.gene_data[fields[1]] = Gene(fields[1], name, fields[4] == "Dead", False)
+
+
+class AGRRawDataFetcher(RawDataFetcher):
+    """data fetcher for AGR raw files for a single species"""
+    def __init__(self, go_terms_exclusion_list: List[str], raw_files_source: str, cache_location: str,
+                 release_version: str, gff_file_name: str, go_annotations_file_name: str, organism_name: str,
+                 use_cache: bool = False, chebi_file_url: str = ""):
+        """create a new data fetcher
+
+        :param go_terms_exclusion_list: list of go ids for terms to exclude
+        :type go_terms_exclusion_list: List[str]
+        :param raw_files_source: base url where to fetch the raw files
+        :type raw_files_source: str
+        :param cache_location: path to cache directory
+        :type cache_location: str
+        :param release_version: WormBase release version for the input files
+        :type release_version: str
+        :param gff_file_name: file name of the gff file containing gene information
+        :type gff_file_name: str
+        :param go_annotations_file_name: file name of the obo file containing go annotations
+        :type go_annotations_file_name: str
+        :param organism_name: name of the organism
+        :type organism_name: str
+        :param use_cache: whether to use cached files. If cache is empty, files are downloading from source and stored
+            in cache
+        :type use_cache: bool
+        :param chebi_file_url: url where to fetch the chebi file
+        :type chebi_file_url: str
+        """
+        super().__init__(go_terms_exclusion_list=go_terms_exclusion_list, use_cache=use_cache)
+        self.gene_data_cache_path = os.path.join(cache_location, "agr", release_version, "gff3", gff_file_name)
+        self.gene_data_url = raw_files_source + '/' + release_version + '/gff3/' + gff_file_name
+        self.go_ontology_cache_path = os.path.join(cache_location, "agr", release_version, "GO", "go.obo")
+        self.go_ontology_url = raw_files_source + '/' + release_version + '/GO/' + 'go.obo'
+        self.chebi_file_cache_path = os.path.join(cache_location, "agr", "CHEBI", "chebi_lite.obo.gz")
+        self.chebi_file_url = chebi_file_url
+        self.go_annotations_cache_path = os.path.join(cache_location, "agr", release_version, "GO", "ANNOT",
+                                                      go_annotations_file_name)
+        self.go_annotations_url = raw_files_source + '/' + release_version + '/GO/ANNOT/' + go_annotations_file_name
+
+    def _load_gene_data(self) -> None:
+        file_path = self._get_cached_file(cache_path=self.gene_data_cache_path, file_source_url=self.gene_data_url)
+        for line in open(file_path):
+            if not line.startswith("#"):
+                # TODO determine if gene is dead or pseudo
+                attributes = line.strip().split("\t")[8]
+                attr_dict = dict([tuple(kv.split("=")) for kv in attributes.split(";")])
+                # TODO each gff file has its own syntax!
+                if "Alias" in attr_dict and "ID" in attr_dict and attr_dict["ID"].startswith("Gene"):
+                    self.gene_data[attr_dict["ID"][5:]] = Gene(attr_dict["ID"][5:], attr_dict["Alias"].split(",")[0],
+                                                               False, False)
 
 

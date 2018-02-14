@@ -1,3 +1,4 @@
 namedlist
 goatools
 biopython
+bcbio-gff

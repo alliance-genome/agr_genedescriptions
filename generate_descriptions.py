@@ -3,7 +3,7 @@
 import argparse
 import json
 
-from data_fetcher import WBRawDataFetcher
+from data_fetcher import WBRawDataFetcher, AGRRawDataFetcher
 from descriptions_rules import *
 import logging
 
@@ -21,8 +21,6 @@ def main():
                                                                         'CRITICAL'], help="set the logging level")
     parser.add_argument("-v", "--output-version", metavar="version_number", dest="version_number", type=str,
                         help="release version number")
-    parser.add_argument("-w", "--wormbase-version", metavar="wormbase_number", dest="wormbase_number", type=str,
-                        help="wormbase input files version number")
 
     args = parser.parse_args()
 
@@ -31,37 +29,53 @@ def main():
 
     logging.basicConfig(filename=args.log_file, level=args.log_level)
 
-    raw_files_source = config["wb_data_fetcher_options"]["raw_files_source"]
-    chebi_file_source = config["wb_data_fetcher_options"]["chebi_file_source"]
     cache_location = config["generic_data_fetcher_options"]["cache_location"]
     species = config["wb_data_fetcher_options"]["species"]
     evidence_codes = config["go_sentences_options"]["evidence_codes"]
     go_prepostfix_sentences_map = {(prepost["aspect"], prepost["group"]): (prepost["prefix"], prepost["postfix"]) for
                                    prepost in config["go_sentences_options"]["go_prepostfix_sentences_map"]}
-    go_annotations_priority = [name for name, priority in sorted([(ec["name"], ec["priority"]) for ec
-                                                                  in evidence_codes], key=lambda x: x[1])]
-    evidence_groups_list = list(set([evidence["group"] for evidence in evidence_codes]))
-    evidence_codes_groups_map = {evidence["name"]: evidence["group"] for evidence in evidence_codes}
+    go_annotations_priority = [key for key, priority in sorted([(key, ec["priority"]) for key, ec in
+                                                                evidence_codes.items()], key=lambda x: x[1])]
+    evidence_groups_priority_list = [group for group, p in sorted([(g, p) for g, p in config["go_sentences_options"]
+                                     ["group_priority"].items()], key=lambda x: x[1])]
+    evidence_codes_groups_map = {name: evidence["group"] for name, evidence in evidence_codes.items()}
+    go_terms_exclusion_list = [term["id"] for term in config["go_sentences_options"]["exclude_terms"]]
 
-    df = WBRawDataFetcher(raw_files_source=raw_files_source, chebi_file_url=chebi_file_source,
-                          release_version=args.wormbase_number, species=species[3]["name"],
-                          project_id=species[3]["project_id"], cache_location=cache_location, use_cache=args.use_cache)
+    if config["generic_data_fetcher_options"]["data_fetcher"] == "AGR":
+        df = AGRRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
+                               raw_files_source=config["agr_data_fetcher_options"]["raw_files_source"],
+                               chebi_file_url=config["generic_data_fetcher_options"]["chebi_file_source"],
+                               release_version=config["agr_data_fetcher_options"]["release"],
+                               gff_file_name=config["agr_data_fetcher_options"]["organisms"]["zfin"]["gff"],
+                               go_annotations_file_name=config["agr_data_fetcher_options"]["organisms"]["zfin"]
+                               ["go_annotations"],
+                               organism_name=config["agr_data_fetcher_options"]["organisms"]["zfin"]["name"],
+                               cache_location=cache_location, use_cache=args.use_cache)
+    else:
+        df = WBRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
+                              raw_files_source=config["wb_data_fetcher_options"]["raw_files_source"],
+                              chebi_file_url=config["generic_data_fetcher_options"]["chebi_file_source"],
+                              release_version=config["wb_data_fetcher_options"]["release"],
+                              species="c_elegans",
+                              project_id=species["c_elegans"]["project_id"],
+                              cache_location=cache_location, use_cache=args.use_cache)
 
     df.load_go_data()
     for gene in df.get_gene_data():
         print(gene.id, gene.name)
         sentences = generate_go_sentences(df.get_go_annotations(gene.id, priority_list=go_annotations_priority),
-                                          evidence_groups_list, go_prepostfix_sentences_map,
+                                          evidence_groups_priority_list, go_prepostfix_sentences_map,
                                           evidence_codes_groups_map)
         if sentences:
             joined_sent = []
-            func_sent = " and ".join([sentence.text for sentence in sentences.get_sentences('F')])
+            func_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
+                go_aspect='F', merge_groups_with_same_prefix=True)])
             if func_sent:
                 joined_sent.append(func_sent)
-            proc_sent = " and ".join([sentence.text for sentence in sentences.get_sentences('B')])
+            proc_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(go_aspect='B')])
             if proc_sent:
                 joined_sent.append(proc_sent)
-            comp_sent = "and ".join([sentence.text for sentence in sentences.get_sentences('C')])
+            comp_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(go_aspect='C')])
             if comp_sent:
                 joined_sent.append(comp_sent)
 
