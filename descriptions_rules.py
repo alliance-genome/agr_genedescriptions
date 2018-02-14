@@ -1,5 +1,5 @@
 from collections import namedtuple, defaultdict
-from enum import Enum
+import inflect
 from typing import List, Dict, Tuple
 
 GOSentence = namedtuple('GOSentence', ['prefix', 'terms', 'postfix', 'text', 'go_aspect', 'evidence_group'])
@@ -56,12 +56,52 @@ class GOSentencesCollection(object):
                     break
         if merge_groups_with_same_prefix:
             sentences = [GOSentence(prefix=prefix, terms=list(postfixes_terms["terms"]),
-                                    postfix=" and ".join(postfixes_terms["postfix"]),
-                                    text=compose_go_sentence(prefix=prefix, go_term_names=list(postfixes_terms["terms"]),
-                                                             postfix=" and ".join(postfixes_terms["postfix"])),
+                                    postfix=GOSentencesCollection.merge_postfix_phrases(postfixes_terms["postfix"]),
+                                    text=compose_go_sentence(prefix=prefix,
+                                                             go_term_names=list(postfixes_terms["terms"]),
+                                                             postfix=GOSentencesCollection.merge_postfix_phrases(
+                                                                 postfixes_terms["postfix"])),
                                     go_aspect=go_aspect, evidence_group=", ".join(postfixes_terms["evidence_groups"]))
                          for prefix, postfixes_terms in merged_sentences.items()]
         return sentences
+
+    @staticmethod
+    def merge_postfix_phrases(postfix_phrases: List[str]) -> str:
+        """merge postfix phrases and remove possible redundant text at the beginning at at the end of the phrases
+
+        :param postfix_phrases: the phrases to merge
+        :type postfix_phrases: List[str]
+        :return: the merged postfix phrase
+        :rtype: str
+        """
+        if len(postfix_phrases) > 1:
+            inf_engine = inflect.engine()
+            shortest_phrase = sorted(zip(postfix_phrases, [len(phrase) for phrase in postfix_phrases]),
+                                     key=lambda x: x[1])[0][0]
+            first_part = ""
+            for idx, letter in enumerate(shortest_phrase):
+                if all(map(lambda x: x[idx] == shortest_phrase[idx], postfix_phrases)):
+                    first_part += letter
+                else:
+                    break
+            last_part = ""
+            for idx, letter in zip(range(len(shortest_phrase)), reversed([l for l in shortest_phrase])):
+                if all(map(lambda x: x[len(x) - idx - 1] == shortest_phrase[len(shortest_phrase) - idx - 1],
+                           postfix_phrases)):
+                    last_part = letter + last_part
+                else:
+                    break
+            new_phrases = [phrase.replace(first_part, "").replace(last_part, "") for phrase in postfix_phrases]
+            if len(last_part.strip().split(" ")) == 1:
+                last_part = inf_engine.plural(last_part)
+            if len(new_phrases) > 2:
+                return first_part + ", ".join(new_phrases[0:-1]) + ", and " + new_phrases[-1] + last_part
+            elif len(new_phrases) > 1:
+                return first_part + " and ".join(new_phrases) + last_part
+            else:
+                return first_part + new_phrases[0] + last_part
+        else:
+            return postfix_phrases[0]
 
 
 def generate_go_sentences(go_annotations: List[dict], evidence_groups_priority_list: List[str],
@@ -109,8 +149,10 @@ def compose_go_sentence(prefix: str, go_term_names: List[str], postfix: str) -> 
     prefix = prefix + " "
     if postfix != "":
         postfix = " " + postfix
-    if len(go_term_names) > 1:
+    if len(go_term_names) > 2:
         return prefix + ", ".join(go_term_names[0:-1]) + ", and " + go_term_names[len(go_term_names) - 1] + postfix
+    elif len(go_term_names) > 1:
+        return prefix + " and ".join(go_term_names) + postfix
     else:
         return prefix + go_term_names[0] + postfix
 
