@@ -18,7 +18,7 @@ class TestWBRawDataFetcher(unittest.TestCase):
 
     def test_get_gene_data(self):
         df = WBRawDataFetcher(raw_files_source=self.raw_files_source, release_version="WS263",
-                              species=self.species[3]["name"], project_id=self.species[3]["project_id"],
+                              species="c_elegans", project_id=self.species["c_elegans"]["project_id"],
                               cache_location=self.cache_location, use_cache=False,
                               chebi_file_url=self.chebi_file_source, go_terms_exclusion_list=self.exclusion_list)
         df.load_go_data()

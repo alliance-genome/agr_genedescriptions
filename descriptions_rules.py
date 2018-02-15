@@ -133,20 +133,21 @@ def generate_go_sentences(go_annotations: List[dict], evidence_groups_priority_l
     if len(go_annotations) > 0:
         go_terms_groups = defaultdict(list)
         for annotation in go_annotations:
-            map_key = (annotation["Aspect"], evidence_codes_groups_map[annotation["Evidence"]])
-            if map_key in go_prepostfix_special_cases_sent_map:
-                for special_case in go_prepostfix_special_cases_sent_map[map_key]:
-                    if re.match(re.escape(special_case[1]), annotation["GO_Name"]):
-                        map_key = (annotation["Aspect"], evidence_codes_groups_map[annotation["Evidence"]] +
-                                   str(special_case[0]))
-                        if evidence_codes_groups_map[annotation["Evidence"]] + str(special_case[0]) not in \
-                                evidence_groups_priority_list:
-                            evidence_groups_priority_list.insert(evidence_groups_priority_list.index(
-                                evidence_codes_groups_map[annotation["Evidence"]]) + 1,
-                                                                 evidence_codes_groups_map[annotation["Evidence"]] +
-                                                                 str(special_case[0]))
-                        break
-            go_terms_groups[map_key].append(annotation["GO_Name"])
+            if annotation["Evidence"] in evidence_codes_groups_map:
+                map_key = (annotation["Aspect"], evidence_codes_groups_map[annotation["Evidence"]])
+                if map_key in go_prepostfix_special_cases_sent_map:
+                    for special_case in go_prepostfix_special_cases_sent_map[map_key]:
+                        if re.match(re.escape(special_case[1]), annotation["GO_Name"]):
+                            map_key = (annotation["Aspect"], evidence_codes_groups_map[annotation["Evidence"]] +
+                                       str(special_case[0]))
+                            if evidence_codes_groups_map[annotation["Evidence"]] + str(special_case[0]) not in \
+                                    evidence_groups_priority_list:
+                                evidence_groups_priority_list.insert(evidence_groups_priority_list.index(
+                                    evidence_codes_groups_map[annotation["Evidence"]]) + 1,
+                                                                     evidence_codes_groups_map[annotation["Evidence"]] +
+                                                                     str(special_case[0]))
+                            break
+                go_terms_groups[map_key].append(annotation["GO_Name"])
         sentences = GOSentencesCollection(evidence_groups_priority_list, go_prepostfix_sentences_map)
         for ((go_aspect, evidence_group), go_terms) in go_terms_groups.items():
             sentences.set_sentence(_get_single_go_sentence(go_term_names=go_terms, go_aspect=go_aspect,
