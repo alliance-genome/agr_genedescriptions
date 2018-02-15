@@ -2,6 +2,8 @@ from collections import namedtuple, defaultdict
 import inflect
 from typing import List, Dict, Tuple
 
+import re
+
 GOSentence = namedtuple('GOSentence', ['prefix', 'terms', 'postfix', 'text', 'go_aspect', 'evidence_group'])
 
 
@@ -106,6 +108,7 @@ class GOSentencesCollection(object):
 
 def generate_go_sentences(go_annotations: List[dict], evidence_groups_priority_list: List[str],
                           go_prepostfix_sentences_map: Dict[Tuple[str, str], Tuple[str, str]],
+                          go_prepostfix_special_cases_sent_map: Dict[Tuple[str, str], Tuple[int, str, str, str]],
                           evidence_codes_groups_map: Dict[str, str]) -> GOSentencesCollection:
     """generate GO sentences from a list of GO annotations
 
@@ -114,9 +117,13 @@ def generate_go_sentences(go_annotations: List[dict], evidence_groups_priority_l
     :param evidence_groups_priority_list: the list of evidence groups to consider, sorted by priority. Sentences of the
         first group (with highest priority) will be returned in first position and so on
     :type evidence_groups_priority_list: List[str]
-    :param go_prepostfix_sentences_map: a map with for the prefix and postfix, where keys are tuples of
+    :param go_prepostfix_sentences_map: a map with prefix and postfix phrases, where keys are tuples of
         go_aspect, evidence_group and values are tuples prefix, postfix
     :type go_prepostfix_sentences_map: Dict[Tuple[str, str], Tuple[str, str]]
+    :param go_prepostfix_special_cases_sent_map: a map for special prefix and postfix cases, where keys are tuples of
+        go_aspect, evidence_group and values are tuples of id, match_regex, prefix, postfix. Match_regex is a regular
+        expression that defines the match for the special case
+    :type go_prepostfix_special_cases_sent_map: Dict[Tuple[str, str], Tuple[int, str, str, str]]
     :param evidence_codes_groups_map: a map between evidence codes and the groups they belong to
     :type evidence_codes_groups_map: Dict[str, str]
     :return: a collection of GO sentences
@@ -125,8 +132,20 @@ def generate_go_sentences(go_annotations: List[dict], evidence_groups_priority_l
     if len(go_annotations) > 0:
         go_terms_groups = defaultdict(list)
         for annotation in go_annotations:
-            go_terms_groups[(annotation["Aspect"], evidence_codes_groups_map[annotation["Evidence"]])].append(
-                annotation["GO_Name"])
+            map_key = (annotation["Aspect"], evidence_codes_groups_map[annotation["Evidence"]])
+            if map_key in go_prepostfix_special_cases_sent_map:
+                for special_case in go_prepostfix_special_cases_sent_map[map_key]:
+                    if re.match(re.escape(special_case[1]), annotation["GO_Name"]):
+                        map_key = (annotation["Aspect"], evidence_codes_groups_map[annotation["Evidence"]] +
+                                   str(special_case[0]))
+                        if evidence_codes_groups_map[annotation["Evidence"]] + str(special_case[0]) not in \
+                                evidence_groups_priority_list:
+                            evidence_groups_priority_list.insert(evidence_groups_priority_list.index(
+                                evidence_codes_groups_map[annotation["Evidence"]]) + 1,
+                                                                 evidence_codes_groups_map[annotation["Evidence"]] +
+                                                                 str(special_case[0]))
+                        break
+            go_terms_groups[map_key].append(annotation["GO_Name"])
         sentences = GOSentencesCollection(evidence_groups_priority_list, go_prepostfix_sentences_map)
         for ((go_aspect, evidence_group), go_terms) in go_terms_groups.items():
             sentences.set_sentence(_get_single_go_sentence(go_term_names=go_terms, go_aspect=go_aspect,

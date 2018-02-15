@@ -135,6 +135,8 @@ class RawDataFetcher(metaclass=ABCMeta):
         :type geneid: str
         :param include_obsolete: whether to include obsolete annotations
         :type include_obsolete: bool
+        :param include_negative_results: whether to include negative results
+        :type include_negative_results: bool
         :param priority_list: the priority list for the evidence codes. If multiple annotations with the same go_term
             are found, only the one with highest priority is returned. The first element in the list has the highest
             priority, whereas the last has the lowest. Only annotations with evidence codes in the priority list are
@@ -143,7 +145,7 @@ class RawDataFetcher(metaclass=ABCMeta):
         :return: the list of go annotations for the given gene
         :rtype: List[GOAnnotation]
         """
-        priority_map = dict(zip(priority_list, reversed(range(len(priority_list)))))
+        priority_map = dict(zip(priority_list, reversed(range(len(list(priority_list))))))
         annotations = [annotation for annotation in self.go_data[geneid] if (include_obsolete or
                        not annotation["Is_Obsolete"]) and (include_negative_results or "NOT" not in
                                                            annotation["Qualifier"])]

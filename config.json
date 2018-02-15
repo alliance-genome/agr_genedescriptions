@@ -1,10 +1,10 @@
 {
-  "generic_data_fetcher_options": {
+  "generic_data_fetcher": {
     "cache_location": "gene_descriptions_cache",
-    "data_fetcher": "WB",
+    "data_fetcher": "wb_data_fetcher",
     "chebi_file_source": "ftp://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi_lite.obo.gz"
   },
-  "wb_data_fetcher_options": {
+  "wb_data_fetcher": {
     "release": "WS263",
     "raw_files_source": "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases",
     "species": {
@@ -37,7 +37,7 @@
       }
     }
   },
-  "agr_data_fetcher_options": {
+  "agr_data_fetcher": {
     "raw_files_source": "https://s3.amazonaws.com/mod-datadumps",
     "release": "1.0",
     "organisms": {
@@ -158,73 +158,113 @@
         "aspect": "F",
         "group": "EXPERIMENTAL",
         "prefix": "exhibits",
-        "postfix": ""
+        "postfix": "",
+        "special_cases": [
+          {
+            "id": 1,
+            "match_regex": "structural constituent",
+            "prefix": "is a",
+            "postfix": ""
+          }
+        ]
       },
       {
         "aspect": "F",
         "group": "SEQUENCE_BASED_ANALYSIS",
         "prefix": "is predicted to have",
-        "postfix": "based on sequence-based analysis"
+        "postfix": "based on sequence analysis",
+        "special_cases": [
+          {
+            "id": 1,
+            "match_regex": "structural constituent",
+            "prefix": "is a",
+            "postfix": ""
+          }
+        ]
       },
       {
         "aspect": "F",
         "group": "PHYLOGENETIC_ANALYSIS",
         "prefix": "is predicted to have",
-        "postfix": "based on phylogenetic analysis"
+        "postfix": "based on phylogenetic analysis",
+        "special_cases": [
+          {
+            "id": 1,
+            "match_regex": "structural constituent",
+            "prefix": "is a",
+            "postfix": ""
+          }
+        ]
       },
       {
         "aspect": "F",
         "group": "ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS",
         "prefix": "is predicted to have",
-        "postfix": "based on computational analysis"
+        "postfix": "based on computational analysis",
+        "special_cases": [
+          {
+            "id": 1,
+            "match_regex": "structural constituent",
+            "prefix": "is a",
+            "postfix": ""
+          }
+        ]
       },
       {
         "aspect": "P",
         "group": "EXPERIMENTAL",
         "prefix": "is involved in",
-        "postfix": ""
+        "postfix": "",
+        "special_cases": []
       },
       {
         "aspect": "P",
         "group": "SEQUENCE_BASED_ANALYSIS",
         "prefix": "is predicted to be involved in",
-        "postfix": "based on sequence-based analysis"
+        "postfix": "based on sequence analysis",
+        "special_cases": []
       },
       {
         "aspect": "P",
         "group": "PHYLOGENETIC_ANALYSIS",
         "prefix": "is predicted to be involved in",
-        "postfix": "based on phylogenetic analysis"
+        "postfix": "based on phylogenetic analysis",
+        "special_cases": []
       },
       {
         "aspect": "P",
         "group": "ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS",
         "prefix": "is predicted to be involved in",
-        "postfix": "based on computational analysis"
+        "postfix": "based on computational analysis",
+        "special_cases": []
       },
       {
         "aspect": "C",
         "group": "EXPERIMENTAL",
-        "prefix": "localizes",
-        "postfix": ""
+        "prefix": "localizes to the",
+        "postfix": "",
+        "special_cases": []
       },
       {
         "aspect": "C",
         "group": "SEQUENCE_BASED_ANALYSIS",
-        "prefix": "is predicted to localize to",
-        "postfix": "based on sequence-based analysis"
+        "prefix": "is predicted to localize to the",
+        "postfix": "based on sequence analysis",
+        "special_cases": []
       },
       {
         "aspect": "C",
         "group": "PHYLOGENETIC_ANALYSIS",
-        "prefix": "is predicted to localize to",
-        "postfix": "based on phylogenetic analysis"
+        "prefix": "is predicted to localize to the",
+        "postfix": "based on phylogenetic analysis",
+        "special_cases": []
       },
       {
         "aspect": "C",
         "group": "ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS",
-        "prefix": "is predicted to localize to",
-        "postfix": "based on computational analysis"
+        "prefix": "is predicted to localize to the",
+        "postfix": "based on computational analysis",
+        "special_cases": []
       }
     ]
   }

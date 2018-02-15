@@ -3,6 +3,7 @@
 import argparse
 import json
 
+from config_parser import GenedescConfigParser
 from data_fetcher import WBRawDataFetcher, AGRRawDataFetcher
 from descriptions_rules import *
 import logging
@@ -24,38 +25,33 @@ def main():
 
     args = parser.parse_args()
 
-    with open(args.config_file) as conf_file:
-        config = json.load(conf_file)
+    conf_parser = GenedescConfigParser(args.config_file)
 
     logging.basicConfig(filename=args.log_file, level=args.log_level)
 
-    cache_location = config["generic_data_fetcher_options"]["cache_location"]
-    species = config["wb_data_fetcher_options"]["species"]
-    evidence_codes = config["go_sentences_options"]["evidence_codes"]
-    go_prepostfix_sentences_map = {(prepost["aspect"], prepost["group"]): (prepost["prefix"], prepost["postfix"]) for
-                                   prepost in config["go_sentences_options"]["go_prepostfix_sentences_map"]}
-    go_annotations_priority = [key for key, priority in sorted([(key, ec["priority"]) for key, ec in
-                                                                evidence_codes.items()], key=lambda x: x[1])]
-    evidence_groups_priority_list = [group for group, p in sorted([(g, p) for g, p in config["go_sentences_options"]
-                                     ["group_priority"].items()], key=lambda x: x[1])]
-    evidence_codes_groups_map = {name: evidence["group"] for name, evidence in evidence_codes.items()}
-    go_terms_exclusion_list = [term["id"] for term in config["go_sentences_options"]["exclude_terms"]]
+    cache_location = conf_parser.get_cache_location()
+    species = conf_parser.get_wb_species()
+    go_prepostfix_sentences_map = conf_parser.get_go_prepostfix_sentences_map()
+    go_prepostfix_special_cases_sent_map = conf_parser.get_go_prepostfix_special_cases_sent_map()
+    go_annotations_priority = conf_parser.get_go_annotations_priority()
+    evidence_groups_priority_list = conf_parser.get_evidence_groups_priority_list()
+    evidence_codes_groups_map = conf_parser.get_evidence_codes_groups_map()
+    go_terms_exclusion_list = conf_parser.get_go_terms_exclusion_list()
 
-    if config["generic_data_fetcher_options"]["data_fetcher"] == "AGR":
+    if conf_parser.get_data_fetcher() == "AGR":
         df = AGRRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
-                               raw_files_source=config["agr_data_fetcher_options"]["raw_files_source"],
-                               chebi_file_url=config["generic_data_fetcher_options"]["chebi_file_source"],
-                               release_version=config["agr_data_fetcher_options"]["release"],
-                               gff_file_name=config["agr_data_fetcher_options"]["organisms"]["zfin"]["gff"],
-                               go_annotations_file_name=config["agr_data_fetcher_options"]["organisms"]["zfin"]
-                               ["go_annotations"],
-                               organism_name=config["agr_data_fetcher_options"]["organisms"]["zfin"]["name"],
+                               raw_files_source=conf_parser.get_raw_file_sources(conf_parser.get_data_fetcher()),
+                               chebi_file_url=conf_parser.get_chebi_file_source(),
+                               release_version=conf_parser.get_release(conf_parser.get_data_fetcher()),
+                               gff_file_name=conf_parser.get_agr_mod_property("zfin", "gff"),
+                               go_annotations_file_name=conf_parser.get_agr_mod_property("zfin", "go_annotations"),
+                               organism_name=conf_parser.get_agr_mod_property("zfin", "name"),
                                cache_location=cache_location, use_cache=args.use_cache)
     else:
         df = WBRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
-                              raw_files_source=config["wb_data_fetcher_options"]["raw_files_source"],
-                              chebi_file_url=config["generic_data_fetcher_options"]["chebi_file_source"],
-                              release_version=config["wb_data_fetcher_options"]["release"],
+                              raw_files_source=conf_parser.get_raw_file_sources(conf_parser.get_data_fetcher()),
+                              chebi_file_url=conf_parser.get_chebi_file_source(),
+                              release_version=conf_parser.get_release(conf_parser.get_data_fetcher()),
                               species="c_elegans",
                               project_id=species["c_elegans"]["project_id"],
                               cache_location=cache_location, use_cache=args.use_cache)
@@ -64,18 +60,22 @@ def main():
     for gene in df.get_gene_data():
         print(gene.id, gene.name)
         sentences = generate_go_sentences(df.get_go_annotations(gene.id, priority_list=go_annotations_priority),
-                                          evidence_groups_priority_list, go_prepostfix_sentences_map,
-                                          evidence_codes_groups_map)
+                                          evidence_groups_priority_list=evidence_groups_priority_list,
+                                          go_prepostfix_sentences_map=go_prepostfix_sentences_map,
+                                          go_prepostfix_special_cases_sent_map=go_prepostfix_special_cases_sent_map,
+                                          evidence_codes_groups_map=evidence_codes_groups_map)
         if sentences:
             joined_sent = []
             func_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
                 go_aspect='F', merge_groups_with_same_prefix=True)])
             if func_sent:
                 joined_sent.append(func_sent)
-            proc_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(go_aspect='B')])
+            proc_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
+                go_aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True)])
             if proc_sent:
                 joined_sent.append(proc_sent)
-            comp_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(go_aspect='C')])
+            comp_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
+                go_aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True)])
             if comp_sent:
                 joined_sent.append(comp_sent)
 
