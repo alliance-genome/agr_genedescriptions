@@ -1,8 +1,9 @@
-from collections import namedtuple, defaultdict
 import inflect
+import re
+
+from collections import namedtuple, defaultdict
 from typing import List, Dict, Tuple
 
-import re
 
 GOSentence = namedtuple('GOSentence', ['prefix', 'terms', 'postfix', 'text', 'go_aspect', 'evidence_group'])
 

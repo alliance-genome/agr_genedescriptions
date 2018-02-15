@@ -1,14 +1,16 @@
 import gzip
 import urllib.request
-from abc import ABCMeta, abstractmethod
-from collections import namedtuple, defaultdict
 import shutil
-from goatools.obo_parser import GODag
-from Bio.UniProt.GOA import gafiterator
 import os
-from typing import List, Iterable
 import logging
 import re
+
+from goatools.obo_parser import GODag
+from Bio.UniProt.GOA import gafiterator
+from abc import ABCMeta, abstractmethod
+from collections import namedtuple, defaultdict
+from typing import List, Iterable
+
 
 Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
 

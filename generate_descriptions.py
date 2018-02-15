@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
-import json
+import logging
 
 from config_parser import GenedescConfigParser
 from data_fetcher import WBRawDataFetcher, AGRRawDataFetcher
 from descriptions_rules import *
-import logging
 
 
 def main():
