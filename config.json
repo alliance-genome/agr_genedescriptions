@@ -243,28 +243,56 @@
         "group": "EXPERIMENTAL",
         "prefix": "localizes to the",
         "postfix": "",
-        "special_cases": []
+        "special_cases": [
+          {
+            "id": 1,
+            "match_regex": "intracellular",
+            "prefix": "is",
+            "postfix": ""
+          }
+        ]
       },
       {
         "aspect": "C",
         "group": "SEQUENCE_BASED_ANALYSIS",
         "prefix": "is predicted to localize to the",
         "postfix": "based on sequence analysis",
-        "special_cases": []
+        "special_cases": [
+          {
+            "id": 1,
+            "match_regex": "intracellular",
+            "prefix": "is",
+            "postfix": ""
+          }
+        ]
       },
       {
         "aspect": "C",
         "group": "PHYLOGENETIC_ANALYSIS",
         "prefix": "is predicted to localize to the",
         "postfix": "based on phylogenetic analysis",
-        "special_cases": []
+        "special_cases": [
+          {
+            "id": 1,
+            "match_regex": "intracellular",
+            "prefix": "is",
+            "postfix": ""
+          }
+        ]
       },
       {
         "aspect": "C",
         "group": "ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS",
         "prefix": "is predicted to localize to the",
         "postfix": "based on computational analysis",
-        "special_cases": []
+        "special_cases": [
+          {
+            "id": 1,
+            "match_regex": "intracellular",
+            "prefix": "is",
+            "postfix": ""
+          }
+        ]
       }
     ]
   }

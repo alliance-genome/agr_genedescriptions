@@ -59,6 +59,7 @@ def main():
     for gene in df.get_gene_data():
         print(gene.id, gene.name)
         sentences = generate_go_sentences(df.get_go_annotations(gene.id, priority_list=go_annotations_priority),
+                                          go_ontology=df.get_go_ontology(),
                                           evidence_groups_priority_list=evidence_groups_priority_list,
                                           go_prepostfix_sentences_map=go_prepostfix_sentences_map,
                                           go_prepostfix_special_cases_sent_map=go_prepostfix_special_cases_sent_map,
@@ -66,15 +67,17 @@ def main():
         if sentences:
             joined_sent = []
             func_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
-                go_aspect='F', merge_groups_with_same_prefix=True)])
+                go_aspect='F', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True)])
             if func_sent:
                 joined_sent.append(func_sent)
             proc_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
-                go_aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True)])
+                go_aspect='P', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True,
+                keep_only_best_group=True)])
             if proc_sent:
                 joined_sent.append(proc_sent)
             comp_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
-                go_aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True)])
+                go_aspect='C', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True,
+                keep_only_best_group=True)])
             if comp_sent:
                 joined_sent.append(comp_sent)
 

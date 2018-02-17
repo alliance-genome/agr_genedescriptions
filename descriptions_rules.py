@@ -5,7 +5,18 @@ from collections import namedtuple, defaultdict
 from typing import List, Dict, Tuple
 
 
-GOSentence = namedtuple('GOSentence', ['prefix', 'terms', 'postfix', 'text', 'go_aspect', 'evidence_group'])
+GOSentence = namedtuple('GOSentence', ['prefix', 'terms', 'term_ids_dict', 'postfix', 'text', 'go_aspect',
+                                       'evidence_group'])
+
+
+class GOSentenceMerger(object):
+    def __init__(self):
+        self.postfix_list = []
+        self.terms = set()
+        self.terms_ids_dict = {}
+        self.term_postfix_dict = {}
+        self.evidence_groups = []
+        self.term_evgroup_dict = {}
 
 
 class GOSentencesCollection(object):
@@ -23,12 +34,13 @@ class GOSentencesCollection(object):
         """
         self.sentences_map[(sentence.go_aspect, sentence.evidence_group)] = sentence
 
-    def get_sentences(self, go_aspect: str, keep_only_best_group: bool = False,
+    def get_sentences(self, go_aspect: str, go_ontology, keep_only_best_group: bool = False,
                       merge_groups_with_same_prefix: bool = False) -> List[GOSentence]:
         """get all sentences containing the specified aspect
 
         :param go_aspect: a GO aspect
         :type go_aspect: str
+        :param go_ontology: the go ontology object obtained from a data fetcher
         :param keep_only_best_group: whether to get only the evidence group with highest priority and discard
             the other evidence groups
         :type keep_only_best_group: bool
@@ -38,34 +50,52 @@ class GOSentencesCollection(object):
         :rtype: List[GOSentence]
         """
         sentences = []
-        merged_sentences = defaultdict(dict)
+        merged_sentences = defaultdict(GOSentenceMerger)
         for eg in self.evidence_groups_list:
             if (go_aspect, eg) in self.sentences_map:
                 if merge_groups_with_same_prefix:
-                    if "postfix" not in merged_sentences[self.go_prepostfix_sentences_map[(go_aspect, eg)][0]]:
-                        merged_sentences[self.go_prepostfix_sentences_map[(go_aspect, eg)][0]]["postfix"] = []
-                    merged_sentences[self.go_prepostfix_sentences_map[(go_aspect, eg)][0]]["postfix"].append(
-                        self.go_prepostfix_sentences_map[(go_aspect, eg)][1])
-                    if "terms" not in merged_sentences[self.go_prepostfix_sentences_map[(go_aspect, eg)][0]]:
-                        merged_sentences[self.go_prepostfix_sentences_map[(go_aspect, eg)][0]]["terms"] = set()
-                    merged_sentences[self.go_prepostfix_sentences_map[(go_aspect, eg)][0]]["terms"].update(
-                        self.sentences_map[(go_aspect, eg)].terms)
-                    if "evidence_groups" not in merged_sentences[self.go_prepostfix_sentences_map[(go_aspect, eg)][0]]:
-                        merged_sentences[self.go_prepostfix_sentences_map[(go_aspect, eg)][0]]["evidence_groups"] = []
-                    merged_sentences[self.go_prepostfix_sentences_map[(go_aspect, eg)][0]]["evidence_groups"].append(eg)
+                    prefix = self.go_prepostfix_sentences_map[(go_aspect, eg)][0]
+                    merged_sentences[prefix].postfix_list.append(self.go_prepostfix_sentences_map[(go_aspect, eg)][1])
+                    merged_sentences[prefix].terms.update(self.sentences_map[(go_aspect, eg)].terms)
+                    merged_sentences[prefix].terms_ids_dict.update(self.sentences_map[(go_aspect, eg)].term_ids_dict)
+                    for term in self.sentences_map[(go_aspect, eg)].terms:
+                        merged_sentences[prefix].term_postfix_dict[term] = self.go_prepostfix_sentences_map[
+                            (go_aspect, eg)][1]
+                    merged_sentences[prefix].evidence_groups.append(eg)
+                    for term in self.sentences_map[(go_aspect, eg)].terms:
+                        merged_sentences[prefix].term_evgroup_dict[term] = eg
                 else:
                     sentences.append(self.sentences_map[(go_aspect, eg)])
                 if keep_only_best_group:
                     break
         if merge_groups_with_same_prefix:
-            sentences = [GOSentence(prefix=prefix, terms=list(postfixes_terms["terms"]),
-                                    postfix=GOSentencesCollection.merge_postfix_phrases(postfixes_terms["postfix"]),
+            for prefix, sent_merger in merged_sentences.items():
+                new_terms_set = set(sent_merger.terms)
+                new_term_ids_dict = sent_merger.terms_ids_dict.copy()
+                new_term_postfix_dict = sent_merger.term_postfix_dict.copy()
+                new_term_evgroup_dict = sent_merger.term_evgroup_dict.copy()
+                for term_name in sent_merger.terms:
+                    for parent_name in get_all_go_parent_names(sent_merger.terms_ids_dict[term_name], go_ontology):
+                        new_terms_set.discard(parent_name)
+                        if parent_name in new_term_ids_dict:
+                            del new_term_ids_dict[parent_name]
+                            del new_term_postfix_dict[parent_name]
+                            del new_term_evgroup_dict[parent_name]
+                sent_merger.postfix_list = [postfix for postfix in sent_merger.postfix_list if
+                                            postfix in set(new_term_postfix_dict.values())]
+                sent_merger.evidence_groups = [eg for eg in sent_merger.evidence_groups if
+                                               eg in set(new_term_evgroup_dict.values())]
+                sent_merger.terms = list(new_terms_set)
+                sent_merger.terms_ids_dict = new_term_ids_dict
+            sentences = [GOSentence(prefix=prefix, terms=list(sent_merger.terms),
+                                    term_ids_dict=sent_merger.terms_ids_dict,
+                                    postfix=GOSentencesCollection.merge_postfix_phrases(sent_merger.postfix_list),
                                     text=compose_go_sentence(prefix=prefix,
-                                                             go_term_names=list(postfixes_terms["terms"]),
+                                                             go_term_names=list(sent_merger.terms),
                                                              postfix=GOSentencesCollection.merge_postfix_phrases(
-                                                                 postfixes_terms["postfix"])),
-                                    go_aspect=go_aspect, evidence_group=", ".join(postfixes_terms["evidence_groups"]))
-                         for prefix, postfixes_terms in merged_sentences.items()]
+                                                                 sent_merger.postfix_list)),
+                                    go_aspect=go_aspect, evidence_group=", ".join(sent_merger.evidence_groups))
+                         for prefix, sent_merger in merged_sentences.items() if len(sent_merger.terms) > 0]
         return sentences
 
     @staticmethod
@@ -107,7 +137,7 @@ class GOSentencesCollection(object):
             return postfix_phrases[0]
 
 
-def generate_go_sentences(go_annotations: List[dict], evidence_groups_priority_list: List[str],
+def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_groups_priority_list: List[str],
                           go_prepostfix_sentences_map: Dict[Tuple[str, str], Tuple[str, str]],
                           go_prepostfix_special_cases_sent_map: Dict[Tuple[str, str], Tuple[int, str, str, str]],
                           evidence_codes_groups_map: Dict[str, str]) -> GOSentencesCollection:
@@ -131,7 +161,7 @@ def generate_go_sentences(go_annotations: List[dict], evidence_groups_priority_l
     :rtype: GOSentencesCollection
     """
     if len(go_annotations) > 0:
-        go_terms_groups = defaultdict(list)
+        go_terms_groups = defaultdict(set)
         for annotation in go_annotations:
             if annotation["Evidence"] in evidence_codes_groups_map:
                 map_key = (annotation["Aspect"], evidence_codes_groups_map[annotation["Evidence"]])
@@ -147,13 +177,30 @@ def generate_go_sentences(go_annotations: List[dict], evidence_groups_priority_l
                                                                      evidence_codes_groups_map[annotation["Evidence"]] +
                                                                      str(special_case[0]))
                             break
-                go_terms_groups[map_key].append(annotation["GO_Name"])
+                go_terms_groups[map_key].add((annotation["GO_Name"], annotation["GO_ID"]))
         sentences = GOSentencesCollection(evidence_groups_priority_list, go_prepostfix_sentences_map)
         for ((go_aspect, evidence_group), go_terms) in go_terms_groups.items():
-            sentences.set_sentence(_get_single_go_sentence(go_term_names=go_terms, go_aspect=go_aspect,
+            go_term_names = set([term[0] for term in go_terms])
+            term_ids_dict = {term_name: term_id for term_name, term_id in go_terms}
+            for go_term in go_terms:
+                for parent_name in get_all_go_parent_names(go_term[1], go_ontology):
+                    go_term_names.discard(parent_name)
+                    if parent_name in term_ids_dict:
+                        del term_ids_dict[parent_name]
+            sentences.set_sentence(_get_single_go_sentence(go_term_names=list(go_term_names),
+                                                           go_term_ids_dict=term_ids_dict,
+                                                           go_aspect=go_aspect,
                                                            evidence_group=evidence_group,
                                                            go_prepostfix_sentences_map=go_prepostfix_sentences_map))
         return sentences
+
+
+def get_all_go_parent_names(go_id, go_ontology):
+    parent_names = []
+    for parent in go_ontology.query_term(go_id).parents:
+        parent_names.append(parent.name)
+        parent_names.extend(get_all_go_parent_names(parent.id, go_ontology))
+    return parent_names
 
 
 def compose_go_sentence(prefix: str, go_term_names: List[str], postfix: str) -> str:
@@ -178,11 +225,27 @@ def compose_go_sentence(prefix: str, go_term_names: List[str], postfix: str) -> 
         return prefix + go_term_names[0] + postfix
 
 
-def _get_single_go_sentence(go_term_names: List[str], go_aspect: int, evidence_group: int,
-                            go_prepostfix_sentences_map: dict):
+def _get_single_go_sentence(go_term_names: List[str], go_term_ids_dict: Dict[str, str], go_aspect: str,
+                            evidence_group: str,
+                            go_prepostfix_sentences_map: Dict[Tuple[str, str], Tuple[str, str]]) -> GOSentence:
+    """build a go sentence
+
+    :param go_term_names: list of go term names to be combined in the sentence
+    :type go_term_names: List[str]
+    :param go_term_ids_dict: map between term names and their ids
+    :type go_term_ids_dict: Dict[str, str]
+    :param go_aspect: go aspect
+    :type go_aspect: str
+    :param evidence_group: evidence group
+    :type evidence_group: str
+    :param go_prepostfix_sentences_map: map for prefix and postfix phrases
+    :type go_prepostfix_sentences_map: Dict[Tuple[str, str], Tuple[str, str]]
+    :return: the combined go sentence
+    :rtype: GOSentence
+    """
     if len(go_term_names) > 0:
         prefix = go_prepostfix_sentences_map[(go_aspect, evidence_group)][0]
         postfix = go_prepostfix_sentences_map[(go_aspect, evidence_group)][1]
         return GOSentence(prefix=prefix, terms=go_term_names, postfix=postfix,
-                          text=compose_go_sentence(prefix, go_term_names, postfix),
+                          term_ids_dict=go_term_ids_dict, text=compose_go_sentence(prefix, go_term_names, postfix),
                           go_aspect=go_aspect, evidence_group=evidence_group)

@@ -163,6 +163,9 @@ class RawDataFetcher(metaclass=ABCMeta):
 
         return [annotation for annotation in go_id_selected_annotation.values()]
 
+    def get_go_ontology(self):
+        return self.go_ontology
+
 
 class WBRawDataFetcher(RawDataFetcher):
     """data fetcher for WormBase raw files for a single species"""
