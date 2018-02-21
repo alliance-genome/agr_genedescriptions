@@ -38,27 +38,34 @@ def main():
     go_terms_exclusion_list = conf_parser.get_go_terms_exclusion_list()
 
     if conf_parser.get_data_fetcher() == "agr_data_fetcher":
-        df = AGRRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
-                               raw_files_source=conf_parser.get_raw_file_sources(conf_parser.get_data_fetcher()),
-                               chebi_file_url=conf_parser.get_chebi_file_source(),
-                               release_version=conf_parser.get_release(conf_parser.get_data_fetcher()),
-                               main_file_name=conf_parser.get_agr_mod_property("zfin", "main_files"),
-                               bgi_file_name=conf_parser.get_agr_mod_property("zfin", "bgi_file"),
-                               go_annotations_file_name=conf_parser.get_agr_mod_property("zfin", "go_annotations"),
-                               organism_name=conf_parser.get_agr_mod_property("zfin", "name"),
-                               cache_location=cache_location, use_cache=args.use_cache)
+        organisms_list = conf_parser.get_agr_organisms_to_process()
     else:
-        df = WBRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
-                              raw_files_source=conf_parser.get_raw_file_sources(conf_parser.get_data_fetcher()),
-                              chebi_file_url=conf_parser.get_chebi_file_source(),
-                              release_version=conf_parser.get_release(conf_parser.get_data_fetcher()),
-                              species="c_elegans",
-                              project_id=species["c_elegans"]["project_id"],
-                              cache_location=cache_location, use_cache=args.use_cache)
+        organisms_list = conf_parser.get_wb_organisms_to_process()
+    df = None
+    for organism in organisms_list:
+        if conf_parser.get_data_fetcher() == "agr_data_fetcher":
+            df = AGRRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
+                                   raw_files_source=conf_parser.get_raw_file_sources(conf_parser.get_data_fetcher()),
+                                   chebi_file_url=conf_parser.get_chebi_file_source(),
+                                   release_version=conf_parser.get_release(conf_parser.get_data_fetcher()),
+                                   main_file_name=conf_parser.get_agr_mod_property(organism, "main_files"),
+                                   bgi_file_name=conf_parser.get_agr_mod_property(organism, "bgi_file"),
+                                   go_annotations_file_name=conf_parser.get_agr_mod_property(organism,
+                                                                                             "go_annotations"),
+                                   organism_name=conf_parser.get_agr_mod_property(organism, "name"),
+                                   cache_location=cache_location, use_cache=args.use_cache)
+        else:
+            df = WBRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
+                                  raw_files_source=conf_parser.get_raw_file_sources(conf_parser.get_data_fetcher()),
+                                  chebi_file_url=conf_parser.get_chebi_file_source(),
+                                  release_version=conf_parser.get_release(conf_parser.get_data_fetcher()),
+                                  species=organism,
+                                  project_id=species[organism]["project_id"],
+                                  cache_location=cache_location, use_cache=args.use_cache)
 
     df.load_go_data()
     for gene in df.get_gene_data():
-        print(gene.id, gene.name)
+        print(gene.name)
         sentences = generate_go_sentences(df.get_go_annotations(gene.id, priority_list=go_annotations_priority),
                                           go_ontology=df.get_go_ontology(),
                                           evidence_groups_priority_list=evidence_groups_priority_list,

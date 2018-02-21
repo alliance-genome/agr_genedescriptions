@@ -132,7 +132,7 @@ class RawDataFetcher(metaclass=ABCMeta):
                                 .replace(match, " " + ext_translation)
                         logging.debug(
                             "Found GO annotation with Annotation_Extension: " + str(mapped_annotation))
-                    self.go_data[annotation["DB_Object_ID"]].append(mapped_annotation)
+                    self.go_data[annotation["DB_Object_Symbol"]].append(mapped_annotation)
 
     def get_go_annotations(self, geneid: str, include_obsolete: bool = False, include_negative_results: bool = False,
                            priority_list: Iterable = ("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "IC", "ISS", "ISO",
@@ -237,6 +237,50 @@ class WBRawDataFetcher(RawDataFetcher):
                 name = fields[2] if fields[2] != '' else fields[3]
                 self.gene_data[fields[1]] = Gene(fields[1], name, fields[4] == "Dead", False)
 
+    def load_go_data(self) -> None:
+        """read go data and gene ontology. After calling this function, go annotations containing mapped go names can
+        be retrieved by using the :meth:`data_fetcher.WBRawDataFetcher.get_go_annotations` function
+        """
+        self.go_ontology = GODag(self._get_cached_file(file_source_url=self.go_ontology_url,
+                                                       cache_path=self.go_ontology_cache_path))
+        if self.anatomy_ontology_url != "":
+            self.an_ontology = GODag(self._get_cached_file(file_source_url=self.anatomy_ontology_url,
+                                                           cache_path=self.anatomy_ontology_cache_path))
+        if self.development_ontology_url != "":
+            self.ls_ontology = GODag(self._get_cached_file(file_source_url=self.development_ontology_url,
+                                                           cache_path=self.development_ontology_cache_path))
+        if self.chebi_file_url != "":
+            self.chebi_ontology = GODag(self._get_cached_file(file_source_url=self.chebi_file_url,
+                                                              cache_path=self.chebi_file_cache_path))
+        self._load_gene_data()
+        file_path = self._get_cached_file(cache_path=self.go_annotations_cache_path,
+                                          file_source_url=self.go_annotations_url)
+        lines_to_skip = 0
+        with open(file_path) as file:
+            while True:
+                if file.readline().strip().startswith("!gaf-version:"):
+                    break
+                lines_to_skip += 1
+        with open(file_path) as file:
+            for _ in range(lines_to_skip):
+                next(file)
+            for annotation in gafiterator(file):
+                if annotation["GO_ID"] not in self.go_terms_exclusion_list:
+                    mapped_annotation = annotation
+                    mapped_annotation["GO_Name"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).name
+                    mapped_annotation["Is_Obsolete"] = self.go_ontology.query_term(
+                        mapped_annotation["GO_ID"]).is_obsolete
+                    if annotation["Annotation_Extension"] != "":
+                        matches = re.findall('(\([^\)]+\))', mapped_annotation["Annotation_Extension"])
+                        for match in matches:
+                            ext_id = match[1:-1]
+                            ext_translation = self._map_ont_term_to_name(ext_id)
+                            mapped_annotation["Annotation_Extension"] = mapped_annotation["Annotation_Extension"] \
+                                .replace(match, " " + ext_translation)
+                        logging.debug(
+                            "Found GO annotation with Annotation_Extension: " + str(mapped_annotation))
+                    self.go_data[annotation["DB_Object_ID"]].append(mapped_annotation)
+
 
 class AGRRawDataFetcher(RawDataFetcher):
     """data fetcher for AGR raw files for a single species"""
@@ -289,10 +333,15 @@ class AGRRawDataFetcher(RawDataFetcher):
         with open(os.path.join(os.path.dirname(self.main_data_cache_path), self.bgi_file_name)) as fileopen:
             bgi_content = json.load(fileopen)
             for gene in bgi_content["data"]:
+                self.gene_data[gene["symbol"]] = Gene(gene["symbol"], gene["symbol"], False, False)
                 # TODO check if id mapping is consistent among species
-                if gene["primaryId"].startswith("ZFIN"):
-                    if "secondaryIds" in gene:
-                        self.gene_data[gene["secondaryIds"][0].replace("ZFIN:", "")] = Gene(
-                            gene["secondaryIds"][0].replace("ZFIN:", ""), gene["symbol"], False, False)
+                #if gene["primaryId"].startswith("ZFIN"):
+                #    if "secondaryIds" in gene:
+                #        self.gene_data[gene["secondaryIds"][0].replace("ZFIN:", "")] = Gene(
+                #            gene["secondaryIds"][0].replace("ZFIN:", ""), gene["symbol"], False, False)
+                #elif gene["primaryId"].startswith("WB:"):
+                #   self.gene_data[gene["primaryId"].replace("WB:", "")] = Gene(gene["primaryId"].replace("WB:", ""),
+                #                                                                gene["symbol"], False, False)
+
 
 

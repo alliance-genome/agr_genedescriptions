@@ -140,3 +140,19 @@ class GenedescConfigParser(object):
         :rtype: str
         """
         return self.config["agr_data_fetcher"]["organisms"][mod][property_name]
+
+    def get_agr_organisms_to_process(self) -> List[str]:
+        """get the list of organisms to process
+
+        :return: the list of organisms to process
+        :rtype: List[str]
+        """
+        return self.config["agr_data_fetcher"]["organisms_to_process"]
+
+    def get_wb_organisms_to_process(self) -> List[str]:
+        """get the list of organisms to process for WormBase
+
+        :return: the list of organisms to process
+        :rtype: List[str]
+        """
+        return self.config["wb_data_fetcher"]["organisms_to_process"]

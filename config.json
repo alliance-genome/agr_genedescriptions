@@ -7,6 +7,7 @@
   "wb_data_fetcher": {
     "release": "WS263",
     "raw_files_source": "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases",
+    "organisms_to_process": ["c_elegans"],
     "species": {
       "b_malayi": {
         "project_id": "PRJNA10729"
@@ -40,11 +41,12 @@
   "agr_data_fetcher": {
     "raw_files_source": "https://s3.amazonaws.com/mod-datadumps",
     "release": "1.0",
+    "organisms_to_process": ["zfin"],
     "organisms": {
       "wb": {
         "name": "c_elegans",
-        "main_files": "WB_1.0.3_3.tar.gz",
-        "bgi_file": "WB_1.0.3_BGI.json",
+        "main_files": "WB_1.0.4_3.tar.gz",
+        "bgi_file": "WB_1.0.4_BGI.json",
         "go_annotations": "gene_association.wb"
       },
       "zfin": {
