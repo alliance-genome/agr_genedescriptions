@@ -101,7 +101,7 @@ class GenedescConfigParser(object):
         :return: the exclusion list
         :rtype: List[str]
         """
-        return [term["id"] for term in self.config["go_sentences_options"]["exclude_terms"]]
+        return self.config["go_sentences_options"]["exclude_terms"]
 
     def get_raw_file_sources(self, data_fetcher: str) -> str:
         """get the url pointing to the raw files source
@@ -156,3 +156,11 @@ class GenedescConfigParser(object):
         :rtype: List[str]
         """
         return self.config["wb_data_fetcher"]["organisms_to_process"]
+
+    def get_go_rename_terms(self) -> Dict[str, str]:
+        """get the regexp to rename GO terms and their replacement strings
+
+        :return: a map of replacements for GO terms
+        :rtype: Dict[str, str]
+        """
+        return self.config["go_sentences_options"]["rename_terms"]

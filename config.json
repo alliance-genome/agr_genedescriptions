@@ -73,26 +73,14 @@
     }
   },
   "go_sentences_options": {
-    "exclude_terms": [
-      {
-        "id": "GO:0008150"
-      },
-      {
-        "id": "GO:0003674"
-      },
-      {
-        "id": "GO:0005575"
-      },
-      {
-        "id": "GO:0005488"
-      },
-      {
-        "id": "GO:0005515"
-      },
-      {
-        "id": "GO:0044877"
-      }
-    ],
+    "exclude_terms": ["GO:0008150", "GO:0003674", "GO:0005575", "GO:0005488", "GO:0005515", "GO:0044877"],
+    "rename_terms": {
+      "molting cycle, collagen and cuticulin-based cuticle": "molting cycle",
+      "molting cycle, chitin-based cuticle": "molting cycle",
+      "multicellular organism growth": "growth",
+      "embryo development ending in birth or egg hatching": "embryo development",
+      "synaptic transmission, (\\w+)": "\\1 synaptic transmission"
+    },
     "evidence_codes": {
       "EXP": {
         "group": "EXPERIMENTAL",

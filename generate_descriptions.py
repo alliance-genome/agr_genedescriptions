@@ -45,6 +45,7 @@ def main():
     for organism in organisms_list:
         if conf_parser.get_data_fetcher() == "agr_data_fetcher":
             df = AGRRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
+                                   go_terms_replacement_dict=conf_parser.get_go_rename_terms(),
                                    raw_files_source=conf_parser.get_raw_file_sources(conf_parser.get_data_fetcher()),
                                    chebi_file_url=conf_parser.get_chebi_file_source(),
                                    release_version=conf_parser.get_release(conf_parser.get_data_fetcher()),
@@ -56,6 +57,7 @@ def main():
                                    cache_location=cache_location, use_cache=args.use_cache)
         else:
             df = WBRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
+                                  go_terms_replacement_dict=conf_parser.get_go_rename_terms(),
                                   raw_files_source=conf_parser.get_raw_file_sources(conf_parser.get_data_fetcher()),
                                   chebi_file_url=conf_parser.get_chebi_file_source(),
                                   release_version=conf_parser.get_release(conf_parser.get_data_fetcher()),

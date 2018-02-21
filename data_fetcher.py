@@ -11,8 +11,7 @@ from goatools.obo_parser import GODag
 from Bio.UniProt.GOA import gafiterator
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple, defaultdict
-from typing import List, Iterable
-
+from typing import List, Iterable, Dict
 
 Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
 
@@ -20,7 +19,8 @@ Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
 class RawDataFetcher(metaclass=ABCMeta):
 
     @abstractmethod
-    def __init__(self, go_terms_exclusion_list: List[str], use_cache: bool = False):
+    def __init__(self, go_terms_exclusion_list: List[str], go_terms_replacement_dict: Dict[str, str],
+                 use_cache: bool = False):
         self.chebi_file_url = ""
         self.chebi_file_cache_path = ""
         self.go_data = defaultdict(list)
@@ -41,6 +41,8 @@ class RawDataFetcher(metaclass=ABCMeta):
         self.go_annotations_cache_path = ""
         self.go_annotations_url = ""
         self.go_terms_exclusion_list = go_terms_exclusion_list
+        self.go_terms_replacement_dict = go_terms_replacement_dict
+        self.go_id_name = "DB_Object_ID"
 
     @staticmethod
     def _get_cached_file(cache_path: str, file_source_url):
@@ -122,6 +124,9 @@ class RawDataFetcher(metaclass=ABCMeta):
                 if annotation["GO_ID"] not in self.go_terms_exclusion_list:
                     mapped_annotation = annotation
                     mapped_annotation["GO_Name"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).name
+                    for regex_to_substitute, regex_target in self.go_terms_replacement_dict.items():
+                        mapped_annotation["GO_Name"] = re.sub(re.escape(regex_to_substitute), re.escape(regex_target),
+                                                              mapped_annotation["GO_Name"])
                     mapped_annotation["Is_Obsolete"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).is_obsolete
                     if annotation["Annotation_Extension"] != "":
                         matches = re.findall('(\([^\)]+\))', mapped_annotation["Annotation_Extension"])
@@ -132,7 +137,7 @@ class RawDataFetcher(metaclass=ABCMeta):
                                 .replace(match, " " + ext_translation)
                         logging.debug(
                             "Found GO annotation with Annotation_Extension: " + str(mapped_annotation))
-                    self.go_data[annotation["DB_Object_Symbol"]].append(mapped_annotation)
+                    self.go_data[annotation[self.go_id_name]].append(mapped_annotation)
 
     def get_go_annotations(self, geneid: str, include_obsolete: bool = False, include_negative_results: bool = False,
                            priority_list: Iterable = ("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "IC", "ISS", "ISO",
@@ -179,12 +184,15 @@ class RawDataFetcher(metaclass=ABCMeta):
 
 class WBRawDataFetcher(RawDataFetcher):
     """data fetcher for WormBase raw files for a single species"""
-    def __init__(self, go_terms_exclusion_list: List[str], raw_files_source: str, cache_location: str, release_version: str,
-                 species: str, project_id: str, use_cache: bool = False, chebi_file_url: str = ""):
+    def __init__(self, go_terms_exclusion_list: List[str], go_terms_replacement_dict: Dict[str, str],
+                 raw_files_source: str, cache_location: str, release_version: str, species: str, project_id: str,
+                 use_cache: bool = False, chebi_file_url: str = ""):
         """create a new data fetcher
 
         :param go_terms_exclusion_list: list of go ids for terms to exclude
         :type go_terms_exclusion_list: List[str]
+        :param go_terms_replacement_dict: dictionary to map go terms to be renamed. Term names can be regex
+        :type go_terms_replacement_dict: Dict[str, str]
         :param raw_files_source: base url where to fetch the raw files
         :type raw_files_source: str
         :param cache_location: path to cache directory
@@ -201,7 +209,8 @@ class WBRawDataFetcher(RawDataFetcher):
         :param chebi_file_url: url where to fetch the chebi file
         :type chebi_file_url: str
         """
-        super().__init__(go_terms_exclusion_list=go_terms_exclusion_list, use_cache=use_cache)
+        super().__init__(go_terms_exclusion_list=go_terms_exclusion_list,
+                         go_terms_replacement_dict=go_terms_replacement_dict, use_cache=use_cache)
         self.gene_data_cache_path = os.path.join(cache_location, "wormbase", release_version, "species", species,
                                                  project_id, "annotation", species + '.' + project_id +
                                                  '.' + release_version + ".geneIDs.txt.gz")
@@ -237,60 +246,19 @@ class WBRawDataFetcher(RawDataFetcher):
                 name = fields[2] if fields[2] != '' else fields[3]
                 self.gene_data[fields[1]] = Gene(fields[1], name, fields[4] == "Dead", False)
 
-    def load_go_data(self) -> None:
-        """read go data and gene ontology. After calling this function, go annotations containing mapped go names can
-        be retrieved by using the :meth:`data_fetcher.WBRawDataFetcher.get_go_annotations` function
-        """
-        self.go_ontology = GODag(self._get_cached_file(file_source_url=self.go_ontology_url,
-                                                       cache_path=self.go_ontology_cache_path))
-        if self.anatomy_ontology_url != "":
-            self.an_ontology = GODag(self._get_cached_file(file_source_url=self.anatomy_ontology_url,
-                                                           cache_path=self.anatomy_ontology_cache_path))
-        if self.development_ontology_url != "":
-            self.ls_ontology = GODag(self._get_cached_file(file_source_url=self.development_ontology_url,
-                                                           cache_path=self.development_ontology_cache_path))
-        if self.chebi_file_url != "":
-            self.chebi_ontology = GODag(self._get_cached_file(file_source_url=self.chebi_file_url,
-                                                              cache_path=self.chebi_file_cache_path))
-        self._load_gene_data()
-        file_path = self._get_cached_file(cache_path=self.go_annotations_cache_path,
-                                          file_source_url=self.go_annotations_url)
-        lines_to_skip = 0
-        with open(file_path) as file:
-            while True:
-                if file.readline().strip().startswith("!gaf-version:"):
-                    break
-                lines_to_skip += 1
-        with open(file_path) as file:
-            for _ in range(lines_to_skip):
-                next(file)
-            for annotation in gafiterator(file):
-                if annotation["GO_ID"] not in self.go_terms_exclusion_list:
-                    mapped_annotation = annotation
-                    mapped_annotation["GO_Name"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).name
-                    mapped_annotation["Is_Obsolete"] = self.go_ontology.query_term(
-                        mapped_annotation["GO_ID"]).is_obsolete
-                    if annotation["Annotation_Extension"] != "":
-                        matches = re.findall('(\([^\)]+\))', mapped_annotation["Annotation_Extension"])
-                        for match in matches:
-                            ext_id = match[1:-1]
-                            ext_translation = self._map_ont_term_to_name(ext_id)
-                            mapped_annotation["Annotation_Extension"] = mapped_annotation["Annotation_Extension"] \
-                                .replace(match, " " + ext_translation)
-                        logging.debug(
-                            "Found GO annotation with Annotation_Extension: " + str(mapped_annotation))
-                    self.go_data[annotation["DB_Object_ID"]].append(mapped_annotation)
-
 
 class AGRRawDataFetcher(RawDataFetcher):
     """data fetcher for AGR raw files for a single species"""
-    def __init__(self, go_terms_exclusion_list: List[str], raw_files_source: str, cache_location: str,
-                 release_version: str, main_file_name: str, bgi_file_name: str, go_annotations_file_name: str,
-                 organism_name: str, use_cache: bool = False, chebi_file_url: str = ""):
+    def __init__(self, go_terms_exclusion_list: List[str], go_terms_replacement_dict: Dict[str, str],
+                 raw_files_source: str, cache_location: str, release_version: str, main_file_name: str,
+                 bgi_file_name: str, go_annotations_file_name: str, organism_name: str, use_cache: bool = False,
+                 chebi_file_url: str = ""):
         """create a new data fetcher
 
         :param go_terms_exclusion_list: list of go ids for terms to exclude
         :type go_terms_exclusion_list: List[str]
+        :param go_terms_replacement_dict: dictionary to map go terms to be renamed. Term names can be regex
+        :type go_terms_replacement_dict: Dict[str, str]
         :param raw_files_source: base url where to fetch the raw files
         :type raw_files_source: str
         :param cache_location: path to cache directory
@@ -311,7 +279,8 @@ class AGRRawDataFetcher(RawDataFetcher):
         :param chebi_file_url: url where to fetch the chebi file
         :type chebi_file_url: str
         """
-        super().__init__(go_terms_exclusion_list=go_terms_exclusion_list, use_cache=use_cache)
+        super().__init__(go_terms_exclusion_list=go_terms_exclusion_list,
+                         go_terms_replacement_dict=go_terms_replacement_dict, use_cache=use_cache)
         self.main_data_cache_path = os.path.join(cache_location, "agr", release_version, "main", main_file_name)
         self.main_data_url = raw_files_source + '/' + main_file_name
         self.bgi_file_name = bgi_file_name
@@ -322,6 +291,7 @@ class AGRRawDataFetcher(RawDataFetcher):
         self.go_annotations_cache_path = os.path.join(cache_location, "agr", release_version, "GO", "ANNOT",
                                                       go_annotations_file_name)
         self.go_annotations_url = raw_files_source + '/' + release_version + '/GO/ANNOT/' + go_annotations_file_name
+        self.go_id_name = "DB_Object_Symbol"
 
     def _load_gene_data(self) -> None:
         if not os.path.isfile(self.main_data_cache_path):
@@ -334,14 +304,6 @@ class AGRRawDataFetcher(RawDataFetcher):
             bgi_content = json.load(fileopen)
             for gene in bgi_content["data"]:
                 self.gene_data[gene["symbol"]] = Gene(gene["symbol"], gene["symbol"], False, False)
-                # TODO check if id mapping is consistent among species
-                #if gene["primaryId"].startswith("ZFIN"):
-                #    if "secondaryIds" in gene:
-                #        self.gene_data[gene["secondaryIds"][0].replace("ZFIN:", "")] = Gene(
-                #            gene["secondaryIds"][0].replace("ZFIN:", ""), gene["symbol"], False, False)
-                #elif gene["primaryId"].startswith("WB:"):
-                #   self.gene_data[gene["primaryId"].replace("WB:", "")] = Gene(gene["primaryId"].replace("WB:", ""),
-                #                                                                gene["symbol"], False, False)
 
 
 
