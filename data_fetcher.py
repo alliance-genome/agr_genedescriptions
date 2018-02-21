@@ -1,4 +1,6 @@
 import gzip
+import json
+import tarfile
 import urllib.request
 import shutil
 import os
@@ -107,7 +109,15 @@ class RawDataFetcher(metaclass=ABCMeta):
         self._load_gene_data()
         file_path = self._get_cached_file(cache_path=self.go_annotations_cache_path,
                                           file_source_url=self.go_annotations_url)
+        lines_to_skip = 0
         with open(file_path) as file:
+            while True:
+                if file.readline().strip().startswith("!gaf-version:"):
+                    break
+                lines_to_skip += 1
+        with open(file_path) as file:
+            for _ in range(lines_to_skip):
+                next(file)
             for annotation in gafiterator(file):
                 if annotation["GO_ID"] not in self.go_terms_exclusion_list:
                     mapped_annotation = annotation
@@ -231,8 +241,8 @@ class WBRawDataFetcher(RawDataFetcher):
 class AGRRawDataFetcher(RawDataFetcher):
     """data fetcher for AGR raw files for a single species"""
     def __init__(self, go_terms_exclusion_list: List[str], raw_files_source: str, cache_location: str,
-                 release_version: str, gff_file_name: str, go_annotations_file_name: str, organism_name: str,
-                 use_cache: bool = False, chebi_file_url: str = ""):
+                 release_version: str, main_file_name: str, bgi_file_name: str, go_annotations_file_name: str,
+                 organism_name: str, use_cache: bool = False, chebi_file_url: str = ""):
         """create a new data fetcher
 
         :param go_terms_exclusion_list: list of go ids for terms to exclude
@@ -243,8 +253,10 @@ class AGRRawDataFetcher(RawDataFetcher):
         :type cache_location: str
         :param release_version: WormBase release version for the input files
         :type release_version: str
-        :param gff_file_name: file name of the gff file containing gene information
-        :type gff_file_name: str
+        :param main_file_name: file name of the main tar.gz file containing gene information
+        :type main_file_name: str
+        :param bgi_file_name: file name of the bgi file containing gene information
+        :type bgi_file_name: str
         :param go_annotations_file_name: file name of the obo file containing go annotations
         :type go_annotations_file_name: str
         :param organism_name: name of the organism
@@ -256,8 +268,9 @@ class AGRRawDataFetcher(RawDataFetcher):
         :type chebi_file_url: str
         """
         super().__init__(go_terms_exclusion_list=go_terms_exclusion_list, use_cache=use_cache)
-        self.gene_data_cache_path = os.path.join(cache_location, "agr", release_version, "gff3", gff_file_name)
-        self.gene_data_url = raw_files_source + '/' + release_version + '/gff3/' + gff_file_name
+        self.main_data_cache_path = os.path.join(cache_location, "agr", release_version, "main", main_file_name)
+        self.main_data_url = raw_files_source + '/' + main_file_name
+        self.bgi_file_name = bgi_file_name
         self.go_ontology_cache_path = os.path.join(cache_location, "agr", release_version, "GO", "go.obo")
         self.go_ontology_url = raw_files_source + '/' + release_version + '/GO/' + 'go.obo'
         self.chebi_file_cache_path = os.path.join(cache_location, "agr", "CHEBI", "chebi_lite.obo.gz")
@@ -267,15 +280,19 @@ class AGRRawDataFetcher(RawDataFetcher):
         self.go_annotations_url = raw_files_source + '/' + release_version + '/GO/ANNOT/' + go_annotations_file_name
 
     def _load_gene_data(self) -> None:
-        file_path = self._get_cached_file(cache_path=self.gene_data_cache_path, file_source_url=self.gene_data_url)
-        for line in open(file_path):
-            if not line.startswith("#"):
-                # TODO determine if gene is dead or pseudo
-                attributes = line.strip().split("\t")[8]
-                attr_dict = dict([tuple(kv.split("=")) for kv in attributes.split(";")])
-                # TODO each gff file has its own syntax!
-                if "Alias" in attr_dict and "ID" in attr_dict and attr_dict["ID"].startswith("Gene"):
-                    self.gene_data[attr_dict["ID"][5:]] = Gene(attr_dict["ID"][5:], attr_dict["Alias"].split(",")[0],
-                                                               False, False)
+        if not os.path.isfile(self.main_data_cache_path):
+            os.makedirs(os.path.dirname(self.main_data_cache_path), exist_ok=True)
+            urllib.request.urlretrieve(self.main_data_url, self.main_data_cache_path)
+        if not os.path.isfile(os.path.join(os.path.dirname(self.main_data_cache_path), self.bgi_file_name)):
+            tar = tarfile.open(self.main_data_cache_path)
+            tar.extractall(path=os.path.dirname(self.main_data_cache_path))
+        with open(os.path.join(os.path.dirname(self.main_data_cache_path), self.bgi_file_name)) as fileopen:
+            bgi_content = json.load(fileopen)
+            for gene in bgi_content["data"]:
+                # TODO check if id mapping is consistent among species
+                if gene["primaryId"].startswith("ZFIN"):
+                    if "secondaryIds" in gene:
+                        self.gene_data[gene["secondaryIds"][0].replace("ZFIN:", "")] = Gene(
+                            gene["secondaryIds"][0].replace("ZFIN:", ""), gene["symbol"], False, False)
 
 

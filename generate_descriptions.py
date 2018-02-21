@@ -37,12 +37,13 @@ def main():
     evidence_codes_groups_map = conf_parser.get_evidence_codes_groups_map()
     go_terms_exclusion_list = conf_parser.get_go_terms_exclusion_list()
 
-    if conf_parser.get_data_fetcher() == "AGR":
+    if conf_parser.get_data_fetcher() == "agr_data_fetcher":
         df = AGRRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
                                raw_files_source=conf_parser.get_raw_file_sources(conf_parser.get_data_fetcher()),
                                chebi_file_url=conf_parser.get_chebi_file_source(),
                                release_version=conf_parser.get_release(conf_parser.get_data_fetcher()),
-                               gff_file_name=conf_parser.get_agr_mod_property("zfin", "gff"),
+                               main_file_name=conf_parser.get_agr_mod_property("zfin", "main_files"),
+                               bgi_file_name=conf_parser.get_agr_mod_property("zfin", "bgi_file"),
                                go_annotations_file_name=conf_parser.get_agr_mod_property("zfin", "go_annotations"),
                                organism_name=conf_parser.get_agr_mod_property("zfin", "name"),
                                cache_location=cache_location, use_cache=args.use_cache)

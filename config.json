@@ -1,7 +1,7 @@
 {
   "generic_data_fetcher": {
     "cache_location": "gene_descriptions_cache",
-    "data_fetcher": "wb_data_fetcher",
+    "data_fetcher": "agr_data_fetcher",
     "chebi_file_source": "ftp://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi_lite.obo.gz"
   },
   "wb_data_fetcher": {
@@ -43,12 +43,14 @@
     "organisms": {
       "wb": {
         "name": "c_elegans",
-        "gff": "c_elegans.PRJNA13758.WS258.genes_only.gff3",
+        "main_files": "WB_1.0.3_3.tar.gz",
+        "bgi_file": "WB_1.0.3_BGI.json",
         "go_annotations": "gene_association.wb"
       },
       "zfin": {
         "name": "zebra_fish",
-        "gff": "zfin_genes.gff3",
+        "main_files": "ZFIN_1.1_1.tar.gz",
+        "bgi_file": "ZFIN_1.1_basicGeneInformation.json",
         "go_annotations": "gene_association.zfin"
       },
       "fb": {
