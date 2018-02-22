@@ -8,7 +8,7 @@
     "release": "WS263",
     "raw_files_source": "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases",
     "organisms_to_process": ["c_elegans"],
-    "species": {
+    "organisms": {
       "b_malayi": {
         "project_id": "PRJNA10729"
       },
@@ -47,28 +47,37 @@
         "name": "c_elegans",
         "main_files": "WB_1.0.4_3.tar.gz",
         "bgi_file": "WB_1.0.4_BGI.json",
-        "go_annotations": "gene_association.wb"
+        "go_annotations": "gene_association.wb.gz"
       },
       "zfin": {
         "name": "zebra_fish",
         "main_files": "ZFIN_1.1_1.tar.gz",
         "bgi_file": "ZFIN_1.1_basicGeneInformation.json",
-        "go_annotations": "gene_association.zfin"
+        "go_annotations": "gene_association.zfin.gz"
       },
       "fb": {
-        "name": "FlyBase"
-      },
-      "human": {
-        "name": "Human"
-      },
-      "mgi": {
-        "name": "MGI"
+        "name": "drosophila melanogaster",
+        "main_files": "FB_1.0.4_4.tar.gz",
+        "bgi_file": "FB_1.0.4_BGI.json",
+        "go_annotations": "gene_association.fb.gz"
       },
       "rgd": {
-        "name": "RGD"
+        "name": "rat",
+        "main_files": "RGD_1.0_4.tar.gz",
+        "bgi_file": "RGD_1.0_basicGeneInformation.10116.json",
+        "go_annotations": "gene_association.rgd.gz"
       },
       "sgd": {
-        "name": "SGD"
+        "name": "yeast",
+        "main_files": "SGD_1.0.3.tar.gz",
+        "bgi_file": "SGD_1.0.2_basicGeneInformation.json",
+        "go_annotations": "gene_association.sgd.gz"
+      },
+      "mgi": {
+        "name": "mouse",
+        "main_files": "MGI_1.0.6.tar.gz",
+        "bgi_file": "MGI_1.0.6_basicGeneInformation.json",
+        "go_annotations": "gene_association.mgi.gz"
       }
     }
   },

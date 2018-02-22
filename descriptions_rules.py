@@ -2,8 +2,7 @@ import inflect
 import re
 
 from collections import namedtuple, defaultdict
-from typing import List, Dict, Tuple
-
+from typing import List, Dict, Tuple, Union
 
 GOSentence = namedtuple('GOSentence', ['prefix', 'terms', 'term_ids_dict', 'postfix', 'text', 'go_aspect',
                                        'evidence_group'])
@@ -32,7 +31,8 @@ class GOSentencesCollection(object):
         :param sentence: the sentence to add
         :type sentence: Sentence
         """
-        self.sentences_map[(sentence.go_aspect, sentence.evidence_group)] = sentence
+        if sentence is not None:
+            self.sentences_map[(sentence.go_aspect, sentence.evidence_group)] = sentence
 
     def get_sentences(self, go_aspect: str, go_ontology, keep_only_best_group: bool = False,
                       merge_groups_with_same_prefix: bool = False) -> List[GOSentence]:
@@ -227,7 +227,8 @@ def compose_go_sentence(prefix: str, go_term_names: List[str], postfix: str) -> 
 
 def _get_single_go_sentence(go_term_names: List[str], go_term_ids_dict: Dict[str, str], go_aspect: str,
                             evidence_group: str,
-                            go_prepostfix_sentences_map: Dict[Tuple[str, str], Tuple[str, str]]) -> GOSentence:
+                            go_prepostfix_sentences_map: Dict[Tuple[str, str], Tuple[str, str]]) -> Union[GOSentence,
+                                                                                                          None]:
     """build a go sentence
 
     :param go_term_names: list of go term names to be combined in the sentence
@@ -241,7 +242,7 @@ def _get_single_go_sentence(go_term_names: List[str], go_term_ids_dict: Dict[str
     :param go_prepostfix_sentences_map: map for prefix and postfix phrases
     :type go_prepostfix_sentences_map: Dict[Tuple[str, str], Tuple[str, str]]
     :return: the combined go sentence
-    :rtype: GOSentence
+    :rtype: Union[GOSentence, None]
     """
     if len(go_term_names) > 0:
         prefix = go_prepostfix_sentences_map[(go_aspect, evidence_group)][0]
@@ -249,3 +250,5 @@ def _get_single_go_sentence(go_term_names: List[str], go_term_ids_dict: Dict[str
         return GOSentence(prefix=prefix, terms=go_term_names, postfix=postfix,
                           term_ids_dict=go_term_ids_dict, text=compose_go_sentence(prefix, go_term_names, postfix),
                           go_aspect=go_aspect, evidence_group=evidence_group)
+    else:
+        return None

@@ -29,7 +29,7 @@ class GenedescConfigParser(object):
         :return: the species dictionary, with species name as key and a dictionary with project_id as value
         :rtype: Dict[str, Dict[str, str]]
         """
-        return self.config["wb_data_fetcher"]["species"]
+        return self.config["wb_data_fetcher"]["organisms"]
 
     def get_go_evidence_codes(self) -> Dict[str, Dict[str, Union[str, id]]]:
         """get the configured evidence codes
