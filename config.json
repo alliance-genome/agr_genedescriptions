@@ -1,7 +1,7 @@
 {
   "generic_data_fetcher": {
     "cache_location": "gene_descriptions_cache",
-    "data_fetcher": "agr_data_fetcher",
+    "data_fetcher": "wb_data_fetcher",
     "chebi_file_source": "ftp://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi_lite.obo.gz"
   },
   "wb_data_fetcher": {
@@ -115,43 +115,63 @@
         "group": "EXPERIMENTAL",
         "priority": 6
       },
-      "ISS": {
-        "group": "SEQUENCE_BASED_ANALYSIS",
-        "priority": 9
-      },
-      "ISO": {
-        "group": "SEQUENCE_BASED_ANALYSIS",
-        "priority": 10
-      },
-      "ISA": {
-        "group": "SEQUENCE_BASED_ANALYSIS",
-        "priority": 11
-      },
-      "ISM": {
-        "group": "SEQUENCE_BASED_ANALYSIS",
-        "priority": 12
-      },
-      "IBA": {
-        "group": "PHYLOGENETIC_ANALYSIS",
+      "HTP": {
+        "group": "HIGH_THROUGHPUT_EXPERIMENTAL",
         "priority": 7
       },
-      "IBD": {
-        "group": "PHYLOGENETIC_ANALYSIS",
+      "HDA": {
+        "group": "HIGH_THROUGHPUT_EXPERIMENTAL",
         "priority": 8
+      },
+      "HMP": {
+        "group": "HIGH_THROUGHPUT_EXPERIMENTAL",
+        "priority": 9
+      },
+      "HGI": {
+        "group": "HIGH_THROUGHPUT_EXPERIMENTAL",
+        "priority": 10
+      },
+      "HEP": {
+        "group": "HIGH_THROUGHPUT_EXPERIMENTAL",
+        "priority": 11
+      },
+      "ISS": {
+        "group": "PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS",
+        "priority": 13
+      },
+      "ISO": {
+        "group": "PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS",
+        "priority": 14
+      },
+      "ISA": {
+        "group": "PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS",
+        "priority": 15
+      },
+      "ISM": {
+        "group": "PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS",
+        "priority": 16
+      },
+      "IBA": {
+        "group": "PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS",
+        "priority": 12
+      },
+      "IBD": {
+        "group": "PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS",
+        "priority": 17
       },
       "RCA": {
         "group": "ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS",
-        "priority": 14
+        "priority": 19
       },
       "IEA": {
         "group": "ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS",
-        "priority": 13
+        "priority": 18
       }
     },
     "group_priority": {
       "EXPERIMENTAL": 1,
-      "PHYLOGENETIC_ANALYSIS": 2,
-      "SEQUENCE_BASED_ANALYSIS": 3,
+      "HIGH_THROUGHPUT_EXPERIMENTAL": 2,
+      "PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS": 3,
       "ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS": 4
     },
     "go_prepostfix_sentences_map": [
@@ -171,9 +191,9 @@
       },
       {
         "aspect": "F",
-        "group": "SEQUENCE_BASED_ANALYSIS",
-        "prefix": "is predicted to have",
-        "postfix": "based on sequence analysis",
+        "group": "HIGH_THROUGHPUT_EXPERIMENTAL",
+        "prefix": "exhibits",
+        "postfix": "",
         "special_cases": [
           {
             "id": 1,
@@ -185,9 +205,9 @@
       },
       {
         "aspect": "F",
-        "group": "PHYLOGENETIC_ANALYSIS",
+        "group": "PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS",
         "prefix": "is predicted to have",
-        "postfix": "based on phylogenetic analysis",
+        "postfix": "based on sequence analysis",
         "special_cases": [
           {
             "id": 1,
@@ -220,16 +240,16 @@
       },
       {
         "aspect": "P",
-        "group": "SEQUENCE_BASED_ANALYSIS",
-        "prefix": "is predicted to be involved in",
-        "postfix": "based on sequence analysis",
+        "group": "HIGH_THROUGHPUT_EXPERIMENTAL",
+        "prefix": "is involved in",
+        "postfix": "",
         "special_cases": []
       },
       {
         "aspect": "P",
-        "group": "PHYLOGENETIC_ANALYSIS",
+        "group": "PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS",
         "prefix": "is predicted to be involved in",
-        "postfix": "based on phylogenetic analysis",
+        "postfix": "based on sequence analysis",
         "special_cases": []
       },
       {
@@ -255,9 +275,9 @@
       },
       {
         "aspect": "C",
-        "group": "SEQUENCE_BASED_ANALYSIS",
-        "prefix": "is predicted to localize to the",
-        "postfix": "based on sequence analysis",
+        "group": "HIGH_THROUGHPUT_EXPERIMENTAL",
+        "prefix": "localizes to the",
+        "postfix": "",
         "special_cases": [
           {
             "id": 1,
@@ -269,9 +289,9 @@
       },
       {
         "aspect": "C",
-        "group": "PHYLOGENETIC_ANALYSIS",
+        "group": "PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS",
         "prefix": "is predicted to localize to the",
-        "postfix": "based on phylogenetic analysis",
+        "postfix": "based on sequence analysis",
         "special_cases": [
           {
             "id": 1,
