@@ -1,7 +1,7 @@
 {
   "generic_data_fetcher": {
     "cache_location": "gene_descriptions_cache",
-    "data_fetcher": "wb_data_fetcher",
+    "data_fetcher": "agr_data_fetcher",
     "chebi_file_source": "ftp://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi_lite.obo.gz"
   },
   "wb_data_fetcher": {

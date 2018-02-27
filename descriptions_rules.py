@@ -20,10 +20,14 @@ class GOSentenceMerger(object):
 
 class GOSentencesCollection(object):
     """a group of GO sentences indexed by aspect"""
-    def __init__(self, evidence_groups_list, go_prepostfix_sentences_map):
+    def __init__(self, evidence_groups_list, go_prepostfix_sentences_map, merge_min_distance_from_root: int,
+                 merge_num_terms_threshold: int, remove_parent_terms: bool):
         self.evidence_groups_list = evidence_groups_list
         self.go_prepostfix_sentences_map = go_prepostfix_sentences_map
         self.sentences_map = {}
+        self.merge_min_distance_from_root = merge_min_distance_from_root
+        self.merge_num_terms_threshold = merge_num_terms_threshold
+        self.remove_parent_terms = remove_parent_terms
 
     def set_sentence(self, sentence: GOSentence) -> None:
         """add a sentence to the collection
@@ -70,35 +74,25 @@ class GOSentencesCollection(object):
                     break
         if merge_groups_with_same_prefix:
             for prefix, sent_merger in merged_sentences.items():
-                new_term_ids_dict = sent_merger.terms_ids_dict.copy()
-                new_term_postfix_dict = sent_merger.term_postfix_dict.copy()
-                new_term_evgroup_dict = sent_merger.term_evgroup_dict.copy()
                 # rem parents
-                term_ids_no_parents = get_term_ids_without_parents_from_terms_names(go_terms_names=sent_merger.terms,
-                                                                                    term_ids_dict=sent_merger.
-                                                                                    terms_ids_dict,
-                                                                                    go_ontology=go_ontology)
-                term_names_no_parents = set([go_ontology.query_term(term_id).name for term_id in term_ids_no_parents])
-                for del_term in set(sent_merger.terms) - term_names_no_parents:
-                    del new_term_ids_dict[del_term]
-                    del new_term_postfix_dict[del_term]
-                    del new_term_evgroup_dict[del_term]
-                sent_merger.postfix_list = [postfix for postfix in sent_merger.postfix_list if
-                                            postfix in set(new_term_postfix_dict.values())]
-                sent_merger.evidence_groups = [eg for eg in sent_merger.evidence_groups if
-                                               eg in set(new_term_evgroup_dict.values())]
-                sent_merger.terms = list(term_names_no_parents)
-                sent_merger.terms_ids_dict = new_term_ids_dict
+                if self.remove_parent_terms:
+                    term_ids_no_parents = get_term_ids_without_parents_from_terms_names(
+                        go_terms_names=sent_merger.terms, term_ids_dict=sent_merger.terms_ids_dict,
+                        go_ontology=go_ontology)
+                    term_names_no_parents = set([go_ontology.query_term(term_id).name for term_id in
+                                                 term_ids_no_parents])
+                    sent_merger.terms = list(term_names_no_parents)
+                    sent_merger.terms_ids_dict = {key: value for key, value in sent_merger.terms_ids_dict.items()
+                                                  if key in set(term_names_no_parents)}
                 # merge
-                merged_ids = get_merged_term_ids_by_common_ancestor_from_term_names(go_terms_names=sent_merger.terms,
-                                                                                    term_ids_dict=sent_merger.
-                                                                                    terms_ids_dict,
-                                                                                    go_ontology=go_ontology,
-                                                                                    min_distance_from_root=2,
-                                                                                    min_number_of_terms=3)
-                sent_merger.terms = [go_ontology.query_term(term_id).name for term_id in merged_ids]
-                term_ids_dict = {go_ontology.query_term(term).name: go_ontology.query_term(term).id for term in
-                                 merged_ids}
+                if self.merge_num_terms_threshold > 0:
+                    merged_ids = get_merged_term_ids_by_common_ancestor_from_term_names(
+                        go_terms_names=sent_merger.terms, term_ids_dict=sent_merger.terms_ids_dict,
+                        go_ontology=go_ontology, min_distance_from_root=self.merge_min_distance_from_root,
+                        min_number_of_terms=self.merge_num_terms_threshold)
+                    sent_merger.terms = [go_ontology.query_term(term_id).name for term_id in merged_ids]
+                    sent_merger.term_ids_dict = {go_ontology.query_term(term).name: go_ontology.query_term(term).id for
+                                                 term in merged_ids}
             sentences = [GOSentence(prefix=prefix, terms=list(sent_merger.terms),
                                     term_ids_dict=sent_merger.terms_ids_dict,
                                     postfix=GOSentencesCollection.merge_postfix_phrases(sent_merger.postfix_list),
@@ -152,7 +146,9 @@ class GOSentencesCollection(object):
 def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_groups_priority_list: List[str],
                           go_prepostfix_sentences_map: Dict[Tuple[str, str], Tuple[str, str]],
                           go_prepostfix_special_cases_sent_map: Dict[Tuple[str, str], Tuple[int, str, str, str]],
-                          evidence_codes_groups_map: Dict[str, str]) -> GOSentencesCollection:
+                          evidence_codes_groups_map: Dict[str, str], remove_parent_terms: bool = True,
+                          merge_num_terms_threshold: int = 3,
+                          merge_min_distance_from_root: int = 2) -> GOSentencesCollection:
     """generate GO sentences from a list of GO annotations
 
     :param go_annotations: the list of GO annotations for a given gene
@@ -170,6 +166,16 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
     :type go_prepostfix_special_cases_sent_map: Dict[Tuple[str, str], Tuple[int, str, str, str]]
     :param evidence_codes_groups_map: a map between evidence codes and the groups they belong to
     :type evidence_codes_groups_map: Dict[str, str]
+    :param remove_parent_terms: whether to remove parent terms from the list of terms in each sentence if at least
+        one children term is present
+    :type remove_parent_terms: bool
+    :param merge_num_terms_threshold: whether to merge terms by common ancestor to
+        reduce the number of terms in the set. The trimming algorithm will be applied only if the number of terms is
+        greater than the specified number and the specified threshold is greater than 0
+    :type merge_num_terms_threshold: int
+    :param merge_min_distance_from_root: minimum distance from root terms for the selection of common ancestors
+        during merging operations
+    :type merge_min_distance_from_root: int
     :return: a collection of GO sentences
     :rtype: GOSentencesCollection
     """
@@ -191,24 +197,27 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
                                                                      str(special_case[0]))
                             break
                 go_terms_groups[map_key].add((annotation["GO_Name"], annotation["GO_ID"]))
-        sentences = GOSentencesCollection(evidence_groups_priority_list, go_prepostfix_sentences_map)
+        sentences = GOSentencesCollection(evidence_groups_priority_list, go_prepostfix_sentences_map,
+                                          merge_num_terms_threshold=merge_num_terms_threshold,
+                                          merge_min_distance_from_root=merge_min_distance_from_root,
+                                          remove_parent_terms=remove_parent_terms)
         for ((go_aspect, evidence_group), go_terms) in go_terms_groups.items():
             go_term_names = [term[0] for term in go_terms]
             term_ids_dict = {term_name: term_id for term_name, term_id in go_terms}
-            term_ids_no_parents = get_term_ids_without_parents_from_terms_names(go_terms_names=go_term_names,
-                                                                                term_ids_dict=term_ids_dict,
-                                                                                go_ontology=go_ontology)
-            go_term_names = [go_ontology.query_term(term_id).name for term_id in term_ids_no_parents]
-            term_ids_dict = {go_ontology.query_term(term_id).name: go_ontology.query_term(term_id).id for term_id in
-                             term_ids_no_parents}
-            merged_ids = get_merged_term_ids_by_common_ancestor_from_term_names(go_terms_names=go_term_names,
-                                                                                term_ids_dict=term_ids_dict,
-                                                                                go_ontology=go_ontology,
-                                                                                min_distance_from_root=2,
-                                                                                min_number_of_terms=3)
-            go_term_names = [go_ontology.query_term(term_id).name for term_id in merged_ids]
-            term_ids_dict = {go_ontology.query_term(term).name: go_ontology.query_term(term).id for term in
-                             merged_ids}
+            if remove_parent_terms:
+                term_ids_no_parents = get_term_ids_without_parents_from_terms_names(go_terms_names=go_term_names,
+                                                                                    term_ids_dict=term_ids_dict,
+                                                                                    go_ontology=go_ontology)
+                go_term_names = [go_ontology.query_term(term_id).name for term_id in term_ids_no_parents]
+                term_ids_dict = {go_ontology.query_term(term_id).name: go_ontology.query_term(term_id).id for term_id in
+                                 term_ids_no_parents}
+            if merge_num_terms_threshold > 0:
+                merged_ids = get_merged_term_ids_by_common_ancestor_from_term_names(
+                    go_terms_names=go_term_names, term_ids_dict=term_ids_dict, go_ontology=go_ontology,
+                    min_distance_from_root=merge_min_distance_from_root, min_number_of_terms=merge_num_terms_threshold)
+                go_term_names = [go_ontology.query_term(term_id).name for term_id in merged_ids]
+                term_ids_dict = {go_ontology.query_term(term).name: go_ontology.query_term(term).id for term in
+                                 merged_ids}
             sentences.set_sentence(_get_single_go_sentence(go_term_names=go_term_names,
                                                            go_term_ids_dict=term_ids_dict,
                                                            go_aspect=go_aspect,

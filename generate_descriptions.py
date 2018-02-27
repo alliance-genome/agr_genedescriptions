@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
 import logging
 
 from config_parser import GenedescConfigParser
@@ -66,36 +67,54 @@ def main():
                                   cache_location=cache_location, use_cache=args.use_cache)
 
     df.load_go_data()
+    json_gene_desc = []
     for gene in df.get_gene_data():
-        print(gene.name)
+        gene_dict = {"name": gene.name}
         sentences = generate_go_sentences(df.get_go_annotations(gene.id, priority_list=go_annotations_priority),
                                           go_ontology=df.get_go_ontology(),
                                           evidence_groups_priority_list=evidence_groups_priority_list,
                                           go_prepostfix_sentences_map=go_prepostfix_sentences_map,
                                           go_prepostfix_special_cases_sent_map=go_prepostfix_special_cases_sent_map,
-                                          evidence_codes_groups_map=evidence_codes_groups_map)
+                                          evidence_codes_groups_map=evidence_codes_groups_map,
+                                          remove_parent_terms=True, merge_num_terms_threshold=3,
+                                          merge_min_distance_from_root=2)
+        num_terms_f = 0
+        num_terms_p = 0
+        num_terms_c = 0
         if sentences:
             joined_sent = []
             func_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
                 go_aspect='F', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True)])
             if func_sent:
                 joined_sent.append(func_sent)
+                num_terms_f = sum(map(len, [sentence.terms for sentence in sentences.get_sentences(
+                    go_aspect='F', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True)]))
             proc_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
                 go_aspect='P', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True,
                 keep_only_best_group=True)])
             if proc_sent:
                 joined_sent.append(proc_sent)
+                num_terms_p = sum(map(len, [sentence.terms for sentence in sentences.get_sentences(
+                    go_aspect='P', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True,
+                    keep_only_best_group=True)]))
             comp_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
                 go_aspect='C', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True,
                 keep_only_best_group=True)])
             if comp_sent:
                 joined_sent.append(comp_sent)
+                num_terms_c = sum(map(len, [sentence.terms for sentence in sentences.get_sentences(
+                    go_aspect='C', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True,
+                    keep_only_best_group=True)]))
 
             go_desc = "; ".join(joined_sent) + "."
-            print(go_desc.capitalize())
+            gene_dict["description"] = go_desc.capitalize()
         else:
-            print("No description available")
-        print()
+            gene_dict["description"] = "No description available"
+        gene_dict["stats"] = {"num_terms_f": num_terms_f, "num_terms_p": num_terms_p, "num_terms_c": num_terms_c }
+        json_gene_desc.append(gene_dict)
+
+    json_string = json.dumps(json_gene_desc)
+    print(json_string)
 
 
 if __name__ == '__main__':
