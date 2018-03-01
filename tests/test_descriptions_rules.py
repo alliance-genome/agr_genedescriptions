@@ -23,6 +23,7 @@ class TestDescriptionsRules(unittest.TestCase):
         self.go_terms_exclusion_list = conf_parser.get_go_terms_exclusion_list()
         self.release_version = conf_parser.get_release("wb_data_fetcher")
         self.evidence_groups_priority_list = conf_parser.get_evidence_groups_priority_list()
+        self.go_terms_replacement_dict = conf_parser.get_go_rename_terms()
 
     def test_generate_go_sentences(self):
         df = WBRawDataFetcher(go_terms_exclusion_list=self.exclusion_list,
@@ -31,7 +32,8 @@ class TestDescriptionsRules(unittest.TestCase):
                               release_version=self.release_version,
                               species="c_elegans",
                               project_id=self.species["c_elegans"]["project_id"],
-                              cache_location=self.cache_location, use_cache=False)
+                              cache_location=self.cache_location, use_cache=False,
+                              go_terms_replacement_dict=self.go_terms_replacement_dict)
         df.load_go_data()
         sentences = []
         for gene in df.get_gene_data():
@@ -40,5 +42,6 @@ class TestDescriptionsRules(unittest.TestCase):
                                                    go_prepostfix_sentences_map=self.go_prepostfix_sentences_map,
                                                    go_prepostfix_special_cases_sent_map=
                                                    self.go_prepostfix_special_cases_sent_map,
-                                                   evidence_codes_groups_map=self.evidence_codes_groups_map))
+                                                   evidence_codes_groups_map=self.evidence_codes_groups_map,
+                                                   go_ontology=df.get_go_ontology()))
         self.assertEqual(len(sentences), 48678)

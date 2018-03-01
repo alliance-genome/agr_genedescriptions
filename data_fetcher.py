@@ -13,6 +13,8 @@ from abc import ABCMeta, abstractmethod
 from collections import namedtuple, defaultdict
 from typing import List, Iterable, Dict
 
+from descriptions_writer import SingleDescStats
+
 Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
 
 
@@ -121,7 +123,8 @@ class RawDataFetcher(metaclass=ABCMeta):
             for _ in range(lines_to_skip):
                 next(file)
             for annotation in gafiterator(file):
-                if annotation["GO_ID"] not in self.go_terms_exclusion_list:
+                if annotation["GO_ID"] not in self.go_terms_exclusion_list and \
+                        self.go_ontology.query_term(annotation["GO_ID"]):
                     mapped_annotation = annotation
                     mapped_annotation["GO_Name"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).name
                     for regex_to_substitute, regex_target in self.go_terms_replacement_dict.items():
@@ -141,9 +144,10 @@ class RawDataFetcher(metaclass=ABCMeta):
 
     def get_go_annotations(self, geneid: str, include_obsolete: bool = False, include_negative_results: bool = False,
                            priority_list: Iterable = ("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "IC", "ISS", "ISO",
-                                                      "ISA", "ISM", "IGC", "IBA", "IBD", "IKR", "IRD", "RCA", "IEA")
-                           ) -> List[dict]:
-        """retrieve go annotations for a given gene id and for a given aspect. The annotations are unique for each pair
+                                                      "ISA", "ISM", "IGC", "IBA", "IBD", "IKR", "IRD", "RCA", "IEA"),
+                           desc_stats: SingleDescStats = None) -> List[dict]:
+        """
+        retrieve go annotations for a given gene id and for a given aspect. The annotations are unique for each pair
         <gene_id, go_term_id>. This means that when multiple annotations for the same pair are found in the go data, the
         one with the evidence code with highest priority is returned (see the *priority_list* parameter to set the
         priority according to evidence codes)
@@ -159,6 +163,9 @@ class RawDataFetcher(metaclass=ABCMeta):
             priority, whereas the last has the lowest. Only annotations with evidence codes in the priority list are
             returned. All other annotations are ignored
         :type priority_list: List[str]
+        :param desc_stats: an object containing the description statistics where to save the total number of annotations
+            for the gene
+        :type desc_stats: SingleDescStats
         :return: the list of go annotations for the given gene
         :rtype: List[GOAnnotation]
         """
@@ -166,6 +173,8 @@ class RawDataFetcher(metaclass=ABCMeta):
         annotations = [annotation for annotation in self.go_data[geneid] if (include_obsolete or
                        not annotation["Is_Obsolete"]) and (include_negative_results or "NOT" not in
                                                            annotation["Qualifier"])]
+        if desc_stats:
+            desc_stats.total_num_go_annotations = len(annotations)
         go_id_selected_annotation = {}
         for annotation in annotations:
             if annotation["Evidence"] in priority_map.keys():
@@ -175,7 +184,8 @@ class RawDataFetcher(metaclass=ABCMeta):
                         go_id_selected_annotation[annotation["GO_ID"]] = annotation
                 else:
                     go_id_selected_annotation[annotation["GO_ID"]] = annotation
-
+        if desc_stats:
+            desc_stats.num_prioritized_go_annotations = len(go_id_selected_annotation.keys())
         return [annotation for annotation in go_id_selected_annotation.values()]
 
     def get_go_ontology(self):

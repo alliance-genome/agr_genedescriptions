@@ -1,8 +1,13 @@
+import copy
+import logging
+
 import inflect
 import re
 
 from collections import namedtuple, defaultdict
 from typing import List, Dict, Tuple, Union, Set
+
+from descriptions_writer import SingleDescStats
 
 GOSentence = namedtuple('GOSentence', ['prefix', 'terms', 'term_ids_dict', 'postfix', 'text', 'go_aspect',
                                        'evidence_group'])
@@ -20,7 +25,7 @@ class GOSentenceMerger(object):
 
 class GOSentencesCollection(object):
     """a group of GO sentences indexed by aspect"""
-    def __init__(self, evidence_groups_list, go_prepostfix_sentences_map, merge_min_distance_from_root: int,
+    def __init__(self, evidence_groups_list, go_prepostfix_sentences_map, merge_min_distance_from_root: dict,
                  merge_num_terms_threshold: int, remove_parent_terms: bool):
         self.evidence_groups_list = evidence_groups_list
         self.go_prepostfix_sentences_map = go_prepostfix_sentences_map
@@ -39,7 +44,8 @@ class GOSentencesCollection(object):
             self.sentences_map[(sentence.go_aspect, sentence.evidence_group)] = sentence
 
     def get_sentences(self, go_aspect: str, go_ontology, keep_only_best_group: bool = False,
-                      merge_groups_with_same_prefix: bool = False) -> List[GOSentence]:
+                      merge_groups_with_same_prefix: bool = False, desc_stats: SingleDescStats = None) -> \
+            List[GOSentence]:
         """get all sentences containing the specified aspect
 
         :param go_aspect: a GO aspect
@@ -50,17 +56,31 @@ class GOSentencesCollection(object):
         :type keep_only_best_group: bool
         :param merge_groups_with_same_prefix: whether to merge the phrases for evidence groups with the same prefix
         :type merge_groups_with_same_prefix: bool
+        :param desc_stats: an object containing the description statistics where to save the total number of annotations
+            for the gene
+        :type desc_stats: SingleDescStats
         :return: the list of sentences containing the specified GO aspect
         :rtype: List[GOSentence]
         """
         sentences = []
         merged_sentences = defaultdict(GOSentenceMerger)
+        if desc_stats:
+            desc_stats.num_terms_trim_nogroup_priority_nomerge[go_aspect] = 0
+            desc_stats.terms_trim_nogroup_priority_nomerge[go_aspect] = []
+            for ga, eg in self.sentences_map.keys():
+                if ga == go_aspect:
+                    desc_stats.num_terms_trim_nogroup_priority_nomerge[go_aspect] += \
+                        len(self.sentences_map[(go_aspect, eg)].terms)
+                    desc_stats.terms_trim_nogroup_priority_nomerge[go_aspect].extend(
+                        self.sentences_map[(go_aspect, eg)].terms)
+        terms_in_previous_ev_groups = set()
         for eg in self.evidence_groups_list:
             if (go_aspect, eg) in self.sentences_map:
                 if merge_groups_with_same_prefix:
                     prefix = self.go_prepostfix_sentences_map[(go_aspect, eg)][0]
                     merged_sentences[prefix].postfix_list.append(self.go_prepostfix_sentences_map[(go_aspect, eg)][1])
-                    merged_sentences[prefix].terms.update(self.sentences_map[(go_aspect, eg)].terms)
+                    merged_sentences[prefix].terms.update([term for term in self.sentences_map[(go_aspect, eg)].terms
+                                                          if term not in terms_in_previous_ev_groups])
                     merged_sentences[prefix].terms_ids_dict.update(self.sentences_map[(go_aspect, eg)].term_ids_dict)
                     for term in self.sentences_map[(go_aspect, eg)].terms:
                         merged_sentences[prefix].term_postfix_dict[term] = self.go_prepostfix_sentences_map[
@@ -68,8 +88,13 @@ class GOSentencesCollection(object):
                     merged_sentences[prefix].evidence_groups.append(eg)
                     for term in self.sentences_map[(go_aspect, eg)].terms:
                         merged_sentences[prefix].term_evgroup_dict[term] = eg
+                    terms_in_previous_ev_groups.update(merged_sentences[prefix].terms)
                 else:
-                    sentences.append(self.sentences_map[(go_aspect, eg)])
+                    sentence_copy = copy.copy(self.sentences_map[(go_aspect, eg)])
+                    sentence_copy.terms = [term for term in sentence_copy.terms if term not in
+                                           terms_in_previous_ev_groups]
+                    sentences.append(sentence_copy)
+                    terms_in_previous_ev_groups.update(self.sentences_map[(go_aspect, eg)].terms)
                 if keep_only_best_group:
                     break
         if merge_groups_with_same_prefix:
@@ -79,20 +104,14 @@ class GOSentencesCollection(object):
                     term_ids_no_parents = get_term_ids_without_parents_from_terms_names(
                         go_terms_names=sent_merger.terms, term_ids_dict=sent_merger.terms_ids_dict,
                         go_ontology=go_ontology)
+                    if len(sent_merger.terms) > len(term_ids_no_parents):
+                        logging.debug("Removed " + str(len(sent_merger.terms) - len(term_ids_no_parents)) +
+                                      " parents from terms while merging sentences with same prefix")
                     term_names_no_parents = set([go_ontology.query_term(term_id).name for term_id in
                                                  term_ids_no_parents])
                     sent_merger.terms = list(term_names_no_parents)
                     sent_merger.terms_ids_dict = {key: value for key, value in sent_merger.terms_ids_dict.items()
                                                   if key in set(term_names_no_parents)}
-                # merge
-                if self.merge_num_terms_threshold > 0:
-                    merged_ids = get_merged_term_ids_by_common_ancestor_from_term_names(
-                        go_terms_names=sent_merger.terms, term_ids_dict=sent_merger.terms_ids_dict,
-                        go_ontology=go_ontology, min_distance_from_root=self.merge_min_distance_from_root,
-                        min_number_of_terms=self.merge_num_terms_threshold)
-                    sent_merger.terms = [go_ontology.query_term(term_id).name for term_id in merged_ids]
-                    sent_merger.term_ids_dict = {go_ontology.query_term(term).name: go_ontology.query_term(term).id for
-                                                 term in merged_ids}
             sentences = [GOSentence(prefix=prefix, terms=list(sent_merger.terms),
                                     term_ids_dict=sent_merger.terms_ids_dict,
                                     postfix=GOSentencesCollection.merge_postfix_phrases(sent_merger.postfix_list),
@@ -102,6 +121,12 @@ class GOSentencesCollection(object):
                                                                  sent_merger.postfix_list)),
                                     go_aspect=go_aspect, evidence_group=", ".join(sent_merger.evidence_groups))
                          for prefix, sent_merger in merged_sentences.items() if len(sent_merger.terms) > 0]
+        if desc_stats:
+            desc_stats.num_terms_trim_group_priority_merge[go_aspect] = 0
+            desc_stats.terms_trim_group_priority_merge[go_aspect] = []
+            for sentence in sentences:
+                desc_stats.num_terms_trim_group_priority_merge[sentence.go_aspect] += len(sentence.terms)
+                desc_stats.terms_trim_group_priority_merge[sentence.go_aspect].extend(sentence.terms)
         return sentences
 
     @staticmethod
@@ -148,7 +173,8 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
                           go_prepostfix_special_cases_sent_map: Dict[Tuple[str, str], Tuple[int, str, str, str]],
                           evidence_codes_groups_map: Dict[str, str], remove_parent_terms: bool = True,
                           merge_num_terms_threshold: int = 3,
-                          merge_min_distance_from_root: int = 2) -> GOSentencesCollection:
+                          merge_min_distance_from_root: dict = None, desc_stats: SingleDescStats = None) -> \
+        GOSentencesCollection:
     """generate GO sentences from a list of GO annotations
 
     :param go_annotations: the list of GO annotations for a given gene
@@ -174,12 +200,18 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
         greater than the specified number and the specified threshold is greater than 0
     :type merge_num_terms_threshold: int
     :param merge_min_distance_from_root: minimum distance from root terms for the selection of common ancestors
-        during merging operations
-    :type merge_min_distance_from_root: int
+        during merging operations. Three values must be provided in the form of a dictionary with keys 'F', 'P', and
+        'C' for go aspect names and values integers indicating the threshold for each aspect
+    :type merge_min_distance_from_root: dict
+    :param desc_stats: an object containing the description statistics where to save the total number of annotations
+        for the gene
+    :type desc_stats: SingleDescStats
     :return: a collection of GO sentences
     :rtype: GOSentencesCollection
     """
     if len(go_annotations) > 0:
+        if not merge_min_distance_from_root:
+            merge_min_distance_from_root = {'F': 1, 'P': 1, 'C': 2}
         go_terms_groups = defaultdict(set)
         for annotation in go_annotations:
             if annotation["Evidence"] in evidence_codes_groups_map:
@@ -203,18 +235,28 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
                                           remove_parent_terms=remove_parent_terms)
         for ((go_aspect, evidence_group), go_terms) in go_terms_groups.items():
             go_term_names = [term[0] for term in go_terms]
+            if desc_stats:
+                desc_stats.num_terms_notrim_nogroup_priority_nomerge[go_aspect] += len(go_term_names)
+                desc_stats.terms_notrim_nogroup_priority_nomerge[go_aspect].extend(go_term_names)
             term_ids_dict = {term_name: term_id for term_name, term_id in go_terms}
             if remove_parent_terms:
                 term_ids_no_parents = get_term_ids_without_parents_from_terms_names(go_terms_names=go_term_names,
                                                                                     term_ids_dict=term_ids_dict,
                                                                                     go_ontology=go_ontology)
+                if len(go_term_names) > len(term_ids_no_parents):
+                    logging.debug("Removed " + str(len(go_term_names) - len(term_ids_no_parents)) +
+                                  " parents from terms")
                 go_term_names = [go_ontology.query_term(term_id).name for term_id in term_ids_no_parents]
                 term_ids_dict = {go_ontology.query_term(term_id).name: go_ontology.query_term(term_id).id for term_id in
                                  term_ids_no_parents}
             if merge_num_terms_threshold > 0:
                 merged_ids = get_merged_term_ids_by_common_ancestor_from_term_names(
                     go_terms_names=go_term_names, term_ids_dict=term_ids_dict, go_ontology=go_ontology,
-                    min_distance_from_root=merge_min_distance_from_root, min_number_of_terms=merge_num_terms_threshold)
+                    min_distance_from_root=merge_min_distance_from_root[go_aspect],
+                    min_number_of_terms=merge_num_terms_threshold)
+                if len(go_term_names) != len(merged_ids):
+                    logging.debug("Reduced number of terms by merging from " + str(len(go_term_names)) + " to " +
+                                  str(len(merged_ids)))
                 go_term_names = [go_ontology.query_term(term_id).name for term_id in merged_ids]
                 term_ids_dict = {go_ontology.query_term(term).name: go_ontology.query_term(term).id for term in
                                  merged_ids}

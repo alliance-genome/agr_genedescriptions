@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 import argparse
-import json
-import logging
+import os
 
 from config_parser import GenedescConfigParser
 from data_fetcher import WBRawDataFetcher, AGRRawDataFetcher
 from descriptions_rules import *
+from descriptions_writer import JsonGDWriter, GeneDesc, SingleDescStats
 
 
 def main():
@@ -42,8 +42,8 @@ def main():
         organisms_list = conf_parser.get_agr_organisms_to_process()
     else:
         organisms_list = conf_parser.get_wb_organisms_to_process()
-    df = None
     for organism in organisms_list:
+        logging.info("processing organism " + organism)
         if conf_parser.get_data_fetcher() == "agr_data_fetcher":
             df = AGRRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
                                    go_terms_replacement_dict=conf_parser.get_go_rename_terms(),
@@ -66,55 +66,47 @@ def main():
                                   project_id=species[organism]["project_id"],
                                   cache_location=cache_location, use_cache=args.use_cache)
 
-    df.load_go_data()
-    json_gene_desc = []
-    for gene in df.get_gene_data():
-        gene_dict = {"name": gene.name}
-        sentences = generate_go_sentences(df.get_go_annotations(gene.id, priority_list=go_annotations_priority),
-                                          go_ontology=df.get_go_ontology(),
-                                          evidence_groups_priority_list=evidence_groups_priority_list,
-                                          go_prepostfix_sentences_map=go_prepostfix_sentences_map,
-                                          go_prepostfix_special_cases_sent_map=go_prepostfix_special_cases_sent_map,
-                                          evidence_codes_groups_map=evidence_codes_groups_map,
-                                          remove_parent_terms=True, merge_num_terms_threshold=3,
-                                          merge_min_distance_from_root=2)
-        num_terms_f = 0
-        num_terms_p = 0
-        num_terms_c = 0
-        if sentences:
-            joined_sent = []
-            func_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
-                go_aspect='F', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True)])
-            if func_sent:
-                joined_sent.append(func_sent)
-                num_terms_f = sum(map(len, [sentence.terms for sentence in sentences.get_sentences(
-                    go_aspect='F', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True)]))
-            proc_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
-                go_aspect='P', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True,
-                keep_only_best_group=True)])
-            if proc_sent:
-                joined_sent.append(proc_sent)
-                num_terms_p = sum(map(len, [sentence.terms for sentence in sentences.get_sentences(
+        df.load_go_data()
+        desc_writer = JsonGDWriter()
+        for gene in df.get_gene_data():
+            gene_desc = GeneDesc(gene_name=gene.name)
+            sentences = generate_go_sentences(df.get_go_annotations(
+                gene.id, priority_list=go_annotations_priority, desc_stats=gene_desc.stats),
+                go_ontology=df.get_go_ontology(),
+                evidence_groups_priority_list=evidence_groups_priority_list,
+                go_prepostfix_sentences_map=go_prepostfix_sentences_map,
+                go_prepostfix_special_cases_sent_map=go_prepostfix_special_cases_sent_map,
+                evidence_codes_groups_map=evidence_codes_groups_map, remove_parent_terms=True,
+                merge_num_terms_threshold=conf_parser.get_go_merge_min_num_terms(),
+                merge_min_distance_from_root=conf_parser.get_go_merge_min_distance_from_root(),
+                desc_stats=gene_desc.stats)
+            if sentences:
+                joined_sent = []
+                func_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
+                    go_aspect='F', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True,
+                    keep_only_best_group=True, desc_stats=gene_desc.stats)])
+                if func_sent:
+                    joined_sent.append(func_sent)
+                proc_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
                     go_aspect='P', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True,
-                    keep_only_best_group=True)]))
-            comp_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
-                go_aspect='C', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True,
-                keep_only_best_group=True)])
-            if comp_sent:
-                joined_sent.append(comp_sent)
-                num_terms_c = sum(map(len, [sentence.terms for sentence in sentences.get_sentences(
+                    keep_only_best_group=True, desc_stats=gene_desc.stats)])
+                if proc_sent:
+                    joined_sent.append(proc_sent)
+                comp_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
                     go_aspect='C', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True,
-                    keep_only_best_group=True)]))
+                    keep_only_best_group=True, desc_stats=gene_desc.stats)])
+                if comp_sent:
+                    joined_sent.append(comp_sent)
 
-            go_desc = "; ".join(joined_sent) + "."
-            gene_dict["description"] = go_desc.capitalize()
-        else:
-            gene_dict["description"] = "No description available"
-        gene_dict["stats"] = {"num_terms_f": num_terms_f, "num_terms_p": num_terms_p, "num_terms_c": num_terms_c }
-        json_gene_desc.append(gene_dict)
-
-    json_string = json.dumps(json_gene_desc)
-    print(json_string)
+                go_desc = "; ".join(joined_sent) + "."
+                gene_desc.description = go_desc.capitalize()
+            else:
+                gene_desc.description = "No description available"
+            desc_writer.add_gene_desc(gene_desc)
+        desc_writer.write(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
+                                       organism + "_with_stats.json"), pretty=True, include_single_gene_stats=True)
+        desc_writer.write(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
+                                       organism + "_no_stats.json"), pretty=True, include_single_gene_stats=False)
 
 
 if __name__ == '__main__':

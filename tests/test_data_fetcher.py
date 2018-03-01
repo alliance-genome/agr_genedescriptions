@@ -15,12 +15,14 @@ class TestWBRawDataFetcher(unittest.TestCase):
         self.cache_location = conf_parser.get_cache_location()
         self.species = conf_parser.get_wb_species()
         self.exclusion_list = conf_parser.get_go_terms_exclusion_list()
+        self.go_terms_replacement_dict = conf_parser.get_go_rename_terms()
 
     def test_get_gene_data(self):
         df = WBRawDataFetcher(raw_files_source=self.raw_files_source, release_version="WS263",
                               species="c_elegans", project_id=self.species["c_elegans"]["project_id"],
                               cache_location=self.cache_location, use_cache=False,
-                              chebi_file_url=self.chebi_file_source, go_terms_exclusion_list=self.exclusion_list)
+                              chebi_file_url=self.chebi_file_source, go_terms_exclusion_list=self.exclusion_list,
+                              go_terms_replacement_dict=self.go_terms_replacement_dict)
         df.load_go_data()
         self.assertEqual(len([gene for gene in df.get_gene_data()]), 48678)
 

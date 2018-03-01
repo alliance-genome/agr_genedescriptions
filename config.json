@@ -41,7 +41,7 @@
   "agr_data_fetcher": {
     "raw_files_source": "https://s3.amazonaws.com/mod-datadumps",
     "release": "1.0",
-    "organisms_to_process": ["zfin"],
+    "organisms_to_process": ["wb", "zfin", "fb", "rgd", "sgd", "mgi"],
     "organisms": {
       "wb": {
         "name": "c_elegans",
@@ -70,7 +70,7 @@
       "sgd": {
         "name": "yeast",
         "main_files": "SGD_1.0.3.tar.gz",
-        "bgi_file": "SGD_1.0.2_basicGeneInformation.json",
+        "bgi_file": "SGD_1.0.3/SGD_1.0.2_basicGeneInformation.json",
         "go_annotations": "gene_association.sgd.gz"
       },
       "mgi": {
@@ -80,6 +80,12 @@
         "go_annotations": "gene_association.mgi.gz"
       }
     }
+  },
+  "generic_genedesc_writer": {
+    "genedesc_writer": "json_writer"
+  },
+  "json_writer_options": {
+    "output_dir": "./generated_descriptions"
   },
   "go_sentences_options": {
     "exclude_terms": ["GO:0008150", "GO:0003674", "GO:0005575", "GO:0005488", "GO:0005515", "GO:0044877"],
@@ -315,6 +321,14 @@
           }
         ]
       }
-    ]
+    ],
+    "remove_parents_if_children_are_present": true,
+    "merge_terms_by_common_ancestors": true,
+    "merge_min_num_terms": 3,
+    "merge_min_distance_from_root": {
+      "F": 3,
+      "P": 1,
+      "C": 5
+    }
   }
 }

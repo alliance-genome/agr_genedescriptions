@@ -164,3 +164,22 @@ class GenedescConfigParser(object):
         :rtype: Dict[str, str]
         """
         return self.config["go_sentences_options"]["rename_terms"]
+
+    def get_go_remove_parents_if_children_are_present(self) -> bool:
+        return self.config["go_sentences_options"]["remove_parents_if_children_are_present"]
+
+    def get_go_merge_terms_by_common_ancestors(self) -> bool:
+        return self.config["go_sentences_options"]["merge_terms_by_common_ancestors"]
+
+    def get_go_merge_min_num_terms(self) -> int:
+        return self.config["go_sentences_options"]["merge_min_num_terms"]
+
+    def get_go_merge_min_distance_from_root(self):
+        return self.config["go_sentences_options"]["merge_min_distance_from_root"]
+
+    def get_genedesc_writer(self):
+        return self.config["generic_genedesc_writer"]["genedesc_writer"]
+
+    def get_genedesc_output_dir(self, genedesc_writer: str):
+        return self.config[genedesc_writer + "_options"]["output_dir"]
+
