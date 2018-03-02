@@ -22,11 +22,12 @@ class RawDataFetcher(metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(self, go_terms_exclusion_list: List[str], go_terms_replacement_dict: Dict[str, str],
-                 use_cache: bool = False):
+                 cache_location: str, use_cache: bool = False):
         self.chebi_file_url = ""
         self.chebi_file_cache_path = ""
         self.go_data = defaultdict(list)
         self.go_ontology = None
+        self.go_slim_ontology = None
         self.ls_ontology = None
         self.an_ontology = None
         self.gene_data = {}
@@ -45,6 +46,8 @@ class RawDataFetcher(metaclass=ABCMeta):
         self.go_terms_exclusion_list = go_terms_exclusion_list
         self.go_terms_replacement_dict = go_terms_replacement_dict
         self.go_id_name = "DB_Object_ID"
+        self.go_slim_url = "http://www.geneontology.org/ontology/subsets/goslim_generic.obo"
+        self.go_slim_cache_path = os.path.join(cache_location, "goslim_generic.obo")
 
     @staticmethod
     def _get_cached_file(cache_path: str, file_source_url):
@@ -101,6 +104,8 @@ class RawDataFetcher(metaclass=ABCMeta):
         """
         self.go_ontology = GODag(self._get_cached_file(file_source_url=self.go_ontology_url,
                                                        cache_path=self.go_ontology_cache_path))
+        self.go_slim_ontology = GODag(self._get_cached_file(file_source_url=self.go_slim_url,
+                                                            cache_path=self.go_slim_cache_path))
         if self.anatomy_ontology_url != "":
             self.an_ontology = GODag(self._get_cached_file(file_source_url=self.anatomy_ontology_url,
                                                            cache_path=self.anatomy_ontology_cache_path))
@@ -191,6 +196,9 @@ class RawDataFetcher(metaclass=ABCMeta):
     def get_go_ontology(self):
         return self.go_ontology
 
+    def get_go_slim_ontology(self):
+        return self.go_slim_ontology
+
 
 class WBRawDataFetcher(RawDataFetcher):
     """data fetcher for WormBase raw files for a single species"""
@@ -220,7 +228,8 @@ class WBRawDataFetcher(RawDataFetcher):
         :type chebi_file_url: str
         """
         super().__init__(go_terms_exclusion_list=go_terms_exclusion_list,
-                         go_terms_replacement_dict=go_terms_replacement_dict, use_cache=use_cache)
+                         go_terms_replacement_dict=go_terms_replacement_dict, use_cache=use_cache,
+                         cache_location=cache_location)
         self.gene_data_cache_path = os.path.join(cache_location, "wormbase", release_version, "species", species,
                                                  project_id, "annotation", species + '.' + project_id +
                                                  '.' + release_version + ".geneIDs.txt.gz")
@@ -290,7 +299,8 @@ class AGRRawDataFetcher(RawDataFetcher):
         :type chebi_file_url: str
         """
         super().__init__(go_terms_exclusion_list=go_terms_exclusion_list,
-                         go_terms_replacement_dict=go_terms_replacement_dict, use_cache=use_cache)
+                         go_terms_replacement_dict=go_terms_replacement_dict, use_cache=use_cache,
+                         cache_location=cache_location)
         self.main_data_cache_path = os.path.join(cache_location, "agr", release_version, "main", main_file_name)
         self.main_data_url = raw_files_source + '/' + main_file_name
         self.bgi_file_name = bgi_file_name

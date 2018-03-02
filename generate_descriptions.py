@@ -73,28 +73,30 @@ def main():
             sentences = generate_go_sentences(df.get_go_annotations(
                 gene.id, priority_list=go_annotations_priority, desc_stats=gene_desc.stats),
                 go_ontology=df.get_go_ontology(),
+                go_slim_ontology=df.get_go_slim_ontology(),
                 evidence_groups_priority_list=evidence_groups_priority_list,
                 go_prepostfix_sentences_map=go_prepostfix_sentences_map,
                 go_prepostfix_special_cases_sent_map=go_prepostfix_special_cases_sent_map,
                 evidence_codes_groups_map=evidence_codes_groups_map, remove_parent_terms=True,
                 merge_num_terms_threshold=conf_parser.get_go_merge_min_num_terms(),
                 merge_min_distance_from_root=conf_parser.get_go_merge_min_distance_from_root(),
+                merge_algorithm=conf_parser.get_go_merge_algorithm(),
                 desc_stats=gene_desc.stats)
             if sentences:
                 joined_sent = []
                 func_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
-                    go_aspect='F', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True,
-                    keep_only_best_group=True, desc_stats=gene_desc.stats)])
+                    go_aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True,
+                    desc_stats=gene_desc.stats)])
                 if func_sent:
                     joined_sent.append(func_sent)
                 proc_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
-                    go_aspect='P', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True,
-                    keep_only_best_group=True, desc_stats=gene_desc.stats)])
+                    go_aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True,
+                    desc_stats=gene_desc.stats)])
                 if proc_sent:
                     joined_sent.append(proc_sent)
                 comp_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
-                    go_aspect='C', go_ontology=df.get_go_ontology(), merge_groups_with_same_prefix=True,
-                    keep_only_best_group=True, desc_stats=gene_desc.stats)])
+                    go_aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True,
+                    desc_stats=gene_desc.stats)])
                 if comp_sent:
                     joined_sent.append(comp_sent)
 

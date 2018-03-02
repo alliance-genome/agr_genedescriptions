@@ -97,5 +97,8 @@ class JsonGDWriter(DescriptionsWriter):
             for gene_desc in json_serializable_self.data:
                 gene_desc.stats = None
         json_serializable_self.data = [vars(gene_desc) for gene_desc in json_serializable_self.data]
+        if not include_single_gene_stats:
+            for gene_desc in json_serializable_self.data:
+                del gene_desc["stats"]
         with open(file_path, "w") as outfile:
             json.dump(vars(json_serializable_self), outfile, indent=indent)
