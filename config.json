@@ -85,7 +85,7 @@
     "genedesc_writer": "json_writer"
   },
   "json_writer_options": {
-    "output_dir": "./generated_descriptions_slim"
+    "output_dir": "./generated_descriptions"
   },
   "go_sentences_options": {
     "exclude_terms": ["GO:0008150", "GO:0003674", "GO:0005575", "GO:0005488", "GO:0005515", "GO:0044877"],
@@ -327,9 +327,9 @@
     "merge_if_more_than_terms": 3,
     "merge_min_distance_from_root": {
       "F": 3,
-      "P": 1,
+      "P": 2,
       "C": 5
     },
-    "merge_algorithm": "slim"
+    "merge_algorithm": "naive"
   }
 }

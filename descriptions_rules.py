@@ -265,17 +265,25 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
                     go_terms_names=go_term_names, term_ids_dict=term_ids_dict, go_ontology=go_ontology,
                     go_slim_ontology=go_slim_ontology, min_distance_from_root=merge_min_distance_from_root[go_aspect],
                     min_number_of_terms=merge_num_terms_threshold, merge_algorithm=merge_algorithm)
-                if len(go_term_names) != len(merged_ids):
+                if len(merged_ids) > 0:
                     logging.debug("Reduced number of terms by merging from " + str(len(go_term_names)) + " to " +
                                   str(len(merged_ids)))
-                if merge_algorithm == "slim" and go_slim_ontology and len(go_term_names) > merge_num_terms_threshold:
-                    go_term_names = [go_slim_ontology.query_term(term_id).name for term_id in merged_ids]
-                    term_ids_dict = {go_slim_ontology.query_term(term).name: go_slim_ontology.query_term(term).id for
-                                     term in merged_ids}
-                else:
-                    go_term_names = [go_ontology.query_term(term_id).name for term_id in merged_ids]
-                    term_ids_dict = {go_ontology.query_term(term).name: go_ontology.query_term(term).id for term in
-                                     merged_ids}
+                    if merge_algorithm == "slim" and go_slim_ontology and len(
+                            go_term_names) > merge_num_terms_threshold:
+                        go_term_names = [go_slim_ontology.query_term(term_id).name if
+                                         go_slim_ontology.query_term(term_id) else go_ontology.query_term(term_id).name
+                                         for term_id in merged_ids]
+                        term_ids_dict = {}
+                        for term in merged_ids:
+                            if go_slim_ontology.query_term(term):
+                                term_ids_dict[go_slim_ontology.query_term(term).name] = go_slim_ontology.query_term(
+                                    term).id
+                            else:
+                                term_ids_dict[go_ontology.query_term(term).name] = go_ontology.query_term(term).id
+                    else:
+                        go_term_names = [go_ontology.query_term(term_id).name for term_id in merged_ids]
+                        term_ids_dict = {go_ontology.query_term(term).name: go_ontology.query_term(term).id for term in
+                                         merged_ids}
             sentences.set_sentence(_get_single_go_sentence(go_term_names=go_term_names,
                                                            go_term_ids_dict=term_ids_dict,
                                                            go_aspect=go_aspect,
@@ -382,7 +390,12 @@ def get_merged_term_ids_by_common_ancestor_from_term_names(go_terms_names: List[
         if merge_algorithm == "slim" and go_slim_ontology:
             # slim algorithm - using GO Slim ontology
             for term in go_terms_names:
-                final_terms_set.update(mapslim(term_ids_dict[term], go_ontology, go_slim_ontology)[0])
+                goslim_ids = mapslim(term_ids_dict[term], go_ontology, go_slim_ontology)[0]
+                for slim_term in goslim_ids:
+                    if len(go_slim_ontology.query_term(slim_term).parents) > 0:
+                        final_terms_set.add(slim_term)
+                    else:
+                        final_terms_set.add(term_ids_dict[term])
         else:
             # naive algorithm
             ancestor_paths = defaultdict(list)
