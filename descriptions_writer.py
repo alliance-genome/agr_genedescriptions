@@ -40,8 +40,8 @@ class DescriptionsWriter(metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(self):
-        self.data: List[GeneDesc] = []
-        self.general_stats: DescriptionsStats = DescriptionsStats()
+        self.data = []
+        self.general_stats = DescriptionsStats()
 
     @abstractmethod
     def write(self):
