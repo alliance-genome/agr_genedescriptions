@@ -12,7 +12,7 @@ from descriptions_writer import JsonGDWriter, GeneDesc, SingleDescStats
 def main():
     parser = argparse.ArgumentParser(description="Generate gene descriptions for wormbase")
     parser.add_argument("-c", "--config-file", metavar="config_file", dest="config_file", type=str,
-                        default="config.json", help="configuration file")
+                        default="config.yml", help="configuration file")
     parser.add_argument("-C", "--use-cache", dest="use_cache", action="store_true", default=False,
                         help="Use cached source files from cache_location specified in config file. Download them from "
                              "raw_file_source (configured in config file) if not yet cached")

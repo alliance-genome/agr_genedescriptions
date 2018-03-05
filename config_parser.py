@@ -1,11 +1,11 @@
-import json
+import yaml
 from typing import Dict, Union, Tuple, List
 
 
 class GenedescConfigParser(object):
     def __init__(self, file_path):
         with open(file_path) as conf_file:
-            self.config = json.load(conf_file)
+            self.config = yaml.load(conf_file)
 
     def get_data_fetcher(self) -> str:
         """get the data fetcher type from the configuration file
@@ -50,8 +50,8 @@ class GenedescConfigParser(object):
             for special cases remain equal to their root group
         :rtype: Dict[Tuple[str, str], Tuple[str, str]]
         """
-        prepost_map = {(prepost["aspect"], prepost["group"]): (prepost["prefix"], prepost["postfix"]) for prepost in
-                       self.config["go_sentences_options"]["go_prepostfix_sentences_map"]}
+        prepost_map = {(prepost["aspect"], prepost["group"]): (prepost["prefix"], prepost["postfix"])
+                       for prepost in self.config["go_sentences_options"]["go_prepostfix_sentences_map"]}
         special_cases = self.get_go_prepostfix_special_cases_sent_map()
         for key, scs in special_cases.items():
             for special_case in scs:
@@ -67,7 +67,7 @@ class GenedescConfigParser(object):
         return {(prepost["aspect"], prepost["group"]): [(sp_case["id"], sp_case["match_regex"], sp_case["prefix"],
                                                          sp_case["postfix"]) for sp_case in
                                                         prepost["special_cases"]] for prepost in
-                self.config["go_sentences_options"]["go_prepostfix_sentences_map"]}
+                self.config["go_sentences_options"]["go_prepostfix_sentences_map"] if prepost["special_cases"]}
 
     def get_go_annotations_priority(self) -> List[str]:
         """get the priority list for evidence codes

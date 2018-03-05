@@ -3,3 +3,4 @@ goatools
 biopython
 bcbio-gff
 inflect
+PyYAML

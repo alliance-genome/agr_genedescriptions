@@ -10,7 +10,7 @@ class TestDescriptionsRules(unittest.TestCase):
 
     def setUp(self):
         this_dir = os.path.split(__file__)[0]
-        conf_parser = GenedescConfigParser(os.path.join(this_dir, os.path.pardir, "config.json"))
+        conf_parser = GenedescConfigParser(os.path.join(this_dir, os.path.pardir, "config.yml"))
         self.raw_files_source = conf_parser.get_raw_file_sources("wb_data_fetcher")
         self.chebi_file_source = conf_parser.get_chebi_file_source()
         self.cache_location = conf_parser.get_cache_location()
