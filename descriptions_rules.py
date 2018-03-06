@@ -265,7 +265,7 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
                     go_terms_names=go_term_names, term_ids_dict=term_ids_dict, go_ontology=go_ontology,
                     go_slim_ontology=go_slim_ontology, min_distance_from_root=merge_min_distance_from_root[go_aspect],
                     min_number_of_terms=merge_num_terms_threshold, merge_algorithm=merge_algorithm)
-                if len(merged_ids) > 0:
+                if 0 < len(merged_ids) < len(go_term_names):
                     logging.debug("Reduced number of terms by merging from " + str(len(go_term_names)) + " to " +
                                   str(len(merged_ids)))
                     if merge_algorithm == "slim" and go_slim_ontology and len(

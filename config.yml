@@ -36,12 +36,12 @@ agr_data_fetcher:
     raw_files_source: "https://s3.amazonaws.com/mod-datadumps"
     release: "1.0"
     organisms_to_process:
-        - wb
         - zfin
-        - fb
-        - rgd
+        - wb
         - sgd
+        - rgd
         - mgi
+        - fb
     organisms:
         wb:
             name: "c_elegans"
@@ -78,7 +78,7 @@ generic_genedesc_writer:
     genedesc_writer: "json_writer"
 
 json_writer_options:
-    output_dir: "./generated_descriptions"
+    output_dir: "./generated_descriptions_slim"
 
 go_sentences_options:
     exclude_terms:
@@ -258,7 +258,7 @@ go_sentences_options:
         F: 3
         P: 2
         C: 5
-    merge_algorithm: naive
+    merge_algorithm: slim
   
 
 
