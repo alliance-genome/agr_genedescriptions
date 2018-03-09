@@ -36,12 +36,12 @@ agr_data_fetcher:
     raw_files_source: "https://s3.amazonaws.com/mod-datadumps"
     release: "1.0"
     organisms_to_process:
-        - zfin
         - wb
-        - sgd
-        - rgd
-        - mgi
+        - zfin
         - fb
+        - rgd
+        - sgd
+        - mgi
     organisms:
         wb:
             name: "c_elegans"
@@ -78,7 +78,7 @@ generic_genedesc_writer:
     genedesc_writer: "json_writer"
 
 json_writer_options:
-    output_dir: "./generated_descriptions_slim"
+    output_dir: "./generated_descriptions"
 
 go_sentences_options:
     exclude_terms:
@@ -165,7 +165,7 @@ go_sentences_options:
           special_cases:
               - id: 1
                 match_regex: "structural constituent"
-                prefix: "is a"
+                prefix: "a"
                 postfix: ""
         - aspect: F
           group: HIGH_THROUGHPUT_EXPERIMENTAL
@@ -174,45 +174,45 @@ go_sentences_options:
           special_cases:
               - id: 1
                 match_regex: "structural constituent"
-                prefix: "is a"
+                prefix: "a"
                 postfix: ""
         - aspect: F
           group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
-          prefix: "is predicted to have"
-          postfix: "based on sequence analysis"
+          prefix: "predicted to have"
+          postfix: ""
           special_cases:
               - id: 1
                 match_regex: "structural constituent"
-                prefix: "is a"
+                prefix: "predicted to be a"
                 postfix: ""
         - aspect: F
           group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
-          prefix: "is predicted to have"
-          postfix: "based on computational analysis"
+          prefix: "predicted to have"
+          postfix: ""
           special_cases:
               - id: 1
                 match_regex: "structural constituent"
-                prefix: "is a"
+                prefix: "predicted to be a"
                 postfix: ""
         - aspect: P
           group: EXPERIMENTAL
-          prefix: "is involved in"
+          prefix: "involved in"
           postfix: ""
           special_cases:
         - aspect: P
           group: HIGH_THROUGHPUT_EXPERIMENTAL
-          prefix: "is involved in"
+          prefix: "involved in"
           postfix: ""
           special_cases:
         - aspect: P
           group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
-          prefix: "is predicted to be involved in"
-          postfix: "based on sequence analysis"
+          prefix: "predicted to be involved in"
+          postfix: ""
           special_cases:
         - aspect: P
           group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
-          prefix: "is predicted to be involved in"
-          postfix: "based on computational analysis"
+          prefix: "predicted to be involved in"
+          postfix: ""
           special_cases:
         - aspect: C
           group: EXPERIMENTAL
@@ -220,7 +220,7 @@ go_sentences_options:
           postfix: ""
           special_cases:
               - id: 1
-                match_regex: "intracellular"
+                match_regex: "intracellular$"
                 prefix: "is"
                 postfix: ""
         - aspect: C
@@ -229,26 +229,26 @@ go_sentences_options:
           postfix: ""
           special_cases:
               - id: 1
-                match_regex: "intracellular"
+                match_regex: "intracellular$"
                 prefix: "is"
                 postfix: ""
         - aspect: C
           group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
-          prefix: "is predicted to localize to the"
-          postfix: "based on sequence analysis"
+          prefix: "predicted to localize to the"
+          postfix: ""
           special_cases:
               - id: 1
-                match_regex: "intracellular"
-                prefix: "is"
+                match_regex: "intracellular$"
+                prefix: "predicted to be"
                 postfix: ""
         - aspect: C
           group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
-          prefix: "is predicted to localize to the"
-          postfix: "based on computational analysis"
+          prefix: "predicted to localize to the"
+          postfix: ""
           special_cases:
               - id: 1
-                match_regex: "intracellular"
-                prefix: "is"
+                match_regex: "intracellular$"
+                prefix: "predicted to be"
                 postfix: ""
 
     remove_parents_if_children_are_present: true
@@ -258,7 +258,7 @@ go_sentences_options:
         F: 3
         P: 2
         C: 5
-    merge_algorithm: slim
+    merge_algorithm: naive
   
 
 
