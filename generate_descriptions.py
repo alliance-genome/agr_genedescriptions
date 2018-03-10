@@ -81,7 +81,7 @@ def main():
                 merge_num_terms_threshold=conf_parser.get_go_merge_min_num_terms(),
                 merge_min_distance_from_root=conf_parser.get_go_merge_min_distance_from_root(),
                 merge_algorithm=conf_parser.get_go_merge_algorithm(),
-                desc_stats=gene_desc.stats)
+                desc_stats=gene_desc.stats, go_terms_replacement_dict=conf_parser.get_go_rename_terms())
             if sentences:
                 joined_sent = []
                 func_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(

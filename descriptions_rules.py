@@ -183,7 +183,8 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
                           evidence_codes_groups_map: Dict[str, str], remove_parent_terms: bool = True,
                           merge_num_terms_threshold: int = 3,
                           merge_min_distance_from_root: dict = None, merge_algorithm: str = "naive",
-                          desc_stats: SingleDescStats = None, go_slim_ontology=None) -> GOSentencesCollection:
+                          desc_stats: SingleDescStats = None, go_slim_ontology=None,
+                          go_terms_replacement_dict: Dict[str, str] = None) -> GOSentencesCollection:
     """generate GO sentences from a list of GO annotations
 
     :param go_annotations: the list of GO annotations for a given gene
@@ -218,6 +219,8 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
         for the gene
     :type desc_stats: SingleDescStats
     :param go_slim_ontology: optional GO slim ontology to be used when merge algorithm is set to slim
+    :param go_terms_replacement_dict: replacement dictionary for terms
+    :type go_terms_replacement_dict: Dict[str, str]
     :return: a collection of GO sentences
     :rtype: GOSentencesCollection
     """
@@ -281,8 +284,14 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
                             else:
                                 term_ids_dict[go_ontology.query_term(term).name] = go_ontology.query_term(term).id
                     else:
-                        go_term_names = [go_ontology.query_term(term_id).name for term_id in merged_ids]
-                        term_ids_dict = {go_ontology.query_term(term).name: go_ontology.query_term(term).id for term in
+                        go_term_names = [go_terms_replacement_dict[go_ontology.query_term(term_id).name] if
+                                         go_terms_replacement_dict and go_ontology.query_term(term_id).name in
+                                         go_terms_replacement_dict else
+                                         go_ontology.query_term(term_id).name for term_id in merged_ids]
+                        term_ids_dict = {go_terms_replacement_dict[go_ontology.query_term(term).name] if
+                                         go_terms_replacement_dict and go_ontology.query_term(term).name in
+                                         go_terms_replacement_dict else
+                                         go_ontology.query_term(term).name: go_ontology.query_term(term).id for term in
                                          merged_ids}
             sentences.set_sentence(_get_single_go_sentence(go_term_names=go_term_names,
                                                            go_term_ids_dict=term_ids_dict,
