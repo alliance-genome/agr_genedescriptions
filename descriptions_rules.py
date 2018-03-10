@@ -284,15 +284,15 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
                             else:
                                 term_ids_dict[go_ontology.query_term(term).name] = go_ontology.query_term(term).id
                     else:
-                        go_term_names = [go_terms_replacement_dict[go_ontology.query_term(term_id).name] if
-                                         go_terms_replacement_dict and go_ontology.query_term(term_id).name in
-                                         go_terms_replacement_dict else
-                                         go_ontology.query_term(term_id).name for term_id in merged_ids]
-                        term_ids_dict = {go_terms_replacement_dict[go_ontology.query_term(term).name] if
-                                         go_terms_replacement_dict and go_ontology.query_term(term).name in
-                                         go_terms_replacement_dict else
-                                         go_ontology.query_term(term).name: go_ontology.query_term(term).id for term in
+                        go_term_names = [go_ontology.query_term(term_id).name for term_id in merged_ids]
+                        term_ids_dict = {go_ontology.query_term(term).name: go_ontology.query_term(term).id for term in
                                          merged_ids}
+                    if go_terms_replacement_dict:
+                        for regex_to_substitute, regex_target in go_terms_replacement_dict.items():
+                            go_term_names = [re.sub(regex_to_substitute, regex_target, go_term_name) for
+                                             go_term_name in go_term_names]
+                            term_ids_dict = {re.sub(regex_to_substitute, regex_target, key): value for key, value in
+                                             term_ids_dict.items()}
             sentences.set_sentence(_get_single_go_sentence(go_term_names=go_term_names,
                                                            go_term_ids_dict=term_ids_dict,
                                                            go_aspect=go_aspect,

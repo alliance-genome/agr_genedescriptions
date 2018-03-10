@@ -39,8 +39,8 @@ agr_data_fetcher:
         - wb
         - zfin
         - fb
-        - rgd
         - sgd
+        - rgd
         - mgi
     organisms:
         wb:

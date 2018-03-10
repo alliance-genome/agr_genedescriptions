@@ -133,7 +133,7 @@ class RawDataFetcher(metaclass=ABCMeta):
                     mapped_annotation = annotation
                     mapped_annotation["GO_Name"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).name
                     for regex_to_substitute, regex_target in self.go_terms_replacement_dict.items():
-                        mapped_annotation["GO_Name"] = re.sub(re.escape(regex_to_substitute), re.escape(regex_target),
+                        mapped_annotation["GO_Name"] = re.sub(regex_to_substitute, regex_target,
                                                               mapped_annotation["GO_Name"])
                     mapped_annotation["Is_Obsolete"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).is_obsolete
                     if annotation["Annotation_Extension"] != "":
