@@ -128,14 +128,16 @@ class RawDataFetcher(metaclass=ABCMeta):
             for _ in range(lines_to_skip):
                 next(file)
             for annotation in gafiterator(file):
-                if annotation["GO_ID"] not in self.go_terms_exclusion_list and \
-                        self.go_ontology.query_term(annotation["GO_ID"]):
+                if self.go_ontology.query_term(annotation["GO_ID"]) and \
+                        self.go_ontology.query_term(annotation["GO_ID"]).id not in self.go_terms_exclusion_list:
                     mapped_annotation = annotation
                     mapped_annotation["GO_Name"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).name
+                    mapped_annotation["GO_ID"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).id
                     for regex_to_substitute, regex_target in self.go_terms_replacement_dict.items():
                         mapped_annotation["GO_Name"] = re.sub(regex_to_substitute, regex_target,
                                                               mapped_annotation["GO_Name"])
-                    mapped_annotation["Is_Obsolete"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).is_obsolete
+                    mapped_annotation["Is_Obsolete"] = \
+                        self.go_ontology.query_term(mapped_annotation["GO_ID"]).is_obsolete
                     if annotation["Annotation_Extension"] != "":
                         matches = re.findall('(\([^\)]+\))', mapped_annotation["Annotation_Extension"])
                         for match in matches:

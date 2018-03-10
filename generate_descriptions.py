@@ -69,6 +69,7 @@ def main():
         df.load_go_data()
         desc_writer = JsonGDWriter()
         for gene in df.get_gene_data():
+            logging.debug("processing gene " + gene.name)
             gene_desc = GeneDesc(gene_name=gene.name)
             sentences = generate_go_sentences(df.get_go_annotations(
                 gene.id, priority_list=go_annotations_priority, desc_stats=gene_desc.stats),

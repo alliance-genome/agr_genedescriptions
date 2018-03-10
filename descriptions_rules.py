@@ -25,7 +25,8 @@ class GOSentenceMerger(object):
 class GOSentencesCollection(object):
     """a group of GO sentences indexed by aspect"""
     def __init__(self, evidence_groups_list, go_prepostfix_sentences_map, remove_parent_terms: bool, go_ontology,
-                 go_slim_ontology=None, merge_algorithm: str = 'naive'):
+                 go_slim_ontology=None, merge_algorithm: str = 'naive',
+                 go_terms_replacement_dict: Dict[str, str] = None):
         self.evidence_groups_list = evidence_groups_list
         self.go_prepostfix_sentences_map = go_prepostfix_sentences_map
         self.sentences_map = {}
@@ -33,6 +34,7 @@ class GOSentencesCollection(object):
         self.go_ontology = go_ontology
         self.go_slim_ontology = go_slim_ontology
         self.merge_algorithm = merge_algorithm
+        self.go_terms_replacement_dict = go_terms_replacement_dict
 
     def set_sentence(self, sentence: GOSentence) -> None:
         """add a sentence to the collection
@@ -108,17 +110,23 @@ class GOSentencesCollection(object):
                     if len(sent_merger.terms) > len(term_ids_no_parents):
                         logging.debug("Removed " + str(len(sent_merger.terms) - len(term_ids_no_parents)) +
                                       " parents from terms while merging sentences with same prefix")
-                    if sent_merger.terms_slimmed:
-                        term_names_no_parents = set([self.go_slim_ontology.query_term(term_id).name if
-                                                     self.go_slim_ontology.query_term(term_id) else
-                                                     self.go_ontology.query_term(term_id).name for term_id in
-                                                     term_ids_no_parents])
-                    else:
-                        term_names_no_parents = set([self.go_ontology.query_term(term_id).name for term_id in
-                                                     term_ids_no_parents])
-                    sent_merger.terms_ids_dict = {key: value for key, value in sent_merger.terms_ids_dict.items()
-                                                  if key in set(term_names_no_parents)}
-                    sent_merger.terms = list(term_names_no_parents)
+                        if sent_merger.terms_slimmed:
+                            term_names_no_parents = set([self.go_slim_ontology.query_term(term_id).name if
+                                                         self.go_slim_ontology.query_term(term_id) else
+                                                         self.go_ontology.query_term(term_id).name for term_id in
+                                                         term_ids_no_parents])
+                        else:
+                            term_names_no_parents = set([self.go_ontology.query_term(term_id).name for term_id in
+                                                         term_ids_no_parents])
+                        sent_merger.terms_ids_dict = {key: value for key, value in sent_merger.terms_ids_dict.items()
+                                                      if key in set(term_names_no_parents)}
+                        sent_merger.terms = list(term_names_no_parents)
+                        if self.go_terms_replacement_dict:
+                            for regex_to_substitute, regex_target in self.go_terms_replacement_dict.items():
+                                sent_merger.terms = [re.sub(regex_to_substitute, regex_target, go_term_name) for
+                                                     go_term_name in sent_merger.terms]
+                                sent_merger.terms_ids_dict = {re.sub(regex_to_substitute, regex_target, key): value for
+                                                              key, value in sent_merger.terms_ids_dict.items()}
 
             sentences = [GOSentence(prefix=prefix, terms=list(sent_merger.terms),
                                     term_ids_dict=sent_merger.terms_ids_dict,
@@ -246,13 +254,15 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
                 go_terms_groups[map_key].add((annotation["GO_Name"], annotation["GO_ID"]))
         sentences = GOSentencesCollection(evidence_groups_priority_list, go_prepostfix_sentences_map,
                                           remove_parent_terms=remove_parent_terms, go_ontology=go_ontology,
-                                          go_slim_ontology=go_slim_ontology, merge_algorithm=merge_algorithm)
+                                          go_slim_ontology=go_slim_ontology, merge_algorithm=merge_algorithm,
+                                          go_terms_replacement_dict=go_terms_replacement_dict)
         for ((go_aspect, evidence_group), go_terms) in go_terms_groups.items():
             go_term_names = [term[0] for term in go_terms]
             if desc_stats:
                 desc_stats.num_terms_notrim_nogroup_priority_nomerge[go_aspect] += len(go_term_names)
                 desc_stats.terms_notrim_nogroup_priority_nomerge[go_aspect].extend(go_term_names)
             term_ids_dict = {term_name: term_id for term_name, term_id in go_terms}
+            replace = False
             if remove_parent_terms:
                 term_ids_no_parents = get_term_ids_without_parents_from_terms_names(go_terms_names=go_term_names,
                                                                                     term_ids_dict=term_ids_dict,
@@ -260,9 +270,10 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
                 if len(go_term_names) > len(term_ids_no_parents):
                     logging.debug("Removed " + str(len(go_term_names) - len(term_ids_no_parents)) +
                                   " parents from terms")
-                go_term_names = [go_ontology.query_term(term_id).name for term_id in term_ids_no_parents]
-                term_ids_dict = {go_ontology.query_term(term_id).name: go_ontology.query_term(term_id).id for term_id in
-                                 term_ids_no_parents}
+                    go_term_names = [go_ontology.query_term(term_id).name for term_id in term_ids_no_parents]
+                    term_ids_dict = {go_ontology.query_term(term_id).name: go_ontology.query_term(term_id).id for
+                                     term_id in term_ids_no_parents}
+                    replace = True
             if merge_num_terms_threshold > 0:
                 merged_ids = get_merged_term_ids_by_common_ancestor_from_term_names(
                     go_terms_names=go_term_names, term_ids_dict=term_ids_dict, go_ontology=go_ontology,
@@ -287,12 +298,13 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
                         go_term_names = [go_ontology.query_term(term_id).name for term_id in merged_ids]
                         term_ids_dict = {go_ontology.query_term(term).name: go_ontology.query_term(term).id for term in
                                          merged_ids}
-                    if go_terms_replacement_dict:
-                        for regex_to_substitute, regex_target in go_terms_replacement_dict.items():
-                            go_term_names = [re.sub(regex_to_substitute, regex_target, go_term_name) for
-                                             go_term_name in go_term_names]
-                            term_ids_dict = {re.sub(regex_to_substitute, regex_target, key): value for key, value in
-                                             term_ids_dict.items()}
+                    replace = True
+            if go_terms_replacement_dict and replace:
+                for regex_to_substitute, regex_target in go_terms_replacement_dict.items():
+                    go_term_names = [re.sub(regex_to_substitute, regex_target, go_ontology.query_term(term_id).name) for
+                                     term_id in merged_ids]
+                    term_ids_dict = {re.sub(regex_to_substitute, regex_target, go_ontology.query_term(term).name):
+                                     go_ontology.query_term(term).id for term in merged_ids}
             sentences.set_sentence(_get_single_go_sentence(go_term_names=go_term_names,
                                                            go_term_ids_dict=term_ids_dict,
                                                            go_aspect=go_aspect,
