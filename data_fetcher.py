@@ -27,7 +27,6 @@ class RawDataFetcher(metaclass=ABCMeta):
         self.chebi_file_cache_path = ""
         self.go_data = defaultdict(list)
         self.go_ontology = None
-        self.go_slim_ontology = None
         self.ls_ontology = None
         self.an_ontology = None
         self.gene_data = {}
@@ -46,8 +45,6 @@ class RawDataFetcher(metaclass=ABCMeta):
         self.go_terms_exclusion_list = go_terms_exclusion_list
         self.go_terms_replacement_dict = go_terms_replacement_dict
         self.go_id_name = "DB_Object_ID"
-        self.go_slim_url = "http://www.geneontology.org/ontology/subsets/goslim_generic.obo"
-        self.go_slim_cache_path = os.path.join(cache_location, "goslim_generic.obo")
 
     @staticmethod
     def _get_cached_file(cache_path: str, file_source_url):
@@ -104,8 +101,6 @@ class RawDataFetcher(metaclass=ABCMeta):
         """
         self.go_ontology = GODag(self._get_cached_file(file_source_url=self.go_ontology_url,
                                                        cache_path=self.go_ontology_cache_path))
-        self.go_slim_ontology = GODag(self._get_cached_file(file_source_url=self.go_slim_url,
-                                                            cache_path=self.go_slim_cache_path))
         if self.anatomy_ontology_url != "":
             self.an_ontology = GODag(self._get_cached_file(file_source_url=self.anatomy_ontology_url,
                                                            cache_path=self.anatomy_ontology_cache_path))
@@ -197,9 +192,6 @@ class RawDataFetcher(metaclass=ABCMeta):
 
     def get_go_ontology(self):
         return self.go_ontology
-
-    def get_go_slim_ontology(self):
-        return self.go_slim_ontology
 
 
 class WBRawDataFetcher(RawDataFetcher):

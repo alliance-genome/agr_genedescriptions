@@ -74,14 +74,12 @@ def main():
             sentences = generate_go_sentences(df.get_go_annotations(
                 gene.id, priority_list=go_annotations_priority, desc_stats=gene_desc.stats),
                 go_ontology=df.get_go_ontology(),
-                go_slim_ontology=df.get_go_slim_ontology(),
                 evidence_groups_priority_list=evidence_groups_priority_list,
                 go_prepostfix_sentences_map=go_prepostfix_sentences_map,
                 go_prepostfix_special_cases_sent_map=go_prepostfix_special_cases_sent_map,
-                evidence_codes_groups_map=evidence_codes_groups_map, remove_parent_terms=True,
+                evidence_codes_groups_map=evidence_codes_groups_map, remove_parent_terms=False,
                 merge_num_terms_threshold=conf_parser.get_go_merge_min_num_terms(),
                 merge_min_distance_from_root=conf_parser.get_go_merge_min_distance_from_root(),
-                merge_algorithm=conf_parser.get_go_merge_algorithm(),
                 desc_stats=gene_desc.stats, go_terms_replacement_dict=conf_parser.get_go_rename_terms())
             if sentences:
                 joined_sent = []
