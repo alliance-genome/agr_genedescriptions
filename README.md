@@ -22,8 +22,8 @@ TBD
 
 ### Configuring the main script
 
-the main script can be configured through a configuration file in .ini format. The default file is *genedesc.ini*, but a
-different file can be provided by the argument -c.
+the main script can be configured through a configuration file in .yaml format. The default file is *genedesc.yaml*,
+but a different file can be provided by using the argument -c.
 
 #### Species
 
