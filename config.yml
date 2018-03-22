@@ -216,7 +216,7 @@ go_sentences_options:
           special_cases:
         - aspect: C
           group: EXPERIMENTAL
-          prefix: "localizes to the"
+          prefix: "localizes to"
           postfix: ""
           special_cases:
               - id: 1
@@ -225,7 +225,7 @@ go_sentences_options:
                 postfix: ""
         - aspect: C
           group: HIGH_THROUGHPUT_EXPERIMENTAL
-          prefix: "localizes to the"
+          prefix: "localizes to"
           postfix: ""
           special_cases:
               - id: 1
@@ -234,7 +234,7 @@ go_sentences_options:
                 postfix: ""
         - aspect: C
           group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
-          prefix: "predicted to localize to the"
+          prefix: "predicted to localize to"
           postfix: ""
           special_cases:
               - id: 1
@@ -243,7 +243,7 @@ go_sentences_options:
                 postfix: ""
         - aspect: C
           group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
-          prefix: "predicted to localize to the"
+          prefix: "predicted to localize to"
           postfix: ""
           special_cases:
               - id: 1
@@ -256,7 +256,11 @@ go_sentences_options:
     merge_if_more_than_terms: 3
     merge_min_distance_from_root: 
         F: 3
-        P: 3
+        P: 4
+        C: 5
+    merge_max_distance_from_leaf:
+        F: 5
+        P: 5
         C: 5
 
 

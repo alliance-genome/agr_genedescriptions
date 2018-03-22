@@ -181,7 +181,8 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
                           go_prepostfix_special_cases_sent_map: Dict[Tuple[str, str], Tuple[int, str, str, str]],
                           evidence_codes_groups_map: Dict[str, str], remove_parent_terms: bool = True,
                           merge_num_terms_threshold: int = 3,
-                          merge_min_distance_from_root: dict = None,  desc_stats: SingleDescStats = None,
+                          merge_min_distance_from_root: dict = None, merge_max_distance_from_leaf: dict = None,
+                          desc_stats: SingleDescStats = None,
                           go_terms_replacement_dict: Dict[str, str] = None) -> GOSentencesCollection:
     """generate GO sentences from a list of GO annotations
 
@@ -211,6 +212,10 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
         during merging operations. Three values must be provided in the form of a dictionary with keys 'F', 'P', and
         'C' for go aspect names and values integers indicating the threshold for each aspect
     :type merge_min_distance_from_root: dict
+    :param merge_max_distance_from_leaf: maximum distance from leaf terms for the selection of common ancestors
+        during merging operations. Three values must be provided in the form of a dictionary with keys 'F', 'P', and
+        'C' for go aspect names and values integers indicating the threshold for each aspect
+    :type merge_min_distance_from_root: dict
     :param desc_stats: an object containing the description statistics where to save the total number of annotations
         for the gene
     :type desc_stats: SingleDescStats
@@ -222,6 +227,8 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
     if len(go_annotations) > 0:
         if not merge_min_distance_from_root:
             merge_min_distance_from_root = {'F': 1, 'P': 1, 'C': 2}
+        if not merge_max_distance_from_leaf:
+            merge_max_distance_from_leaf = {'F': None, 'P': None, 'C': None}
         go_terms_groups = defaultdict(set)
         for annotation in go_annotations:
             if annotation["Evidence"] in evidence_codes_groups_map:
@@ -265,6 +272,7 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
                 merged_ids_covered_subsets = get_merged_term_ids_by_common_ancestor_from_term_names(
                     go_terms_names=go_term_names, term_ids_dict=term_ids_dict, ontology=go_ontology,
                     min_distance_from_root=merge_min_distance_from_root[go_aspect],
+                    max_distance_from_leaf=merge_max_distance_from_leaf[go_aspect],
                     min_number_of_terms=merge_num_terms_threshold)
                 if len(merged_ids_covered_subsets.keys()) <= merge_num_terms_threshold:
                     merged_ids = list(merged_ids_covered_subsets.keys())
@@ -349,9 +357,11 @@ def _get_single_go_sentence(go_term_names: List[str], go_term_ids_dict: Dict[str
         elif go_aspect == "P":
             others_word = "processes"
         elif go_aspect == "C":
-            others_word = "components"
+            others_word = "cellular components"
         if add_others:
-            additional_prefix += " a variety of " + others_word + ", including"
+            additional_prefix += " several " + others_word + ", including"
+        elif go_aspect == "C":
+            additional_prefix += " the"
         postfix = go_prepostfix_sentences_map[(go_aspect, evidence_group)][1]
         return GOSentence(prefix=prefix, terms=go_term_names, postfix=postfix,
                           term_ids_dict=go_term_ids_dict, text=compose_go_sentence(prefix=prefix,

@@ -177,6 +177,9 @@ class GenedescConfigParser(object):
     def get_go_merge_min_distance_from_root(self):
         return self.config["go_sentences_options"]["merge_min_distance_from_root"]
 
+    def get_go_merge_max_distance_from_leaf(self):
+        return self.config["go_sentences_options"]["merge_max_distance_from_leaf"]
+
     def get_genedesc_writer(self):
         return self.config["generic_genedesc_writer"]["genedesc_writer"]
 

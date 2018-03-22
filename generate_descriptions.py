@@ -80,6 +80,7 @@ def main():
                 evidence_codes_groups_map=evidence_codes_groups_map, remove_parent_terms=False,
                 merge_num_terms_threshold=conf_parser.get_go_merge_min_num_terms(),
                 merge_min_distance_from_root=conf_parser.get_go_merge_min_distance_from_root(),
+                merge_max_distance_from_leaf=conf_parser.get_go_merge_max_distance_from_leaf(),
                 desc_stats=gene_desc.stats, go_terms_replacement_dict=conf_parser.get_go_rename_terms())
             if sentences:
                 joined_sent = []
