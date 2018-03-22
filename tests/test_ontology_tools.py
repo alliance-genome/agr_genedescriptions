@@ -3,8 +3,7 @@ import os
 
 from config_parser import GenedescConfigParser
 from data_fetcher import WBRawDataFetcher
-from descriptions_rules import generate_go_sentences
-from ontology_tools import calculate_nodes_distance_matrix, get_merged_term_ids_by_set_covering
+from ontology_tools import get_merged_term_ids_by_set_covering, get_nodes_distance_matrix
 
 
 class TestDescriptionsRules(unittest.TestCase):
@@ -39,7 +38,7 @@ class TestDescriptionsRules(unittest.TestCase):
         sentences = []
         gene = next(df.get_gene_data())
         go_ids = [annotation["GO_ID"] for annotation in df.get_go_annotations(gene.id) if annotation["Aspect"] == 'P']
-        dist_mat = calculate_nodes_distance_matrix(go_ids, df.get_go_ontology())
+        dist_mat = get_nodes_distance_matrix(go_ids, df.get_go_ontology())
         self.assertTrue(True)
 
     def test_get_merged_term_ids_by_set_covering(self):
