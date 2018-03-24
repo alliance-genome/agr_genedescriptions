@@ -315,6 +315,7 @@ def compose_go_sentence(prefix: str, additional_prefix: str, go_term_names: List
     :return: the text of the go sentence
     :rtype: str"""
     prefix = prefix + additional_prefix + " "
+    go_term_names = sorted(go_term_names)
     if postfix != "":
         postfix = " " + postfix
     if len(go_term_names) > 2:
