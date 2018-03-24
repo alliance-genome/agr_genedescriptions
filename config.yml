@@ -37,6 +37,11 @@ agr_data_fetcher:
     release: "1.0"
     organisms_to_process:
         - wb
+        - fb
+        - zfin
+        - sgd
+        - rgd
+        - mgi
     organisms:
         wb:
             name: "c_elegans"
