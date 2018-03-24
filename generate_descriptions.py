@@ -77,7 +77,8 @@ def main():
                 evidence_groups_priority_list=evidence_groups_priority_list,
                 go_prepostfix_sentences_map=go_prepostfix_sentences_map,
                 go_prepostfix_special_cases_sent_map=go_prepostfix_special_cases_sent_map,
-                evidence_codes_groups_map=evidence_codes_groups_map, remove_parent_terms=False,
+                evidence_codes_groups_map=evidence_codes_groups_map,
+                remove_parent_terms=conf_parser.get_go_remove_parents_if_children_are_present(),
                 merge_num_terms_threshold=conf_parser.get_go_merge_min_num_terms(),
                 merge_min_distance_from_root=conf_parser.get_go_merge_min_distance_from_root(),
                 merge_max_distance_from_leaf=conf_parser.get_go_merge_max_distance_from_leaf(),
@@ -101,7 +102,8 @@ def main():
                     joined_sent.append(comp_sent)
 
                 go_desc = "; ".join(joined_sent) + "."
-                gene_desc.description = go_desc.capitalize()
+                if len(go_desc) > 0:
+                    gene_desc.description = go_desc[0].upper() + go_desc[1:]
             else:
                 gene_desc.description = "No description available"
             desc_writer.add_gene_desc(gene_desc)

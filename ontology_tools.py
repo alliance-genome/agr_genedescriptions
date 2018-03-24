@@ -17,9 +17,9 @@ def get_all_go_parent_ids(go_id: str, ontology) -> List[str]:
     :rtype: List[str]
     """
     parent_ids = []
-    for parent in ontology.query_term(go_id).parents:
+    for parent in ontology.query_term(go_id).get_parents():
         # do not return root terms
-        if len(ontology.query_term(parent.id).parents) > 0:
+        if len(ontology.query_term(parent.id).get_parents()) > 0:
             parent_ids.append(parent.id)
             parent_ids.extend(get_all_go_parent_ids(parent.id, ontology))
     return parent_ids
@@ -50,7 +50,7 @@ def get_all_term_paths_to_root(go_id: str, ontology, min_distance_from_root: int
     if term_properties.depth >= min_distance_from_root and (not max_distance_from_leaf or
                                                             len(previous_path) < max_distance_from_leaf):
         new_path.append(term_properties.id)
-        parents = term_properties.parents
+        parents = term_properties.get_parents()
         if len(parents) > 0:
             # go up the tree, following a depth first visit
             paths_to_return = set()

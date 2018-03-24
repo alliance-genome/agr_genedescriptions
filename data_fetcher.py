@@ -6,7 +6,9 @@ import shutil
 import os
 import logging
 import re
+from itertools import chain
 
+import goatools
 from goatools.obo_parser import GODag
 from Bio.UniProt.GOA import gafiterator
 from abc import ABCMeta, abstractmethod
@@ -16,6 +18,11 @@ from typing import List, Iterable, Dict
 from descriptions_writer import SingleDescStats
 
 Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
+
+
+def get_parents(self):
+    """Return parent GO IDs."""
+    return set([parent for parent in chain(self.parents, getattr(self, "relationship", defaultdict(set))["part_of"])])
 
 
 class RawDataFetcher(metaclass=ABCMeta):
@@ -99,14 +106,18 @@ class RawDataFetcher(metaclass=ABCMeta):
         """read go data and gene ontology. After calling this function, go annotations containing mapped go names can
         be retrieved by using the :meth:`data_fetcher.WBRawDataFetcher.get_go_annotations` function
         """
+        goatools.obo_parser.GOTerm.get_parents = get_parents
         self.go_ontology = GODag(self._get_cached_file(file_source_url=self.go_ontology_url,
-                                                       cache_path=self.go_ontology_cache_path))
+                                                       cache_path=self.go_ontology_cache_path),
+                                 optional_attrs=["relationship"])
         if self.anatomy_ontology_url != "":
             self.an_ontology = GODag(self._get_cached_file(file_source_url=self.anatomy_ontology_url,
-                                                           cache_path=self.anatomy_ontology_cache_path))
+                                                           cache_path=self.anatomy_ontology_cache_path),
+                                     optional_attrs=["relationship"])
         if self.development_ontology_url != "":
             self.ls_ontology = GODag(self._get_cached_file(file_source_url=self.development_ontology_url,
-                                                           cache_path=self.development_ontology_cache_path))
+                                                           cache_path=self.development_ontology_cache_path),
+                                     optional_attrs=["relationship"])
         if self.chebi_file_url != "":
             self.chebi_ontology = GODag(self._get_cached_file(file_source_url=self.chebi_file_url,
                                                               cache_path=self.chebi_file_cache_path))
