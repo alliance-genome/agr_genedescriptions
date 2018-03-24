@@ -121,7 +121,7 @@ def get_merged_term_ids_by_common_ancestor_from_term_names(go_terms_names: List[
                 ancestor_paths[path[-1]].append(path)
         # step 2: merge terms and keep common ancestors
         for go_term_id in [term_ids_dict[term_name] for term_name in go_terms_names]:
-            term_paths_copy = term_paths[go_term_id].copy()
+            term_paths_copy = sorted(term_paths[go_term_id].copy(), key=lambda x: len(x))
             while len(term_paths_copy) > 0:
                 curr_path = list(term_paths_copy.pop())
                 selected_highest_ancestor = curr_path.pop()
@@ -138,14 +138,14 @@ def get_merged_term_ids_by_common_ancestor_from_term_names(go_terms_names: List[
                         while len(curr_path) > 1:
                             i -= 1
                             curr_highest_ancestor = curr_path.pop()
-                            if not all(map(lambda x: len(x) >= - i, related_paths)) or not \
-                                    all(map(lambda x: x[i] == curr_highest_ancestor, related_paths)):
+                            if not all(map(lambda x: len(x) >= - i, related_paths)):
                                 break
-                            selected_highest_ancestor = curr_highest_ancestor
-                            if selected_highest_ancestor in ancestor_paths:
-                                del ancestor_paths[selected_highest_ancestor]
-                            for path in related_paths:
-                                term_paths[path[0]].discard(path)
+                            if all(map(lambda x: x[i] == curr_highest_ancestor, related_paths)):
+                                selected_highest_ancestor = curr_highest_ancestor
+                                if selected_highest_ancestor in ancestor_paths:
+                                    del ancestor_paths[selected_highest_ancestor]
+                                for path in related_paths:
+                                    term_paths[path[0]].discard(path)
                 final_terms_set[selected_highest_ancestor] = covered_nodes_set
                 for path in related_paths:
                     term_paths[path[0]].discard(path)
@@ -207,8 +207,8 @@ def find_set_covering(subsets: List[Tuple[str, Set[str]]], costs: List[float] = 
             effect_sets = sorted([(c / len(s[1] - included_elmts), s[1], s[0]) for s, c in zip(subsets, costs)],
                                  key=lambda x: x[0], reverse=True)
         else:
-            effect_sets = sorted([(len(s[1] - included_elmts), s[1], s[0]) for s in subsets], key=lambda x: x[0],
-                                 reverse=True)
+            effect_sets = sorted([(len(s[1] - included_elmts), s[1], s[0]) for s in subsets],
+                                 key=lambda x: (x[0], x[2]), reverse=True)
         included_elmts |= effect_sets[0][1]
         included_sets.append(effect_sets[0][2])
     logging.debug("finished set covering optimization")
