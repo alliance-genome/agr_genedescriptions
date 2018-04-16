@@ -183,7 +183,9 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
                           merge_num_terms_threshold: int = 3,
                           merge_min_distance_from_root: dict = None,
                           desc_stats: SingleDescStats = None,
-                          go_terms_replacement_dict: Dict[str, str] = None) -> GOSentencesCollection:
+                          go_terms_replacement_dict: Dict[str, str] = None,
+                          truncate_others_generic_word: str = "several",
+                          truncate_others_aspect_words: Dict[str, str] = None) -> GOSentencesCollection:
     """generate GO sentences from a list of GO annotations
 
     :param go_annotations: the list of GO annotations for a given gene
@@ -217,12 +219,20 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
     :type desc_stats: SingleDescStats
     :param go_terms_replacement_dict: replacement dictionary for terms
     :type go_terms_replacement_dict: Dict[str, str]
+    :param truncate_others_generic_word: a generic word to indicate that the set of terms reported in the sentence is
+        only a subset of the original terms, e.g., 'several'
+    :type truncate_others_generic_word: str
+    :param truncate_others_aspect_words: one word for each aspect describing the kind of terms that are included in the
+        aspect
+    :type truncate_others_aspect_words: Dict[str, str]
     :return: a collection of GO sentences
     :rtype: GOSentencesCollection
     """
     if len(go_annotations) > 0:
         if not merge_min_distance_from_root:
             merge_min_distance_from_root = {'F': 1, 'P': 1, 'C': 2}
+        if not truncate_others_aspect_words:
+            truncate_others_aspect_words = {'F': 'functions', 'P': 'processes', 'C': 'components'}
         go_terms_groups = defaultdict(set)
         for annotation in go_annotations:
             if annotation["Evidence"] in evidence_codes_groups_map:
@@ -292,7 +302,9 @@ def generate_go_sentences(go_annotations: List[dict], go_ontology, evidence_grou
                                                            evidence_group=evidence_group,
                                                            go_prepostfix_sentences_map=go_prepostfix_sentences_map,
                                                            terms_merged=True if 0 < merge_num_terms_threshold < len(
-                                                               go_term_names) else False, add_others=add_others))
+                                                               go_term_names) else False, add_others=add_others,
+                                                           truncate_others_generic_word=truncate_others_generic_word,
+                                                           truncate_others_aspect_words=truncate_others_aspect_words))
         return sentences
 
 
@@ -305,6 +317,8 @@ def compose_go_sentence(prefix: str, additional_prefix: str, go_term_names: List
     :type go_term_names: List[str]
     :param postfix: the postfix of the sentence
     :type postfix: str
+    :param additional_prefix: an additional prefix to be used for special cases
+    :type additional_prefix: str
     :return: the text of the go sentence
     :rtype: str"""
     prefix = prefix + additional_prefix + " "
@@ -322,7 +336,9 @@ def compose_go_sentence(prefix: str, additional_prefix: str, go_term_names: List
 def _get_single_go_sentence(go_term_names: List[str], go_term_ids_dict: Dict[str, str], go_aspect: str,
                             evidence_group: str,
                             go_prepostfix_sentences_map: Dict[Tuple[str, str], Tuple[str, str]],
-                            terms_merged: bool = False, add_others: bool = False) -> Union[GOSentence, None]:
+                            terms_merged: bool = False, add_others: bool = False,
+                            truncate_others_generic_word: str = "several",
+                            truncate_others_aspect_words: Dict[str, str] = None) -> Union[GOSentence, None]:
     """build a go sentence
 
     :param go_term_names: list of go term names to be combined in the sentence
@@ -339,6 +355,12 @@ def _get_single_go_sentence(go_term_names: List[str], go_term_ids_dict: Dict[str
     :type terms_merged: bool
     :param add_others: whether to say that there are other terms which have been omitted from the sentence
     :type add_others: bool
+    :param truncate_others_generic_word: a generic word to indicate that the set of terms reported in the sentence is
+        only a subset of the original terms, e.g., 'several'
+    :type truncate_others_generic_word: str
+    :param truncate_others_aspect_words: one word for each aspect describing the kind of terms that are included in the
+        aspect
+    :type truncate_others_aspect_words: Dict[str, str]
     :return: the combined go sentence
     :rtype: Union[GOSentence, None]
     """
@@ -346,15 +368,11 @@ def _get_single_go_sentence(go_term_names: List[str], go_term_ids_dict: Dict[str
         prefix = go_prepostfix_sentences_map[(go_aspect, evidence_group)][0]
         additional_prefix = ""
         others_word = "entities"
-        if go_aspect == "F":
-            others_word = "functions"
-        elif go_aspect == "P":
-            others_word = "processes"
-        elif go_aspect == "C":
-            others_word = "cellular components"
+        if go_aspect in truncate_others_aspect_words:
+            others_word = truncate_others_aspect_words[go_aspect]
         if add_others:
-            additional_prefix += " several " + others_word + ", including"
-        elif go_aspect == "C":
+            additional_prefix += " " + truncate_others_generic_word + " " + others_word + ", including"
+        if go_aspect == "C":
             additional_prefix += " the"
         postfix = go_prepostfix_sentences_map[(go_aspect, evidence_group)][1]
         return GOSentence(prefix=prefix, terms=go_term_names, postfix=postfix,

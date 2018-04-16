@@ -166,18 +166,63 @@ class GenedescConfigParser(object):
         return self.config["go_sentences_options"]["rename_terms"]
 
     def get_go_remove_parents_if_children_are_present(self) -> bool:
+        """get the value of the option to remove parent terms from sentences if children are present in the term set
+
+        :return: the value of the option
+        :rtype: bool
+        """
         return self.config["go_sentences_options"]["remove_parents_if_children_are_present"]
 
-    def get_go_merge_terms_by_common_ancestors(self) -> bool:
-        return self.config["go_sentences_options"]["merge_terms_by_common_ancestors"]
+    def get_go_trim_terms_by_common_ancestors(self) -> bool:
+        """get the value of the option to trim terms by common ancestors
 
-    def get_go_merge_min_num_terms(self) -> int:
-        return self.config["go_sentences_options"]["merge_if_more_than_terms"]
+        :return: the value of the option
+        :rtype: bool
+        """
+        return self.config["go_sentences_options"]["trim_terms_by_common_ancestors"]
 
-    def get_go_merge_min_distance_from_root(self):
-        return self.config["go_sentences_options"]["merge_min_distance_from_root"]
+    def get_go_trim_min_num_terms(self) -> int:
+        """get the threshold value that indicates the minimum number of terms per go aspect for which trimming has to
+        be applied
+
+        :return: the value of the option
+        :rtype: int
+        """
+        return self.config["go_sentences_options"]["trim_if_more_than_terms"]
+
+    def get_go_trim_min_distance_from_root(self):
+        """get the minimum distance from root in the GO ontology to be considered while looking for common ancestors
+        between terms
+
+        :return: the distances for all go aspects
+        :rtype: Dict[str, int]
+        """
+        return self.config["go_sentences_options"]["trim_min_distance_from_root"]
+
+    def get_go_truncate_others_aggregation_word(self) -> str:
+        """get the generic word used to indicate that one or more terms have been omitted from the sentence, e.g.,
+        'several'
+
+        :return: the aggregation word
+        :rtype: str
+        """
+        return self.config["go_sentences_options"]["go_truncate_others_aggregation_word"]
+
+    def get_go_truncate_others_terms(self) -> Dict[str, str]:
+        """get the specific words used for each aspect to indicate that one or more terms have been omitted from the
+        sentence, e.g., 'functions'
+
+        :return: a dictionary containing one word for each aspect
+        :rtype: Dict[str, int]
+        """
+        return self.config["go_sentences_options"]["go_truncate_others_terms"]
 
     def get_genedesc_writer(self):
+        """get the type of writer
+
+        :return: the type of writer
+        :rtype: str
+        """
         return self.config["generic_genedesc_writer"]["genedesc_writer"]
 
     def get_genedesc_output_dir(self, genedesc_writer: str):

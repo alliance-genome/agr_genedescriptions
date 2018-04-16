@@ -79,9 +79,11 @@ def main():
                 go_prepostfix_special_cases_sent_map=go_prepostfix_special_cases_sent_map,
                 evidence_codes_groups_map=evidence_codes_groups_map,
                 remove_parent_terms=conf_parser.get_go_remove_parents_if_children_are_present(),
-                merge_num_terms_threshold=conf_parser.get_go_merge_min_num_terms(),
-                merge_min_distance_from_root=conf_parser.get_go_merge_min_distance_from_root(),
-                desc_stats=gene_desc.stats, go_terms_replacement_dict=conf_parser.get_go_rename_terms())
+                merge_num_terms_threshold=conf_parser.get_go_trim_min_num_terms(),
+                merge_min_distance_from_root=conf_parser.get_go_trim_min_distance_from_root(),
+                desc_stats=gene_desc.stats, go_terms_replacement_dict=conf_parser.get_go_rename_terms(),
+                truncate_others_generic_word=conf_parser.get_go_truncate_others_aggregation_word(),
+                truncate_others_aspect_words=conf_parser.get_go_truncate_others_terms())
             if sentences:
                 joined_sent = []
                 func_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
