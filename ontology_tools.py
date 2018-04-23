@@ -148,42 +148,20 @@ def get_merged_term_ids_by_common_ancestor_from_term_names(go_terms_names: List[
         return {term_ids_dict[term]: set(term_ids_dict[term]) for term in go_terms_names}
 
 
-def get_all_parents_with_distances(nodes: List[str], ontology):
-    parent_distances = defaultdict(lambda: defaultdict(int))
-    for node_id in nodes:
-        for path in get_all_term_paths_to_root(go_id=node_id, ontology=ontology):
-            for dist, parent in enumerate(path[1:], 1):
-                parent_distances[node_id][parent] = parent_distances[node_id][parent] if \
-                    0 < parent_distances[node_id][parent] < dist else dist
-    return parent_distances
+def find_set_covering(subsets: List[Tuple[str, Set[str]]], costs: List[float] = None, max_num_subsets: int = None) -> \
+        List[str]:
+    """greedy algorithm to solve set covering problem
 
-
-def get_distance_between_node_pair(node1: str, node2: str, ontology,
-                                   parent_distances: Dict[str, Dict[str, int]] = None):
-    if not parent_distances:
-        parent_distances = get_all_parents_with_distances([node1, node2], ontology)
-    if node2 in parent_distances[node1]:
-        return parent_distances[node1][node2]
-    elif node1 in parent_distances[node2]:
-        return parent_distances[node2][node1]
-    else:
-        common_parents = set(parent_distances[node1].keys()) & set(parent_distances[node2].keys())
-        return min([parent_distances[node1][cp] + parent_distances[node2][cp] for cp in common_parents])
-
-
-def get_nodes_distance_matrix(node_ids: List[str], ontology):
-    parent_distances = get_all_parents_with_distances(node_ids, ontology)
-    node_ids_copy = node_ids.copy()
-    dist_mat = pd.DataFrame(index=node_ids, columns=node_ids)
-    while len(node_ids_copy) > 0:
-        curr_node = node_ids_copy.pop()
-        for other_node in node_ids_copy:
-            dist = get_distance_between_node_pair(curr_node, other_node, ontology, parent_distances)
-            dist_mat[curr_node][other_node] = dist
-            dist_mat[other_node][curr_node] = dist
-
-
-def find_set_covering(subsets: List[Tuple[str, Set[str]]], costs: List[float] = None, max_num_subsets: int = None):
+    :param subsets: list of subsets, each of which must contain a tuple with the first element being the ID of the
+        subset and the second the actual set of elements
+    :type subsets: List[Tuple[str, Set[str]]]
+    :param costs: list of costs of the subsets
+    :type costs: List[float]
+    :param max_num_subsets: maximum number of subsets in the final list
+    :type max_num_subsets: int
+    :return: the list of IDs of the subsets that maximize coverage with respect to the elements in the universe
+    :rtype: List[str]
+    """
     logging.debug("starting set covering optimization")
     if costs and len(costs) != len(subsets) and any(map(lambda x: x <= 0, costs)):
         return None
@@ -202,35 +180,6 @@ def find_set_covering(subsets: List[Tuple[str, Set[str]]], costs: List[float] = 
         included_sets.append(effect_sets[0][2])
     logging.debug("finished set covering optimization")
     return included_sets
-
-
-def update_final_cost_subgraph(node: goatools.obo_parser.GOTerm, final_node_cost: Dict, base_node_cost: Dict):
-    if node.name in final_node_cost:
-        return final_node_cost[node.name]
-    node_cost = base_node_cost[node.name]
-    for child in node.children:
-        if child.name not in final_node_cost:
-            update_final_cost_subgraph(child, final_node_cost, base_node_cost)
-        node_cost += final_node_cost[child.name]
-    final_node_cost[node.name] = node_cost
-
-
-def get_nodes_cost_based_on_go_annotations(annotations: Dict[str, List[Dict[str, Any]]], ontology,
-                                           root_nodes: List[str]):
-    base_node_cost = defaultdict(int)
-    final_node_cost = {}
-    for gene_annotations in annotations.values():
-        for annotation in gene_annotations:
-            base_node_cost[annotation["GO_ID"]] += 1
-    for root_node in root_nodes:
-        update_final_cost_subgraph(ontology.query_term(root_node), final_node_cost, base_node_cost)
-    return final_node_cost
-
-
-def get_merged_term_ids_by_set_covering(annotations, ontology, root_nodes):
-    node_cost = get_nodes_cost_based_on_go_annotations(annotations, ontology, root_nodes)
-
-    pass
 
 
 
