@@ -5,8 +5,11 @@ from typing import List
 import numpy as np
 import copy
 
+from data_fetcher import AGRDBDataFetcher
+
 
 class SingleDescStats(object):
+    """statistics for a single gene description"""
     def __init__(self):
         self.num_terms_notrim_nogroup_priority_nomerge = defaultdict(int)
         self.num_terms_trim_nogroup_priority_nomerge = defaultdict(int)
@@ -19,7 +22,9 @@ class SingleDescStats(object):
 
 
 class GeneDesc(object):
-    def __init__(self, gene_name: str = "", description: str = "", stats: SingleDescStats = None):
+    """gene description"""
+    def __init__(self, gene_id: str, gene_name: str = "", description: str = "", stats: SingleDescStats = None):
+        self.gene_id = gene_id
         self.gene_name = gene_name
         self.description = description
         if stats:
@@ -29,6 +34,7 @@ class GeneDesc(object):
 
 
 class DescriptionsStats(object):
+    """overall statistics for a set of gene descriptions"""
     def __init__(self):
         self.num_genes_with_go_sentence = 0
         self.average_num_go_terms_if_desc_trim_group_priority_merge = 0
@@ -71,6 +77,7 @@ class DescriptionsWriter(metaclass=ABCMeta):
 
 
 class JsonGDWriter(DescriptionsWriter):
+    """generate gene descriptions in json format"""
     def __init__(self):
         super().__init__()
 
@@ -102,3 +109,20 @@ class JsonGDWriter(DescriptionsWriter):
                 del gene_desc["stats"]
         with open(file_path, "w") as outfile:
             json.dump(vars(json_serializable_self), outfile, indent=indent)
+
+
+class Neo4jGDWriter(DescriptionsWriter):
+    """write gene descriptions to AGR neo4j database"""
+
+    def __init__(self):
+        super().__init__()
+
+    def write(self, db_graph):
+        query = """
+            UNWIND $descriptions as row 
+
+            MATCH (g:GOTerm:Ontology {primaryKey:row.gene_id})
+                SET g.automatedGeneSynopsis = row.description
+            """
+        AGRDBDataFetcher.query_db(db_graph=db_graph, query=query, parameters={"descriptions": self.data})
+

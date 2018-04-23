@@ -4,3 +4,4 @@ biopython
 bcbio-gff
 inflect
 PyYAML
+neo4j-driver

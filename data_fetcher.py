@@ -13,7 +13,7 @@ from goatools.obo_parser import GODag
 from Bio.UniProt.GOA import gafiterator
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple, defaultdict
-from typing import List, Iterable, Dict
+from typing import List, Iterable, Dict, Tuple
 
 from descriptions_writer import SingleDescStats
 
@@ -25,15 +25,160 @@ def get_parents(self):
     return set([parent for parent in chain(self.parents, getattr(self, "relationship", defaultdict(set))["part_of"])])
 
 
-class RawDataFetcher(metaclass=ABCMeta):
+class GOTerm(object):
+    """go term with the same properties and methods defined by goatools GOTerm
+
+    only the properties used for gene descriptions are implemented
+    """
+
+    def __init__(self, name: str, depth: int, node_id: str, parents: List, children: List, ontology):
+        self.depth = depth
+        self.name = name
+        self.id = node_id
+        self._parents = parents
+        self._children = children
+        self._ontology = ontology
+
+    def get_parents(self) -> List["GOTerm"]:
+        """get the parent terms of the current term
+
+        :return: the list of parents of the term
+        :rtype: List[GOTerm]
+        """
+        return [self._ontology.query_term(parent_id) for parent_id in self._parents]
+
+    def get_children(self) -> List["GOTerm"]:
+        """get the child terms of the current term
+
+        :return: the list of children of the term
+        :rtype: List[GOTerm]
+        """
+        return [self._ontology.query_term(child_id) for child_id in self._children]
+
+
+class Neo4jGOOntology(object):
+    """ontology with the same properties and methods defined by goatools GODag
+
+    only the properties used for gene descriptions are implemented
+    """
+
+    def __init__(self, root_terms: List[Tuple[str, str, List[str]]], node_children_dict, node_parents_dict, node_names,
+                 alt_ids):
+        self.node_children_dict = node_children_dict
+        self.node_parents_dict = node_parents_dict
+        self.node_depth = defaultdict(int)
+        self.node_names = node_names
+        self.alt_ids = alt_ids
+        for root_term in root_terms:
+            self.calculate_all_depths_in_branch(root_term[0])
+
+    def calculate_all_depths_in_branch(self, root_id: str, current_depth: int = 0):
+        """calculate and set depth recursively for all terms in a branch
+
+        :param root_id: the ID of the root term of the branch to process
+        :type root_id: str
+        :param current_depth: the current depth in the ontology
+        :type current_depth: int
+        """
+        self.node_depth[root_id] = max(self.node_depth[root_id], current_depth)
+        for child_id in self.node_children_dict[root_id]:
+            self.calculate_all_depths_in_branch(root_id=child_id, current_depth=current_depth + 1)
+
+    def query_term(self, term_id: str):
+        """retrieve a term from its ID
+
+        :param term_id: the ID of the term
+        :type term_id: str
+        :return: the term
+        :rtype: GOTerm
+        """
+        if term_id not in self.node_names:
+            if term_id in self.alt_ids:
+                term_id = self.alt_ids[term_id]
+            else:
+                return None
+        return GOTerm(name=self.node_names[term_id], depth=self.node_depth[term_id], node_id=term_id,
+                      parents=self.node_parents_dict[term_id], children=self.node_children_dict[term_id], ontology=self)
+
+
+class DataFetcher(metaclass=ABCMeta):
+    """retrieve data for gene descriptions from different sources"""
+
+    @abstractmethod
+    def __init__(self, go_terms_exclusion_list: List[str], go_terms_replacement_dict: Dict[str, str]):
+        self.go_data = defaultdict(list)
+        self.go_ontology = None
+        self.go_terms_exclusion_list = go_terms_exclusion_list
+        self.go_terms_replacement_dict = go_terms_replacement_dict
+
+    @abstractmethod
+    def get_gene_data(self) -> Gene:
+        pass
+
+    @abstractmethod
+    def load_go_data(self) -> None:
+        pass
+
+    def get_go_annotations(self, geneid: str, include_obsolete: bool = False, include_negative_results: bool = False,
+                           priority_list: Iterable = ("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "IC", "ISS", "ISO",
+                                                      "ISA", "ISM", "IGC", "IBA", "IBD", "IKR", "IRD", "RCA", "IEA"),
+                           desc_stats: SingleDescStats = None) -> List[dict]:
+        """
+        retrieve go annotations for a given gene id and for a given aspect. The annotations are unique for each pair
+        <gene_id, go_term_id>. This means that when multiple annotations for the same pair are found in the go data, the
+        one with the evidence code with highest priority is returned (see the *priority_list* parameter to set the
+        priority according to evidence codes)
+
+        :param geneid: the id of the gene related to the annotations to retrieve, in standard format
+        :type geneid: str
+        :param include_obsolete: whether to include obsolete annotations
+        :type include_obsolete: bool
+        :param include_negative_results: whether to include negative results
+        :type include_negative_results: bool
+        :param priority_list: the priority list for the evidence codes. If multiple annotations with the same go_term
+            are found, only the one with highest priority is returned. The first element in the list has the highest
+            priority, whereas the last has the lowest. Only annotations with evidence codes in the priority list are
+            returned. All other annotations are ignored
+        :type priority_list: List[str]
+        :param desc_stats: an object containing the description statistics where to save the total number of annotations
+            for the gene
+        :type desc_stats: SingleDescStats
+        :return: the list of go annotations for the given gene
+        :rtype: List[GOAnnotation]
+        """
+        priority_map = dict(zip(priority_list, reversed(range(len(list(priority_list))))))
+        annotations = [annotation for annotation in self.go_data[geneid] if (include_obsolete or
+                       not annotation["Is_Obsolete"]) and (include_negative_results or "NOT" not in
+                                                           annotation["Qualifier"])]
+        if desc_stats:
+            desc_stats.total_num_go_annotations = len(annotations)
+        go_id_selected_annotation = {}
+        for annotation in annotations:
+            if annotation["Evidence"] in priority_map.keys():
+                if annotation["GO_ID"] in go_id_selected_annotation:
+                    if priority_map[annotation["Evidence"]] > \
+                            priority_map[go_id_selected_annotation[annotation["GO_ID"]]["Evidence"]]:
+                        go_id_selected_annotation[annotation["GO_ID"]] = annotation
+                else:
+                    go_id_selected_annotation[annotation["GO_ID"]] = annotation
+        if desc_stats:
+            desc_stats.num_prioritized_go_annotations = len(go_id_selected_annotation.keys())
+        return [annotation for annotation in go_id_selected_annotation.values()]
+
+    def get_go_ontology(self):
+        return self.go_ontology
+
+
+class RawDataFetcher(DataFetcher):
+    """retrieve data for gene descriptions from raw data files"""
 
     @abstractmethod
     def __init__(self, go_terms_exclusion_list: List[str], go_terms_replacement_dict: Dict[str, str],
                  cache_location: str, use_cache: bool = False):
+        super().__init__(go_terms_exclusion_list=go_terms_exclusion_list,
+                         go_terms_replacement_dict=go_terms_replacement_dict)
         self.chebi_file_url = ""
         self.chebi_file_cache_path = ""
-        self.go_data = defaultdict(list)
-        self.go_ontology = None
         self.ls_ontology = None
         self.an_ontology = None
         self.gene_data = {}
@@ -49,8 +194,6 @@ class RawDataFetcher(metaclass=ABCMeta):
         self.anatomy_ontology_url = ""
         self.go_annotations_cache_path = ""
         self.go_annotations_url = ""
-        self.go_terms_exclusion_list = go_terms_exclusion_list
-        self.go_terms_replacement_dict = go_terms_replacement_dict
         self.go_id_name = "DB_Object_ID"
 
     @staticmethod
@@ -155,58 +298,10 @@ class RawDataFetcher(metaclass=ABCMeta):
                             "Found GO annotation with Annotation_Extension: " + str(mapped_annotation))
                     self.go_data[annotation[self.go_id_name]].append(mapped_annotation)
 
-    def get_go_annotations(self, geneid: str, include_obsolete: bool = False, include_negative_results: bool = False,
-                           priority_list: Iterable = ("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "IC", "ISS", "ISO",
-                                                      "ISA", "ISM", "IGC", "IBA", "IBD", "IKR", "IRD", "RCA", "IEA"),
-                           desc_stats: SingleDescStats = None) -> List[dict]:
-        """
-        retrieve go annotations for a given gene id and for a given aspect. The annotations are unique for each pair
-        <gene_id, go_term_id>. This means that when multiple annotations for the same pair are found in the go data, the
-        one with the evidence code with highest priority is returned (see the *priority_list* parameter to set the
-        priority according to evidence codes)
-
-        :param geneid: the id of the gene related to the annotations to retrieve, in standard format
-        :type geneid: str
-        :param include_obsolete: whether to include obsolete annotations
-        :type include_obsolete: bool
-        :param include_negative_results: whether to include negative results
-        :type include_negative_results: bool
-        :param priority_list: the priority list for the evidence codes. If multiple annotations with the same go_term
-            are found, only the one with highest priority is returned. The first element in the list has the highest
-            priority, whereas the last has the lowest. Only annotations with evidence codes in the priority list are
-            returned. All other annotations are ignored
-        :type priority_list: List[str]
-        :param desc_stats: an object containing the description statistics where to save the total number of annotations
-            for the gene
-        :type desc_stats: SingleDescStats
-        :return: the list of go annotations for the given gene
-        :rtype: List[GOAnnotation]
-        """
-        priority_map = dict(zip(priority_list, reversed(range(len(list(priority_list))))))
-        annotations = [annotation for annotation in self.go_data[geneid] if (include_obsolete or
-                       not annotation["Is_Obsolete"]) and (include_negative_results or "NOT" not in
-                                                           annotation["Qualifier"])]
-        if desc_stats:
-            desc_stats.total_num_go_annotations = len(annotations)
-        go_id_selected_annotation = {}
-        for annotation in annotations:
-            if annotation["Evidence"] in priority_map.keys():
-                if annotation["GO_ID"] in go_id_selected_annotation:
-                    if priority_map[annotation["Evidence"]] > \
-                            priority_map[go_id_selected_annotation[annotation["GO_ID"]]["Evidence"]]:
-                        go_id_selected_annotation[annotation["GO_ID"]] = annotation
-                else:
-                    go_id_selected_annotation[annotation["GO_ID"]] = annotation
-        if desc_stats:
-            desc_stats.num_prioritized_go_annotations = len(go_id_selected_annotation.keys())
-        return [annotation for annotation in go_id_selected_annotation.values()]
-
-    def get_go_ontology(self):
-        return self.go_ontology
-
 
 class WBRawDataFetcher(RawDataFetcher):
     """data fetcher for WormBase raw files for a single species"""
+
     def __init__(self, go_terms_exclusion_list: List[str], go_terms_replacement_dict: Dict[str, str],
                  raw_files_source: str, cache_location: str, release_version: str, species: str, project_id: str,
                  use_cache: bool = False, chebi_file_url: str = ""):
@@ -273,6 +368,7 @@ class WBRawDataFetcher(RawDataFetcher):
 
 class AGRRawDataFetcher(RawDataFetcher):
     """data fetcher for AGR raw files for a single species"""
+
     def __init__(self, go_terms_exclusion_list: List[str], go_terms_replacement_dict: Dict[str, str],
                  raw_files_source: str, cache_location: str, release_version: str, main_file_name: str,
                  bgi_file_name: str, go_annotations_file_name: str, organism_name: str, use_cache: bool = False,
@@ -331,4 +427,111 @@ class AGRRawDataFetcher(RawDataFetcher):
                 self.gene_data[gene["symbol"]] = Gene(gene["symbol"], gene["symbol"], False, False)
 
 
+class AGRDBDataFetcher(DataFetcher):
+    """data fetcher for AGR neo4j database for a single species"""
 
+    def __init__(self, go_terms_exclusion_list: List[str], go_terms_replacement_dict: Dict[str, str],
+                 data_provider: str, db_graph, go_ontology=None):
+        super().__init__(go_terms_exclusion_list=go_terms_exclusion_list,
+                         go_terms_replacement_dict=go_terms_replacement_dict)
+        self.db_graph = db_graph
+        self.data_provider = data_provider
+        self.go_ontology = go_ontology
+
+    @staticmethod
+    def query_db(db_graph, query: str, parameters: Dict = None):
+        """query the neo4j db
+
+        :param db_graph: a neo4j graph database
+        :param query: a cypher
+        :type query: str
+        :param parameters: a dictionary of the parameters of the query
+        :type parameters: Dict
+        """
+        with db_graph.session() as session:
+            with session.begin_transaction() as tx:
+                return_set = tx.run(query, parameters=parameters)
+        return return_set
+
+    def get_gene_data(self):
+        """get all gene data from the fetcher, returning one gene per call
+
+        while reading data for a gene, all related annotations are loaded from neo4j into memory
+
+        :return: data for one gene per each call, including gene_id and gene_name
+        :rtype: Gene
+        """
+        db_query = "match (g:Gene) where g.dataProvider = {dataProvider} return g.symbol, g.primaryKey"
+        result_set = self.query_db(db_graph=self.db_graph, query=db_query,
+                                   parameters={"dataProvider": self.data_provider})
+        for result in result_set:
+            annot_db_query = "match (g:Gene)-[annot:ANNOTATED_TO]->(go_term:GOTerm:Ontology) " \
+                             "where g.primaryKey = {gene_id} " \
+                             "return g.primaryKey, g.symbol, annot.evidence_code, annot.aspect, annot.qualifier, " \
+                             "go_term.primaryKey, go_term.name, go_term.is_obsolete"
+            annot_result_set = self.query_db(db_graph=self.db_graph, query=annot_db_query,
+                                             parameters={"gene_id": result["g.primaryKey"]})
+            for annot in annot_result_set:
+                if not annot["go_term.is_obsolete"] == "true":
+                    onto_node = self.go_ontology.query_term(annot["go_term.primaryKey"])
+                    if onto_node:
+                        self.go_data[result["g.symbol"]].append({
+                            "DB": self.data_provider,
+                            "DB_Object_ID": annot["g.primaryKey"],
+                            "DB_Object_Symbol": annot["g.symbol"],
+                            "Qualifier": annot["annot.qualifier"],
+                            "GO_ID": onto_node.id,
+                            "DB:Reference": None,
+                            "Evidence": annot["annot.evidence_code"],
+                            "With": "",
+                            "Aspect": annot["annot.aspect"],
+                            "DB_Object_Name": None,
+                            "Synonym": None,
+                            "DB_Object_Type": None,
+                            "Taxon_ID": None,
+                            "Date": None,
+                            "Assigned_By": None,
+                            "Annotation_Extension": None,
+                            "Gene_Product_Form_ID": None,
+                            "GO_Name": onto_node.name,
+                            "Is_Obsolete": False
+                        })
+                    else:
+                        logging.warning("Annotated GO Term " + annot["go_term.primaryKey"] + " not found in GO ontology")
+            yield Gene(result["g.primaryKey"], result["g.symbol"], False, False)
+
+    def load_go_data(self):
+        """load GO ontology from neo4j if not already loaded"""
+        if not self.go_ontology:
+
+            # get root terms
+            db_query = "match path=(child:GOTerm:Ontology)-[r:IS_A|PART_OF]->(parent:GOTerm:Ontology) " \
+                       "where size((parent)-[:IS_A|PART_OF]->()) = 0 " \
+                       "return distinct parent.primaryKey, parent.alt_ids, parent.name"
+            result_set = self.query_db(db_graph=self.db_graph, query=db_query)
+            root_terms = []
+            for result in result_set:
+                root_terms.append((result["parent.primaryKey"], result["parent.name"], result["parent.alt_ids"]))
+
+            # cypher query to build go_ontology object
+            db_query = "match (child:GOTerm:Ontology)-[:IS_A|PART_OF]->(parent:GOTerm:Ontology) " \
+                       "return distinct child.primaryKey, child.alt_ids, child.name, parent.primaryKey"
+            result_set = self.query_db(db_graph=self.db_graph, query=db_query)
+            node_parents_dict = defaultdict(list)
+            node_children_dict = defaultdict(list)
+            node_names = {}
+            alt_ids = {}
+            for result in result_set:
+                node_parents_dict[result["child.primaryKey"]].append(result["parent.primaryKey"])
+                node_children_dict[result["parent.primaryKey"]].append(result["child.primaryKey"])
+                node_names[result["child.primaryKey"]] = result["child.name"]
+                for alt_id in list(result["child.alt_ids"]):
+                    alt_ids[alt_id] = result["child.primaryKey"]
+            for root_term_id, root_term_name, root_term_alt_ids in root_terms:
+                node_names[root_term_id] = root_term_name
+                for alt_id in list(root_term_alt_ids):
+                    alt_ids[alt_id] = root_term_id
+
+            self.go_ontology = Neo4jGOOntology(root_terms=root_terms, node_children_dict=node_children_dict,
+                                               node_parents_dict=node_parents_dict, node_names=node_names,
+                                               alt_ids=alt_ids)
