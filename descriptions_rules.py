@@ -1,13 +1,45 @@
 import copy
-import logging
 import inflect
 import re
 from collections import namedtuple
-from descriptions_writer import SingleDescStats
 from ontology_tools import *
 
 GOSentence = namedtuple('GOSentence', ['prefix', 'terms', 'term_ids_dict', 'postfix', 'text', 'go_aspect',
                                        'evidence_group', 'terms_merged', 'additional_prefix'])
+
+
+class SingleDescStats(object):
+    """statistics for a single gene description"""
+    def __init__(self):
+        self.num_terms_notrim_nogroup_priority_nomerge = defaultdict(int)
+        self.num_terms_trim_nogroup_priority_nomerge = defaultdict(int)
+        self.num_terms_trim_group_priority_merge = defaultdict(int)
+        self.total_num_go_annotations = 0
+        self.num_prioritized_go_annotations = 0
+        self.terms_notrim_nogroup_priority_nomerge = defaultdict(list)
+        self.terms_trim_nogroup_priority_nomerge = defaultdict(list)
+        self.terms_trim_group_priority_merge = defaultdict(list)
+
+
+class GeneDesc(object):
+    """gene description"""
+    def __init__(self, gene_id: str, gene_name: str = "", description: str = "", stats: SingleDescStats = None):
+        self.gene_id = gene_id
+        self.gene_name = gene_name
+        self.description = description
+        if stats:
+            self.stats = stats
+        else:
+            self.stats = SingleDescStats()
+
+
+class DescriptionsStats(object):
+    """overall statistics for a set of gene descriptions"""
+    def __init__(self):
+        self.num_genes_with_go_sentence = 0
+        self.average_num_go_terms_if_desc_trim_group_priority_merge = 0
+        self.average_num_go_terms_if_desc_trim_nogroup_priority_nomerge = 0
+        self.average_num_go_terms_if_desc_notrim_nogroup_priority_nomerge = 0
 
 
 class GOSentenceMerger(object):

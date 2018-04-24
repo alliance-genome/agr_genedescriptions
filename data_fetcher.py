@@ -7,15 +7,10 @@ import os
 import logging
 import re
 from itertools import chain
-
-import goatools
-from goatools.obo_parser import GODag
-from Bio.UniProt.GOA import gafiterator
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple, defaultdict
 from typing import List, Iterable, Dict, Tuple
-
-from descriptions_writer import SingleDescStats
+from descriptions_rules import SingleDescStats
 
 Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
 
@@ -23,82 +18,6 @@ Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
 def get_parents(self):
     """Return parent GO IDs."""
     return set([parent for parent in chain(self.parents, getattr(self, "relationship", defaultdict(set))["part_of"])])
-
-
-class GOTerm(object):
-    """go term with the same properties and methods defined by goatools GOTerm
-
-    only the properties used for gene descriptions are implemented
-    """
-
-    def __init__(self, name: str, depth: int, node_id: str, parents: List, children: List, ontology):
-        self.depth = depth
-        self.name = name
-        self.id = node_id
-        self._parents = parents
-        self._children = children
-        self._ontology = ontology
-
-    def get_parents(self) -> List["GOTerm"]:
-        """get the parent terms of the current term
-
-        :return: the list of parents of the term
-        :rtype: List[GOTerm]
-        """
-        return [self._ontology.query_term(parent_id) for parent_id in self._parents]
-
-    def get_children(self) -> List["GOTerm"]:
-        """get the child terms of the current term
-
-        :return: the list of children of the term
-        :rtype: List[GOTerm]
-        """
-        return [self._ontology.query_term(child_id) for child_id in self._children]
-
-
-class Neo4jGOOntology(object):
-    """ontology with the same properties and methods defined by goatools GODag
-
-    only the properties used for gene descriptions are implemented
-    """
-
-    def __init__(self, root_terms: List[Tuple[str, str, List[str]]], node_children_dict, node_parents_dict, node_names,
-                 alt_ids):
-        self.node_children_dict = node_children_dict
-        self.node_parents_dict = node_parents_dict
-        self.node_depth = defaultdict(int)
-        self.node_names = node_names
-        self.alt_ids = alt_ids
-        for root_term in root_terms:
-            self.calculate_all_depths_in_branch(root_term[0])
-
-    def calculate_all_depths_in_branch(self, root_id: str, current_depth: int = 0):
-        """calculate and set depth recursively for all terms in a branch
-
-        :param root_id: the ID of the root term of the branch to process
-        :type root_id: str
-        :param current_depth: the current depth in the ontology
-        :type current_depth: int
-        """
-        self.node_depth[root_id] = max(self.node_depth[root_id], current_depth)
-        for child_id in self.node_children_dict[root_id]:
-            self.calculate_all_depths_in_branch(root_id=child_id, current_depth=current_depth + 1)
-
-    def query_term(self, term_id: str):
-        """retrieve a term from its ID
-
-        :param term_id: the ID of the term
-        :type term_id: str
-        :return: the term
-        :rtype: GOTerm
-        """
-        if term_id not in self.node_names:
-            if term_id in self.alt_ids:
-                term_id = self.alt_ids[term_id]
-            else:
-                return None
-        return GOTerm(name=self.node_names[term_id], depth=self.node_depth[term_id], node_id=term_id,
-                      parents=self.node_parents_dict[term_id], children=self.node_children_dict[term_id], ontology=self)
 
 
 class DataFetcher(metaclass=ABCMeta):
@@ -249,6 +168,9 @@ class RawDataFetcher(DataFetcher):
         """read go data and gene ontology. After calling this function, go annotations containing mapped go names can
         be retrieved by using the :meth:`data_fetcher.WBRawDataFetcher.get_go_annotations` function
         """
+        import goatools
+        from goatools.obo_parser import GODag
+        from Bio.UniProt.GOA import gafiterator
         goatools.obo_parser.GOTerm.get_parents = get_parents
         self.go_ontology = GODag(self._get_cached_file(file_source_url=self.go_ontology_url,
                                                        cache_path=self.go_ontology_cache_path),
@@ -425,113 +347,3 @@ class AGRRawDataFetcher(RawDataFetcher):
             bgi_content = json.load(fileopen)
             for gene in bgi_content["data"]:
                 self.gene_data[gene["symbol"]] = Gene(gene["symbol"], gene["symbol"], False, False)
-
-
-class AGRDBDataFetcher(DataFetcher):
-    """data fetcher for AGR neo4j database for a single species"""
-
-    def __init__(self, go_terms_exclusion_list: List[str], go_terms_replacement_dict: Dict[str, str],
-                 data_provider: str, db_graph, go_ontology=None):
-        super().__init__(go_terms_exclusion_list=go_terms_exclusion_list,
-                         go_terms_replacement_dict=go_terms_replacement_dict)
-        self.db_graph = db_graph
-        self.data_provider = data_provider
-        self.go_ontology = go_ontology
-
-    @staticmethod
-    def query_db(db_graph, query: str, parameters: Dict = None):
-        """query the neo4j db
-
-        :param db_graph: a neo4j graph database
-        :param query: a cypher
-        :type query: str
-        :param parameters: a dictionary of the parameters of the query
-        :type parameters: Dict
-        """
-        with db_graph.session() as session:
-            with session.begin_transaction() as tx:
-                return_set = tx.run(query, parameters=parameters)
-        return return_set
-
-    def get_gene_data(self):
-        """get all gene data from the fetcher, returning one gene per call
-
-        while reading data for a gene, all related annotations are loaded from neo4j into memory
-
-        :return: data for one gene per each call, including gene_id and gene_name
-        :rtype: Gene
-        """
-        db_query = "match (g:Gene) where g.dataProvider = {dataProvider} return g.symbol, g.primaryKey"
-        result_set = self.query_db(db_graph=self.db_graph, query=db_query,
-                                   parameters={"dataProvider": self.data_provider})
-        for result in result_set:
-            annot_db_query = "match (g:Gene)-[annot:ANNOTATED_TO]->(go_term:GOTerm:Ontology) " \
-                             "where g.primaryKey = {gene_id} " \
-                             "return g.primaryKey, g.symbol, annot.evidence_code, annot.aspect, annot.qualifier, " \
-                             "go_term.primaryKey, go_term.name, go_term.is_obsolete"
-            annot_result_set = self.query_db(db_graph=self.db_graph, query=annot_db_query,
-                                             parameters={"gene_id": result["g.primaryKey"]})
-            for annot in annot_result_set:
-                if not annot["go_term.is_obsolete"] == "true":
-                    onto_node = self.go_ontology.query_term(annot["go_term.primaryKey"])
-                    if onto_node:
-                        self.go_data[result["g.symbol"]].append({
-                            "DB": self.data_provider,
-                            "DB_Object_ID": annot["g.primaryKey"],
-                            "DB_Object_Symbol": annot["g.symbol"],
-                            "Qualifier": annot["annot.qualifier"],
-                            "GO_ID": onto_node.id,
-                            "DB:Reference": None,
-                            "Evidence": annot["annot.evidence_code"],
-                            "With": "",
-                            "Aspect": annot["annot.aspect"],
-                            "DB_Object_Name": None,
-                            "Synonym": None,
-                            "DB_Object_Type": None,
-                            "Taxon_ID": None,
-                            "Date": None,
-                            "Assigned_By": None,
-                            "Annotation_Extension": None,
-                            "Gene_Product_Form_ID": None,
-                            "GO_Name": onto_node.name,
-                            "Is_Obsolete": False
-                        })
-                    else:
-                        logging.warning("Annotated GO Term " + annot["go_term.primaryKey"] + " not found in GO ontology")
-            yield Gene(result["g.primaryKey"], result["g.symbol"], False, False)
-
-    def load_go_data(self):
-        """load GO ontology from neo4j if not already loaded"""
-        if not self.go_ontology:
-
-            # get root terms
-            db_query = "match path=(child:GOTerm:Ontology)-[r:IS_A|PART_OF]->(parent:GOTerm:Ontology) " \
-                       "where size((parent)-[:IS_A|PART_OF]->()) = 0 " \
-                       "return distinct parent.primaryKey, parent.alt_ids, parent.name"
-            result_set = self.query_db(db_graph=self.db_graph, query=db_query)
-            root_terms = []
-            for result in result_set:
-                root_terms.append((result["parent.primaryKey"], result["parent.name"], result["parent.alt_ids"]))
-
-            # cypher query to build go_ontology object
-            db_query = "match (child:GOTerm:Ontology)-[:IS_A|PART_OF]->(parent:GOTerm:Ontology) " \
-                       "return distinct child.primaryKey, child.alt_ids, child.name, parent.primaryKey"
-            result_set = self.query_db(db_graph=self.db_graph, query=db_query)
-            node_parents_dict = defaultdict(list)
-            node_children_dict = defaultdict(list)
-            node_names = {}
-            alt_ids = {}
-            for result in result_set:
-                node_parents_dict[result["child.primaryKey"]].append(result["parent.primaryKey"])
-                node_children_dict[result["parent.primaryKey"]].append(result["child.primaryKey"])
-                node_names[result["child.primaryKey"]] = result["child.name"]
-                for alt_id in list(result["child.alt_ids"]):
-                    alt_ids[alt_id] = result["child.primaryKey"]
-            for root_term_id, root_term_name, root_term_alt_ids in root_terms:
-                node_names[root_term_id] = root_term_name
-                for alt_id in list(root_term_alt_ids):
-                    alt_ids[alt_id] = root_term_id
-
-            self.go_ontology = Neo4jGOOntology(root_terms=root_terms, node_children_dict=node_children_dict,
-                                               node_parents_dict=node_parents_dict, node_names=node_names,
-                                               alt_ids=alt_ids)

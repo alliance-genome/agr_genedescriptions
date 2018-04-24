@@ -1,4 +1,6 @@
 namedlist
+goatools
+biopython
 inflect
 PyYAML
 neo4j-driver
