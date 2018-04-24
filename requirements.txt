@@ -1,4 +1,3 @@
 namedlist
 inflect
 PyYAML
-neo4j-driver

@@ -17,7 +17,11 @@ Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
 
 def get_parents(self):
     """Return parent GO IDs."""
-    return set([parent for parent in chain(self.parents, getattr(self, "relationship", defaultdict(set))["part_of"])])
+    relationship = getattr(self, "relationship", defaultdict(set))
+    if relationship and "part_of" in relationship:
+        return set([parent for parent in chain(self.parents, relationship["part_of"])])
+    else:
+        return self.parents
 
 
 class DataFetcher(metaclass=ABCMeta):
