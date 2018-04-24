@@ -2,7 +2,6 @@ import json
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import copy
-from data_fetcher import AGRDBDataFetcher
 from descriptions_rules import DescriptionsStats, GeneDesc
 
 
@@ -73,20 +72,4 @@ class JsonGDWriter(DescriptionsWriter):
                 del gene_desc["stats"]
         with open(file_path, "w") as outfile:
             json.dump(vars(json_serializable_self), outfile, indent=indent)
-
-
-class Neo4jGDWriter(DescriptionsWriter):
-    """write gene descriptions to AGR neo4j database"""
-
-    def __init__(self):
-        super().__init__()
-
-    def write(self, db_graph):
-        query = """
-            UNWIND $descriptions as row 
-
-            MATCH (g:GOTerm:Ontology {primaryKey:row.gene_id})
-                SET g.automatedGeneSynopsis = row.description
-            """
-        AGRDBDataFetcher.query_db(db_graph=db_graph, query=query, parameters={"descriptions": self.data})
 
