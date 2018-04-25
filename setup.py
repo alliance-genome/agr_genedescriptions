@@ -12,7 +12,8 @@ setup(name='genedescriptions',
       install_requires=[
           'namedlist',
           'inflect',
-          'PyYAML'
+          'PyYAML',
+          'numpy'
       ],
       test_suite='nose.collector',
       tests_require=['nose'],
