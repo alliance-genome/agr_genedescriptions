@@ -9,8 +9,8 @@ import re
 from itertools import chain
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple, defaultdict
-from typing import List, Iterable, Dict, Tuple
-from descriptions_rules import SingleDescStats
+from typing import List, Iterable, Dict
+from genedescriptions.descriptions_rules import SingleDescStats
 
 Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
 

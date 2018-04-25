@@ -2,7 +2,7 @@ import json
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import copy
-from descriptions_rules import DescriptionsStats, GeneDesc
+from genedescriptions.descriptions_rules import DescriptionsStats, GeneDesc
 
 
 class DescriptionsWriter(metaclass=ABCMeta):

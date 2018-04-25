@@ -2,7 +2,7 @@ import copy
 import inflect
 import re
 from collections import namedtuple
-from ontology_tools import *
+from genedescriptions.ontology_tools import *
 
 GOSentence = namedtuple('GOSentence', ['prefix', 'terms', 'term_ids_dict', 'postfix', 'text', 'go_aspect',
                                        'evidence_group', 'terms_merged', 'additional_prefix'])

@@ -1,8 +1,8 @@
 import unittest
 import os
 
-from config_parser import GenedescConfigParser
-from data_fetcher import WBRawDataFetcher
+from genedescriptions.config_parser import GenedescConfigParser
+from genedescriptions.data_fetcher import WBRawDataFetcher
 
 
 class TestWBRawDataFetcher(unittest.TestCase):

@@ -1,10 +1,7 @@
 """set of functions to manipulate ontology graphs"""
 import logging
 from collections import defaultdict
-from typing import List, Dict, Tuple, Union, Set, Any
-
-import goatools
-import pandas as pd
+from typing import List, Dict, Tuple, Union, Set
 
 
 def get_all_go_parent_ids(go_id: str, ontology) -> List[str]:

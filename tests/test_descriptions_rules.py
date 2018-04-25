@@ -1,9 +1,9 @@
 import unittest
 import os
 
-from config_parser import GenedescConfigParser
-from data_fetcher import WBRawDataFetcher
-from descriptions_rules import generate_go_sentences
+from genedescriptions.config_parser import GenedescConfigParser
+from genedescriptions.data_fetcher import WBRawDataFetcher
+from genedescriptions.descriptions_rules import generate_go_sentences
 
 
 class TestDescriptionsRules(unittest.TestCase):

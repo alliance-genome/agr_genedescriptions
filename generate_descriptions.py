@@ -3,10 +3,10 @@
 import argparse
 import os
 
-from config_parser import GenedescConfigParser
-from data_fetcher import WBRawDataFetcher, AGRRawDataFetcher
-from descriptions_rules import *
-from descriptions_writer import JsonGDWriter, GeneDesc, SingleDescStats
+from genedescriptions.config_parser import GenedescConfigParser
+from genedescriptions.data_fetcher import WBRawDataFetcher, AGRRawDataFetcher
+from genedescriptions.descriptions_rules import *
+from genedescriptions.descriptions_writer import JsonGDWriter, GeneDesc
 
 
 def main():

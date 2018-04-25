@@ -2,14 +2,17 @@
 
 from setuptools import setup
 
-setup(name='wb_genedescriptions',
+setup(name='genedescriptions',
       version='0.1',
-      description='Generate gene descriptions',
+      description='gene descriptions package',
       url='',
       author='Valerio Arnaboldi',
       author_email='valearna@caltech.edu',
+      packages=['genedescriptions'],
       install_requires=[
-          'namedlist'
+          'namedlist',
+          'inflect',
+          'PyYAML'
       ],
       test_suite='nose.collector',
       tests_require=['nose'],
