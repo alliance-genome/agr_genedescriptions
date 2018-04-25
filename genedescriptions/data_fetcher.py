@@ -24,6 +24,59 @@ def get_parents(self):
         return self.parents
 
 
+class GOTerm(object):
+    """go term with the same properties and methods defined by goatools GOTerm
+
+    only the properties used for gene descriptions are included
+    """
+
+    def __init__(self, name: str, depth: int, node_id: str, parents: List, children: List, ontology):
+        self.depth = depth
+        self.name = name
+        self.id = node_id
+        self._parents = parents
+        self._children = children
+        self._ontology = ontology
+
+    def get_parents(self) -> List["GOTerm"]:
+        """get the parent terms of the current term
+
+        :return: the list of parents of the term
+        :rtype: List[GOTerm]
+        """
+        return [self._ontology.query_term(parent_id) for parent_id in self._parents]
+
+    def get_children(self) -> List["GOTerm"]:
+        """get the child terms of the current term
+
+        :return: the list of children of the term
+        :rtype: List[GOTerm]
+        """
+        return [self._ontology.query_term(child_id) for child_id in self._children]
+
+
+class Ontology(metaclass=ABCMeta):
+    """ontology interface with properties and methods needed for gene descriptions
+
+    the structure of this interface mirrors that of goatools GODag class for compatibility with goatools package
+    """
+
+    @abstractmethod
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    def query_term(self, term_id: str) -> GOTerm:
+        """retrieve a term from its ID
+
+        :param term_id: the ID of the term
+        :type term_id: str
+        :return: the term
+        :rtype: GOTerm
+        """
+        pass
+
+
 class DataFetcher(metaclass=ABCMeta):
     """retrieve data for gene descriptions from different sources"""
 
