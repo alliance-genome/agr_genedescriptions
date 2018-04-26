@@ -40,7 +40,7 @@ class GenedescConfigParser(object):
         """
         return self.config["go_sentences_options"]["evidence_codes"]
 
-    def get_go_prepostfix_sentences_map(self) -> Dict[Tuple[str, str], Tuple[str, str]]:
+    def get_go_prepostfix_sentences_map(self) -> Dict[Tuple[str, str, str], Tuple[str, str]]:
         """get the map that links go aspects and evidence groups with their pre- and postfix phrases, including special
         cases
 
@@ -48,26 +48,28 @@ class GenedescConfigParser(object):
             build the automatically generated sentences. Special cases are transformed and treated as additional groups
             by appending their id at the end of the group they belong to forming thus a new group name. Group priorities
             for special cases remain equal to their root group
-        :rtype: Dict[Tuple[str, str], Tuple[str, str]]
+        :rtype: Dict[Tuple[str, str, str], Tuple[str, str]]
         """
-        prepost_map = {(prepost["aspect"], prepost["group"]): (prepost["prefix"], prepost["postfix"])
+        prepost_map = {(prepost["aspect"], prepost["group"], prepost["qualifier"]): (prepost["prefix"],
+                                                                                     prepost["postfix"])
                        for prepost in self.config["go_sentences_options"]["go_prepostfix_sentences_map"]}
         special_cases = self.get_go_prepostfix_special_cases_sent_map()
         for key, scs in special_cases.items():
             for special_case in scs:
-                prepost_map[(key[0], key[1] + str(special_case[0]))] = (special_case[2], special_case[3])
+                prepost_map[(key[0], key[1] + str(special_case[0]), key[2])] = (special_case[2], special_case[3])
         return prepost_map
 
-    def get_go_prepostfix_special_cases_sent_map(self) -> Dict[Tuple[str, str], Tuple[int, str, str, str]]:
+    def get_go_prepostfix_special_cases_sent_map(self) -> Dict[Tuple[str, str, str], Tuple[int, str, str, str]]:
         """get a map of pre- and postfix phrases for special cases
 
-        :return: a map between aspect and group, and special cases properties
-        :rtype: Dict[Tuple[str, str], Tuple[int, str, str, str]]
+        :return: a map between aspect, group and qualifier, and special cases properties
+        :rtype: Dict[Tuple[str, str, str], Tuple[int, str, str, str]]
         """
-        return {(prepost["aspect"], prepost["group"]): [(sp_case["id"], sp_case["match_regex"], sp_case["prefix"],
-                                                         sp_case["postfix"]) for sp_case in
-                                                        prepost["special_cases"]] for prepost in
-                self.config["go_sentences_options"]["go_prepostfix_sentences_map"] if prepost["special_cases"]}
+        return {(prepost["aspect"], prepost["group"], prepost["qualifier"]): [(sp_case["id"], sp_case["match_regex"],
+                                                                               sp_case["prefix"], sp_case["postfix"])
+                                                                              for sp_case in prepost["special_cases"]]
+                for prepost in self.config["go_sentences_options"]["go_prepostfix_sentences_map"] if
+                prepost["special_cases"]}
 
     def get_go_annotations_priority(self) -> List[str]:
         """get the priority list for evidence codes

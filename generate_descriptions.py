@@ -12,12 +12,13 @@ from genedescriptions.descriptions_writer import JsonGDWriter, GeneDesc
 def main():
     parser = argparse.ArgumentParser(description="Generate gene descriptions for wormbase")
     parser.add_argument("-c", "--config-file", metavar="config_file", dest="config_file", type=str,
-                        default="config.yml", help="configuration file")
+                        default="config.yml", help="configuration file. Default ./config.yaml")
     parser.add_argument("-C", "--use-cache", dest="use_cache", action="store_true", default=False,
                         help="Use cached source files from cache_location specified in config file. Download them from "
                              "raw_file_source (configured in config file) if not yet cached")
     parser.add_argument("-l", "--log-file", metavar="log_file", dest="log_file", type=str,
-                        default="genedescriptions.log", help="path to the log file to generate")
+                        default="genedescriptions.log",
+                        help="path to the log file to generate. Default ./genedescriptions.log")
     parser.add_argument("-L", "--log-level", dest="log_level", choices=['DEBUG', 'INFO', 'WARNING', 'ERROR',
                                                                         'CRITICAL'], help="set the logging level")
     parser.add_argument("-v", "--output-version", metavar="version_number", dest="version_number", type=str,
@@ -91,6 +92,11 @@ def main():
                     desc_stats=gene_desc.stats)])
                 if func_sent:
                     joined_sent.append(func_sent)
+                contributes_to_func_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
+                    go_aspect='F', qualifier='contributes_to', merge_groups_with_same_prefix=True,
+                    keep_only_best_group=True, desc_stats=gene_desc.stats)])
+                if contributes_to_func_sent:
+                    joined_sent.append(contributes_to_func_sent)
                 proc_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
                     go_aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True,
                     desc_stats=gene_desc.stats)])
@@ -101,6 +107,11 @@ def main():
                     desc_stats=gene_desc.stats)])
                 if comp_sent:
                     joined_sent.append(comp_sent)
+                colocalizes_with_comp_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
+                    go_aspect='C', qualifier='colocalizes_with', merge_groups_with_same_prefix=True,
+                    keep_only_best_group=True, desc_stats=gene_desc.stats)])
+                if colocalizes_with_comp_sent:
+                    joined_sent.append(colocalizes_with_comp_sent)
 
                 go_desc = "; ".join(joined_sent) + "."
                 if len(go_desc) > 0:
