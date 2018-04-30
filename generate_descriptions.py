@@ -45,6 +45,7 @@ def main():
         organisms_list = conf_parser.get_wb_organisms_to_process()
     for organism in organisms_list:
         logging.info("processing organism " + organism)
+        sister_gene_name_id_map = {}
         if conf_parser.get_data_fetcher() == "agr_data_fetcher":
             df = AGRRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
                                    go_terms_replacement_dict=conf_parser.get_go_rename_terms(),
@@ -66,12 +67,25 @@ def main():
                                   species=organism,
                                   project_id=species[organism]["project_id"],
                                   cache_location=cache_location, use_cache=args.use_cache)
-
+            if "main_sister_species" in species[organism] and species[organism]["main_sister_species"]:
+                sister_df = WBRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
+                                             go_terms_replacement_dict=conf_parser.get_go_rename_terms(),
+                                             raw_files_source=conf_parser.get_raw_file_sources(
+                                                 conf_parser.get_data_fetcher()),
+                                             chebi_file_url=conf_parser.get_chebi_file_source(),
+                                             release_version=conf_parser.get_release(conf_parser.get_data_fetcher()),
+                                             species=species[organism]["main_sister_species"],
+                                             project_id=species[species[organism]["main_sister_species"]]["project_id"],
+                                             cache_location=cache_location, use_cache=args.use_cache)
+                sister_df.load_go_data()
+                for gene in sister_df.get_gene_data():
+                    sister_gene_name_id_map[gene.name] = gene.id
         df.load_go_data()
         desc_writer = JsonGDWriter()
         for gene in df.get_gene_data():
             logging.debug("processing gene " + gene.name)
             gene_desc = GeneDesc(gene_id=gene.id, gene_name=gene.name)
+            joined_sent = []
             sentences = generate_go_sentences(df.get_go_annotations(
                 gene.id, priority_list=go_annotations_priority, desc_stats=gene_desc.stats),
                 go_ontology=df.get_go_ontology(),
@@ -86,7 +100,6 @@ def main():
                 truncate_others_generic_word=conf_parser.get_go_truncate_others_aggregation_word(),
                 truncate_others_aspect_words=conf_parser.get_go_truncate_others_terms())
             if sentences:
-                joined_sent = []
                 func_sent = " and ".join([sentence.text for sentence in sentences.get_sentences(
                     go_aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True,
                     desc_stats=gene_desc.stats)])
@@ -113,6 +126,30 @@ def main():
                 if colocalizes_with_comp_sent:
                     joined_sent.append(colocalizes_with_comp_sent)
 
+            if "main_sister_species" in species[organism] and species[organism]["main_sister_species"] and \
+                    gene.name.startswith("Cbr-") and gene.name[4:] in sister_gene_name_id_map:
+                sister_sentences = generate_go_sentences(sister_df.get_go_annotations(
+                    sister_gene_name_id_map[gene.name[4:]], priority_list=("EXP", "IDA", "IPI", "IMP", "IGI", "IEP",
+                                                                           "HTP", "HDA", "HMP", "HGI", "HEP"),
+                    desc_stats=gene_desc.stats),
+                    go_ontology=df.get_go_ontology(),
+                    evidence_groups_priority_list=evidence_groups_priority_list,
+                    go_prepostfix_sentences_map=go_prepostfix_sentences_map,
+                    go_prepostfix_special_cases_sent_map=go_prepostfix_special_cases_sent_map,
+                    evidence_codes_groups_map=evidence_codes_groups_map,
+                    remove_parent_terms=conf_parser.get_go_remove_parents_if_children_are_present(),
+                    merge_num_terms_threshold=conf_parser.get_go_trim_min_num_terms(),
+                    merge_min_distance_from_root=conf_parser.get_go_trim_min_distance_from_root(),
+                    desc_stats=gene_desc.stats, go_terms_replacement_dict=conf_parser.get_go_rename_terms(),
+                    truncate_others_generic_word=conf_parser.get_go_truncate_others_aggregation_word(),
+                    truncate_others_aspect_words=conf_parser.get_go_truncate_others_terms())
+                if sister_sentences:
+                    sister_proc_sent = " and ".join([sentence.text for sentence in sister_sentences.get_sentences(
+                        go_aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True)])
+                    if sister_proc_sent:
+                        joined_sent.append("In " + species[species[organism]["main_sister_species"]]["name"] + ", " +
+                                           gene.name[4:] + " " + sister_proc_sent)
+            if len(joined_sent) > 0:
                 go_desc = "; ".join(joined_sent) + "."
                 if len(go_desc) > 0:
                     gene_desc.description = go_desc[0].upper() + go_desc[1:]
