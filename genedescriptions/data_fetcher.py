@@ -30,13 +30,14 @@ class GOTerm(object):
     only the properties used for gene descriptions are included
     """
 
-    def __init__(self, name: str, depth: int, node_id: str, parents: List, children: List, ontology):
+    def __init__(self, name: str, depth: int, node_id: str, parents: List, children: List, is_obsolete: bool, ontology):
         self.depth = depth
         self.name = name
         self.id = node_id
         self._parents = parents
         self._children = children
         self._ontology = ontology
+        self.is_obsolete = is_obsolete
 
     def get_parents(self) -> List["GOTerm"]:
         """get the parent terms of the current term
