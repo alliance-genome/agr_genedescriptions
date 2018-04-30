@@ -6,7 +6,7 @@ generic_data_fetcher:
 
 # options for WormBase gene description generation - used when data_fetcher is set to 'wb_data_fetcher'
 wb_data_fetcher:
-    release: "WS263"
+    release: "WS265"
     raw_files_source: "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases"
     organisms_to_process:
         # add the species to be processed to the following list. Entries must have the same text as in 'organisms'
@@ -27,6 +27,7 @@ wb_data_fetcher:
             project_id: "PRJNA20035"
         c_briggsae:
             project_id: "PRJNA10731"
+            main_sister_species: c_elegans
         c_elegans:
             project_id: "PRJNA13758"
         c_japonica:
@@ -39,6 +40,8 @@ wb_data_fetcher:
             project_id: "PRJNA12644"
         s_ratti:
             project_id: "PRJEB125"
+        t_muris:
+            project_id: "PRJEB126"
 
 agr_data_fetcher:
     raw_files_source: "https://s3.amazonaws.com/mod-datadumps"
@@ -155,19 +158,23 @@ go_sentences_options:
             group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
             priority: 17
         TAS:
-            group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
+            group: INFERRED_BY_CURATORS_AND_AUTHORS
             priority: 18
+        IC:
+            group: INFERRED_BY_CURATORS_AND_AUTHORS
+            priority: 19
         RCA:
             group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
-            priority: 20
+            priority: 21
         IEA:
             group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
-            priority: 19
+            priority: 20
     group_priority:
         EXPERIMENTAL: 1
         HIGH_THROUGHPUT_EXPERIMENTAL: 2
         PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS: 3
-        ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS: 4
+        INFERRED_BY_CURATORS_AND_AUTHORS: 4
+        ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS: 5
     go_prepostfix_sentences_map:
         - aspect: F
           group: EXPERIMENTAL
@@ -230,6 +237,26 @@ go_sentences_options:
                 prefix: "predicted to contribute as a"
                 postfix: ""
         - aspect: F
+          group: INFERRED_BY_CURATORS_AND_AUTHORS
+          qualifier: ""
+          prefix: "predicted to have"
+          postfix: ""
+          special_cases:
+              - id: 1
+                match_regex: "structural constituent"
+                prefix: "predicted to be a"
+                postfix: ""
+        - aspect: F
+          group: INFERRED_BY_CURATORS_AND_AUTHORS
+          qualifier: "contributes_to"
+          prefix: "predicted to contribute to"
+          postfix: ""
+          special_cases:
+              - id: 1
+                match_regex: "structural constituent"
+                prefix: "predicted to contribute as a"
+                postfix: ""
+        - aspect: F
           group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
           qualifier: ""
           prefix: "predicted to have"
@@ -263,6 +290,12 @@ go_sentences_options:
           special_cases:
         - aspect: P
           group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
+          qualifier: ""
+          prefix: "predicted to be involved in"
+          postfix: ""
+          special_cases:
+        - aspect: P
+          group: INFERRED_BY_CURATORS_AND_AUTHORS
           qualifier: ""
           prefix: "predicted to be involved in"
           postfix: ""
@@ -325,6 +358,26 @@ go_sentences_options:
                 postfix: ""
         - aspect: C
           group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
+          qualifier: "colocalizes_with"
+          prefix: "predicted to colocalize with"
+          postfix: ""
+          special_cases:
+              - id: 1
+                match_regex: "intracellular$"
+                prefix: "predicted to be"
+                postfix: ""
+        - aspect: C
+          group: INFERRED_BY_CURATORS_AND_AUTHORS
+          qualifier: ""
+          prefix: "predicted to localize to"
+          postfix: ""
+          special_cases:
+              - id: 1
+                match_regex: "intracellular$"
+                prefix: "predicted to be"
+                postfix: ""
+        - aspect: C
+          group: INFERRED_BY_CURATORS_AND_AUTHORS
           qualifier: "colocalizes_with"
           prefix: "predicted to colocalize with"
           postfix: ""
