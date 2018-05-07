@@ -145,13 +145,13 @@ def get_merged_term_ids_by_common_ancestor_from_term_names(go_terms_names: List[
         return {term_ids_dict[term]: set(term_ids_dict[term]) for term in go_terms_names}
 
 
-def find_set_covering(subsets: List[Tuple[str, Set[str]]], costs: List[float] = None, max_num_subsets: int = None) -> \
-        List[str]:
+def find_set_covering(subsets: List[Tuple[str, str, Set[str]]], costs: List[float] = None,
+                      max_num_subsets: int = None) -> List[str]:
     """greedy algorithm to solve set covering problem
 
     :param subsets: list of subsets, each of which must contain a tuple with the first element being the ID of the
-        subset and the second the actual set of elements
-    :type subsets: List[Tuple[str, Set[str]]]
+        subset, the second being the name, and the third the actual set of elements
+    :type subsets: List[Tuple[str, str, Set[str]]]
     :param costs: list of costs of the subsets
     :type costs: List[float]
     :param max_num_subsets: maximum number of subsets in the final list
@@ -168,13 +168,13 @@ def find_set_covering(subsets: List[Tuple[str, Set[str]]], costs: List[float] = 
     while len(included_sets) < len(subsets) and included_elmts != universe and \
             (not max_num_subsets or len(included_sets) < max_num_subsets):
         if costs:
-            effect_sets = sorted([(c / len(s[1] - included_elmts), s[1], s[0]) for s, c in zip(subsets, costs)],
-                                 key=lambda x: x[0], reverse=True)
+            effect_sets = sorted([(c / len(s[2] - included_elmts), s[2], s[1], s[0]) for s, c in zip(subsets, costs)],
+                                 key=lambda x: (- x[0], x[2]))
         else:
-            effect_sets = sorted([(len(s[1] - included_elmts), s[1], s[0]) for s in subsets],
-                                 key=lambda x: (x[0], x[2]), reverse=True)
+            effect_sets = sorted([(len(s[2] - included_elmts), s[2], s[1], s[0]) for s in subsets],
+                                 key=lambda x: (- x[0], x[2]))
         included_elmts |= effect_sets[0][1]
-        included_sets.append(effect_sets[0][2])
+        included_sets.append(effect_sets[0][3])
     logging.debug("finished set covering optimization")
     return included_sets
 
