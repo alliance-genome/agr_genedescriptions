@@ -6,6 +6,7 @@ import shutil
 import os
 import logging
 import re
+from enum import Enum
 from itertools import chain
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple, defaultdict
@@ -14,6 +15,9 @@ from genedescriptions.descriptions_rules import SingleDescStats
 
 Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
 
+class AnnotationType(Enum):
+    GO = 1
+    DO = 2
 
 def get_parents(self):
     """Return parent GO IDs."""
@@ -24,7 +28,7 @@ def get_parents(self):
         return self.parents
 
 
-class GOTerm(object):
+class OntoTerm(object):
     """go term with the same properties and methods defined by goatools GOTerm
 
     only the properties used for gene descriptions are included
@@ -39,19 +43,19 @@ class GOTerm(object):
         self._ontology = ontology
         self.is_obsolete = is_obsolete
 
-    def get_parents(self) -> List["GOTerm"]:
+    def get_parents(self) -> List["OntoTerm"]:
         """get the parent terms of the current term
 
         :return: the list of parents of the term
-        :rtype: List[GOTerm]
+        :rtype: List[OntoTerm]
         """
         return [self._ontology.query_term(parent_id) for parent_id in self._parents]
 
-    def get_children(self) -> List["GOTerm"]:
+    def get_children(self) -> List["OntoTerm"]:
         """get the child terms of the current term
 
         :return: the list of children of the term
-        :rtype: List[GOTerm]
+        :rtype: List[OntoTerm]
         """
         return [self._ontology.query_term(child_id) for child_id in self._children]
 
@@ -67,13 +71,13 @@ class Ontology(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def query_term(self, term_id: str) -> GOTerm:
+    def query_term(self, term_id: str) -> OntoTerm:
         """retrieve a term from its ID
 
         :param term_id: the ID of the term
         :type term_id: str
         :return: the term
-        :rtype: GOTerm
+        :rtype: OntoTerm
         """
         pass
 
@@ -87,6 +91,12 @@ class DataFetcher(metaclass=ABCMeta):
         self.go_ontology = None
         self.go_terms_exclusion_list = go_terms_exclusion_list
         self.go_terms_replacement_dict = go_terms_replacement_dict
+        self.do_ontology = None
+        self.do_data = defaultdict(list)
+
+    @abstractmethod
+    def load_gene_data(self):
+        pass
 
     @abstractmethod
     def get_gene_data(self) -> Gene:
@@ -96,10 +106,23 @@ class DataFetcher(metaclass=ABCMeta):
     def load_go_data(self) -> None:
         pass
 
-    def get_go_annotations(self, geneid: str, include_obsolete: bool = False, include_negative_results: bool = False,
-                           priority_list: Iterable = ("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "IC", "ISS", "ISO",
-                                                      "ISA", "ISM", "IGC", "IBA", "IBD", "IKR", "IRD", "RCA", "IEA"),
-                           desc_stats: SingleDescStats = None) -> List[dict]:
+    @abstractmethod
+    def load_disease_data(self) -> None:
+        pass
+
+    def load_all_data(self) -> None:
+        """retrieve all data needed to generate the descriptions and load it into the data structures of the data
+        fetcher
+        """
+        self.load_gene_data()
+        self.load_go_data()
+        self.load_disease_data()
+
+    def get_annotations(self, geneid: str, annot_type: AnnotationType = AnnotationType.GO,
+                        include_obsolete: bool = False, include_negative_results: bool = False,
+                        priority_list: Iterable = ("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "IC", "ISS", "ISO", "ISA",
+                                                   "ISM", "IGC", "IBA", "IBD", "IKR", "IRD", "RCA", "IEA"),
+                        desc_stats: SingleDescStats = None) -> List[dict]:
         """
         retrieve go annotations for a given gene id and for a given aspect. The annotations are unique for each pair
         <gene_id, go_term_id>. This means that when multiple annotations for the same pair are found in the go data, the
@@ -108,6 +131,8 @@ class DataFetcher(metaclass=ABCMeta):
 
         :param geneid: the id of the gene related to the annotations to retrieve, in standard format
         :type geneid: str
+        :param annot_type: type of annotations to read
+        :type annot_type: AnnotationType
         :param include_obsolete: whether to include obsolete annotations
         :type include_obsolete: bool
         :param include_negative_results: whether to include negative results
@@ -123,27 +148,35 @@ class DataFetcher(metaclass=ABCMeta):
         :return: the list of go annotations for the given gene
         :rtype: List[GOAnnotation]
         """
+        dataset = None
+        if annot_type == AnnotationType.GO:
+            dataset = self.go_data
+        elif annot_type == AnnotationType.DO:
+            dataset = self.do_data
         priority_map = dict(zip(priority_list, reversed(range(len(list(priority_list))))))
-        annotations = [annotation for annotation in self.go_data[geneid] if (include_obsolete or
+        annotations = [annotation for annotation in dataset[geneid] if (include_obsolete or
                        not annotation["Is_Obsolete"]) and (include_negative_results or "NOT" not in
                                                            annotation["Qualifier"])]
         if desc_stats:
             desc_stats.total_num_go_annotations = len(annotations)
-        go_id_selected_annotation = {}
+        id_selected_annotation = {}
         for annotation in annotations:
             if annotation["Evidence"] in priority_map.keys():
-                if annotation["GO_ID"] in go_id_selected_annotation:
+                if annotation["GO_ID"] in id_selected_annotation:
                     if priority_map[annotation["Evidence"]] > \
-                            priority_map[go_id_selected_annotation[annotation["GO_ID"]]["Evidence"]]:
-                        go_id_selected_annotation[annotation["GO_ID"]] = annotation
+                            priority_map[id_selected_annotation[annotation["GO_ID"]]["Evidence"]]:
+                        id_selected_annotation[annotation["GO_ID"]] = annotation
                 else:
-                    go_id_selected_annotation[annotation["GO_ID"]] = annotation
+                    id_selected_annotation[annotation["GO_ID"]] = annotation
         if desc_stats:
-            desc_stats.num_prioritized_go_annotations = len(go_id_selected_annotation.keys())
-        return [annotation for annotation in go_id_selected_annotation.values()]
+            desc_stats.num_prioritized_go_annotations = len(id_selected_annotation.keys())
+        return [annotation for annotation in id_selected_annotation.values()]
 
     def get_go_ontology(self):
         return self.go_ontology
+
+    def get_do_ontology(self):
+        return self.do_ontology
 
 
 class RawDataFetcher(DataFetcher):
@@ -159,19 +192,18 @@ class RawDataFetcher(DataFetcher):
         self.ls_ontology = None
         self.an_ontology = None
         self.gene_data = {}
-        self.chebi_ontology = None
         self.use_cache = use_cache
         self.gene_data_cache_path = ""
         self.gene_data_url = ""
         self.go_ontology_cache_path = ""
         self.go_ontology_url = ""
-        self.development_ontology_cache_path = ""
-        self.development_ontology_url = ""
-        self.anatomy_ontology_cache_path = ""
-        self.anatomy_ontology_url = ""
         self.go_annotations_cache_path = ""
         self.go_annotations_url = ""
         self.go_id_name = "DB_Object_ID"
+        self.do_ontology_cache_path = ""
+        self.do_ontology_url = ""
+        self.do_annotations_cache_path = ""
+        self.do_annotations_url = ""
 
     @staticmethod
     def _get_cached_file(cache_path: str, file_source_url):
@@ -185,10 +217,6 @@ class RawDataFetcher(DataFetcher):
             file_path = cache_path.replace(".gz", "")
         return file_path
 
-    @abstractmethod
-    def _load_gene_data(self) -> None:
-        pass
-
     def get_gene_data(self, include_dead_genes: bool = False, include_pseudo_genes: bool = False) -> Gene:
         """get all gene data from the fetcher, returning one gene per call
 
@@ -200,27 +228,10 @@ class RawDataFetcher(DataFetcher):
         :rtype: Gene
         """
         if len(self.gene_data) == 0:
-            self._load_gene_data()
+            self.load_gene_data()
         for gene_id, gene_obj in self.gene_data.items():
             if (include_dead_genes or not gene_obj.dead) and (include_pseudo_genes or not gene_obj.pseudo):
                 yield gene_obj
-
-    def _map_ont_term_to_name(self, ont_id):
-        t = None
-        if ont_id.startswith("WBls:") and self.ls_ontology is not None:
-            t = self.ls_ontology.query_term(ont_id)
-        elif ont_id.startswith("WBbt:") and self.an_ontology is not None:
-            t = self.an_ontology.query_term(ont_id)
-        elif ont_id.startswith("GO:") and self.go_ontology is not None:
-            t = self.go_ontology.query_term(ont_id)
-        elif ont_id.startswith("ChEBI:") and self.chebi_ontology is not None:
-            t = self.chebi_ontology.query_term(ont_id)
-        elif ont_id.startswith("WB:WBGene"):
-            if ont_id in self.gene_data:
-                t = self.gene_data[ont_id]
-            else:
-                return ont_id
-        return t.name if t else ont_id
 
     def load_go_data(self) -> None:
         """read go data and gene ontology. After calling this function, go annotations containing mapped go names can
@@ -233,18 +244,6 @@ class RawDataFetcher(DataFetcher):
         self.go_ontology = GODag(self._get_cached_file(file_source_url=self.go_ontology_url,
                                                        cache_path=self.go_ontology_cache_path),
                                  optional_attrs=["relationship"])
-        if self.anatomy_ontology_url != "":
-            self.an_ontology = GODag(self._get_cached_file(file_source_url=self.anatomy_ontology_url,
-                                                           cache_path=self.anatomy_ontology_cache_path),
-                                     optional_attrs=["relationship"])
-        if self.development_ontology_url != "":
-            self.ls_ontology = GODag(self._get_cached_file(file_source_url=self.development_ontology_url,
-                                                           cache_path=self.development_ontology_cache_path),
-                                     optional_attrs=["relationship"])
-        if self.chebi_file_url != "":
-            self.chebi_ontology = GODag(self._get_cached_file(file_source_url=self.chebi_file_url,
-                                                              cache_path=self.chebi_file_cache_path))
-        self._load_gene_data()
         file_path = self._get_cached_file(cache_path=self.go_annotations_cache_path,
                                           file_source_url=self.go_annotations_url)
         lines_to_skip = 0
@@ -267,15 +266,6 @@ class RawDataFetcher(DataFetcher):
                                                               mapped_annotation["GO_Name"])
                     mapped_annotation["Is_Obsolete"] = \
                         self.go_ontology.query_term(mapped_annotation["GO_ID"]).is_obsolete
-                    if annotation["Annotation_Extension"] != "":
-                        matches = re.findall('(\([^\)]+\))', mapped_annotation["Annotation_Extension"])
-                        for match in matches:
-                            ext_id = match[1:-1]
-                            ext_translation = self._map_ont_term_to_name(ext_id)
-                            mapped_annotation["Annotation_Extension"] = mapped_annotation["Annotation_Extension"]\
-                                .replace(match, " " + ext_translation)
-                        logging.debug(
-                            "Found GO annotation with Annotation_Extension: " + str(mapped_annotation))
                     self.go_data[annotation[self.go_id_name]].append(mapped_annotation)
 
 
@@ -284,7 +274,7 @@ class WBRawDataFetcher(RawDataFetcher):
 
     def __init__(self, go_terms_exclusion_list: List[str], go_terms_replacement_dict: Dict[str, str],
                  raw_files_source: str, cache_location: str, release_version: str, species: str, project_id: str,
-                 use_cache: bool = False, chebi_file_url: str = ""):
+                 use_cache: bool = False):
         """create a new data fetcher
 
         :param go_terms_exclusion_list: list of go ids for terms to exclude
@@ -304,8 +294,6 @@ class WBRawDataFetcher(RawDataFetcher):
         :param use_cache: whether to use cached files. If cache is empty, files are downloading from source and stored
             in cache
         :type use_cache: bool
-        :param chebi_file_url: url where to fetch the chebi file
-        :type chebi_file_url: str
         """
         super().__init__(go_terms_exclusion_list=go_terms_exclusion_list,
                          go_terms_replacement_dict=go_terms_replacement_dict, use_cache=use_cache,
@@ -319,31 +307,82 @@ class WBRawDataFetcher(RawDataFetcher):
                                                    "gene_ontology." + release_version + ".obo")
         self.go_ontology_url = raw_files_source + '/' + release_version + '/ONTOLOGY/gene_ontology.' + \
                                release_version + '.obo'
-        self.development_ontology_cache_path = os.path.join(cache_location, "wormbase", release_version, "ONTOLOGY",
-                                                            "development_ontology." + release_version + ".obo")
-        self.development_ontology_url = raw_files_source + '/' + release_version + '/ONTOLOGY/development_ontology.' + \
-                                        release_version + '.obo'
-        self.anatomy_ontology_cache_path = os.path.join(cache_location, "wormbase", release_version, "ONTOLOGY",
-                                                        "anatomy_ontology." + release_version + ".obo")
-        self.anatomy_ontology_url = raw_files_source + '/' + release_version + '/ONTOLOGY/anatomy_ontology.' + \
-                                    release_version + '.obo'
-        self.chebi_file_cache_path = os.path.join(cache_location, "wormbase", "CHEBI", "chebi_lite.obo.gz")
-        self.chebi_file_url = chebi_file_url
         self.go_annotations_cache_path = os.path.join(cache_location, "wormbase", release_version, "species", species,
                                                       project_id, "annotation", species + '.' + project_id + '.' +
                                                       release_version + ".go_annotations.gaf.gz")
         self.go_annotations_url = raw_files_source + '/' + release_version + '/species/' + species + '/' + \
                                   project_id + '/annotation/' + species + '.' + project_id + '.' + release_version + \
                                   '.go_annotations.gaf.gz'
+        self.do_ontology_url = raw_files_source + '/' + release_version + '/ONTOLOGY/disease_ontology.' + \
+                               release_version + '.obo'
+        self.do_ontology_cache_path = os.path.join(cache_location, "wormbase", release_version, "ONTOLOGY",
+                                                   "disease_ontology." + release_version + ".obo")
+        self.do_annotations_cache_path = os.path.join(cache_location, "wormbase", release_version, "species", species,
+                                                      project_id, "annotation", species + '.' + project_id + '.' +
+                                                      release_version + ".do_annotations.wb")
+        self.do_annotations_url = raw_files_source + '/' + release_version + '/ONTOLOGY/disease_association.' + \
+                                  release_version + '.wb'
+        self.do_annotations_new_cache_path = os.path.join(cache_location, "wormbase", release_version, "species",
+                                                          species, project_id, "annotation", species + '.' +
+                                                          project_id + '.' + release_version +
+                                                          ".do_annotations.daf.txt")
+        self.do_annotations_new_url = raw_files_source + '/' + release_version + '/ONTOLOGY/disease_association.' + \
+                                      release_version + '.daf.txt'
 
-    def _load_gene_data(self) -> None:
+    def load_gene_data(self) -> None:
         """load all gene data"""
-        file_path = self._get_cached_file(cache_path=self.gene_data_cache_path, file_source_url=self.gene_data_url)
+        if len(self.gene_data.items()) == 0:
+            file_path = self._get_cached_file(cache_path=self.gene_data_cache_path, file_source_url=self.gene_data_url)
+            with open(file_path) as file:
+                for line in file:
+                    fields = line.strip().split(',')
+                    name = fields[2] if fields[2] != '' else fields[3]
+                    self.gene_data[fields[1]] = Gene(fields[1], name, fields[4] == "Dead", False)
+
+    def load_disease_data(self) -> None:
+        from Bio.UniProt.GOA import gafiterator
+        from goatools.obo_parser import GODag
+        self.do_ontology = GODag(self._get_cached_file(file_source_url=self.do_ontology_url,
+                                                       cache_path=self.do_ontology_cache_path))
+        file_path = self._get_cached_file(cache_path=self.do_annotations_cache_path,
+                                          file_source_url=self.do_annotations_url)
+        lines_to_skip = 0
         with open(file_path) as file:
-            for line in file:
-                fields = line.strip().split(',')
-                name = fields[2] if fields[2] != '' else fields[3]
-                self.gene_data[fields[1]] = Gene(fields[1], name, fields[4] == "Dead", False)
+            while True:
+                if file.readline().strip().startswith("!gaf-version:"):
+                    break
+                lines_to_skip += 1
+        with open(file_path) as file:
+            for _ in range(lines_to_skip):
+                next(file)
+            for annotation in gafiterator(file):
+                if self.do_ontology.query_term(annotation["GO_ID"]) and annotation["Evidence"] == "IEA":
+                    mapped_annotation = annotation
+                    mapped_annotation["GO_Name"] = self.do_ontology.query_term(mapped_annotation["GO_ID"]).name
+                    mapped_annotation["GO_ID"] = self.do_ontology.query_term(mapped_annotation["GO_ID"]).id
+                    mapped_annotation["Is_Obsolete"] = \
+                        self.do_ontology.query_term(mapped_annotation["GO_ID"]).is_obsolete
+                    self.do_data[annotation[self.go_id_name]].append(mapped_annotation)
+
+        file_path = self._get_cached_file(cache_path=self.do_annotations_new_cache_path,
+                                          file_source_url=self.do_annotations_new_url)
+        header = True
+        for line in open(file_path):
+            if not line.strip().startswith("!"):
+                if not header:
+                    linearr = line.strip().split("\t")
+                    if self.do_ontology.query_term(linearr[10]) and linearr[16] != "IEA":
+                        mapped_annotation = {"Evidence": linearr[16],
+                                             "GO_Name": self.do_ontology.query_term(linearr[10]).name,
+                                             "GO_ID": self.do_ontology.query_term(linearr[10]).id,
+                                             "Is_Obsolete": self.do_ontology.query_term(linearr[10]).is_obsolete,
+                                             "DB_Object_ID": linearr[2],
+                                             "DB_Object_Symbol": linearr[3],
+                                             "Qualifier": linearr[9],
+                                             "Aspect": "D"}
+                        self.do_data[linearr[2][3:]].append(mapped_annotation)
+                else:
+                    header = False
 
 
 class AGRRawDataFetcher(RawDataFetcher):
@@ -351,8 +390,7 @@ class AGRRawDataFetcher(RawDataFetcher):
 
     def __init__(self, go_terms_exclusion_list: List[str], go_terms_replacement_dict: Dict[str, str],
                  raw_files_source: str, cache_location: str, release_version: str, main_file_name: str,
-                 bgi_file_name: str, go_annotations_file_name: str, organism_name: str, use_cache: bool = False,
-                 chebi_file_url: str = ""):
+                 bgi_file_name: str, go_annotations_file_name: str, organism_name: str, use_cache: bool = False):
         """create a new data fetcher
 
         :param go_terms_exclusion_list: list of go ids for terms to exclude
@@ -376,8 +414,6 @@ class AGRRawDataFetcher(RawDataFetcher):
         :param use_cache: whether to use cached files. If cache is empty, files are downloading from source and stored
             in cache
         :type use_cache: bool
-        :param chebi_file_url: url where to fetch the chebi file
-        :type chebi_file_url: str
         """
         super().__init__(go_terms_exclusion_list=go_terms_exclusion_list,
                          go_terms_replacement_dict=go_terms_replacement_dict, use_cache=use_cache,
@@ -387,21 +423,23 @@ class AGRRawDataFetcher(RawDataFetcher):
         self.bgi_file_name = bgi_file_name
         self.go_ontology_cache_path = os.path.join(cache_location, "agr", release_version, "GO", "go.obo")
         self.go_ontology_url = raw_files_source + '/' + release_version + '/GO/' + 'go.obo'
-        self.chebi_file_cache_path = os.path.join(cache_location, "agr", "CHEBI", "chebi_lite.obo.gz")
-        self.chebi_file_url = chebi_file_url
         self.go_annotations_cache_path = os.path.join(cache_location, "agr", release_version, "GO", "ANNOT",
                                                       go_annotations_file_name)
         self.go_annotations_url = raw_files_source + '/' + release_version + '/GO/ANNOT/' + go_annotations_file_name
         self.go_id_name = "DB_Object_Symbol"
 
-    def _load_gene_data(self) -> None:
-        if not os.path.isfile(self.main_data_cache_path):
-            os.makedirs(os.path.dirname(self.main_data_cache_path), exist_ok=True)
-            urllib.request.urlretrieve(self.main_data_url, self.main_data_cache_path)
-        if not os.path.isfile(os.path.join(os.path.dirname(self.main_data_cache_path), self.bgi_file_name)):
-            tar = tarfile.open(self.main_data_cache_path)
-            tar.extractall(path=os.path.dirname(self.main_data_cache_path))
-        with open(os.path.join(os.path.dirname(self.main_data_cache_path), self.bgi_file_name)) as fileopen:
-            bgi_content = json.load(fileopen)
-            for gene in bgi_content["data"]:
-                self.gene_data[gene["symbol"]] = Gene(gene["symbol"], gene["symbol"], False, False)
+    def load_gene_data(self) -> None:
+        if len(self.gene_data.items()) == 0:
+            if not os.path.isfile(self.main_data_cache_path):
+                os.makedirs(os.path.dirname(self.main_data_cache_path), exist_ok=True)
+                urllib.request.urlretrieve(self.main_data_url, self.main_data_cache_path)
+            if not os.path.isfile(os.path.join(os.path.dirname(self.main_data_cache_path), self.bgi_file_name)):
+                tar = tarfile.open(self.main_data_cache_path)
+                tar.extractall(path=os.path.dirname(self.main_data_cache_path))
+            with open(os.path.join(os.path.dirname(self.main_data_cache_path), self.bgi_file_name)) as fileopen:
+                bgi_content = json.load(fileopen)
+                for gene in bgi_content["data"]:
+                    self.gene_data[gene["symbol"]] = Gene(gene["symbol"], gene["symbol"], False, False)
+
+    def load_disease_data(self) -> None:
+        pass

@@ -1,7 +1,7 @@
 generic_data_fetcher:
     cache_location: "gene_descriptions_cache"
     # set 'data_fetcher' to 'agr_data_fetcher' to generate descriptions for AGR or 'wb_data_fetcher' for WormBase
-    data_fetcher: "agr_data_fetcher"
+    data_fetcher: "wb_data_fetcher"
     chebi_file_source: "ftp://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi_lite.obo.gz"
 
 # options for WormBase gene description generation - used when data_fetcher is set to 'wb_data_fetcher'
@@ -12,14 +12,15 @@ wb_data_fetcher:
         # add the species to be processed to the following list. Entries must have the same text as in 'organisms'
         # option
         - c_elegans
-        - b_malayi
-        - c_brenneri
-        - c_briggsae
-        - c_japonica
-        - c_remanei
-        - o_volvulus
-        - p_pacificus
-        - s_ratti
+        #- b_malayi
+        #- c_brenneri
+        #- c_briggsae
+        #- c_japonica
+        #- c_remanei
+        #- o_volvulus
+        #- p_pacificus
+        #- s_ratti
+        #- t_muris
     organisms:
         b_malayi:
             project_id: "PRJNA10729"
@@ -30,6 +31,7 @@ wb_data_fetcher:
             main_sister_species: c_elegans
         c_elegans:
             project_id: "PRJNA13758"
+            name: "C. elegans"
         c_japonica:
             project_id: "PRJNA12591"
         c_remanei:
@@ -47,11 +49,11 @@ agr_data_fetcher:
     raw_files_source: "https://s3.amazonaws.com/mod-datadumps"
     release: "1.0"
     organisms_to_process:
-        #- wb
-        #- fb
-        #- zfin
-        #- sgd
-        #- rgd
+        - wb
+        - fb
+        - zfin
+        - sgd
+        - rgd
         - mgi
     organisms:
         wb:
@@ -81,9 +83,9 @@ agr_data_fetcher:
             go_annotations: "gene_association.sgd.gz"
         mgi:
             name: "mouse"
-            main_files: "MGI_1.0.0.2_1.tar.gz"
-            bgi_file: "MGI_1.0.0.2_BGI.json"
-            go_annotations: "gene_association_1.0.mgi.gz"
+            main_files: "MGI_1.0.6.tar.gz"
+            bgi_file: "MGI_1.0.6_basicGeneInformation.json"
+            go_annotations: "gene_association.mgi.gz"
 
 generic_genedesc_writer:
     genedesc_writer: "json_writer"
@@ -204,7 +206,7 @@ go_sentences_options:
           special_cases:
               - id: 1
                 match_regex: "structural constituent"
-                prefix: "a"
+                prefix: "is a"
                 postfix: ""
         - aspect: F
           group: HIGH_THROUGHPUT_EXPERIMENTAL
@@ -214,96 +216,96 @@ go_sentences_options:
           special_cases:
               - id: 1
                 match_regex: "structural constituent"
-                prefix: "a"
+                prefix: "is a"
                 postfix: ""
         - aspect: F
           group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
           qualifier: ""
-          prefix: "predicted to have"
+          prefix: "is predicted to have"
           postfix: ""
           special_cases:
               - id: 1
                 match_regex: "structural constituent"
-                prefix: "predicted to be a"
+                prefix: "is predicted to be a"
                 postfix: ""
         - aspect: F
           group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
           qualifier: "contributes_to"
-          prefix: "predicted to contribute to"
+          prefix: "is predicted to contribute to"
           postfix: ""
           special_cases:
               - id: 1
                 match_regex: "structural constituent"
-                prefix: "predicted to contribute as a"
+                prefix: "is predicted to contribute as a"
                 postfix: ""
         - aspect: F
           group: INFERRED_BY_CURATORS_AND_AUTHORS
           qualifier: ""
-          prefix: "predicted to have"
+          prefix: "is predicted to have"
           postfix: ""
           special_cases:
               - id: 1
                 match_regex: "structural constituent"
-                prefix: "predicted to be a"
+                prefix: "is predicted to be a"
                 postfix: ""
         - aspect: F
           group: INFERRED_BY_CURATORS_AND_AUTHORS
           qualifier: "contributes_to"
-          prefix: "predicted to contribute to"
+          prefix: "is predicted to contribute to"
           postfix: ""
           special_cases:
               - id: 1
                 match_regex: "structural constituent"
-                prefix: "predicted to contribute as a"
+                prefix: "is predicted to contribute as a"
                 postfix: ""
         - aspect: F
           group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
           qualifier: ""
-          prefix: "predicted to have"
+          prefix: "is predicted to have"
           postfix: ""
           special_cases:
               - id: 1
                 match_regex: "structural constituent"
-                prefix: "predicted to be a"
+                prefix: "is predicted to be a"
                 postfix: ""
         - aspect: F
           group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
           qualifier: "contributes_to"
-          prefix: "predicted to contribute to"
+          prefix: "is predicted to contribute to"
           postfix: ""
           special_cases:
               - id: 1
                 match_regex: "structural constituent"
-                prefix: "predicted to contribute as a"
+                prefix: "is predicted to contribute as a"
                 postfix: ""
         - aspect: P
           group: EXPERIMENTAL
           qualifier: ""
-          prefix: "involved in"
+          prefix: "is involved in"
           postfix: ""
           special_cases:
         - aspect: P
           group: HIGH_THROUGHPUT_EXPERIMENTAL
           qualifier: ""
-          prefix: "involved in"
+          prefix: "is involved in"
           postfix: ""
           special_cases:
         - aspect: P
           group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
           qualifier: ""
-          prefix: "predicted to be involved in"
+          prefix: "is predicted to be involved in"
           postfix: ""
           special_cases:
         - aspect: P
           group: INFERRED_BY_CURATORS_AND_AUTHORS
           qualifier: ""
-          prefix: "predicted to be involved in"
+          prefix: "is predicted to be involved in"
           postfix: ""
           special_cases:
         - aspect: P
           group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
           qualifier: ""
-          prefix: "predicted to be involved in"
+          prefix: "is predicted to be involved in"
           postfix: ""
           special_cases:
         - aspect: C
@@ -349,62 +351,62 @@ go_sentences_options:
         - aspect: C
           group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
           qualifier: ""
-          prefix: "predicted to localize to"
+          prefix: "is predicted to localize to"
           postfix: ""
           special_cases:
               - id: 1
                 match_regex: "intracellular$"
-                prefix: "predicted to be"
+                prefix: "is predicted to be"
                 postfix: ""
         - aspect: C
           group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
           qualifier: "colocalizes_with"
-          prefix: "predicted to colocalize with"
+          prefix: "is predicted to colocalize with"
           postfix: ""
           special_cases:
               - id: 1
                 match_regex: "intracellular$"
-                prefix: "predicted to be"
+                prefix: "is predicted to be"
                 postfix: ""
         - aspect: C
           group: INFERRED_BY_CURATORS_AND_AUTHORS
           qualifier: ""
-          prefix: "predicted to localize to"
+          prefix: "is predicted to localize to"
           postfix: ""
           special_cases:
               - id: 1
                 match_regex: "intracellular$"
-                prefix: "predicted to be"
+                prefix: "is predicted to be"
                 postfix: ""
         - aspect: C
           group: INFERRED_BY_CURATORS_AND_AUTHORS
           qualifier: "colocalizes_with"
-          prefix: "predicted to colocalize with"
+          prefix: "is predicted to colocalize with"
           postfix: ""
           special_cases:
               - id: 1
                 match_regex: "intracellular$"
-                prefix: "predicted to be"
+                prefix: "is predicted to be"
                 postfix: ""
         - aspect: C
           group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
           qualifier: ""
-          prefix: "predicted to localize to"
+          prefix: "is predicted to localize to"
           postfix: ""
           special_cases:
               - id: 1
                 match_regex: "intracellular$"
-                prefix: "predicted to be"
+                prefix: "is predicted to be"
                 postfix: ""
         - aspect: C
           group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
           qualifier: "colocalize_with"
-          prefix: "predicted to colocalize with"
+          prefix: "is predicted to colocalize with"
           postfix: ""
           special_cases:
               - id: 1
                 match_regex: "intracellular$"
-                prefix: "predicted to be"
+                prefix: "is predicted to be"
                 postfix: ""
 
     go_truncate_others_aggregation_word: several
@@ -451,7 +453,7 @@ do_sentences_options:
         - aspect: "D"
           group: EXPERIMENTAL
           qualifier: ""
-          prefix: "used to study"
+          prefix: "is used to study"
           postfix: ""
         - aspect: "D"
           group: BIOMARKER
@@ -461,17 +463,17 @@ do_sentences_options:
         - aspect: "D"
           group: INFERRED_BY_CURATORS_AND_AUTHORS
           qualifier: ""
-          prefix: "is"
+          prefix: "is used to study"
           postfix: ""
         - aspect: "D"
           group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
           qualifier: ""
-          prefix: "ortholog of this gene implicated in"
+          prefix: "ortholog of this gene is implicated in"
           postfix: ""
         - aspect: "D"
           group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
           qualifier: ""
-          prefix: "ortholog of this gene implicated in"
+          prefix: "ortholog of this gene is implicated in"
           postfix: ""
 
     remove_parents_if_children_are_present: true
@@ -484,8 +486,4 @@ do_sentences_options:
         D: diseases
     go_truncate_others_terms:
         D: "diseases"
-
-
-
-
 
