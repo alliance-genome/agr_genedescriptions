@@ -451,17 +451,17 @@ do_sentences_options:
         - aspect: "D"
           group: EXPERIMENTAL
           qualifier: ""
-          prefix: "used to study"
+          prefix: "is used to study"
           postfix: ""
         - aspect: "D"
           group: BIOMARKER
-          qualifier: "D"
+          qualifier: ""
           prefix: "is biomarker of"
           postfix: ""
         - aspect: "D"
           group: INFERRED_BY_CURATORS_AND_AUTHORS
           qualifier: ""
-          prefix: "is"
+          prefix: "is used to study"
           postfix: ""
         - aspect: "D"
           group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS

@@ -457,7 +457,7 @@ do_sentences_options:
           postfix: ""
         - aspect: "D"
           group: BIOMARKER
-          qualifier: "D"
+          qualifier: ""
           prefix: "is biomarker of"
           postfix: ""
         - aspect: "D"
