@@ -30,7 +30,7 @@ class TestRawDataFetcher(unittest.TestCase):
 
     def test_get_go_data(self):
         self.assertTrue(self.df.get_go_ontology())
-        self.assertTrue(len(self.df.get_annotations(geneid="WBGene00000001")) > 0)
+        self.assertTrue(len(self.df.get_annotations_for_gene(geneid="WB:WBGene00000001")) > 0)
 
     def test_get_gene_data(self):
         self.assertGreater(len([gene for gene in self.df.get_gene_data()]), 20000)

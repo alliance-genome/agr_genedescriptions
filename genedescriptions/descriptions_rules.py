@@ -3,9 +3,11 @@ import inflect
 import re
 from namedlist import namedlist
 from genedescriptions.ontology_tools import *
+from ontobio.ontol import Ontology
+from ontobio.assocmodel import AssociationSet
 
-Sentence = namedlist('Sentence', ['prefix', 'terms', 'term_ids_dict', 'postfix', 'text', 'aspect', 'evidence_group',
-                                  'terms_merged', 'additional_prefix', 'qualifier'])
+Sentence = namedlist('Sentence', ['prefix', 'terms_ids', 'postfix', 'text', 'aspect', 'evidence_group', 'terms_merged',
+                                  'additional_prefix', 'qualifier'])
 
 
 class SingleDescStats(object):
@@ -45,8 +47,7 @@ class DescriptionsStats(object):
 class SentenceMerger(object):
     def __init__(self):
         self.postfix_list = []
-        self.terms = set()
-        self.terms_ids_dict = {}
+        self.terms: set = set()
         self.term_postfix_dict = {}
         self.evidence_groups = []
         self.term_evgroup_dict = {}
@@ -55,14 +56,12 @@ class SentenceMerger(object):
 
 class SentencesCollection(object):
     """a group of sentences indexed by aspect"""
-    def __init__(self, evidence_groups_list, prepostfix_sentences_map, remove_parent_terms: bool, ontology,
-                 terms_replacement_dict: Dict[str, str] = None):
+    def __init__(self, evidence_groups_list, prepostfix_sentences_map, remove_parent_terms: bool, ontology: Ontology):
         self.evidence_groups_list = evidence_groups_list
         self.prepostfix_sentences_map = prepostfix_sentences_map
         self.sentences_map = {}
         self.remove_parent_terms = remove_parent_terms
         self.ontology = ontology
-        self.terms_replacement_dict = terms_replacement_dict
 
     def set_sentence(self, sentence: Sentence) -> None:
         """add a sentence to the collection
@@ -94,7 +93,6 @@ class SentencesCollection(object):
         :rtype: List[GOSentence]
         """
         sentences = []
-        qualifier = qualifier.lower()
         merged_sentences = defaultdict(SentenceMerger)
         if desc_stats:
             desc_stats.num_terms_trim_nogroup_priority_nomerge[aspect] = 0
@@ -115,8 +113,6 @@ class SentencesCollection(object):
                     merged_sentences[prefix].terms.update([term for term in self.sentences_map[(aspect, eg,
                                                                                                 qualifier)].terms
                                                           if term not in terms_in_previous_ev_groups])
-                    merged_sentences[prefix].terms_ids_dict.update(self.sentences_map[(aspect, eg,
-                                                                                       qualifier)].term_ids_dict)
                     for term in self.sentences_map[(aspect, eg, qualifier)].terms:
                         merged_sentences[prefix].term_postfix_dict[term] = self.prepostfix_sentences_map[
                             (aspect, eg, qualifier)][1]
@@ -129,35 +125,23 @@ class SentencesCollection(object):
                             self.sentences_map[(aspect, eg, qualifier)].additional_prefix
                 else:
                     sentence_copy = copy.copy(self.sentences_map[(aspect, eg, qualifier)])
-                    sentence_copy.terms = [term for term in sentence_copy.terms if term not in
-                                           terms_in_previous_ev_groups]
+                    sentence_copy.terms_ids = [term for term in sentence_copy.terms_ids if term not in
+                                               terms_in_previous_ev_groups]
                     sentences.append(sentence_copy)
-                    terms_in_previous_ev_groups.update(self.sentences_map[(aspect, eg, qualifier)].terms)
+                    terms_in_previous_ev_groups.update(self.sentences_map[(aspect, eg, qualifier)].terms_ids)
                 if keep_only_best_group:
                     break
         if merge_groups_with_same_prefix:
             for prefix, sent_merger in merged_sentences.items():
                 # rem parents
                 if self.remove_parent_terms:
-                    term_ids_no_parents = get_term_ids_without_parents_from_terms_names(
-                        go_terms_names=sent_merger.terms, term_ids_dict=sent_merger.terms_ids_dict,
-                        ontology=self.ontology)
-                    if len(sent_merger.terms) > len(term_ids_no_parents):
-                        logging.debug("Removed " + str(len(sent_merger.terms) - len(term_ids_no_parents)) +
+                    terms_no_ancestors = sent_merger.terms - set([ancestor for node_id in sent_merger.terms for ancestor
+                                                                  in self.ontology.ancestors(node_id)])
+                    if len(sent_merger.terms) > len(terms_no_ancestors):
+                        logging.debug("Removed " + str(len(sent_merger.terms) - len(terms_no_ancestors)) +
                                       " parents from terms while merging sentences with same prefix")
-                        term_names_no_parents = set([self.ontology.query_term(term_id).name for term_id in
-                                                     term_ids_no_parents])
-                        sent_merger.terms_ids_dict = {key: value for key, value in sent_merger.terms_ids_dict.items()
-                                                      if key in set(term_names_no_parents)}
-                        sent_merger.terms = list(term_names_no_parents)
-                        if self.terms_replacement_dict:
-                            for regex_to_substitute, regex_target in self.terms_replacement_dict.items():
-                                sent_merger.terms = [re.sub(regex_to_substitute, regex_target, go_term_name) for
-                                                     go_term_name in sent_merger.terms]
-                                sent_merger.terms_ids_dict = {re.sub(regex_to_substitute, regex_target, key): value for
-                                                              key, value in sent_merger.terms_ids_dict.items()}
+                        sent_merger.terms = terms_no_ancestors
             sentences = [Sentence(prefix=prefix, terms=list(sent_merger.terms),
-                                  term_ids_dict=sent_merger.terms_ids_dict,
                                   postfix=SentencesCollection.merge_postfix_phrases(sent_merger.postfix_list),
                                   text=compose_sentence(prefix=prefix,
                                                         term_names=list(sent_merger.terms),
@@ -215,19 +199,20 @@ class SentencesCollection(object):
             return postfix_phrases[0]
 
 
-def generate_sentences(annotations: List[dict], ontology, evidence_groups_priority_list: List[str],
+def generate_sentences(annotations: AssociationSet, ontology: Ontology, evidence_groups_priority_list: List[str],
                        prepostfix_sentences_map: Dict[Tuple[str, str, str], Tuple[str, str]],
                        evidence_codes_groups_map: Dict[str, str],
                        prepostfix_special_cases_sent_map: Dict[Tuple[str, str, str], Tuple[int, str, str, str]] = None,
                        remove_parent_terms: bool = True, merge_num_terms_threshold: int = 3,
                        merge_min_distance_from_root: dict = None, desc_stats: SingleDescStats = None,
-                       terms_replacement_dict: Dict[str, str] = None, truncate_others_generic_word: str = "several",
+                       truncate_others_generic_word: str = "several",
                        truncate_others_aspect_words: Dict[str, str] = None) -> SentencesCollection:
     """generate sentences from a list of annotations
 
     :param annotations: the list of annotations for a given gene
-    :type annotations: List[dict]
-    :param ontology: the ontology
+    :type annotations: AssociationSet
+    :param ontology: the ontology linked to the annotations
+    :type ontology: Ontology
     :param evidence_groups_priority_list: the list of evidence groups to consider, sorted by priority. Sentences of the
         first group (with highest priority) will be returned in first position and so on
     :type evidence_groups_priority_list: List[str]
@@ -254,8 +239,6 @@ def generate_sentences(annotations: List[dict], ontology, evidence_groups_priori
     :param desc_stats: an object containing the description statistics where to save the total number of annotations
         for the gene
     :type desc_stats: SingleDescStats
-    :param terms_replacement_dict: replacement dictionary for terms
-    :type terms_replacement_dict: Dict[str, str]
     :param truncate_others_generic_word: a generic word to indicate that the set of terms reported in the sentence is
         only a subset of the original terms, e.g., 'several'
     :type truncate_others_generic_word: str
@@ -265,84 +248,66 @@ def generate_sentences(annotations: List[dict], ontology, evidence_groups_priori
     :return: a collection of sentences
     :rtype: SentencesCollection
     """
-    if len(annotations) > 0:
+    if len(annotations.associations_by_subj.values()) > 0:
         if not merge_min_distance_from_root:
             merge_min_distance_from_root = {'F': 1, 'P': 1, 'C': 2, 'D': 3}
         if not truncate_others_aspect_words:
             truncate_others_aspect_words = {'F': 'functions', 'P': 'processes', 'C': 'components'}
-        go_terms_groups = defaultdict(set)
-        for annotation in annotations:
-            if annotation["Evidence"] in evidence_codes_groups_map:
-                map_key = (annotation["Aspect"], evidence_codes_groups_map[annotation["Evidence"]],
-                           "_".join(sorted(annotation["Qualifier"])).lower())
-                if prepostfix_special_cases_sent_map and map_key in prepostfix_special_cases_sent_map:
-                    for special_case in prepostfix_special_cases_sent_map[map_key]:
-                        if re.match(re.escape(special_case[1]), annotation["GO_Name"]):
-                            map_key = (annotation["Aspect"], evidence_codes_groups_map[annotation["Evidence"]] +
-                                       str(special_case[0]), "_".join(sorted(annotation["Qualifier"])).lower())
-                            if evidence_codes_groups_map[annotation["Evidence"]] + str(special_case[0]) not in \
-                                    evidence_groups_priority_list:
-                                evidence_groups_priority_list.insert(evidence_groups_priority_list.index(
-                                    evidence_codes_groups_map[annotation["Evidence"]]) + 1,
-                                                                     evidence_codes_groups_map[annotation["Evidence"]] +
-                                                                     str(special_case[0]))
-                            break
-                go_terms_groups[map_key].add((annotation["GO_Name"], annotation["GO_ID"]))
+        terms_groups = defaultdict(set)
+        for subj_associations in annotations.associations_by_subj.values():
+            for annotation in subj_associations:
+                if annotation["evidence"]["type"] in evidence_codes_groups_map:
+                    map_key = (annotation["aspect"], evidence_codes_groups_map[annotation["evidence"]["type"]],
+                               "_".join(sorted(annotation["qualifiers"])).lower())
+                    if prepostfix_special_cases_sent_map and map_key in prepostfix_special_cases_sent_map:
+                        for special_case in prepostfix_special_cases_sent_map[map_key]:
+                            if re.match(re.escape(special_case[1]), ontology.node(annotation["object"]["id"])["label"]):
+                                map_key = (annotation["aspect"], evidence_codes_groups_map[
+                                    annotation["evidence"]["type"]] + str(special_case[0]),
+                                           "_".join(sorted(annotation["qualifier"].lower() if "qualifier" in annotation
+                                                           else "")))
+                                if evidence_codes_groups_map[annotation["evidence"]["type"]] + str(special_case[0]) \
+                                        not in evidence_groups_priority_list:
+                                    evidence_groups_priority_list.insert(evidence_groups_priority_list.index(
+                                        evidence_codes_groups_map[annotation["evidence"]["type"]]) + 1,
+                                                                         evidence_codes_groups_map[
+                                                                             annotation["evidence"]["type"]] +
+                                                                         str(special_case[0]))
+                                break
+                    terms_groups[map_key].add(annotation["object"]["id"])
         sentences = SentencesCollection(evidence_groups_priority_list, prepostfix_sentences_map,
-                                        remove_parent_terms=remove_parent_terms, ontology=ontology,
-                                        terms_replacement_dict=terms_replacement_dict)
-        for ((go_aspect, evidence_group, qualifier), go_terms) in go_terms_groups.items():
-            go_term_names = [term[0] for term in go_terms]
+                                        remove_parent_terms=remove_parent_terms, ontology=ontology)
+        for ((aspect, evidence_group, qualifier), terms) in terms_groups.items():
             if desc_stats:
-                desc_stats.num_terms_notrim_nogroup_priority_nomerge[go_aspect] += len(go_term_names)
-                desc_stats.terms_notrim_nogroup_priority_nomerge[go_aspect].extend(go_term_names)
-            term_ids_dict = {term_name: term_id for term_name, term_id in go_terms}
-            replace = False
+                desc_stats.num_terms_notrim_nogroup_priority_nomerge[aspect] += len(terms)
+                desc_stats.terms_notrim_nogroup_priority_nomerge[aspect].extend(terms)
             add_others = False
             if remove_parent_terms:
-                term_ids_no_parents = get_term_ids_without_parents_from_terms_names(go_terms_names=go_term_names,
-                                                                                    term_ids_dict=term_ids_dict,
-                                                                                    ontology=ontology)
-                if len(go_term_names) > len(term_ids_no_parents):
-                    logging.debug("Removed " + str(len(go_term_names) - len(term_ids_no_parents)) +
-                                  " parents from terms")
-                    go_term_names = [ontology.query_term(term_id).name for term_id in term_ids_no_parents]
-                    term_ids_dict = {ontology.query_term(term_id).name: ontology.query_term(term_id).id for
-                                     term_id in term_ids_no_parents}
-                    replace = True
+                terms_no_ancestors = terms - set([ancestor for node_id in terms for ancestor in
+                                                  ontology.ancestors(node_id)])
+                if len(terms) > len(terms_no_ancestors):
+                    logging.debug("Removed " + str(len(terms) - len(terms_no_ancestors)) + " parents from terms")
+                    terms = terms_no_ancestors
             if merge_num_terms_threshold > 0:
-                merged_ids_covered_subsets = get_merged_term_ids_by_common_ancestor_from_term_names(
-                    go_terms_names=go_term_names, term_ids_dict=term_ids_dict, ontology=ontology,
-                    min_distance_from_root=merge_min_distance_from_root[go_aspect],
+                merged_terms_coverset = get_merged_nodes_by_common_ancestor(
+                    node_ids=terms, ontology=ontology, min_distance_from_root=merge_min_distance_from_root[aspect],
                     min_number_of_terms=merge_num_terms_threshold)
-                if len(merged_ids_covered_subsets.keys()) <= merge_num_terms_threshold:
-                    merged_ids = list(merged_ids_covered_subsets.keys())
+                if len(merged_terms_coverset.keys()) <= merge_num_terms_threshold:
+                    merged_terms = list(merged_terms_coverset.keys())
                 else:
-                    merged_ids = find_set_covering([(k, ontology.query_term(k).name, v) for k, v in
-                                                    merged_ids_covered_subsets.items()],
-                                                   max_num_subsets=merge_num_terms_threshold)
+                    merged_terms = find_set_covering([(k, ontology.node(k)["label"], v) for k, v in
+                                                      merged_terms_coverset.items()],
+                                                     max_num_subsets=merge_num_terms_threshold)
                     add_others = True
-                if 0 < len(merged_ids) < len(go_term_names):
-                    logging.debug("Reduced number of terms by merging from " + str(len(go_term_names)) + " to " +
-                                  str(len(merged_ids)))
-                    go_term_names = [ontology.query_term(term_id).name for term_id in merged_ids]
-                    term_ids_dict = {ontology.query_term(term).name: ontology.query_term(term).id for term in
-                                     merged_ids}
-                    replace = True
-            if terms_replacement_dict and replace:
-                for regex_to_substitute, regex_target in terms_replacement_dict.items():
-                    go_term_names = [re.sub(regex_to_substitute, regex_target, term_name) for term_name in
-                                     go_term_names]
-                    term_ids_dict = {re.sub(regex_to_substitute, regex_target, term_name):
-                                     term_id for term_name, term_id in term_ids_dict.items()}
-            sentences.set_sentence(_get_single_sentence(term_names=go_term_names,
-                                                        term_ids_dict=term_ids_dict,
-                                                        aspect=go_aspect,
-                                                        evidence_group=evidence_group,
-                                                        qualifier=qualifier,
+                if 0 < len(merged_terms) < len(terms):
+                    logging.debug("Reduced number of terms by merging from " + str(len(terms)) + " to " +
+                                  str(len(merged_terms)))
+                    terms = merged_terms
+            sentences.set_sentence(_get_single_sentence(node_ids=terms, ontology=ontology, aspect=aspect,
+                                                        evidence_group=evidence_group, qualifier=qualifier,
                                                         prepostfix_sentences_map=prepostfix_sentences_map,
                                                         terms_merged=True if 0 < merge_num_terms_threshold < len(
-                                                               go_term_names) else False, add_others=add_others,
+                                                               terms) else False, add_others=add_others,
                                                         truncate_others_generic_word=truncate_others_generic_word,
                                                         truncate_others_aspect_words=truncate_others_aspect_words))
         return sentences
@@ -373,19 +338,18 @@ def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str],
         return prefix + term_names[0] + postfix
 
 
-def _get_single_sentence(term_names: List[str], term_ids_dict: Dict[str, str], aspect: str,
-                         evidence_group: str, qualifier: str,
+def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, evidence_group: str, qualifier: str,
                          prepostfix_sentences_map: Dict[Tuple[str, str, str], Tuple[str, str]],
                          terms_merged: bool = False, add_others: bool = False,
                          truncate_others_generic_word: str = "several",
                          truncate_others_aspect_words: Dict[str, str] = None) -> Union[Sentence, None]:
-    """build a go sentence
+    """build a sentence
 
-    :param term_names: list of go term names to be combined in the sentence
-    :type term_names: List[str]
-    :param term_ids_dict: map between term names and their ids
-    :type term_ids_dict: Dict[str, str]
-    :param aspect: go aspect
+    :param node_ids: list of ids for the terms to be combined in the sentence
+    :type node_ids: List[str]
+    :param ontology: the ontology containing the nodes
+    :type ontology: Ontology
+    :param aspect: aspect
     :type aspect: str
     :param evidence_group: evidence group
     :type evidence_group: str
@@ -406,7 +370,7 @@ def _get_single_sentence(term_names: List[str], term_ids_dict: Dict[str, str], a
     :return: the combined go sentence
     :rtype: Union[GOSentence, None]
     """
-    if len(term_names) > 0:
+    if len(node_ids) > 0:
         prefix = prepostfix_sentences_map[(aspect, evidence_group, qualifier)][0]
         additional_prefix = ""
         others_word = "entities"
@@ -417,11 +381,10 @@ def _get_single_sentence(term_names: List[str], term_ids_dict: Dict[str, str], a
         if aspect == "C":
             additional_prefix += " the"
         postfix = prepostfix_sentences_map[(aspect, evidence_group, qualifier)][1]
-        return Sentence(prefix=prefix, terms=term_names, postfix=postfix,
-                        term_ids_dict=term_ids_dict, text=compose_sentence(prefix=prefix,
-                                                                           term_names=term_names,
-                                                                           postfix=postfix,
-                                                                           additional_prefix=additional_prefix),
+        term_labels = [ontology.label(node_id) for node_id in node_ids]
+        return Sentence(prefix=prefix, terms_ids=node_ids, postfix=postfix,
+                        text=compose_sentence(prefix=prefix, term_names=term_labels, postfix=postfix,
+                                              additional_prefix=additional_prefix),
                         aspect=aspect, evidence_group=evidence_group, terms_merged=terms_merged,
                         additional_prefix=additional_prefix, qualifier=qualifier)
     else:

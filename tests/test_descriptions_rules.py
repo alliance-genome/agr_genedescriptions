@@ -42,19 +42,21 @@ class TestDescriptionsRules(unittest.TestCase):
         df.load_disease_data()
         sentences = []
         for gene in df.get_gene_data():
-            sentences.append(generate_sentences(annotations=df.get_annotations(gene.id, annot_type=AnnotationType.GO),
-                                                evidence_groups_priority_list=self.go_evidence_groups_priority_list,
-                                                prepostfix_sentences_map=self.go_prepostfix_sentences_map,
-                                                prepostfix_special_cases_sent_map=
-                                                self.go_prepostfix_special_cases_sent_map,
-                                                evidence_codes_groups_map=self.go_evidence_codes_groups_map,
-                                                ontology=df.get_go_ontology()))
-            do_sent = generate_sentences(annotations=df.get_annotations(gene.id, annot_type=AnnotationType.DO),
+            sentence = []
+            go_sent = generate_sentences(annotations=df.get_annotations_for_gene(gene.id, annot_type=AnnotationType.GO),
+                                         evidence_groups_priority_list=self.go_evidence_groups_priority_list,
+                                         prepostfix_sentences_map=self.go_prepostfix_sentences_map,
+                                         prepostfix_special_cases_sent_map=self.go_prepostfix_special_cases_sent_map,
+                                         evidence_codes_groups_map=self.go_evidence_codes_groups_map,
+                                         ontology=df.get_go_ontology())
+            if go_sent:
+                sentence.append(go_sent.get_sentences(aspect='F', ))
+            do_sent = generate_sentences(annotations=df.get_annotations_for_gene(gene.id, annot_type=AnnotationType.DO),
                                          evidence_groups_priority_list=self.do_evidence_groups_priority_list,
                                          prepostfix_sentences_map=self.do_prepostfix_sentences_map,
                                          evidence_codes_groups_map=self.do_evidence_codes_groups_map,
                                          ontology=df.get_do_ontology())
             if do_sent:
-                disease_sent = do_sent.get_sentences('D')
+                sentence.append(do_sent.get_sentences('D'))
         self.assertGreater(len(sentences), 20000)
 

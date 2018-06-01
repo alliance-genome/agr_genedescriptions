@@ -2,32 +2,43 @@
 import logging
 from collections import defaultdict
 from typing import List, Dict, Tuple, Union, Set
+from ontobio.ontol import Ontology
+
+RELATIONSHIPS = ["subClassOf", "BFO:0000050"]
 
 
-def get_all_go_parent_ids(go_id: str, ontology) -> List[str]:
-    """get the ids of all the ancestors of a GO term, excluding the root terms
+def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None, current_depth: int = 0):
+    """calculate and set max_depth and min_depth (maximum and minimum distances from root terms in the ontology)
+    recursively for all terms in a branch of the ontology
 
-    :param go_id: a valid GO id for the starting term
-    :type go_id: str
-    :param ontology: the go ontology
-    :return: the list of ancestors of the term
-    :rtype: List[str]
+    :param ontology: the ontology
+    :type ontology: Ontology
+    :param root_id: the ID of the root term of the branch to process
+    :type root_id: str
+    :param relations: list of relations to consider
+    :type relations: List[str]
+    :param current_depth: the current depth in the ontology
+    :type current_depth: int
     """
-    parent_ids = []
-    for parent in ontology.query_term(go_id).get_parents():
-        # do not return root terms
-        if len(ontology.query_term(parent.id).get_parents()) > 0:
-            parent_ids.append(parent.id)
-            parent_ids.extend(get_all_go_parent_ids(parent.id, ontology))
-    return parent_ids
+    if "max_depth" not in ontology.node(root_id):
+        ontology.node(root_id)["max_depth"] = current_depth
+    else:
+        ontology.node(root_id)["max_depth"] = max(ontology.node(root_id)["max_depth"], current_depth)
+    if "min_depth" not in ontology.node(root_id):
+        ontology.node(root_id)["min_depth"] = current_depth
+    else:
+        ontology.node(root_id)["min_depth"] = min(ontology.node(root_id)["min_depth"], current_depth)
+    for child_id in ontology.children(node=root_id, relations=relations):
+        set_all_depths_in_subgraph(ontology=ontology, root_id=child_id, relations=relations,
+                                   current_depth=current_depth + 1)
 
 
-def get_all_term_paths_to_root(go_id: str, ontology, min_distance_from_root: int = 0,
-                               previous_path: Union[None, List[str]] = None) -> Set[Tuple[str]]:
+def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_root: int = 0,
+                          previous_path: Union[None, List[str]] = None) -> Set[Tuple[str]]:
     """get all possible paths connecting a go term to its root terms
 
-    :param go_id: a valid GO id for the starting term
-    :type go_id: str
+    :param node_id: a valid GO id for the starting term
+    :type node_id: str
     :param ontology: the go ontology
     :param min_distance_from_root: return only terms at a specified minimum distance from root terms
     :type min_distance_from_root: int
@@ -40,51 +51,29 @@ def get_all_term_paths_to_root(go_id: str, ontology, min_distance_from_root: int
     if previous_path is None:
         previous_path = []
     new_path = previous_path[:]
-    term_properties = ontology.query_term(go_id)
-    new_path.append(term_properties.id)
-    parents = [parent for parent in term_properties.get_parents() if parent.depth >= min_distance_from_root]
+    new_path.append(node_id)
+    parents = [parent for parent in ontology.parents(node=node_id, relations=RELATIONSHIPS) if
+               ontology.node(parent)["max_depth"] >= min_distance_from_root]
     if len(parents) > 0:
         # go up the tree, following a depth first visit
         paths_to_return = set()
         for parent in parents:
-            for path in get_all_term_paths_to_root(go_id=parent.id, ontology=ontology, previous_path=new_path,
-                                                   min_distance_from_root=min_distance_from_root):
+            for path in get_all_paths_to_root(node_id=parent, ontology=ontology, previous_path=new_path,
+                                              min_distance_from_root=min_distance_from_root):
                 paths_to_return.add(path)
         return paths_to_return
     if len(new_path) == 0:
-        return {(go_id,)}
+        return {(node_id,)}
     else:
         return {tuple(new_path)}
 
 
-def get_term_ids_without_parents_from_terms_names(go_terms_names: List[str], term_ids_dict: Dict[str, str],
-                                                  ontology) -> Set[str]:
-    """remove parent terms (according to the provided go ontology) from a list of terms
-
-    :param go_terms_names: the list of go terms from which the parents will be removed
-    :type go_terms_names: List[str]
-    :param term_ids_dict: a dictionary that maps term names into their GO ids
-    :type term_ids_dict: Dict[str, str]
-    :param ontology: the go ontology
-    :return: the list of parents that have been removed from the list
-    :rtype: Set[str]
-    """
-    go_ids_set = set([term_ids_dict[term] for term in go_terms_names])
-    for go_term_name in go_terms_names:
-        for parent_id in get_all_go_parent_ids(term_ids_dict[go_term_name], ontology):
-            go_ids_set.discard(parent_id)
-    return go_ids_set
-
-
-def get_merged_term_ids_by_common_ancestor_from_term_names(go_terms_names: List[str], term_ids_dict: Dict[str, str],
-                                                           ontology, min_distance_from_root: int = 3,
-                                                           min_number_of_terms: int = 3) -> Dict[str, Set[str]]:
+def get_merged_nodes_by_common_ancestor(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 3,
+                                        min_number_of_terms: int = 3) -> Dict[str, Set[str]]:
     """remove terms with common ancestor and keep the ancestor term instead
 
-    :param go_terms_names: the list of go terms from which the parents will be removed
-    :type go_terms_names: List[str]
-    :param term_ids_dict: a dictionary that maps term names into their GO ids
-    :type term_ids_dict: Dict[str, str]
+    :param node_ids: the list of nodes to merge by common ancestor
+    :type node_ids: List[str]
     :param min_distance_from_root: set a minimum distance from root terms for ancestors that can group children terms
     :type min_distance_from_root: int
     :param min_number_of_terms: minimum number of terms above which the merge operation is performed
@@ -93,21 +82,21 @@ def get_merged_term_ids_by_common_ancestor_from_term_names(go_terms_names: List[
     :return: the set of merged terms, together with the set of original terms that each of them covers
     :rtype: Set[str]
     """
-    if len(go_terms_names) > min_number_of_terms:
+    if len(node_ids) > min_number_of_terms:
         logging.debug("applying trimming through naive algorithm")
         final_terms_set = {}
         ancestor_paths = defaultdict(list)
         term_paths = defaultdict(set)
         # step 1: get all path for each term and populate data structures
-        for go_term_id in [term_ids_dict[term_name] for term_name in go_terms_names]:
-            paths = get_all_term_paths_to_root(go_id=go_term_id, ontology=ontology,
-                                               min_distance_from_root=min_distance_from_root)
+        for node_id in node_ids:
+            paths = get_all_paths_to_root(node_id=node_id, ontology=ontology,
+                                          min_distance_from_root=min_distance_from_root)
             for path in paths:
-                term_paths[go_term_id].add(path)
+                term_paths[node_id].add(path)
                 ancestor_paths[path[-1]].append(path)
         # step 2: merge terms and keep common ancestors
-        for go_term_id in sorted([term_ids_dict[term_name] for term_name in go_terms_names]):
-            term_paths_copy = sorted(term_paths[go_term_id].copy(), key=lambda x: len(x))
+        for node_id in sorted(node_ids):
+            term_paths_copy = sorted(term_paths[node_id].copy(), key=lambda x: len(x))
             while len(term_paths_copy) > 0:
                 curr_path = list(term_paths_copy.pop())
                 selected_highest_ancestor = curr_path.pop()
@@ -135,14 +124,14 @@ def get_merged_term_ids_by_common_ancestor_from_term_names(go_terms_names: List[
                 final_terms_set[selected_highest_ancestor] = covered_nodes_set
                 for path in related_paths:
                     term_paths[path[0]].discard(path)
-                if len(term_paths[go_term_id]) > 0:
-                    term_paths_copy = term_paths[go_term_id].copy()
+                if len(term_paths[node_id]) > 0:
+                    term_paths_copy = term_paths[node_id].copy()
                 else:
                     break
         logging.debug("trimming done")
         return final_terms_set
     else:
-        return {term_ids_dict[term]: set(term_ids_dict[term]) for term in go_terms_names}
+        return {node_id: set(node_id) for node_id in node_ids}
 
 
 def find_set_covering(subsets: List[Tuple[str, str, Set[str]]], costs: List[float] = None,

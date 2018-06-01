@@ -89,7 +89,7 @@ def main():
             logging.debug("processing gene " + gene.name)
             gene_desc = GeneDesc(gene_id=gene.id, gene_name=gene.name)
             joined_sent = []
-            go_sentences = generate_sentences(df.get_annotations(
+            go_sentences = generate_sentences(df.get_annotations_for_gene(
                 gene.id, annot_type=AnnotationType.GO, priority_list=go_annotations_priority,
                 desc_stats=gene_desc.stats), ontology=df.get_go_ontology(),
                 evidence_groups_priority_list=go_evidence_groups_priority_list,
@@ -99,7 +99,7 @@ def main():
                 remove_parent_terms=conf_parser.get_go_remove_parents_if_children_are_present(),
                 merge_num_terms_threshold=conf_parser.get_go_trim_min_num_terms(),
                 merge_min_distance_from_root=conf_parser.get_go_trim_min_distance_from_root(),
-                desc_stats=gene_desc.stats, terms_replacement_dict=conf_parser.get_go_rename_terms(),
+                desc_stats=gene_desc.stats,
                 truncate_others_generic_word=conf_parser.get_go_truncate_others_aggregation_word(),
                 truncate_others_aspect_words=conf_parser.get_go_truncate_others_terms())
             if go_sentences:
@@ -129,7 +129,7 @@ def main():
                 if colocalizes_with_comp_sent:
                     joined_sent.append(colocalizes_with_comp_sent)
 
-            do_sentences = generate_sentences(df.get_annotations(
+            do_sentences = generate_sentences(df.get_annotations_for_gene(
                 gene.id, annot_type=AnnotationType.DO, priority_list=do_annotations_priority,
                 desc_stats=gene_desc.stats), ontology=df.get_do_ontology(),
                 evidence_groups_priority_list=do_evidence_groups_priority_list,
@@ -151,7 +151,7 @@ def main():
             if conf_parser.get_data_fetcher() == "wb_data_fetcher" and "main_sister_species" in species[organism] and \
                     species[organism]["main_sister_species"] and gene.name.startswith("Cbr-") and gene.name[4:] in \
                     sister_gene_name_id_map:
-                sister_sentences = generate_sentences(sister_df.get_annotations(
+                sister_sentences = generate_sentences(sister_df.get_annotations_for_gene(
                     annot_type=AnnotationType.GO, geneid=sister_gene_name_id_map[gene.name[4:]],
                     priority_list=("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI", "HEP"),
                     desc_stats=gene_desc.stats),
@@ -163,7 +163,7 @@ def main():
                     remove_parent_terms=conf_parser.get_go_remove_parents_if_children_are_present(),
                     merge_num_terms_threshold=conf_parser.get_go_trim_min_num_terms(),
                     merge_min_distance_from_root=conf_parser.get_go_trim_min_distance_from_root(),
-                    desc_stats=gene_desc.stats, terms_replacement_dict=conf_parser.get_go_rename_terms(),
+                    desc_stats=gene_desc.stats,
                     truncate_others_generic_word=conf_parser.get_go_truncate_others_aggregation_word(),
                     truncate_others_aspect_words=conf_parser.get_go_truncate_others_terms())
                 if sister_sentences:

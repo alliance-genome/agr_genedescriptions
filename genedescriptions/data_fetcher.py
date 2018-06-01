@@ -4,82 +4,24 @@ import tarfile
 import urllib.request
 import shutil
 import os
-import logging
 import re
 from enum import Enum
-from itertools import chain
 from abc import ABCMeta, abstractmethod
-from collections import namedtuple, defaultdict
+from collections import namedtuple
 from typing import List, Iterable, Dict
-from genedescriptions.descriptions_rules import SingleDescStats
+from ontobio import AssociationSetFactory
+from genedescriptions.descriptions_rules import SingleDescStats, set_all_depths_in_subgraph, RELATIONSHIPS
+from ontobio.ontol_factory import OntologyFactory
+from ontobio.ontol import Ontology
+from ontobio.assocmodel import AssociationSet
+from ontobio.io.gafparser import GafParser
 
 Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
+
 
 class AnnotationType(Enum):
     GO = 1
     DO = 2
-
-def get_parents(self):
-    """Return parent GO IDs."""
-    relationship = getattr(self, "relationship", defaultdict(set))
-    if relationship and "part_of" in relationship:
-        return set([parent for parent in chain(self.parents, relationship["part_of"])])
-    else:
-        return self.parents
-
-
-class OntoTerm(object):
-    """go term with the same properties and methods defined by goatools GOTerm
-
-    only the properties used for gene descriptions are included
-    """
-
-    def __init__(self, name: str, depth: int, node_id: str, parents: List, children: List, is_obsolete: bool, ontology):
-        self.depth = depth
-        self.name = name
-        self.id = node_id
-        self._parents = parents
-        self._children = children
-        self._ontology = ontology
-        self.is_obsolete = is_obsolete
-
-    def get_parents(self) -> List["OntoTerm"]:
-        """get the parent terms of the current term
-
-        :return: the list of parents of the term
-        :rtype: List[OntoTerm]
-        """
-        return [self._ontology.query_term(parent_id) for parent_id in self._parents]
-
-    def get_children(self) -> List["OntoTerm"]:
-        """get the child terms of the current term
-
-        :return: the list of children of the term
-        :rtype: List[OntoTerm]
-        """
-        return [self._ontology.query_term(child_id) for child_id in self._children]
-
-
-class Ontology(metaclass=ABCMeta):
-    """ontology interface with properties and methods needed for gene descriptions
-
-    the structure of this interface mirrors that of goatools GODag class for compatibility with goatools package
-    """
-
-    @abstractmethod
-    def __init__(self):
-        pass
-
-    @abstractmethod
-    def query_term(self, term_id: str) -> OntoTerm:
-        """retrieve a term from its ID
-
-        :param term_id: the ID of the term
-        :type term_id: str
-        :return: the term
-        :rtype: OntoTerm
-        """
-        pass
 
 
 class DataFetcher(metaclass=ABCMeta):
@@ -87,12 +29,12 @@ class DataFetcher(metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(self, go_terms_exclusion_list: List[str], go_terms_replacement_dict: Dict[str, str]):
-        self.go_data = defaultdict(list)
-        self.go_ontology = None
+        self.go_associations: AssociationSet = None
+        self.go_ontology: Ontology = None
         self.go_terms_exclusion_list = go_terms_exclusion_list
         self.go_terms_replacement_dict = go_terms_replacement_dict
-        self.do_ontology = None
-        self.do_data = defaultdict(list)
+        self.do_ontology: Ontology = None
+        self.do_associations: AssociationSet = None
 
     @abstractmethod
     def load_gene_data(self):
@@ -118,13 +60,14 @@ class DataFetcher(metaclass=ABCMeta):
         self.load_go_data()
         self.load_disease_data()
 
-    def get_annotations(self, geneid: str, annot_type: AnnotationType = AnnotationType.GO,
-                        include_obsolete: bool = False, include_negative_results: bool = False,
-                        priority_list: Iterable = ("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "IC", "ISS", "ISO", "ISA",
-                                                   "ISM", "IGC", "IBA", "IBD", "IKR", "IRD", "RCA", "IEA"),
-                        desc_stats: SingleDescStats = None) -> List[dict]:
+    def get_annotations_for_gene(self, geneid: str, annot_type: AnnotationType = AnnotationType.GO,
+                                 include_obsolete: bool = False, include_negative_results: bool = False,
+                                 priority_list: Iterable = ("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "IC", "ISS",
+                                                            "ISO", "ISA", "ISM", "IGC", "IBA", "IBD", "IKR", "IRD",
+                                                            "RCA", "IEA"),
+                                 desc_stats: SingleDescStats = None) -> AssociationSet:
         """
-        retrieve go annotations for a given gene id and for a given aspect. The annotations are unique for each pair
+        retrieve go annotations for a given gene id and a given type. The annotations are unique for each pair
         <gene_id, go_term_id>. This means that when multiple annotations for the same pair are found in the go data, the
         one with the evidence code with highest priority is returned (see the *priority_list* parameter to set the
         priority according to evidence codes)
@@ -146,31 +89,35 @@ class DataFetcher(metaclass=ABCMeta):
             for the gene
         :type desc_stats: SingleDescStats
         :return: the list of go annotations for the given gene
-        :rtype: List[GOAnnotation]
+        :rtype: AssociationSet
         """
         dataset = None
+        ontology = None
         if annot_type == AnnotationType.GO:
-            dataset = self.go_data
+            dataset = self.go_associations
+            ontology = self.go_ontology
         elif annot_type == AnnotationType.DO:
-            dataset = self.do_data
+            dataset = self.do_associations
+            ontology = self.do_ontology
         priority_map = dict(zip(priority_list, reversed(range(len(list(priority_list))))))
-        annotations = [annotation for annotation in dataset[geneid] if (include_obsolete or
-                       not annotation["Is_Obsolete"]) and (include_negative_results or "NOT" not in
-                                                           annotation["Qualifier"])]
+        annotations = [annotation for annotation in dataset.associations(geneid) if (include_obsolete or
+                       not ontology.is_obsolete(annotation["object"]["id"]))
+                       and (include_negative_results or "NOT" not in annotation["qualifiers"])]
         if desc_stats:
             desc_stats.total_num_go_annotations = len(annotations)
         id_selected_annotation = {}
         for annotation in annotations:
-            if annotation["Evidence"] in priority_map.keys():
-                if annotation["GO_ID"] in id_selected_annotation:
-                    if priority_map[annotation["Evidence"]] > \
-                            priority_map[id_selected_annotation[annotation["GO_ID"]]["Evidence"]]:
-                        id_selected_annotation[annotation["GO_ID"]] = annotation
+            if annotation["evidence"]["type"] in priority_map.keys():
+                if annotation["object"]["id"] in id_selected_annotation:
+                    if priority_map[annotation["evidence"]["type"]] > \
+                            priority_map[id_selected_annotation[annotation["object"]["id"]]["evidence"]["type"]]:
+                        id_selected_annotation[annotation["object"]["id"]] = annotation
                 else:
-                    id_selected_annotation[annotation["GO_ID"]] = annotation
+                    id_selected_annotation[annotation["object"]["id"]] = annotation
         if desc_stats:
             desc_stats.num_prioritized_go_annotations = len(id_selected_annotation.keys())
-        return [annotation for annotation in id_selected_annotation.values()]
+        return AssociationSetFactory().create_from_assocs(
+            assocs=[annotation for annotation in id_selected_annotation.values()], ontology=ontology)
 
     def get_go_ontology(self):
         return self.go_ontology
@@ -237,36 +184,27 @@ class RawDataFetcher(DataFetcher):
         """read go data and gene ontology. After calling this function, go annotations containing mapped go names can
         be retrieved by using the :meth:`data_fetcher.WBRawDataFetcher.get_go_annotations` function
         """
-        import goatools
-        from goatools.obo_parser import GODag
-        from Bio.UniProt.GOA import gafiterator
-        goatools.obo_parser.GOTerm.get_parents = get_parents
-        self.go_ontology = GODag(self._get_cached_file(file_source_url=self.go_ontology_url,
-                                                       cache_path=self.go_ontology_cache_path),
-                                 optional_attrs=["relationship"])
-        file_path = self._get_cached_file(cache_path=self.go_annotations_cache_path,
-                                          file_source_url=self.go_annotations_url)
-        lines_to_skip = 0
-        with open(file_path) as file:
-            while True:
-                if file.readline().strip().startswith("!gaf-version:"):
-                    break
-                lines_to_skip += 1
-        with open(file_path) as file:
-            for _ in range(lines_to_skip):
-                next(file)
-            for annotation in gafiterator(file):
-                if self.go_ontology.query_term(annotation["GO_ID"]) and \
-                        self.go_ontology.query_term(annotation["GO_ID"]).id not in self.go_terms_exclusion_list:
-                    mapped_annotation = annotation
-                    mapped_annotation["GO_Name"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).name
-                    mapped_annotation["GO_ID"] = self.go_ontology.query_term(mapped_annotation["GO_ID"]).id
-                    for regex_to_substitute, regex_target in self.go_terms_replacement_dict.items():
-                        mapped_annotation["GO_Name"] = re.sub(regex_to_substitute, regex_target,
-                                                              mapped_annotation["GO_Name"])
-                    mapped_annotation["Is_Obsolete"] = \
-                        self.go_ontology.query_term(mapped_annotation["GO_ID"]).is_obsolete
-                    self.go_data[annotation[self.go_id_name]].append(mapped_annotation)
+        self.go_ontology = OntologyFactory().create(self._get_cached_file(file_source_url=self.go_ontology_url,
+                                                                          cache_path=self.go_ontology_cache_path))
+        for node in self.go_ontology.nodes():
+            for regex_to_substitute, regex_target in self.go_terms_replacement_dict.items():
+                if "label" in self.go_ontology.node(node):
+                    self.go_ontology.node(node)["label"] = re.sub(regex_to_substitute, regex_target,
+                                                                  self.go_ontology.node(node)["label"])
+        for root_id in self.go_ontology.get_roots(relations=RELATIONSHIPS):
+            set_all_depths_in_subgraph(ontology=self.go_ontology, root_id=root_id, relations=RELATIONSHIPS)
+        self.go_associations = AssociationSetFactory().create_from_assocs(
+            assocs=GafParser().parse(file=self._get_cached_file(cache_path=self.go_annotations_cache_path,
+                                                                file_source_url=self.go_annotations_url),
+                                     skipheader=True),
+            ontology=self.go_ontology)
+        associations = []
+        for subj_associations in self.go_associations.associations_by_subj.values():
+            for association in subj_associations:
+                if association["object"]["id"] not in self.go_terms_exclusion_list:
+                    associations.append(association)
+        self.go_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
+                                                                          ontology=self.go_ontology)
 
 
 class WBRawDataFetcher(RawDataFetcher):
@@ -337,33 +275,23 @@ class WBRawDataFetcher(RawDataFetcher):
                 for line in file:
                     fields = line.strip().split(',')
                     name = fields[2] if fields[2] != '' else fields[3]
-                    self.gene_data[fields[1]] = Gene(fields[1], name, fields[4] == "Dead", False)
+                    self.gene_data["WB:" + fields[1]] = Gene("WB:" + fields[1], name, fields[4] == "Dead", False)
 
     def load_disease_data(self) -> None:
-        from Bio.UniProt.GOA import gafiterator
-        from goatools.obo_parser import GODag
-        self.do_ontology = GODag(self._get_cached_file(file_source_url=self.do_ontology_url,
-                                                       cache_path=self.do_ontology_cache_path))
-        file_path = self._get_cached_file(cache_path=self.do_annotations_cache_path,
-                                          file_source_url=self.do_annotations_url)
-        lines_to_skip = 0
-        with open(file_path) as file:
-            while True:
-                if file.readline().strip().startswith("!gaf-version:"):
-                    break
-                lines_to_skip += 1
-        with open(file_path) as file:
-            for _ in range(lines_to_skip):
-                next(file)
-            for annotation in gafiterator(file):
-                if self.do_ontology.query_term(annotation["GO_ID"]) and annotation["Evidence"] == "IEA":
-                    mapped_annotation = annotation
-                    mapped_annotation["GO_Name"] = self.do_ontology.query_term(mapped_annotation["GO_ID"]).name
-                    mapped_annotation["GO_ID"] = self.do_ontology.query_term(mapped_annotation["GO_ID"]).id
-                    mapped_annotation["Is_Obsolete"] = \
-                        self.do_ontology.query_term(mapped_annotation["GO_ID"]).is_obsolete
-                    self.do_data[annotation[self.go_id_name]].append(mapped_annotation)
-
+        self.do_ontology = OntologyFactory().create(self._get_cached_file(file_source_url=self.do_ontology_url,
+                                                                          cache_path=self.do_ontology_cache_path))
+        for root_id in self.do_ontology.get_roots(relations=RELATIONSHIPS):
+            set_all_depths_in_subgraph(ontology=self.do_ontology, root_id=root_id, relations=RELATIONSHIPS)
+        self.do_associations = AssociationSetFactory().create_from_assocs(
+            assocs=GafParser().parse(file=self._get_cached_file(cache_path=self.do_annotations_cache_path,
+                                                                file_source_url=self.do_annotations_url),
+                                     skipheader=True),
+            ontology=self.do_ontology)
+        associations = []
+        for subj_associations in self.do_associations.associations_by_subj.values():
+            for association in subj_associations:
+                if association["evidence"]["type"] == "IEA":
+                    associations.append(association)
         file_path = self._get_cached_file(cache_path=self.do_annotations_new_cache_path,
                                           file_source_url=self.do_annotations_new_url)
         header = True
@@ -371,18 +299,37 @@ class WBRawDataFetcher(RawDataFetcher):
             if not line.strip().startswith("!"):
                 if not header:
                     linearr = line.strip().split("\t")
-                    if self.do_ontology.query_term(linearr[10]) and linearr[16] != "IEA":
-                        mapped_annotation = {"Evidence": linearr[16],
-                                             "GO_Name": self.do_ontology.query_term(linearr[10]).name,
-                                             "GO_ID": self.do_ontology.query_term(linearr[10]).id,
-                                             "Is_Obsolete": self.do_ontology.query_term(linearr[10]).is_obsolete,
-                                             "DB_Object_ID": linearr[2],
-                                             "DB_Object_Symbol": linearr[3],
-                                             "Qualifier": linearr[9],
-                                             "Aspect": "D"}
-                        self.do_data[linearr[2][3:]].append(mapped_annotation)
+                    if self.do_ontology.node(linearr[10]) and linearr[16] != "IEA":
+                        associations.append({"source_line": line,
+                                             "subject": {
+                                                 "id": linearr[2],
+                                                 "label": linearr[3],
+                                                 "type": line[1],
+                                                 "fullname": "",
+                                                 "synonyms": [],
+                                                 "taxon": {"id": linearr[0]}
+
+                                             },
+                                             "object": {
+                                                 "id": linearr[10],
+                                                 "taxon": ""
+                                             },
+                                             "qualifiers": linearr[9].split("|"),
+                                             "aspect": "D",
+                                             "relation": {"id": None},
+                                             "negated": False,
+                                             "evidence": {
+                                                 "type": linearr[16],
+                                                 "has_supporting_reference": linearr[18].split("|"),
+                                                 "with_support_from": [],
+                                                 "provided_by": linearr[20],
+                                                 "date": linearr[19]
+                                                 }
+                                             })
                 else:
                     header = False
+        self.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
+                                                                          ontology=self.do_ontology)
 
 
 class AGRRawDataFetcher(RawDataFetcher):
