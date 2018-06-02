@@ -330,10 +330,10 @@ def generate_sentences(annotations: List[dict], ontology, evidence_groups_priori
                     replace = True
             if terms_replacement_dict and replace:
                 for regex_to_substitute, regex_target in terms_replacement_dict.items():
-                    go_term_names = [re.sub(regex_to_substitute, regex_target, ontology.query_term(term_id).name) for
-                                     term_id in merged_ids]
-                    term_ids_dict = {re.sub(regex_to_substitute, regex_target, ontology.query_term(term).name):
-                                     ontology.query_term(term).id for term in merged_ids}
+                    go_term_names = [re.sub(regex_to_substitute, regex_target, term_name) for term_name in
+                                     go_term_names]
+                    term_ids_dict = {re.sub(regex_to_substitute, regex_target, term_name):
+                                     term_id for term_name, term_id in term_ids_dict.items()}
             sentences.set_sentence(_get_single_sentence(term_names=go_term_names,
                                                         term_ids_dict=term_ids_dict,
                                                         aspect=go_aspect,
