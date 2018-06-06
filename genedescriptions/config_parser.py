@@ -152,6 +152,14 @@ class GenedescConfigParser(object):
         """
         return self.config["go_sentences_options"]["exclude_terms"]
 
+    def get_do_terms_exclusion_list(self) -> List[str]:
+        """get the list of go terms to exclude from the gene descriptions
+
+        :return: the exclusion list
+        :rtype: List[str]
+        """
+        return self.config["do_sentences_options"]["exclude_terms"]
+
     def get_raw_file_sources(self, data_fetcher: str) -> str:
         """get the url pointing to the raw files source
 
@@ -161,14 +169,6 @@ class GenedescConfigParser(object):
         :rtype: str
         """
         return self.config[data_fetcher]["raw_files_source"]
-
-    def get_chebi_file_source(self) -> str:
-        """get the url pointing to the chebi file
-
-        :return: the location of the chebi file
-        :rtype: str
-        """
-        return self.config["generic_data_fetcher"]["chebi_file_source"]
 
     def get_release(self, data_fetcher):
         """get the release code related to the input data to use

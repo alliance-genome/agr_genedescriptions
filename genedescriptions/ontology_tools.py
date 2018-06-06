@@ -4,10 +4,9 @@ from collections import defaultdict
 from typing import List, Dict, Tuple, Union, Set
 from ontobio.ontol import Ontology
 
-RELATIONSHIPS = ["subClassOf", "BFO:0000050"]
 
-
-def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None, current_depth: int = 0):
+def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None, comparison_func=max,
+                               current_depth: int = 0):
     """calculate and set max_depth and min_depth (maximum and minimum distances from root terms in the ontology)
     recursively for all terms in a branch of the ontology
 
@@ -17,24 +16,22 @@ def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List
     :type root_id: str
     :param relations: list of relations to consider
     :type relations: List[str]
+    :param comparison_func: a comparison function to calculate the depth when multiple paths exist between the node and
+        the root. max calculates the length of the longest path, min the one of the shortest
     :param current_depth: the current depth in the ontology
     :type current_depth: int
     """
-    if "max_depth" not in ontology.node(root_id):
-        ontology.node(root_id)["max_depth"] = current_depth
+    if "depth" not in ontology.node(root_id):
+        ontology.node(root_id)["depth"] = current_depth
     else:
-        ontology.node(root_id)["max_depth"] = max(ontology.node(root_id)["max_depth"], current_depth)
-    if "min_depth" not in ontology.node(root_id):
-        ontology.node(root_id)["min_depth"] = current_depth
-    else:
-        ontology.node(root_id)["min_depth"] = min(ontology.node(root_id)["min_depth"], current_depth)
+        ontology.node(root_id)["depth"] = comparison_func(ontology.node(root_id)["depth"], current_depth)
     for child_id in ontology.children(node=root_id, relations=relations):
         set_all_depths_in_subgraph(ontology=ontology, root_id=child_id, relations=relations,
-                                   current_depth=current_depth + 1)
+                                   comparison_func=comparison_func, current_depth=current_depth + 1)
 
 
 def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_root: int = 0,
-                          previous_path: Union[None, List[str]] = None) -> Set[Tuple[str]]:
+                          relations: List[str] = None, previous_path: Union[None, List[str]] = None) -> Set[Tuple[str]]:
     """get all possible paths connecting a go term to its root terms
 
     :param node_id: a valid GO id for the starting term
@@ -42,6 +39,8 @@ def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_ro
     :param ontology: the go ontology
     :param min_distance_from_root: return only terms at a specified minimum distance from root terms
     :type min_distance_from_root: int
+    :param relations: the list of relations to be used
+    :type relations: List[str]
     :param previous_path: the path to get to the current node
     :type previous_path: Union[None, List[str]]
     :return: the set of paths connecting the specified term to its root terms, each of which contains a sequence of
@@ -52,14 +51,14 @@ def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_ro
         previous_path = []
     new_path = previous_path[:]
     new_path.append(node_id)
-    parents = [parent for parent in ontology.parents(node=node_id, relations=RELATIONSHIPS) if
-               ontology.node(parent)["max_depth"] >= min_distance_from_root]
+    parents = [parent for parent in ontology.parents(node=node_id, relations=relations) if
+               ontology.node(parent)["depth"] >= min_distance_from_root]
     if len(parents) > 0:
         # go up the tree, following a depth first visit
         paths_to_return = set()
         for parent in parents:
             for path in get_all_paths_to_root(node_id=parent, ontology=ontology, previous_path=new_path,
-                                              min_distance_from_root=min_distance_from_root):
+                                              min_distance_from_root=min_distance_from_root, relations=relations):
                 paths_to_return.add(path)
         return paths_to_return
     if len(new_path) == 0:
@@ -90,7 +89,7 @@ def get_merged_nodes_by_common_ancestor(node_ids: List[str], ontology: Ontology,
         # step 1: get all path for each term and populate data structures
         for node_id in node_ids:
             paths = get_all_paths_to_root(node_id=node_id, ontology=ontology,
-                                          min_distance_from_root=min_distance_from_root)
+                                          min_distance_from_root=min_distance_from_root, relations=None)
             for path in paths:
                 term_paths[node_id].add(path)
                 ancestor_paths[path[-1]].append(path)

@@ -4,7 +4,7 @@ import argparse
 import os
 
 from genedescriptions.config_parser import GenedescConfigParser
-from genedescriptions.data_fetcher import WBRawDataFetcher, AGRRawDataFetcher, AnnotationType
+from genedescriptions.data_fetcher import WBDataFetcher, DataType, AGRDataFetcher
 from genedescriptions.descriptions_rules import *
 from genedescriptions.descriptions_writer import JsonGDWriter, GeneDesc
 
@@ -25,24 +25,8 @@ def main():
                         help="release version number")
 
     args = parser.parse_args()
-
     conf_parser = GenedescConfigParser(args.config_file)
-
     logging.basicConfig(filename=args.log_file, level=args.log_level)
-
-    cache_location = conf_parser.get_cache_location()
-    species = conf_parser.get_wb_species()
-    go_prepostfix_sentences_map = conf_parser.get_go_prepostfix_sentences_map()
-    go_prepostfix_special_cases_sent_map = conf_parser.get_go_prepostfix_special_cases_sent_map()
-    go_annotations_priority = conf_parser.get_go_annotations_priority()
-    go_evidence_groups_priority_list = conf_parser.get_go_evidence_groups_priority_list()
-    go_evidence_codes_groups_map = conf_parser.get_go_evidence_codes_groups_map()
-    go_terms_exclusion_list = conf_parser.get_go_terms_exclusion_list()
-
-    do_prepostfix_sentences_map = conf_parser.get_do_prepostfix_sentences_map()
-    do_annotations_priority = conf_parser.get_do_annotations_priority()
-    do_evidence_codes_groups_map = conf_parser.get_do_evidence_codes_groups_map()
-    do_evidence_groups_priority_list = conf_parser.get_do_evidence_groups_priority_list()
 
     if conf_parser.get_data_fetcher() == "agr_data_fetcher":
         organisms_list = conf_parser.get_agr_organisms_to_process()
@@ -51,51 +35,52 @@ def main():
     for organism in organisms_list:
         logging.info("processing organism " + organism)
         sister_gene_name_id_map = {}
+        sister_df = None
+        species = None
         if conf_parser.get_data_fetcher() == "agr_data_fetcher":
-            df = AGRRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
-                                   go_terms_replacement_dict=conf_parser.get_go_rename_terms(),
-                                   raw_files_source=conf_parser.get_raw_file_sources(conf_parser.get_data_fetcher()),
-                                   release_version=conf_parser.get_release(conf_parser.get_data_fetcher()),
-                                   main_file_name=conf_parser.get_agr_mod_property(organism, "main_files"),
-                                   bgi_file_name=conf_parser.get_agr_mod_property(organism, "bgi_file"),
-                                   go_annotations_file_name=conf_parser.get_agr_mod_property(organism,
-                                                                                             "go_annotations"),
-                                   organism_name=conf_parser.get_agr_mod_property(organism, "name"),
-                                   cache_location=cache_location, use_cache=args.use_cache)
+            df = AGRDataFetcher(raw_files_source=conf_parser.get_raw_file_sources("agr_data_fetcher"),
+                                release_version=conf_parser.get_release("agr_data_fetcher"),
+                                main_file_name=conf_parser.get_agr_mod_property(organism, "main_files"),
+                                bgi_file_name=conf_parser.get_agr_mod_property(organism, "bgi_file"),
+                                go_annotations_file_name=conf_parser.get_agr_mod_property(organism, "go_annotations"),
+                                organism_name=conf_parser.get_agr_mod_property(organism, "name"),
+                                cache_location=conf_parser.get_cache_location(), do_relations=None,
+                                go_relations=["subClassOf", "BFO:0000050"])
         else:
-            df = WBRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
-                                  go_terms_replacement_dict=conf_parser.get_go_rename_terms(),
-                                  raw_files_source=conf_parser.get_raw_file_sources(conf_parser.get_data_fetcher()),
-                                  release_version=conf_parser.get_release(conf_parser.get_data_fetcher()),
-                                  species=organism,
-                                  project_id=species[organism]["project_id"],
-                                  cache_location=cache_location, use_cache=args.use_cache)
+            species = conf_parser.get_wb_species()
+            df = WBDataFetcher(raw_files_source=conf_parser.get_raw_file_sources("wb_data_fetcher"),
+                               release_version=conf_parser.get_release("wb_data_fetcher"),
+                               species=organism, project_id=species[organism]["project_id"],
+                               cache_location=conf_parser.get_cache_location(), do_relations=None,
+                               go_relations=["subClassOf", "BFO:0000050"])
             if "main_sister_species" in species[organism] and species[organism]["main_sister_species"]:
-                sister_df = WBRawDataFetcher(go_terms_exclusion_list=go_terms_exclusion_list,
-                                             go_terms_replacement_dict=conf_parser.get_go_rename_terms(),
-                                             raw_files_source=conf_parser.get_raw_file_sources(
-                                                 conf_parser.get_data_fetcher()),
-                                             release_version=conf_parser.get_release(conf_parser.get_data_fetcher()),
-                                             species=species[organism]["main_sister_species"],
-                                             project_id=species[species[organism]["main_sister_species"]]["project_id"],
-                                             cache_location=cache_location, use_cache=args.use_cache)
-                sister_df.load_go_data()
+                sister_df = WBDataFetcher(raw_files_source=conf_parser.get_raw_file_sources("wb_data_fetcher"),
+                                          release_version=conf_parser.get_release("wb_data_fetcher"),
+                                          species=species[organism]["main_sister_species"],
+                                          project_id=species[species[organism]["main_sister_species"]]["project_id"],
+                                          cache_location=conf_parser.get_cache_location(), do_relations=None,
+                                          go_relations=["subClassOf", "BFO:0000050"])
+                sister_df.load_gene_data_from_file()
                 for gene in sister_df.get_gene_data():
                     sister_gene_name_id_map[gene.name] = gene.id
-        df.load_go_data()
-        df.load_disease_data()
+        df.load_all_data_from_file(go_terms_replacement_regex=conf_parser.get_go_rename_terms(),
+                                   go_terms_exclusion_list=conf_parser.get_go_terms_exclusion_list(),
+                                   do_terms_replacement_regex=None,
+                                   do_terms_exclusion_list=conf_parser.get_do_terms_exclusion_list())
         desc_writer = JsonGDWriter()
         for gene in df.get_gene_data():
             logging.debug("processing gene " + gene.name)
             gene_desc = GeneDesc(gene_id=gene.id, gene_name=gene.name)
             joined_sent = []
-            go_sentences = generate_sentences(df.get_annotations_for_gene(
-                gene.id, annot_type=AnnotationType.GO, priority_list=go_annotations_priority,
-                desc_stats=gene_desc.stats), ontology=df.get_go_ontology(),
-                evidence_groups_priority_list=go_evidence_groups_priority_list,
-                prepostfix_sentences_map=go_prepostfix_sentences_map,
-                prepostfix_special_cases_sent_map=go_prepostfix_special_cases_sent_map,
-                evidence_codes_groups_map=go_evidence_codes_groups_map,
+            go_sentences = generate_sentences(
+                df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.GO,
+                                            priority_list=conf_parser.get_go_annotations_priority(),
+                                            desc_stats=gene_desc.stats),
+                ontology=df.go_ontology,
+                evidence_groups_priority_list=conf_parser.get_go_evidence_groups_priority_list(),
+                prepostfix_sentences_map=conf_parser.get_go_prepostfix_sentences_map(),
+                prepostfix_special_cases_sent_map=conf_parser.get_go_prepostfix_special_cases_sent_map(),
+                evidence_codes_groups_map=conf_parser.get_go_evidence_codes_groups_map(),
                 remove_parent_terms=conf_parser.get_go_remove_parents_if_children_are_present(),
                 merge_num_terms_threshold=conf_parser.get_go_trim_min_num_terms(),
                 merge_min_distance_from_root=conf_parser.get_go_trim_min_distance_from_root(),
@@ -129,12 +114,14 @@ def main():
                 if colocalizes_with_comp_sent:
                     joined_sent.append(colocalizes_with_comp_sent)
 
-            do_sentences = generate_sentences(df.get_annotations_for_gene(
-                gene.id, annot_type=AnnotationType.DO, priority_list=do_annotations_priority,
-                desc_stats=gene_desc.stats), ontology=df.get_do_ontology(),
-                evidence_groups_priority_list=do_evidence_groups_priority_list,
-                prepostfix_sentences_map=do_prepostfix_sentences_map,
-                evidence_codes_groups_map=do_evidence_codes_groups_map,
+            do_sentences = generate_sentences(
+                df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.DO,
+                                            priority_list=conf_parser.get_do_annotations_priority(),
+                                            desc_stats=gene_desc.stats),
+                ontology=df.do_ontology,
+                evidence_groups_priority_list=conf_parser.get_do_evidence_groups_priority_list(),
+                prepostfix_sentences_map=conf_parser.get_do_prepostfix_sentences_map(),
+                evidence_codes_groups_map=conf_parser.get_do_evidence_codes_groups_map(),
                 remove_parent_terms=conf_parser.get_do_remove_parents_if_children_are_present(),
                 merge_num_terms_threshold=conf_parser.get_do_trim_min_num_terms(),
                 merge_min_distance_from_root=conf_parser.get_do_trim_min_distance_from_root(),
@@ -152,14 +139,14 @@ def main():
                     species[organism]["main_sister_species"] and gene.name.startswith("Cbr-") and gene.name[4:] in \
                     sister_gene_name_id_map:
                 sister_sentences = generate_sentences(sister_df.get_annotations_for_gene(
-                    annot_type=AnnotationType.GO, geneid=sister_gene_name_id_map[gene.name[4:]],
+                    annot_type=DataType.GO, gene_id=sister_gene_name_id_map[gene.name[4:]],
                     priority_list=("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI", "HEP"),
                     desc_stats=gene_desc.stats),
-                    ontology=df.get_go_ontology(),
-                    evidence_groups_priority_list=go_evidence_groups_priority_list,
-                    prepostfix_sentences_map=go_prepostfix_sentences_map,
-                    prepostfix_special_cases_sent_map=go_prepostfix_special_cases_sent_map,
-                    evidence_codes_groups_map=go_evidence_codes_groups_map,
+                    ontology=df.go_ontology,
+                    evidence_groups_priority_list=conf_parser.get_go_evidence_groups_priority_list(),
+                    prepostfix_sentences_map=conf_parser.get_go_prepostfix_sentences_map(),
+                    prepostfix_special_cases_sent_map=conf_parser.get_go_prepostfix_special_cases_sent_map(),
+                    evidence_codes_groups_map=conf_parser.get_go_evidence_codes_groups_map(),
                     remove_parent_terms=conf_parser.get_go_remove_parents_if_children_are_present(),
                     merge_num_terms_threshold=conf_parser.get_go_trim_min_num_terms(),
                     merge_min_distance_from_root=conf_parser.get_go_trim_min_distance_from_root(),
