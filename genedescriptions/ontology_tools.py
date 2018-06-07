@@ -10,16 +10,13 @@ def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List
     """calculate and set max_depth and min_depth (maximum and minimum distances from root terms in the ontology)
     recursively for all terms in a branch of the ontology
 
-    :param ontology: the ontology
-    :type ontology: Ontology
-    :param root_id: the ID of the root term of the branch to process
-    :type root_id: str
-    :param relations: list of relations to consider
-    :type relations: List[str]
-    :param comparison_func: a comparison function to calculate the depth when multiple paths exist between the node and
-        the root. max calculates the length of the longest path, min the one of the shortest
-    :param current_depth: the current depth in the ontology
-    :type current_depth: int
+    Args:
+        ontology (Ontology): the ontology
+        root_id (str): the ID of the root term of the branch to process
+        relations (List[str]): list of relations to consider
+        comparison_func: a comparison function to calculate the depth when multiple paths exist between the node and
+            the root. max calculates the length of the longest path, min the one of the shortest
+        current_depth (int): the current depth in the ontology
     """
     if "depth" not in ontology.node(root_id):
         ontology.node(root_id)["depth"] = current_depth
@@ -34,18 +31,15 @@ def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_ro
                           relations: List[str] = None, previous_path: Union[None, List[str]] = None) -> Set[Tuple[str]]:
     """get all possible paths connecting a go term to its root terms
 
-    :param node_id: a valid GO id for the starting term
-    :type node_id: str
-    :param ontology: the go ontology
-    :param min_distance_from_root: return only terms at a specified minimum distance from root terms
-    :type min_distance_from_root: int
-    :param relations: the list of relations to be used
-    :type relations: List[str]
-    :param previous_path: the path to get to the current node
-    :type previous_path: Union[None, List[str]]
-    :return: the set of paths connecting the specified term to its root terms, each of which contains a sequence of
-        terms ids
-    :rtype: Set[Tuple[str]]
+    Args:
+        node_id (str): a valid GO id for the starting term
+        ontology (Ontology): the go ontology
+        min_distance_from_root (int): return only terms at a specified minimum distance from root terms
+        relations (List[str]): the list of relations to be used
+        previous_path (Union[None, List[str]]): the path to get to the current node
+    Returns:
+        Set[Tuple[str]]: the set of paths connecting the specified term to its root terms, each of which contains a
+        sequence of terms ids
     """
     if previous_path is None:
         previous_path = []
@@ -71,15 +65,13 @@ def get_merged_nodes_by_common_ancestor(node_ids: List[str], ontology: Ontology,
                                         min_number_of_terms: int = 3) -> Dict[str, Set[str]]:
     """remove terms with common ancestor and keep the ancestor term instead
 
-    :param node_ids: the list of nodes to merge by common ancestor
-    :type node_ids: List[str]
-    :param min_distance_from_root: set a minimum distance from root terms for ancestors that can group children terms
-    :type min_distance_from_root: int
-    :param min_number_of_terms: minimum number of terms above which the merge operation is performed
-    :type min_number_of_terms: int
-    :param ontology: the go ontology
-    :return: the set of merged terms, together with the set of original terms that each of them covers
-    :rtype: Set[str]
+    Args:
+        node_ids (List[str]): the list of nodes to merge by common ancestor
+        min_distance_from_root (int): set a minimum distance from root terms for ancestors that can group children terms
+        min_number_of_terms (int): minimum number of terms above which the merge operation is performed
+        ontology (Ontology): the ontology
+    Returns:
+        Set[str]: the set of merged terms, together with the set of original terms that each of them covers
     """
     if len(node_ids) > min_number_of_terms:
         logging.debug("applying trimming through naive algorithm")
@@ -137,15 +129,13 @@ def find_set_covering(subsets: List[Tuple[str, str, Set[str]]], costs: List[floa
                       max_num_subsets: int = None) -> List[str]:
     """greedy algorithm to solve set covering problem
 
-    :param subsets: list of subsets, each of which must contain a tuple with the first element being the ID of the
-        subset, the second being the name, and the third the actual set of elements
-    :type subsets: List[Tuple[str, str, Set[str]]]
-    :param costs: list of costs of the subsets
-    :type costs: List[float]
-    :param max_num_subsets: maximum number of subsets in the final list
-    :type max_num_subsets: int
-    :return: the list of IDs of the subsets that maximize coverage with respect to the elements in the universe
-    :rtype: List[str]
+    Args:
+        subsets (List[Tuple[str, str, Set[str]]]): list of subsets, each of which must contain a tuple with the first
+        element being the ID of the subset, the second being the name, and the third the actual set of elements
+        costs (List[float]): list of costs of the subsets
+        max_num_subsets (int): maximum number of subsets in the final list
+    Returns:
+        List[str]: the list of IDs of the subsets that maximize coverage with respect to the elements in the universe
     """
     logging.debug("starting set covering optimization")
     if costs and len(costs) != len(subsets) and any(map(lambda x: x <= 0, costs)):

@@ -1,10 +1,8 @@
-import copy
 import inflect
 import re
 from namedlist import namedlist
 from genedescriptions.ontology_tools import *
 from ontobio.ontol import Ontology
-from ontobio.assocmodel import AssociationSet
 
 Sentence = namedlist('Sentence', ['prefix', 'terms_ids', 'postfix', 'text', 'aspect', 'evidence_group', 'terms_merged',
                                   'additional_prefix', 'qualifier'])
@@ -52,6 +50,8 @@ class SentenceMerger(object):
         self.evidence_groups = []
         self.term_evgroup_dict = {}
         self.additional_prefix = ""
+        self.aspect = ""
+        self.qualifier = ""
 
 
 class SentenceGenerator(object):
@@ -62,22 +62,18 @@ class SentenceGenerator(object):
                  prepostfix_special_cases_sent_map: Dict[Tuple[str, str, str], Tuple[int, str, str, str]] = None):
         """initialize sentence generator object
 
-        :param annotations: the list of annotations for a given gene
-        :type annotations: List[Dict]
-        :param ontology: the ontology linked to the annotations
-        :type ontology: Ontology
-        :param evidence_groups_priority_list: the list of evidence groups to consider, sorted by priority. Sentences of the
-            first group (with highest priority) will be returned in first position and so on
-        :type evidence_groups_priority_list: List[str]
-        :param prepostfix_sentences_map: a map with prefix and postfix phrases, where keys are tuples of
-            go_aspect, evidence_group and values are tuples prefix, postfix
-        :type prepostfix_sentences_map: Dict[Tuple[str, str, str], Tuple[str, str]]
-        :param prepostfix_special_cases_sent_map: a map for special prefix and postfix cases, where keys are tuples of
-            go_aspect, evidence_group and values are tuples of id, match_regex, prefix, postfix. Match_regex is a regular
-            expression that defines the match for the special case
-        :type prepostfix_special_cases_sent_map: Dict[Tuple[str, str, str], Tuple[int, str, str, str]]
-        :param evidence_codes_groups_map: a map between evidence codes and the groups they belong to
-        :type evidence_codes_groups_map: Dict[str, str]
+        Args:
+            annotations (List[Dict]): the list of annotations for a given gene
+            ontology (Ontology): the ontology linked to the annotations
+            evidence_groups_priority_list (List[str]): the list of evidence groups to consider, sorted by priority.
+                Sentences of the first group (with highest priority) will be returned in first position and so on
+            prepostfix_sentences_map (Dict[Tuple[str, str, str], Tuple[str, str]]): a map with prefix and postfix
+                phrases, where keys are tuples of go_aspect, evidence_group and values are tuples prefix, postfix
+            prepostfix_special_cases_sent_map (Dict[Tuple[str, str, str], Tuple[int, str, str, str]]): a map for
+                special prefix and postfix cases, where keys are tuples of aspect, evidence_group and values are tuples
+                of id, match_regex, prefix, postfix. Match_regex is a regular expression that defines the match for the
+                special case
+            evidence_codes_groups_map (Dict[str, str]): a map between evidence codes and the groups they belong to
         """
         self.evidence_groups_priority_list = evidence_groups_priority_list
         self.prepostfix_sentences_map = prepostfix_sentences_map
@@ -112,49 +108,37 @@ class SentenceGenerator(object):
                       exclude_terms_ids: List[str] = None) -> List[Sentence]:
         """generate sentences for specific combination of aspect and qualifier
 
-        :param aspect: a data type aspect
-        :type aspect: str
-        :param qualifier: qualifier
-        :type qualifier: str
-        :param keep_only_best_group: whether to get only the evidence group with highest priority and discard
-            the other evidence groups
-        :type keep_only_best_group: bool
-        :param merge_groups_with_same_prefix: whether to merge the phrases for evidence groups with the same prefix
-        :type merge_groups_with_same_prefix: bool
-        :param remove_parent_terms: whether to remove parent terms from the list of terms in each sentence if at least
-            one children term is present
-        :type remove_parent_terms: bool
-        :param merge_num_terms_threshold: whether to merge terms by common ancestor to
-            reduce the number of terms in the set. The trimming algorithm will be applied only if the number of terms is
-            greater than the specified number and the specified threshold is greater than 0
-        :type merge_num_terms_threshold: int
-        :param merge_min_distance_from_root: minimum distance from root terms for the selection of common ancestors
-            during merging operations. Three values must be provided in the form of a dictionary with keys 'F', 'P', and
-            'C' for go aspect names and values integers indicating the threshold for each aspect
-        :type merge_min_distance_from_root: dict
-        :param desc_stats: an object containing the description statistics where to save the total number of annotations
-            for the gene
-        :type desc_stats: SingleDescStats
-        :param truncate_others_generic_word: a generic word to indicate that the set of terms reported in the sentence
-            is only a subset of the original terms, e.g., 'several'
-        :type truncate_others_generic_word: str
-        :param truncate_others_aspect_words: one word for each aspect describing the kind of terms that are included in
-            the aspect
-        :type truncate_others_aspect_words: Dict[str, str]
-        :param remove_successive_overlapped_terms: whether to remove terms in lower priority evidence groups when
-            already present in higher priority groups
-        :type remove_successive_overlapped_terms: bool
-        :param exclude_terms_ids: list of term ids to exclude
-        :type exclude_terms_ids: List[str]
-        :return: a list of sentences
-        :rtype: List[Sentence]
+        Args:
+            aspect (str): a data type aspect
+            qualifier (str): qualifier
+            keep_only_best_group (bool): whether to get only the evidence group with highest priority and discard
+                the other evidence groups
+            merge_groups_with_same_prefix (bool): whether to merge the phrases for evidence groups with the same prefix
+            remove_parent_terms: whether to remove parent terms from the list of terms in each sentence if at least
+                one children term is present
+            merge_num_terms_threshold (int): whether to merge terms by common ancestor to reduce the number of terms in
+                the set. The trimming algorithm will be applied only if the number of terms is greater than the
+                specified number and the specified threshold is greater than 0
+            merge_min_distance_from_root (dict): minimum distance from root terms for the selection of common ancestors
+                during merging operations. Three values must be provided in the form of a dictionary with keys 'F', 'P',
+                and 'C' for go aspect names and values integers indicating the threshold for each aspect
+            desc_stats (SingleDescStat): an object containing the description statistics where to save the total number
+                of annotations for the gene
+            truncate_others_generic_word (str): a generic word to indicate that the set of terms reported in the
+                sentence is only a subset of the original terms, e.g., 'several'
+            truncate_others_aspect_words (Dict[str, str]): one word for each aspect describing the kind of terms that
+                are included in the aspect
+            remove_successive_overlapped_terms (bool): whether to remove terms in lower priority evidence groups when
+                already present in higher priority groups
+            exclude_terms_ids (List[str]): list of term ids to exclude
+        Returns:
+            List[Sentence]: a list of sentences
         """
         if not merge_min_distance_from_root:
             merge_min_distance_from_root = {'F': 1, 'P': 1, 'C': 2, 'D': 3}
         if not truncate_others_aspect_words:
             truncate_others_aspect_words = {'F': 'functions', 'P': 'processes', 'C': 'components'}
         sentences = []
-        merged_sentences = defaultdict(SentenceMerger)
         terms_already_covered = set()
         evidence_group_priority = {eg: p for p, eg in enumerate(self.evidence_groups_priority_list)}
         for terms, evidence_group, priority in sorted([(t, eg, evidence_group_priority[eg]) for eg, t in
@@ -193,62 +177,74 @@ class SentenceGenerator(object):
                 terms = merged_terms
             else:
                 terms_already_covered.update(terms)
-
-            sentences.append(_get_single_sentence(node_ids=terms, ontology=self.ontology, aspect=aspect,
-                                                  evidence_group=evidence_group, qualifier=qualifier,
-                                                  prepostfix_sentences_map=self.prepostfix_sentences_map,
-                                                  terms_merged=True if 0 < merge_num_terms_threshold < len(terms) else
-                                                  False, add_others=add_others,
-                                                  truncate_others_generic_word=truncate_others_generic_word,
-                                                  truncate_others_aspect_words=truncate_others_aspect_words))
+            sentences.append(
+                _get_single_sentence(node_ids=terms, ontology=self.ontology, aspect=aspect,
+                                     evidence_group=evidence_group, qualifier=qualifier,
+                                     prepostfix_sentences_map=self.prepostfix_sentences_map,
+                                     terms_merged=True if 0 < merge_num_terms_threshold < len(terms) else False,
+                                     add_others=add_others,
+                                     truncate_others_generic_word=truncate_others_generic_word,
+                                     truncate_others_aspect_words=truncate_others_aspect_words))
             if keep_only_best_group:
                 return sentences
-
         if merge_groups_with_same_prefix:
-            for sentence in sentences:
-                prefix = self.prepostfix_sentences_map[(aspect, sentence.evidence_group, qualifier)][0]
-                merged_sentences[prefix].postfix_list.append(self.prepostfix_sentences_map[(aspect,
-                                                                                            sentence.evidence_group,
-                                                                                            qualifier)][1])
-                merged_sentences[prefix].terms_ids.update(sentence.terms_ids)
-                for term in sentence.terms_ids:
-                    merged_sentences[prefix].term_postfix_dict[term] = self.prepostfix_sentences_map[
-                        (aspect, sentence.evidence_group, qualifier)][1]
-                merged_sentences[prefix].evidence_groups.append(sentence.evidence_group)
-                for term in sentence.terms_ids:
-                    merged_sentences[prefix].term_evgroup_dict[term] = sentence.evidence_group
-                if sentence.additional_prefix:
-                    merged_sentences[prefix].additional_prefix = sentence.additional_prefix
-            if remove_parent_terms:
-                for prefix, sent_merger in merged_sentences.items():
-                    terms_no_ancestors = sent_merger.terms_ids - set([ancestor for node_id in sent_merger.terms_ids for
-                                                                      ancestor in self.ontology.ancestors(node_id)])
-                    if len(sent_merger.terms_ids) > len(terms_no_ancestors):
-                        logging.debug("Removed " + str(len(sent_merger.terms_ids) - len(terms_no_ancestors)) +
-                                      " parents from terms while merging sentences with same prefix")
-                        sent_merger.terms_ids = terms_no_ancestors
-            sentences = [Sentence(prefix=prefix, terms_ids=list(sent_merger.terms_ids),
-                                  postfix=SentenceGenerator.merge_postfix_phrases(sent_merger.postfix_list),
-                                  text=compose_sentence(prefix=prefix,
-                                                        term_names=[self.ontology.label(node) for node in
-                                                                    sent_merger.terms_ids],
-                                                        postfix=SentenceGenerator.merge_postfix_phrases(
-                                                            sent_merger.postfix_list),
-                                                        additional_prefix=sent_merger.additional_prefix),
-                                  aspect=aspect, evidence_group=", ".join(sent_merger.evidence_groups),
-                                  terms_merged=True, additional_prefix=sent_merger.additional_prefix,
-                                  qualifier=qualifier)
-                         for prefix, sent_merger in merged_sentences.items() if len(sent_merger.terms_ids) > 0]
+            sentences = self.merge_sentences_with_same_prefix(sentences=sentences,
+                                                              remove_parent_terms=remove_parent_terms)
         return sentences
+
+    def merge_sentences_with_same_prefix(self, sentences: List[Sentence], remove_parent_terms: bool = True):
+        """merge sentences with the same prefix
+
+        Args:
+            sentences (List[Sentence]): a list of sentences
+            remove_parent_terms (bool): whether to remove parent terms if present in the merged set of terms
+        Returns:
+            List[Sentence]: the list of merged sentences, sorted by (merged) evidence group priority
+        """
+        merged_sentences = defaultdict(SentenceMerger)
+        for sentence in sentences:
+            prefix = self.prepostfix_sentences_map[(sentence.aspect, sentence.evidence_group, sentence.qualifier)][0]
+            merged_sentences[prefix].postfix_list.append(self.prepostfix_sentences_map[(sentence.aspect,
+                                                                                        sentence.evidence_group,
+                                                                                        sentence.qualifier)][1])
+            merged_sentences[prefix].aspect = sentence.aspect
+            merged_sentences[prefix].qualifier = sentence.qualifier
+            merged_sentences[prefix].terms_ids.update(sentence.terms_ids)
+            for term in sentence.terms_ids:
+                merged_sentences[prefix].term_postfix_dict[term] = self.prepostfix_sentences_map[
+                    (sentence.aspect, sentence.evidence_group, sentence.qualifier)][1]
+            merged_sentences[prefix].evidence_groups.append(sentence.evidence_group)
+            for term in sentence.terms_ids:
+                merged_sentences[prefix].term_evgroup_dict[term] = sentence.evidence_group
+            if sentence.additional_prefix:
+                merged_sentences[prefix].additional_prefix = sentence.additional_prefix
+        if remove_parent_terms:
+            for prefix, sent_merger in merged_sentences.items():
+                terms_no_ancestors = sent_merger.terms_ids - set([ancestor for node_id in sent_merger.terms_ids for
+                                                                  ancestor in self.ontology.ancestors(node_id)])
+                if len(sent_merger.terms_ids) > len(terms_no_ancestors):
+                    logging.debug("Removed " + str(len(sent_merger.terms_ids) - len(terms_no_ancestors)) +
+                                  " parents from terms while merging sentences with same prefix")
+                    sent_merger.terms_ids = terms_no_ancestors
+        return [Sentence(prefix=prefix, terms_ids=list(sent_merger.terms_ids),
+                         postfix=SentenceGenerator.merge_postfix_phrases(sent_merger.postfix_list),
+                         text=compose_sentence(prefix=prefix,
+                         term_names=[self.ontology.label(node) for node in sent_merger.terms_ids],
+                         postfix=SentenceGenerator.merge_postfix_phrases(sent_merger.postfix_list),
+                         additional_prefix=sent_merger.additional_prefix),
+                         aspect=sent_merger.aspect, evidence_group=", ".join(sent_merger.evidence_groups),
+                         terms_merged=True, additional_prefix=sent_merger.additional_prefix,
+                         qualifier=sent_merger.qualifier) for prefix, sent_merger in merged_sentences.items() if
+                len(sent_merger.terms_ids) > 0]
 
     @staticmethod
     def merge_postfix_phrases(postfix_phrases: List[str]) -> str:
         """merge postfix phrases and remove possible redundant text at the beginning at at the end of the phrases
 
-        :param postfix_phrases: the phrases to merge
-        :type postfix_phrases: List[str]
-        :return: the merged postfix phrase
-        :rtype: str
+        Args:
+            postfix_phrases (List[str]): the phrases to merge
+        Returns:
+            str: the merged postfix phrase
         """
         postfix_phrases = [postfix for postfix in postfix_phrases if postfix]
         if postfix_phrases and len(postfix_phrases) > 0:
@@ -284,28 +280,17 @@ class SentenceGenerator(object):
             return ""
 
 
-def generate_sentences() -> SentenceGenerator:
-    """generate sentences from a list of annotations
-
-
-    :return: a collection of sentences
-    :rtype: SentenceGenerator
-    """
-
-
 def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str], postfix: str) -> str:
     """compose the text of a sentence given its prefix, terms, and postfix
 
-    :param prefix: the prefix of the sentence
-    :type prefix: str
-    :param term_names: a list of go terms
-    :type term_names: List[str]
-    :param postfix: the postfix of the sentence
-    :type postfix: str
-    :param additional_prefix: an additional prefix to be used for special cases
-    :type additional_prefix: str
-    :return: the text of the go sentence
-    :rtype: str"""
+    Args:
+        prefix (str): the prefix of the sentence
+        term_names (List[str]): a list of term names
+        postfix (str): the postfix of the sentence
+        additional_prefix (str): an additional prefix to be used for special cases
+    Returns:
+        str: the text of the go sentence
+    """
     prefix = prefix + additional_prefix + " "
     term_names = sorted(term_names)
     if postfix != "":
@@ -325,30 +310,21 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
                          truncate_others_aspect_words: Dict[str, str] = None) -> Union[Sentence, None]:
     """build a sentence
 
-    :param node_ids: list of ids for the terms to be combined in the sentence
-    :type node_ids: List[str]
-    :param ontology: the ontology containing the nodes
-    :type ontology: Ontology
-    :param aspect: aspect
-    :type aspect: str
-    :param evidence_group: evidence group
-    :type evidence_group: str
-    :param qualifier: qualifier
-    :type qualifier: str
-    :param prepostfix_sentences_map: map for prefix and postfix phrases
-    :type prepostfix_sentences_map: Dict[Tuple[str, str, str], Tuple[str, str]]
-    :param terms_merged: whether the terms set has been merged to reduce its size
-    :type terms_merged: bool
-    :param add_others: whether to say that there are other terms which have been omitted from the sentence
-    :type add_others: bool
-    :param truncate_others_generic_word: a generic word to indicate that the set of terms reported in the sentence is
-        only a subset of the original terms, e.g., 'several'
-    :type truncate_others_generic_word: str
-    :param truncate_others_aspect_words: one word for each aspect describing the kind of terms that are included in the
-        aspect
-    :type truncate_others_aspect_words: Dict[str, str]
-    :return: the combined go sentence
-    :rtype: Union[GOSentence, None]
+    Args:
+        node_ids (List[str]): list of ids for the terms to be combined in the sentence
+        ontology (Ontology): the ontology containing the nodes
+        aspect (str): aspect
+        evidence_group (str): evidence group
+        qualifier (str): qualifier
+        prepostfix_sentences_map (Dict[Tuple[str, str, str], Tuple[str, str]]): map for prefix and postfix phrases
+        terms_merged (bool): whether the terms set has been merged to reduce its size
+        add_others (bool): whether to say that there are other terms which have been omitted from the sentence
+        truncate_others_generic_word (str): a generic word to indicate that the set of terms reported in the sentence is
+            only a subset of the original terms, e.g., 'several'
+        truncate_others_aspect_words (Dict[str, str]): one word for each aspect describing the kind of terms that are
+            included in the aspect
+    Returns:
+        Union[Sentence,None]: the combined go sentence
     """
     if len(node_ids) > 0:
         prefix = prepostfix_sentences_map[(aspect, evidence_group, qualifier)][0]

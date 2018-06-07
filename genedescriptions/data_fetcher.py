@@ -29,6 +29,13 @@ class DataFetcher(metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(self, go_relations: List[str] = None, do_relations: List[str] = None, use_cache: bool = False):
+        """create a new a data fetcher
+
+        Args:
+            go_relations (List[str]): list of ontology relations to be used for GO
+            do_relations (List[str]): list of ontology relations to be used for DO
+            use_cache (bool): whether to use cached files
+        """
         self.go_associations: AssociationSet = None
         self.go_ontology: Ontology = None
         self.do_ontology: Ontology = None
@@ -54,12 +61,11 @@ class DataFetcher(metaclass=ABCMeta):
     def get_gene_data(self, include_dead_genes: bool = False, include_pseudo_genes: bool = False) -> Gene:
         """get all gene data from the fetcher, returning one gene per call
 
-        :param include_dead_genes: whether to include dead genes in the results
-        :type include_dead_genes: bool
-        :param include_pseudo_genes: whether to include pseudo genes in the results
-        :type include_dead_genes: bool
-        :return: data for one gene per each call, including gene_id and gene_name
-        :rtype: Gene
+        Args:
+            include_dead_genes (bool): whether to include dead genes in the results
+            include_pseudo_genes (bool): whether to include pseudo genes in the results
+        Returns:
+            Gene: data for one gene per each call, including gene_id and gene_name
         """
         if self.gene_data and len(self.gene_data) > 0:
             for gene_id, gene_obj in self.gene_data.items():
@@ -71,14 +77,12 @@ class DataFetcher(metaclass=ABCMeta):
                                        terms_blacklist) -> AssociationSet:
         """remove annotations linked to blacklisted ontology terms from an association set
 
-        :param association_set: the original association set
-        :type association_set: AssociationSet
-        :param ontology: the ontology linked to the annotations
-        :type ontology: Ontology
-        :param terms_blacklist: the list of ontology terms related to the annotations to be removed
-        :type terms_blacklist: List[str]
-        :return: the filtered annotations
-        :rtype: AssociationSet
+        Args:
+            association_set (AssociationSet): the original association set
+            ontology (Ontology): the ontology linked to the annotations
+            terms_blacklist (List[str]): the list of ontology terms related to the annotations to be removed
+        Returns:
+            AssociationSet: the filtered annotations
         """
         associations = []
         for subj_associations in association_set.associations_by_subj.values():
@@ -91,12 +95,11 @@ class DataFetcher(metaclass=ABCMeta):
     def rename_ontology_terms(ontology: Ontology, terms_replacement_regex: Dict[str, str]) -> None:
         """rename ontology terms based on regular expression matching
 
-        :param ontology: the ontology containing the terms to be renamed
-        :type ontology: Ontology
-        :param terms_replacement_regex: a dictionary containing the regular expression to be applied for renaming terms.
-            Each key must be a regular expression to search for terms and the associated value another regular
-            expression that defines the final result
-        :type terms_replacement_regex: Dict[str, str]
+        Args:
+            ontology (Ontology): the ontology containing the terms to be renamed
+            terms_replacement_regex (Dict[str, str]): a dictionary containing the regular expression to be applied for
+                renaming terms. Each key must be a regular expression to search for terms and the associated value
+                another regular expression that defines the final result
         """
         for regex_to_substitute, regex_target in terms_replacement_regex.items():
             for node in ontology.search(regex_to_substitute, is_regex=True):
@@ -106,14 +109,12 @@ class DataFetcher(metaclass=ABCMeta):
                      terms_replacement_regex: Dict[str, str]) -> None:
         """set the go ontology and apply terms renaming
 
-        :param ontology_type: the type of ontology to set
-        :type ontology_type: DataType
-        :param ontology: an ontology object to set as go ontology
-        :type ontology: Ontology
-        :param terms_replacement_regex: a dictionary containing the regular expression to be applied for renaming terms.
-            Each key must be a regular expression to search for terms and the associated value another regular
-            expression that defines the final result
-        :type terms_replacement_regex: Dict[str, str]
+        Args:
+            ontology_type (DataType): the type of ontology to set
+            ontology (Ontology): an ontology object to set as go ontology
+            terms_replacement_regex (Dict[str, str]): a dictionary containing the regular expression to be applied for
+                renaming terms. Each key must be a regular expression to search for terms and the associated value
+                another regular expression that defines the final result
         """
         new_ontology = None
         if ontology_type == DataType.GO:
@@ -130,16 +131,13 @@ class DataFetcher(metaclass=ABCMeta):
                                 terms_replacement_regex: Dict[str, str] = None) -> None:
         """load go ontology from file
 
-        :param ontology_type: the type of ontology to set
-        :type ontology_type: DataType
-        :param ontology_url: url to the ontology file
-        :type ontology_url: str
-        :param ontology_cache_path: path to cache file for the ontology
-        :type ontology_cache_path: str
-        :param terms_replacement_regex: a dictionary containing the regular expression to be applied for renaming terms.
-            Each key must be a regular expression to search for terms and the associated value another regular
-            expression that defines the final result
-        :type terms_replacement_regex: Dict[str, str]
+        Args:
+            ontology_type (DataType): the type of ontology to set
+            ontology_url (str): url to the ontology file
+            ontology_cache_path (str): path to cache file for the ontology
+            terms_replacement_regex (Dict[str, str])]: a dictionary containing the regular expression to be applied for
+                renaming terms. Each key must be a regular expression to search for terms and the associated value
+                another regular expression that defines the final result
         """
         new_ontology = None
         if ontology_type == DataType.GO:
@@ -161,12 +159,10 @@ class DataFetcher(metaclass=ABCMeta):
                          exclusion_list: List[str]) -> None:
         """set the go annotations and remove blacklisted annotations
 
-        :param associations_type: the type of associations to set
-        :type associations_type: DataType
-        :param associations: an association object to set as go annotations
-        :type associations: AssociationSet
-        :param exclusion_list: the list of ontology terms related to the annotations to be removed
-        :type exclusion_list: List[str]
+        Args:
+            associations_type (DataType): the type of associations to set
+            associations (AssociationSet): an association object to set as go annotations
+            exclusion_list (List[str]): the list of ontology terms related to the annotations to be removed
         """
         if associations_type == DataType.GO:
             self.go_associations = self.remove_blacklisted_annotations(association_set=associations,
@@ -181,14 +177,11 @@ class DataFetcher(metaclass=ABCMeta):
                                     associations_cache_path: str, exclusion_list: List[str]) -> None:
         """load go associations from file
 
-        :param associations_type: the type of associations to set
-        :type associations_type: DataType
-        :param associations_url: url to the association file
-        :type associations_url: str
-        :param associations_cache_path: path to cache file for the associations
-        :type associations_cache_path: str
-        :param exclusion_list: the list of ontology terms related to the annotations to be removed
-        :type exclusion_list: List[str]
+        Args:
+            associations_type (DataType): the type of associations to set
+            associations_url (str): url to the association file
+            associations_cache_path (str): path to cache file for the associations
+            exclusion_list (List[str]): the list of ontology terms related to the annotations to be removed
         """
         if associations_type == DataType.GO:
             self.go_associations = AssociationSetFactory().create_from_assocs(assocs=GafParser().parse(
@@ -213,28 +206,23 @@ class DataFetcher(metaclass=ABCMeta):
                                  desc_stats: SingleDescStats = None) -> List[Dict]:
         """
         retrieve go annotations for a given gene id and a given type. The annotations are unique for each pair
-        <gene_id, go_term_id>. This means that when multiple annotations for the same pair are found in the go data, the
+        <gene_id, term_id>. This means that when multiple annotations for the same pair are found in the go data, the
         one with the evidence code with highest priority is returned (see the *priority_list* parameter to set the
         priority according to evidence codes)
 
-        :param gene_id: the id of the gene related to the annotations to retrieve, in standard format
-        :type gene_id: str
-        :param annot_type: type of annotations to read
-        :type annot_type: DataType
-        :param include_obsolete: whether to include obsolete annotations
-        :type include_obsolete: bool
-        :param include_negative_results: whether to include negative results
-        :type include_negative_results: bool
-        :param priority_list: the priority list for the evidence codes. If multiple annotations with the same go_term
-            are found, only the one with highest priority is returned. The first element in the list has the highest
-            priority, whereas the last has the lowest. Only annotations with evidence codes in the priority list are
-            returned. All other annotations are ignored
-        :type priority_list: List[str]
-        :param desc_stats: an object containing the description statistics where to save the total number of annotations
-            for the gene
-        :type desc_stats: SingleDescStats
-        :return: the list of go annotations for the given gene
-        :rtype: List[Dict]
+        Args:
+            gene_id (str): the id of the gene related to the annotations to retrieve, in standard format
+            annot_type (DataType): type of annotations to read
+            include_obsolete (bool): whether to include obsolete annotations
+            include_negative_results (bool): whether to include negative results
+            priority_list (List[str]): the priority list for the evidence codes. If multiple annotations with the same
+                term are found, only the one with highest priority is returned. The first element in the list has the
+                highest priority, whereas the last has the lowest. Only annotations with evidence codes in the priority
+                list are returned. All other annotations are ignored
+            desc_stats (SingleDescStats): an object containing the description statistics where to save the total number
+                of annotations for the gene
+        Returns:
+            List[Dict]: the list of annotations for the given gene
         """
         dataset = None
         ontology = None
@@ -282,16 +270,12 @@ class WBDataFetcher(DataFetcher):
         locations are automatically generated and stored in class variables ending in _url for remote filed and
         _cache_path for caching
 
-        :param raw_files_source: base url where to fetch the raw files
-        :type raw_files_source: str
-        :param cache_location: path to cache directory
-        :type cache_location: str
-        :param release_version: WormBase release version for the input files
-        :type release_version: str
-        :param species: WormBase species to fetch
-        :type species: str
-        :param project_id: project id associated with the species
-        :type project_id: str
+        Args:
+            raw_files_source (str): base url where to fetch the raw files
+            cache_location (str): path to cache directory
+            release_version (str): WormBase release version for the input files
+            species (str): WormBase species to fetch
+            project_id (str): project id associated with the species
         """
         super().__init__(go_relations=go_relations, do_relations=do_relations, use_cache=use_cache)
         self.gene_data_cache_path = os.path.join(cache_location, "wormbase", release_version, "species", species,
@@ -326,6 +310,7 @@ class WBDataFetcher(DataFetcher):
                                        release_version + '.daf.txt'
 
     def load_gene_data_from_file(self) -> None:
+        """load gene list from pre-set file location"""
         if not self.gene_data or len(self.gene_data.items()) == 0:
             self.gene_data = {}
             file_path = self._get_cached_file(cache_path=self.gene_data_cache_path, file_source_url=self.gene_data_url)
@@ -398,20 +383,19 @@ class WBDataFetcher(DataFetcher):
                                 go_terms_exclusion_list: List[str] = None,
                                 do_terms_replacement_regex: Dict[str, str] = None,
                                 do_terms_exclusion_list: List[str] = None) -> None:
-        """load all data types from stored file locations
+        """load all data types from pre-set file locations
 
-        :param go_terms_replacement_regex: a dictionary containing the regular expression to be applied for renaming
-            GO terms. Each key must be a regular expression to search for terms and the associated value another regular
-            expression that defines the final result
-        :type go_terms_replacement_regex: Dict[str, str]
-        :param go_terms_exclusion_list: the list of GO ontology terms related to the GO annotations to be removed
-        :type go_terms_exclusion_list: List[str]
-        :param do_terms_replacement_regex: a dictionary containing the regular expression to be applied for renaming
-            DO terms. Each key must be a regular expression to search for terms and the associated value another regular
-            expression that defines the final result
-        :type do_terms_replacement_regex: Dict[str, str]
-        :param do_terms_exclusion_list: the list of DO ontology terms related to the DO annotations to be removed
-        :type do_terms_exclusion_list: List[str]
+        Args:
+            go_terms_replacement_regex (Dict[str, str]): a dictionary containing the regular expression to be applied
+                for renaming terms. Each key must be a regular expression to search for terms and the associated value
+                another regular expression that defines the final result
+            go_terms_exclusion_list (List[str]): the list of GO ontology terms related to the GO annotations to be
+                removed
+            do_terms_replacement_regex (Dict[str, str]): a dictionary containing the regular expression to be applied
+                for renaming DO terms. Each key must be a regular expression to search for terms and the associated
+                value another regular expression that defines the final result
+            do_terms_exclusion_list (List[str]): the list of DO ontology terms related to the DO annotations to be
+                removed
         """
         self.load_gene_data_from_file()
         self.load_ontology_from_file(ontology_type=DataType.GO, ontology_url=self.go_ontology_url,
@@ -427,51 +411,3 @@ class WBDataFetcher(DataFetcher):
                                          associations_cache_path=self.do_associations_cache_path,
                                          exclusion_list=do_terms_exclusion_list)
 
-
-class AGRDataFetcher(DataFetcher):
-    """data fetcher for AGR raw files for a single species"""
-
-    def __init__(self, raw_files_source: str, cache_location: str, release_version: str, main_file_name: str,
-                 bgi_file_name: str, go_annotations_file_name: str, organism_name: str, go_relations: List[str] = None,
-                 do_relations: List[str] = None, use_cache: bool = False):
-        """create a new data fetcher
-
-        :param raw_files_source: base url where to fetch the raw files
-        :type raw_files_source: str
-        :param cache_location: path to cache directory
-        :type cache_location: str
-        :param release_version: WormBase release version for the input files
-        :type release_version: str
-        :param main_file_name: file name of the main tar.gz file containing gene information
-        :type main_file_name: str
-        :param bgi_file_name: file name of the bgi file containing gene information
-        :type bgi_file_name: str
-        :param go_annotations_file_name: file name of the obo file containing go annotations
-        :type go_annotations_file_name: str
-        :param organism_name: name of the organism
-        :type organism_name: str
-
-        """
-        super().__init__(do_relations=do_relations, go_relations=go_relations, use_cache=use_cache)
-        self.main_data_cache_path = os.path.join(cache_location, "agr", release_version, "main", main_file_name)
-        self.main_data_url = raw_files_source + '/' + main_file_name
-        self.bgi_file_name = bgi_file_name
-        self.go_ontology_cache_path = os.path.join(cache_location, "agr", release_version, "GO", "go.obo")
-        self.go_ontology_url = raw_files_source + '/' + release_version + '/GO/' + 'go.obo'
-        self.go_annotations_cache_path = os.path.join(cache_location, "agr", release_version, "GO", "ANNOT",
-                                                      go_annotations_file_name)
-        self.go_annotations_url = raw_files_source + '/' + release_version + '/GO/ANNOT/' + go_annotations_file_name
-        #self.go_id_name = "DB_Object_Symbol"
-
-    def load_gene_data_from_file(self) -> None:
-        if len(self.gene_data.items()) == 0:
-            if not os.path.isfile(self.main_data_cache_path):
-                os.makedirs(os.path.dirname(self.main_data_cache_path), exist_ok=True)
-                urllib.request.urlretrieve(self.main_data_url, self.main_data_cache_path)
-            if not os.path.isfile(os.path.join(os.path.dirname(self.main_data_cache_path), self.bgi_file_name)):
-                tar = tarfile.open(self.main_data_cache_path)
-                tar.extractall(path=os.path.dirname(self.main_data_cache_path))
-            with open(os.path.join(os.path.dirname(self.main_data_cache_path), self.bgi_file_name)) as fileopen:
-                bgi_content = json.load(fileopen)
-                for gene in bgi_content["data"]:
-                    self.gene_data[gene["symbol"]] = Gene(gene["symbol"], gene["symbol"], False, False)

@@ -19,8 +19,8 @@ class DescriptionsWriter(metaclass=ABCMeta):
     def add_gene_desc(self, gene_description: GeneDesc):
         """add a gene description to the writer object
 
-        :param gene_description: the gene description to be added
-        :type gene_description: GeneDesc
+        Args:
+            gene_description (GeneDesc): the gene description to be added
         """
         self.data.append(gene_description)
 
@@ -47,12 +47,10 @@ class JsonGDWriter(DescriptionsWriter):
     def write(self, file_path: str, pretty: bool = False, include_single_gene_stats: bool = False):
         """write the descriptions to a json file
 
-        :param file_path: the path to the file to write
-        :type file_path: str
-        :param pretty: whether to format the json file to make it more human-readable
-        :type pretty: bool
-        :param include_single_gene_stats: whether to include statistics about the descriptions in the output file
-        :type include_single_gene_stats: bool
+        Args:
+            file_path (str): the path to the file to write
+            pretty (bool): whether to format the json file to make it more human-readable
+            include_single_gene_stats (bool): whether to include statistics about the descriptions in the output file
         """
         indent = None
         if pretty:
