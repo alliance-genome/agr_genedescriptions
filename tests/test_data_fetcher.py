@@ -2,7 +2,7 @@ import unittest
 import os
 
 from genedescriptions.config_parser import GenedescConfigParser
-from genedescriptions.data_fetcher import WBDataFetcher, AGRDataFetcher, DataType
+from genedescriptions.data_fetcher import WBDataFetcher, DataType
 
 
 class TestRawDataFetcher(unittest.TestCase):

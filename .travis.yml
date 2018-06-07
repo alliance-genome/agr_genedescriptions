@@ -5,6 +5,9 @@ python:
 
 # command to install dependencies
 install:
+  - wget http://build.berkeleybop.org/userContent/owltools/owltools
+  - chmod +x owltools
+  - export PATH=$PATH:$PWD
   - pip install -r requirements.txt
   - pip install nose
   - pip install coverage

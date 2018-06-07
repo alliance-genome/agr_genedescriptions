@@ -3,7 +3,7 @@ import os
 
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.data_fetcher import WBDataFetcher, DataType
-from genedescriptions.descriptions_rules import generate_sentences, SentenceGenerator
+from genedescriptions.descriptions_rules import SentenceGenerator
 
 
 class TestDescriptionsRules(unittest.TestCase):
