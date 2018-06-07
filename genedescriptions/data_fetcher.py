@@ -74,7 +74,7 @@ class DataFetcher(metaclass=ABCMeta):
 
     @staticmethod
     def remove_blacklisted_annotations(association_set: AssociationSet, ontology: Ontology,
-                                       terms_blacklist) -> AssociationSet:
+                                       terms_blacklist: List[str] = None) -> AssociationSet:
         """remove annotations linked to blacklisted ontology terms from an association set
 
         Args:
@@ -84,12 +84,15 @@ class DataFetcher(metaclass=ABCMeta):
         Returns:
             AssociationSet: the filtered annotations
         """
-        associations = []
-        for subj_associations in association_set.associations_by_subj.values():
-            for association in subj_associations:
-                if association["object"]["id"] not in terms_blacklist:
-                    associations.append(association)
-        return AssociationSetFactory().create_from_assocs(assocs=associations, ontology=ontology)
+        if terms_blacklist:
+            associations = []
+            for subj_associations in association_set.associations_by_subj.values():
+                for association in subj_associations:
+                    if association["object"]["id"] not in terms_blacklist:
+                        associations.append(association)
+            return AssociationSetFactory().create_from_assocs(assocs=associations, ontology=ontology)
+        else:
+            return association_set
 
     @staticmethod
     def rename_ontology_terms(ontology: Ontology, terms_replacement_regex: Dict[str, str]) -> None:
@@ -336,6 +339,7 @@ class WBDataFetcher(DataFetcher):
             for subj_associations in self.do_associations.associations_by_subj.values():
                 for association in subj_associations:
                     if association["evidence"]["type"] == "IEA":
+                        association["subject"]["id"] = "WB:" + association["subject"]["id"]
                         associations.append(association)
             file_path = self._get_cached_file(cache_path=self.do_associations_new_cache_path,
                                               file_source_url=self.do_associations_new_url)
@@ -345,9 +349,12 @@ class WBDataFetcher(DataFetcher):
                     if not header:
                         linearr = line.strip().split("\t")
                         if self.do_ontology.node(linearr[10]) and linearr[16] != "IEA":
+                            gene_id = line[2]
+                            if linearr[1] == "allele":
+                                gene_id = linearr[4]
                             associations.append({"source_line": line,
                                                  "subject": {
-                                                     "id": linearr[2],
+                                                     "id": gene_id,
                                                      "label": linearr[3],
                                                      "type": line[1],
                                                      "fullname": "",

@@ -13,7 +13,7 @@ wb_data_fetcher:
         - c_elegans
         #- b_malayi
         #- c_brenneri
-        #- c_briggsae
+        - c_briggsae
         #- c_japonica
         #- c_remanei
         #- o_volvulus
@@ -479,12 +479,12 @@ do_sentences_options:
         - aspect: "D"
           group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
           qualifier: ""
-          prefix: "ortholog of this gene is implicated in"
+          prefix: "human ortholog of this gene is implicated in"
           postfix: ""
         - aspect: "D"
           group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
           qualifier: ""
-          prefix: "ortholog of this gene is implicated in"
+          prefix: "human ortholog of this gene is implicated in"
           postfix: ""
 
     remove_parents_if_children_are_present: true

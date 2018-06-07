@@ -4,7 +4,7 @@ import argparse
 import os
 
 from genedescriptions.config_parser import GenedescConfigParser
-from genedescriptions.data_fetcher import WBDataFetcher, DataType, AGRDataFetcher
+from genedescriptions.data_fetcher import WBDataFetcher, DataType
 from genedescriptions.descriptions_rules import *
 from genedescriptions.descriptions_writer import JsonGDWriter, GeneDesc
 
@@ -28,6 +28,27 @@ def main():
     conf_parser = GenedescConfigParser(args.config_file)
     logging.basicConfig(filename=args.log_file, level=args.log_level)
 
+    go_sent_gen_common_props = {"evidence_groups_priority_list": conf_parser.get_go_evidence_groups_priority_list(),
+                                "prepostfix_sentences_map": conf_parser.get_go_prepostfix_sentences_map(),
+                                "prepostfix_special_cases_sent_map": conf_parser.get_go_prepostfix_special_cases_sent_map(),
+                                "evidence_codes_groups_map": conf_parser.get_go_evidence_codes_groups_map()}
+    go_sent_common_props = {"remove_parent_terms": conf_parser.get_go_remove_parents_if_children_are_present(),
+                            "merge_num_terms_threshold": conf_parser.get_go_trim_min_num_terms(),
+                            "merge_min_distance_from_root": conf_parser.get_go_trim_min_distance_from_root(),
+                            "truncate_others_generic_word": conf_parser.get_go_truncate_others_aggregation_word(),
+                            "truncate_others_aspect_words": conf_parser.get_go_truncate_others_terms(),
+                            "add_multiple_if_covers_more_children": False}
+    do_sent_gen_common_prop = {"evidence_groups_priority_list": conf_parser.get_do_evidence_groups_priority_list(),
+                               "prepostfix_sentences_map": conf_parser.get_do_prepostfix_sentences_map(),
+                               "prepostfix_special_cases_sent_map": None,
+                               "evidence_codes_groups_map": conf_parser.get_do_evidence_codes_groups_map()}
+    do_sent_common_props = {"remove_parent_terms": conf_parser.get_do_remove_parents_if_children_are_present(),
+                            "merge_num_terms_threshold": conf_parser.get_do_trim_min_num_terms(),
+                            "merge_min_distance_from_root": conf_parser.get_do_trim_min_distance_from_root(),
+                            "truncate_others_generic_word": conf_parser.get_do_truncate_others_aggregation_word(),
+                            "truncate_others_aspect_words": conf_parser.get_do_truncate_others_terms(),
+                            "add_multiple_if_covers_more_children": True}
+
     if conf_parser.get_data_fetcher() == "agr_data_fetcher":
         organisms_list = conf_parser.get_agr_organisms_to_process()
     else:
@@ -37,32 +58,22 @@ def main():
         sister_gene_name_id_map = {}
         sister_df = None
         species = None
-        if conf_parser.get_data_fetcher() == "agr_data_fetcher":
-            df = AGRDataFetcher(raw_files_source=conf_parser.get_raw_file_sources("agr_data_fetcher"),
-                                release_version=conf_parser.get_release("agr_data_fetcher"),
-                                main_file_name=conf_parser.get_agr_mod_property(organism, "main_files"),
-                                bgi_file_name=conf_parser.get_agr_mod_property(organism, "bgi_file"),
-                                go_annotations_file_name=conf_parser.get_agr_mod_property(organism, "go_annotations"),
-                                organism_name=conf_parser.get_agr_mod_property(organism, "name"),
-                                cache_location=conf_parser.get_cache_location(), do_relations=None,
-                                go_relations=["subClassOf", "BFO:0000050"])
-        else:
-            species = conf_parser.get_wb_species()
-            df = WBDataFetcher(raw_files_source=conf_parser.get_raw_file_sources("wb_data_fetcher"),
-                               release_version=conf_parser.get_release("wb_data_fetcher"),
-                               species=organism, project_id=species[organism]["project_id"],
-                               cache_location=conf_parser.get_cache_location(), do_relations=None,
-                               go_relations=["subClassOf", "BFO:0000050"])
-            if "main_sister_species" in species[organism] and species[organism]["main_sister_species"]:
-                sister_df = WBDataFetcher(raw_files_source=conf_parser.get_raw_file_sources("wb_data_fetcher"),
-                                          release_version=conf_parser.get_release("wb_data_fetcher"),
-                                          species=species[organism]["main_sister_species"],
-                                          project_id=species[species[organism]["main_sister_species"]]["project_id"],
-                                          cache_location=conf_parser.get_cache_location(), do_relations=None,
-                                          go_relations=["subClassOf", "BFO:0000050"])
-                sister_df.load_gene_data_from_file()
-                for gene in sister_df.get_gene_data():
-                    sister_gene_name_id_map[gene.name] = gene.id
+        species = conf_parser.get_wb_species()
+        df = WBDataFetcher(raw_files_source=conf_parser.get_raw_file_sources("wb_data_fetcher"),
+                           release_version=conf_parser.get_release("wb_data_fetcher"),
+                           species=organism, project_id=species[organism]["project_id"],
+                           cache_location=conf_parser.get_cache_location(), do_relations=None,
+                           go_relations=["subClassOf", "BFO:0000050"])
+        if "main_sister_species" in species[organism] and species[organism]["main_sister_species"]:
+            sister_df = WBDataFetcher(raw_files_source=conf_parser.get_raw_file_sources("wb_data_fetcher"),
+                                      release_version=conf_parser.get_release("wb_data_fetcher"),
+                                      species=species[organism]["main_sister_species"],
+                                      project_id=species[species[organism]["main_sister_species"]]["project_id"],
+                                      cache_location=conf_parser.get_cache_location(), do_relations=None,
+                                      go_relations=["subClassOf", "BFO:0000050"])
+            sister_df.load_all_data_from_file()
+            for gene in sister_df.get_gene_data():
+                sister_gene_name_id_map[gene.name] = gene.id
         df.load_all_data_from_file(go_terms_replacement_regex=conf_parser.get_go_rename_terms(),
                                    go_terms_exclusion_list=conf_parser.get_go_terms_exclusion_list(),
                                    do_terms_replacement_regex=None,
@@ -72,99 +83,65 @@ def main():
             logging.debug("processing gene " + gene.name)
             gene_desc = GeneDesc(gene_id=gene.id, gene_name=gene.name)
             joined_sent = []
-            go_sentences = generate_sentences(
-                df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.GO,
-                                            priority_list=conf_parser.get_go_annotations_priority(),
-                                            desc_stats=gene_desc.stats),
-                ontology=df.go_ontology,
-                evidence_groups_priority_list=conf_parser.get_go_evidence_groups_priority_list(),
-                prepostfix_sentences_map=conf_parser.get_go_prepostfix_sentences_map(),
-                prepostfix_special_cases_sent_map=conf_parser.get_go_prepostfix_special_cases_sent_map(),
-                evidence_codes_groups_map=conf_parser.get_go_evidence_codes_groups_map(),
-                remove_parent_terms=conf_parser.get_go_remove_parents_if_children_are_present(),
-                merge_num_terms_threshold=conf_parser.get_go_trim_min_num_terms(),
-                merge_min_distance_from_root=conf_parser.get_go_trim_min_distance_from_root(),
-                desc_stats=gene_desc.stats,
-                truncate_others_generic_word=conf_parser.get_go_truncate_others_aggregation_word(),
-                truncate_others_aspect_words=conf_parser.get_go_truncate_others_terms())
-            if go_sentences:
-                func_sent = " and ".join([sentence.text for sentence in go_sentences.get_sentences(
-                    aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True,
-                    desc_stats=gene_desc.stats)])
-                if func_sent:
-                    joined_sent.append(func_sent)
-                contributes_to_func_sent = " and ".join([sentence.text for sentence in go_sentences.get_sentences(
-                    aspect='F', qualifier='contributes_to', merge_groups_with_same_prefix=True,
-                    keep_only_best_group=True, desc_stats=gene_desc.stats)])
-                if contributes_to_func_sent:
-                    joined_sent.append(contributes_to_func_sent)
-                proc_sent = " and ".join([sentence.text for sentence in go_sentences.get_sentences(
-                    aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True,
-                    desc_stats=gene_desc.stats)])
-                if proc_sent:
-                    joined_sent.append(proc_sent)
-                comp_sent = " and ".join([sentence.text for sentence in go_sentences.get_sentences(
-                    aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True,
-                    desc_stats=gene_desc.stats)])
-                if comp_sent:
-                    joined_sent.append(comp_sent)
-                colocalizes_with_comp_sent = " and ".join([sentence.text for sentence in go_sentences.get_sentences(
-                    aspect='C', qualifier='colocalizes_with', merge_groups_with_same_prefix=True,
-                    keep_only_best_group=True, desc_stats=gene_desc.stats)])
-                if colocalizes_with_comp_sent:
-                    joined_sent.append(colocalizes_with_comp_sent)
+            go_sent_generator = SentenceGenerator(
+                annotations=df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.GO,
+                                                        priority_list=conf_parser.get_go_annotations_priority(),
+                                                        desc_stats=gene_desc.stats),
+                ontology=df.go_ontology, **go_sent_gen_common_props)
+            func_sent = " and ".join([sentence.text for sentence in go_sent_generator.get_sentences(
+                aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True, )])
+            if func_sent:
+                joined_sent.append(func_sent)
+            contributes_to_func_sent = " and ".join([sentence.text for sentence in go_sent_generator.get_sentences(
+                aspect='F', qualifier='contributes_to', merge_groups_with_same_prefix=True,
+                keep_only_best_group=True, desc_stats=gene_desc.stats, **go_sent_common_props)])
+            if contributes_to_func_sent:
+                joined_sent.append(contributes_to_func_sent)
+            proc_sent = " and ".join([sentence.text for sentence in go_sent_generator.get_sentences(
+                aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True,
+                desc_stats=gene_desc.stats, **go_sent_common_props)])
+            if proc_sent:
+                joined_sent.append(proc_sent)
+            comp_sent = " and ".join([sentence.text for sentence in go_sent_generator.get_sentences(
+                aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True,
+                desc_stats=gene_desc.stats, **go_sent_common_props)])
+            if comp_sent:
+                joined_sent.append(comp_sent)
+            colocalizes_with_comp_sent = " and ".join([sentence.text for sentence in go_sent_generator.get_sentences(
+                aspect='C', qualifier='colocalizes_with', merge_groups_with_same_prefix=True,
+                desc_stats=gene_desc.stats, keep_only_best_group=True, **go_sent_common_props)])
+            if colocalizes_with_comp_sent:
+                joined_sent.append(colocalizes_with_comp_sent)
 
-            do_sentences = generate_sentences(
+            do_sentence_generator = SentenceGenerator(
                 df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.DO,
                                             priority_list=conf_parser.get_do_annotations_priority(),
                                             desc_stats=gene_desc.stats),
-                ontology=df.do_ontology,
-                evidence_groups_priority_list=conf_parser.get_do_evidence_groups_priority_list(),
-                prepostfix_sentences_map=conf_parser.get_do_prepostfix_sentences_map(),
-                evidence_codes_groups_map=conf_parser.get_do_evidence_codes_groups_map(),
-                remove_parent_terms=conf_parser.get_do_remove_parents_if_children_are_present(),
-                merge_num_terms_threshold=conf_parser.get_do_trim_min_num_terms(),
-                merge_min_distance_from_root=conf_parser.get_do_trim_min_distance_from_root(),
-                desc_stats=gene_desc.stats,
-                truncate_others_generic_word=conf_parser.get_do_truncate_others_aggregation_word(),
-                truncate_others_aspect_words=conf_parser.get_do_truncate_others_terms())
-            if do_sentences:
-                disease_sent = " and ".join([sentence.text for sentence in do_sentences.get_sentences(
-                    aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=True,
-                    desc_stats=gene_desc.stats)])
-                if disease_sent:
-                    joined_sent.append(disease_sent)
+                ontology=df.do_ontology, **do_sent_gen_common_prop)
+            disease_sent = "; ".join([sentence.text for sentence in do_sentence_generator.get_sentences(
+                aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False, desc_stats=gene_desc.stats,
+                **do_sent_common_props)])
+            if disease_sent:
+                joined_sent.append(disease_sent)
 
             if conf_parser.get_data_fetcher() == "wb_data_fetcher" and "main_sister_species" in species[organism] and \
                     species[organism]["main_sister_species"] and gene.name.startswith("Cbr-") and gene.name[4:] in \
                     sister_gene_name_id_map:
-                sister_sentences = generate_sentences(sister_df.get_annotations_for_gene(
+                sister_sentences_generator = SentenceGenerator(sister_df.get_annotations_for_gene(
                     annot_type=DataType.GO, gene_id=sister_gene_name_id_map[gene.name[4:]],
                     priority_list=("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI", "HEP"),
-                    desc_stats=gene_desc.stats),
-                    ontology=df.go_ontology,
-                    evidence_groups_priority_list=conf_parser.get_go_evidence_groups_priority_list(),
-                    prepostfix_sentences_map=conf_parser.get_go_prepostfix_sentences_map(),
-                    prepostfix_special_cases_sent_map=conf_parser.get_go_prepostfix_special_cases_sent_map(),
-                    evidence_codes_groups_map=conf_parser.get_go_evidence_codes_groups_map(),
-                    remove_parent_terms=conf_parser.get_go_remove_parents_if_children_are_present(),
-                    merge_num_terms_threshold=conf_parser.get_go_trim_min_num_terms(),
-                    merge_min_distance_from_root=conf_parser.get_go_trim_min_distance_from_root(),
-                    desc_stats=gene_desc.stats,
-                    truncate_others_generic_word=conf_parser.get_go_truncate_others_aggregation_word(),
-                    truncate_others_aspect_words=conf_parser.get_go_truncate_others_terms())
-                if sister_sentences:
-                    sister_proc_sent = " and ".join([sentence.text for sentence in sister_sentences.get_sentences(
-                        aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True)])
-                    if sister_proc_sent:
-                        joined_sent.append("In " + species[species[organism]["main_sister_species"]]["name"] + ", " +
-                                           gene.name[4:] + " " + sister_proc_sent)
+                    desc_stats=gene_desc.stats), ontology=df.go_ontology, **go_sent_gen_common_props)
+                sister_proc_sent = " and ".join([sentence.text for sentence in sister_sentences_generator.get_sentences(
+                    aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True, **go_sent_common_props)])
+                if sister_proc_sent:
+                    joined_sent.append("in " + species[species[organism]["main_sister_species"]]["name"] + ", " +
+                                       gene.name[4:] + " " + sister_proc_sent)
             if len(joined_sent) > 0:
                 desc = "; ".join(joined_sent) + "."
                 if len(desc) > 0:
                     gene_desc.description = desc[0].upper() + desc[1:]
             else:
-                gene_desc.description = "No description available"
+                gene_desc.description = None
             desc_writer.add_gene_desc(gene_desc)
         desc_writer.write(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
                                        organism + "_with_stats.json"), pretty=True, include_single_gene_stats=True)

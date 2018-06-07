@@ -5,7 +5,7 @@ from genedescriptions.ontology_tools import *
 from ontobio.ontol import Ontology
 
 Sentence = namedlist('Sentence', ['prefix', 'terms_ids', 'postfix', 'text', 'aspect', 'evidence_group', 'terms_merged',
-                                  'additional_prefix', 'qualifier'])
+                                  'additional_prefix', 'qualifier', 'ancestors_covering_multiple_terms'])
 
 
 class SingleDescStats(object):
@@ -52,6 +52,7 @@ class SentenceMerger(object):
         self.additional_prefix = ""
         self.aspect = ""
         self.qualifier = ""
+        self.ancestors_covering_multiple_terms = set()
 
 
 class SentenceGenerator(object):
@@ -105,7 +106,8 @@ class SentenceGenerator(object):
                       truncate_others_aspect_words: Dict[str, str] = None,
                       desc_stats: SingleDescStats = None,
                       remove_successive_overlapped_terms: bool = True,
-                      exclude_terms_ids: List[str] = None) -> List[Sentence]:
+                      exclude_terms_ids: List[str] = None,
+                      add_multiple_if_covers_more_children: bool = False) -> List[Sentence]:
         """generate sentences for specific combination of aspect and qualifier
 
         Args:
@@ -131,6 +133,8 @@ class SentenceGenerator(object):
             remove_successive_overlapped_terms (bool): whether to remove terms in lower priority evidence groups when
                 already present in higher priority groups
             exclude_terms_ids (List[str]): list of term ids to exclude
+            add_multiple_if_covers_more_children (bool): whether to add the label '(multiple)' to terms that are
+                ancestors covering multiple children
         Returns:
             List[Sentence]: a list of sentences
         """
@@ -144,6 +148,7 @@ class SentenceGenerator(object):
         for terms, evidence_group, priority in sorted([(t, eg, evidence_group_priority[eg]) for eg, t in
                                                        self.terms_groups[(aspect, qualifier)].items()],
                                                       key=lambda x: x[2]):
+            ancestors_covering_multiple_children = set()
             if remove_successive_overlapped_terms:
                 terms -= terms_already_covered
             if exclude_terms_ids:
@@ -160,7 +165,8 @@ class SentenceGenerator(object):
                     terms = terms_no_ancestors
             if 0 < merge_num_terms_threshold <= len(terms):
                 merged_terms_coverset = get_merged_nodes_by_common_ancestor(
-                    node_ids=terms, ontology=self.ontology, min_distance_from_root=merge_min_distance_from_root[aspect],
+                    node_ids=list(terms), ontology=self.ontology,
+                    min_distance_from_root=merge_min_distance_from_root[aspect],
                     min_number_of_terms=merge_num_terms_threshold)
                 if len(merged_terms_coverset.keys()) <= merge_num_terms_threshold:
                     merged_terms = list(merged_terms_coverset.keys())
@@ -172,6 +178,9 @@ class SentenceGenerator(object):
                     for merged_term in merged_terms:
                         terms_already_covered.update(merged_terms_coverset[merged_term])
                     add_others = True
+                if add_multiple_if_covers_more_children:
+                    ancestors_covering_multiple_children = {self.ontology.label(ancestor) for ancestor in merged_terms
+                                                            if len(merged_terms_coverset[ancestor]) > 1}
                 logging.debug("Reduced number of terms by merging from " + str(len(terms)) + " to " +
                               str(len(merged_terms)))
                 terms = merged_terms
@@ -184,7 +193,8 @@ class SentenceGenerator(object):
                                      terms_merged=True if 0 < merge_num_terms_threshold < len(terms) else False,
                                      add_others=add_others,
                                      truncate_others_generic_word=truncate_others_generic_word,
-                                     truncate_others_aspect_words=truncate_others_aspect_words))
+                                     truncate_others_aspect_words=truncate_others_aspect_words,
+                                     ancestors_with_multiple_children=ancestors_covering_multiple_children))
             if keep_only_best_group:
                 return sentences
         if merge_groups_with_same_prefix:
@@ -218,6 +228,8 @@ class SentenceGenerator(object):
                 merged_sentences[prefix].term_evgroup_dict[term] = sentence.evidence_group
             if sentence.additional_prefix:
                 merged_sentences[prefix].additional_prefix = sentence.additional_prefix
+            merged_sentences[prefix].ancestors_covering_multiple_terms.update(
+                sentence.ancestors_covering_multiple_terms)
         if remove_parent_terms:
             for prefix, sent_merger in merged_sentences.items():
                 terms_no_ancestors = sent_merger.terms_ids - set([ancestor for node_id in sent_merger.terms_ids for
@@ -231,11 +243,13 @@ class SentenceGenerator(object):
                          text=compose_sentence(prefix=prefix,
                          term_names=[self.ontology.label(node) for node in sent_merger.terms_ids],
                          postfix=SentenceGenerator.merge_postfix_phrases(sent_merger.postfix_list),
-                         additional_prefix=sent_merger.additional_prefix),
+                         additional_prefix=sent_merger.additional_prefix,
+                         ancestors_with_multiple_children=sent_merger.ancestors_covering_multiple_terms),
                          aspect=sent_merger.aspect, evidence_group=", ".join(sent_merger.evidence_groups),
                          terms_merged=True, additional_prefix=sent_merger.additional_prefix,
-                         qualifier=sent_merger.qualifier) for prefix, sent_merger in merged_sentences.items() if
-                len(sent_merger.terms_ids) > 0]
+                         qualifier=sent_merger.qualifier,
+                         ancestors_covering_multiple_terms=sent_merger.ancestors_covering_multiple_terms)
+                for prefix, sent_merger in merged_sentences.items() if len(sent_merger.terms_ids) > 0]
 
     @staticmethod
     def merge_postfix_phrases(postfix_phrases: List[str]) -> str:
@@ -280,7 +294,8 @@ class SentenceGenerator(object):
             return ""
 
 
-def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str], postfix: str) -> str:
+def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str], postfix: str,
+                     ancestors_with_multiple_children: Set[str] = None) -> str:
     """compose the text of a sentence given its prefix, terms, and postfix
 
     Args:
@@ -288,11 +303,14 @@ def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str],
         term_names (List[str]): a list of term names
         postfix (str): the postfix of the sentence
         additional_prefix (str): an additional prefix to be used for special cases
+        ancestors_with_multiple_children (Set[str]): set containing labels of terms that cover more than one children
+            term in the original set and which will appear with the label '(multiple)'
     Returns:
         str: the text of the go sentence
     """
     prefix = prefix + additional_prefix + " "
-    term_names = sorted(term_names)
+    term_names = [term_name + " (multiple)" if term_name in ancestors_with_multiple_children else term_name for
+                  term_name in sorted(term_names)]
     if postfix != "":
         postfix = " " + postfix
     if len(term_names) > 2:
@@ -307,8 +325,9 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
                          prepostfix_sentences_map: Dict[Tuple[str, str, str], Tuple[str, str]],
                          terms_merged: bool = False, add_others: bool = False,
                          truncate_others_generic_word: str = "several",
-                         truncate_others_aspect_words: Dict[str, str] = None) -> Union[Sentence, None]:
-    """build a sentence
+                         truncate_others_aspect_words: Dict[str, str] = None,
+                         ancestors_with_multiple_children: Set[str] = None) -> Union[Sentence, None]:
+    """build a sentence object
 
     Args:
         node_ids (List[str]): list of ids for the terms to be combined in the sentence
@@ -323,6 +342,8 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
             only a subset of the original terms, e.g., 'several'
         truncate_others_aspect_words (Dict[str, str]): one word for each aspect describing the kind of terms that are
             included in the aspect
+        ancestors_with_multiple_children (Set[str]): set containing labels of terms that cover more than one children
+            term in the original set and which will appear with the label '(multiple)'
     Returns:
         Union[Sentence,None]: the combined go sentence
     """
@@ -340,8 +361,10 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
         term_labels = [ontology.label(node_id) for node_id in node_ids]
         return Sentence(prefix=prefix, terms_ids=node_ids, postfix=postfix,
                         text=compose_sentence(prefix=prefix, term_names=term_labels, postfix=postfix,
-                                              additional_prefix=additional_prefix),
+                                              additional_prefix=additional_prefix,
+                                              ancestors_with_multiple_children=ancestors_with_multiple_children),
                         aspect=aspect, evidence_group=evidence_group, terms_merged=terms_merged,
-                        additional_prefix=additional_prefix, qualifier=qualifier)
+                        additional_prefix=additional_prefix, qualifier=qualifier,
+                        ancestors_covering_multiple_terms=ancestors_with_multiple_children)
     else:
         return None
