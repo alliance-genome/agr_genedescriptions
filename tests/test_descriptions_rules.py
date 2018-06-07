@@ -3,7 +3,7 @@ import os
 
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.data_fetcher import WBDataFetcher, DataType
-from genedescriptions.descriptions_rules import generate_sentences
+from genedescriptions.descriptions_rules import generate_sentences, SentenceGenerator
 
 
 class TestDescriptionsRules(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestDescriptionsRules(unittest.TestCase):
         sentences = []
         for gene in df.get_gene_data():
             joined_sentence = []
-            go_sent = generate_sentences(
+            go_sent_generator = SentenceGenerator(
                 annotations=df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.GO,
                                                         priority_list=self.conf_parser.get_go_annotations_priority()),
                 evidence_groups_priority_list=self.conf_parser.get_go_evidence_groups_priority_list(),
@@ -33,17 +33,15 @@ class TestDescriptionsRules(unittest.TestCase):
                 prepostfix_special_cases_sent_map=self.conf_parser.get_go_prepostfix_special_cases_sent_map(),
                 evidence_codes_groups_map=self.conf_parser.get_go_evidence_codes_groups_map(),
                 ontology=df.go_ontology)
+            go_sent = go_sent_generator.get_sentences(aspect='F', remove_parent_terms=True,
+                                                      merge_num_terms_threshold=self.conf_parser.
+                                                      get_go_trim_min_num_terms(),
+                                                      merge_min_distance_from_root=self.conf_parser.
+                                                      get_go_trim_min_distance_from_root(),
+                                                      remove_successive_overlapped_terms=True,
+                                                      keep_only_best_group=False, merge_groups_with_same_prefix=True)
             if go_sent:
-                joined_sentence.append("; ".join([sent.text for sent in go_sent.get_sentences(aspect='F')]))
-            do_sent = generate_sentences(
-                annotations=df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.DO,
-                                                        priority_list=self.conf_parser.get_do_annotations_priority()),
-                evidence_groups_priority_list=self.conf_parser.get_do_evidence_groups_priority_list(),
-                prepostfix_sentences_map=self.conf_parser.get_do_prepostfix_sentences_map(),
-                evidence_codes_groups_map=self.conf_parser.get_do_evidence_codes_groups_map(),
-                ontology=df.do_ontology)
-            if do_sent:
-                joined_sentence.append("; ".join([sent.text for sent in do_sent.get_sentences('D')]))
+                joined_sentence.append("; ".join([sent.text for sent in go_sent]))
             sentences.append("; ".join(joined_sentence))
         self.assertGreater(len(sentences), 20000)
 

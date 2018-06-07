@@ -130,7 +130,7 @@ def get_merged_nodes_by_common_ancestor(node_ids: List[str], ontology: Ontology,
         logging.debug("trimming done")
         return final_terms_set
     else:
-        return {node_id: set(node_id) for node_id in node_ids}
+        return {node_id: {node_id} for node_id in node_ids}
 
 
 def find_set_covering(subsets: List[Tuple[str, str, Set[str]]], costs: List[float] = None,

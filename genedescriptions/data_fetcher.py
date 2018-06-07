@@ -194,12 +194,16 @@ class DataFetcher(metaclass=ABCMeta):
             self.go_associations = AssociationSetFactory().create_from_assocs(assocs=GafParser().parse(
                 file=self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url),
                 skipheader=True), ontology=self.go_ontology)
+            self.go_associations = self.remove_blacklisted_annotations(association_set=self.go_associations,
+                                                                       ontology=self.go_ontology,
+                                                                       terms_blacklist=exclusion_list)
         elif associations_type == DataType.DO:
             self.do_associations = AssociationSetFactory().create_from_assocs(assocs=GafParser().parse(
                 file=self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url),
                 skipheader=True), ontology=self.do_ontology)
-        self.remove_blacklisted_annotations(association_set=self.go_associations, ontology=self.go_ontology,
-                                            terms_blacklist=exclusion_list)
+            self.do_associations = self.remove_blacklisted_annotations(association_set=self.do_associations,
+                                                                       ontology=self.do_ontology,
+                                                                       terms_blacklist=exclusion_list)
 
     def get_annotations_for_gene(self, gene_id: str, annot_type: DataType = DataType.GO,
                                  include_obsolete: bool = False, include_negative_results: bool = False,
@@ -386,6 +390,9 @@ class WBDataFetcher(DataFetcher):
                         header = False
             self.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
                                                                               ontology=self.do_ontology)
+            self.do_associations = self.remove_blacklisted_annotations(association_set=self.do_associations,
+                                                                       ontology=self.do_ontology,
+                                                                       terms_blacklist=exclusion_list)
 
     def load_all_data_from_file(self, go_terms_replacement_regex: Dict[str, str] = None,
                                 go_terms_exclusion_list: List[str] = None,
