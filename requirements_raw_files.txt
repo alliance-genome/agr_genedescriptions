@@ -1,5 +1,0 @@
-namedlist
-goatools==0.7.11
-biopython
-inflect
-PyYAML

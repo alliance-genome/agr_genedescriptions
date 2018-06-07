@@ -5,7 +5,7 @@ python:
 
 # command to install dependencies
 install:
-  - pip install -r requirements_raw_files.txt
+  - pip install -r requirements.txt
   - pip install nose
   - pip install coverage
   - pip install coveralls
