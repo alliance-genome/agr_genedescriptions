@@ -95,7 +95,7 @@ class DataFetcher(metaclass=ABCMeta):
             return association_set
 
     @staticmethod
-    def rename_ontology_terms(ontology: Ontology, terms_replacement_regex: Dict[str, str]) -> None:
+    def rename_ontology_terms(ontology: Ontology, terms_replacement_regex: Dict[str, str] = None) -> None:
         """rename ontology terms based on regular expression matching
 
         Args:
@@ -104,12 +104,14 @@ class DataFetcher(metaclass=ABCMeta):
                 renaming terms. Each key must be a regular expression to search for terms and the associated value
                 another regular expression that defines the final result
         """
-        for regex_to_substitute, regex_target in terms_replacement_regex.items():
-            for node in ontology.search(regex_to_substitute, is_regex=True):
-                ontology.node(node)["label"] = re.sub(regex_to_substitute, regex_target, ontology.node(node)["label"])
+        if terms_replacement_regex:
+            for regex_to_substitute, regex_target in terms_replacement_regex.items():
+                for node in ontology.search(regex_to_substitute, is_regex=True):
+                    ontology.node(node)["label"] = re.sub(regex_to_substitute, regex_target,
+                                                          ontology.node(node)["label"])
 
     def set_ontology(self, ontology_type: DataType, ontology: Ontology,
-                     terms_replacement_regex: Dict[str, str]) -> None:
+                     terms_replacement_regex: Dict[str, str] = None) -> None:
         """set the go ontology and apply terms renaming
 
         Args:
