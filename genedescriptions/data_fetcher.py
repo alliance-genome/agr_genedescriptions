@@ -161,7 +161,7 @@ class DataFetcher(metaclass=ABCMeta):
             set_all_depths_in_subgraph(ontology=new_ontology, root_id=root_id, relations=None)
 
     def set_associations(self, associations_type: DataType, associations: AssociationSet,
-                         exclusion_list: List[str]) -> None:
+                         exclusion_list: List[str] = None) -> None:
         """set the go annotations and remove blacklisted annotations
 
         Args:
