@@ -23,10 +23,13 @@ class SingleDescStats(object):
 
 class GeneDesc(object):
     """gene description"""
-    def __init__(self, gene_id: str, gene_name: str = "", description: str = "", stats: SingleDescStats = None):
+    def __init__(self, gene_id: str, gene_name: str = "", description: str = "", go_description: str = "",
+                 disease_description: str = "", stats: SingleDescStats = None):
         self.gene_id = gene_id
         self.gene_name = gene_name
         self.description = description
+        self.go_description = go_description
+        self.disease_description = disease_description
         if stats:
             self.stats = stats
         else:
@@ -45,7 +48,7 @@ class DescriptionsStats(object):
 class SentenceMerger(object):
     def __init__(self):
         self.postfix_list = []
-        self.terms_ids: set = set()
+        self.terms_ids = set()
         self.term_postfix_dict = {}
         self.evidence_groups = []
         self.term_evgroup_dict = {}
