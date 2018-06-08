@@ -36,11 +36,11 @@ class DataFetcher(metaclass=ABCMeta):
             do_relations (List[str]): list of ontology relations to be used for DO
             use_cache (bool): whether to use cached files
         """
-        self.go_associations: AssociationSet = None
-        self.go_ontology: Ontology = None
-        self.do_ontology: Ontology = None
-        self.do_associations: AssociationSet = None
-        self.gene_data: Dict[str, Gene] = None
+        self.go_associations = None
+        self.go_ontology = None
+        self.do_ontology = None
+        self.do_associations = None
+        self.gene_data = None
         self.go_relations = go_relations
         self.do_relations = do_relations
         self.use_cache = use_cache
