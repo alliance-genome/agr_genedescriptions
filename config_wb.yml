@@ -491,7 +491,7 @@ do_sentences_options:
     trim_terms_by_common_ancestors: true
     trim_if_more_than_terms: 3
     trim_min_distance_from_root:
-        D: 3
+        D: 4
     do_truncate_others_aggregation_word: several
     do_truncate_others_terms:
         D: diseases
