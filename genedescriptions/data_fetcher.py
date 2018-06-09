@@ -1,12 +1,9 @@
 import gzip
-import json
-import tarfile
 import urllib.request
 import shutil
 import os
 import re
 from enum import Enum
-from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from typing import List, Iterable, Dict
 from ontobio import AssociationSetFactory
@@ -24,10 +21,9 @@ class DataType(Enum):
     DO = 2
 
 
-class DataFetcher(metaclass=ABCMeta):
+class DataFetcher(object):
     """retrieve data for gene descriptions from different sources"""
 
-    @abstractmethod
     def __init__(self, go_relations: List[str] = None, do_relations: List[str] = None, use_cache: bool = False):
         """create a new a data fetcher
 
@@ -261,7 +257,6 @@ class DataFetcher(metaclass=ABCMeta):
         for gene in gene_data:
             self.gene_data[gene.id] = gene
 
-    @abstractmethod
     def load_gene_data_from_file(self):
         pass
 
