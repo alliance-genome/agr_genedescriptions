@@ -81,6 +81,20 @@ class GenedescConfigParser(object):
                        for prepost in self.config["do_sentences_options"]["do_prepostfix_sentences_map"]}
         return prepost_map
 
+    def get_do_prepostfix_sentences_map_humans(self) -> Dict[Tuple[str, str, str], Tuple[str, str]]:
+        """get the map that links do aspects and evidence groups with their pre- and postfix phrases
+
+        Returns:
+            Dict[Tuple[str, str, str], Tuple[str, str]]: a dictionary that maps a tuple of aspect and group with prefix
+                and postfix phrases to be used to build the automatically generated sentences
+        """
+        prepost_map = None
+        if "do_prepostfix_sentences_map_humans" in self.config["do_sentences_options"]:
+            prepost_map = {(prepost["aspect"], prepost["group"], prepost["qualifier"]): (prepost["prefix"],
+                                                                                         prepost["postfix"])
+                           for prepost in self.config["do_sentences_options"]["do_prepostfix_sentences_map_humans"]}
+        return prepost_map
+
     def get_go_prepostfix_special_cases_sent_map(self) -> Dict[Tuple[str, str, str], Tuple[int, str, str, str]]:
         """get a map of pre- and postfix phrases for special cases
 
