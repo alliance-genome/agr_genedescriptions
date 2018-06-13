@@ -336,7 +336,6 @@ class WBDataFetcher(DataFetcher):
             for subj_associations in self.do_associations.associations_by_subj.values():
                 for association in subj_associations:
                     if association["evidence"]["type"] == "IEA":
-                        association["subject"]["id"] = "WB:" + association["subject"]["id"]
                         associations.append(association)
             file_path = self._get_cached_file(cache_path=self.do_associations_new_cache_path,
                                               file_source_url=self.do_associations_new_url)

@@ -414,6 +414,7 @@ go_sentences_options:
         F: "functions"
         P: "processes"
         C: "cellular components"
+        D: "diseases"
 
     remove_parents_if_children_are_present: true
     trim_terms_by_common_ancestors: true
@@ -439,27 +440,31 @@ do_sentences_options:
         IMP:
             group: EXPERIMENTAL
             priority: 1
-        IEP:
-            group: BIOMARKER
+        IDA:
+            group: EXPERIMENTAL
             priority: 2
-        TAS:
-            group: INFERRED_BY_CURATORS_AND_AUTHORS
+        IAGP:
+            group: EXPERIMENTAL
             priority: 3
         IC:
-            group: INFERRED_BY_CURATORS_AND_AUTHORS
+            group: EXPERIMENTAL
             priority: 4
-        ISS:
-            group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
+        TAS:
+            group: EXPERIMENTAL
             priority: 5
-        IEA:
-            group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
+        IEP:
+            group: BIOMARKER
             priority: 6
+        ISS:
+            group: ORTHOLOGY_BASED
+            priority: 7
+        IEA:
+            group: ORTHOLOGY_BASED
+            priority: 8
     group_priority:
         EXPERIMENTAL: 1
         BIOMARKER: 2
-        INFERRED_BY_CURATORS_AND_AUTHORS: 3
-        PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS: 4
-        ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS: 5
+        ORTHOLOGY_BASED: 3
     do_prepostfix_sentences_map:
         - aspect: "D"
           group: EXPERIMENTAL
@@ -472,17 +477,23 @@ do_sentences_options:
           prefix: "is biomarker of"
           postfix: ""
         - aspect: "D"
-          group: INFERRED_BY_CURATORS_AND_AUTHORS
-          qualifier: ""
-          prefix: "is used to study"
-          postfix: ""
-        - aspect: "D"
-          group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
+          group: ORTHOLOGY_BASED
           qualifier: ""
           prefix: "human ortholog of this gene is implicated in"
           postfix: ""
+    do_prepostfix_sentences_map_humans:
         - aspect: "D"
-          group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
+          group: EXPERIMENTAL
+          qualifier: ""
+          prefix: "is implicated in"
+          postfix: ""
+        - aspect: "D"
+          group: BIOMARKER
+          qualifier: ""
+          prefix: "is biomarker of"
+          postfix: ""
+        - aspect: "D"
+          group: ORTHOLOGY_BASED
           qualifier: ""
           prefix: "human ortholog of this gene is implicated in"
           postfix: ""
@@ -494,7 +505,5 @@ do_sentences_options:
         D: 4
     do_truncate_others_aggregation_word: several
     do_truncate_others_terms:
-        D: diseases
-    go_truncate_others_terms:
         D: "diseases"
 
