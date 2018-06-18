@@ -94,6 +94,7 @@ class SentencesCollection(object):
         :rtype: List[GOSentence]
         """
         sentences = []
+        qualifier = qualifier.lower()
         merged_sentences = defaultdict(SentenceMerger)
         if desc_stats:
             desc_stats.num_terms_trim_nogroup_priority_nomerge[aspect] = 0
@@ -273,12 +274,12 @@ def generate_sentences(annotations: List[dict], ontology, evidence_groups_priori
         for annotation in annotations:
             if annotation["Evidence"] in evidence_codes_groups_map:
                 map_key = (annotation["Aspect"], evidence_codes_groups_map[annotation["Evidence"]],
-                           "_".join(sorted(annotation["Qualifier"])))
+                           "_".join(sorted(annotation["Qualifier"])).lower())
                 if prepostfix_special_cases_sent_map and map_key in prepostfix_special_cases_sent_map:
                     for special_case in prepostfix_special_cases_sent_map[map_key]:
                         if re.match(re.escape(special_case[1]), annotation["GO_Name"]):
                             map_key = (annotation["Aspect"], evidence_codes_groups_map[annotation["Evidence"]] +
-                                       str(special_case[0]), "_".join(sorted(annotation["Qualifier"])))
+                                       str(special_case[0]), "_".join(sorted(annotation["Qualifier"])).lower())
                             if evidence_codes_groups_map[annotation["Evidence"]] + str(special_case[0]) not in \
                                     evidence_groups_priority_list:
                                 evidence_groups_priority_list.insert(evidence_groups_priority_list.index(
