@@ -89,7 +89,7 @@ class SentenceGenerator(object):
                 if annotation["evidence"]["type"] in evidence_codes_groups_map:
                     aspect = annotation["aspect"]
                     ev_group = evidence_codes_groups_map[annotation["evidence"]["type"]]
-                    qualifier = "_".join(sorted(annotation["qualifiers"])).lower() if "qualifiers" in annotation else ""
+                    qualifier = "_".join(sorted(annotation["qualifiers"])) if "qualifiers" in annotation else ""
                     if prepostfix_special_cases_sent_map and (aspect, ev_group, qualifier) in \
                             prepostfix_special_cases_sent_map:
                         for special_case in prepostfix_special_cases_sent_map[(aspect, ev_group, qualifier)]:
@@ -189,17 +189,18 @@ class SentenceGenerator(object):
                 terms = merged_terms
             else:
                 terms_already_covered.update(terms)
-            sentences.append(
-                _get_single_sentence(node_ids=terms, ontology=self.ontology, aspect=aspect,
-                                     evidence_group=evidence_group, qualifier=qualifier,
-                                     prepostfix_sentences_map=self.prepostfix_sentences_map,
-                                     terms_merged=True if 0 < merge_num_terms_threshold < len(terms) else False,
-                                     add_others=add_others,
-                                     truncate_others_generic_word=truncate_others_generic_word,
-                                     truncate_others_aspect_words=truncate_others_aspect_words,
-                                     ancestors_with_multiple_children=ancestors_covering_multiple_children))
-            if keep_only_best_group:
-                return sentences
+            if (aspect, evidence_group, qualifier) in self.prepostfix_sentences_map:
+                sentences.append(
+                    _get_single_sentence(node_ids=terms, ontology=self.ontology, aspect=aspect,
+                                         evidence_group=evidence_group, qualifier=qualifier,
+                                         prepostfix_sentences_map=self.prepostfix_sentences_map,
+                                         terms_merged=True if 0 < merge_num_terms_threshold < len(terms) else False,
+                                         add_others=add_others,
+                                         truncate_others_generic_word=truncate_others_generic_word,
+                                         truncate_others_aspect_words=truncate_others_aspect_words,
+                                         ancestors_with_multiple_children=ancestors_covering_multiple_children))
+                if keep_only_best_group:
+                    return sentences
         if merge_groups_with_same_prefix:
             sentences = self.merge_sentences_with_same_prefix(sentences=sentences,
                                                               remove_parent_terms=remove_parent_terms)
