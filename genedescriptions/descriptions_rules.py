@@ -89,7 +89,7 @@ class SentenceGenerator(object):
                 if annotation["evidence"]["type"] in evidence_codes_groups_map:
                     aspect = annotation["aspect"]
                     ev_group = evidence_codes_groups_map[annotation["evidence"]["type"]]
-                    qualifier = "_".join(sorted(annotation["qualifiers"])) if "qualifiers" in annotation else ""
+                    qualifier = "_".join(sorted(annotation["qualifiers"])).lower() if "qualifiers" in annotation else ""
                     if prepostfix_special_cases_sent_map and (aspect, ev_group, qualifier) in \
                             prepostfix_special_cases_sent_map:
                         for special_case in prepostfix_special_cases_sent_map[(aspect, ev_group, qualifier)]:
