@@ -4,22 +4,14 @@ import shutil
 import os
 import re
 
-from enum import Enum
-from collections import namedtuple, defaultdict
+from collections import defaultdict
 from typing import List, Iterable, Dict
 from ontobio import AssociationSetFactory
-from genedescriptions.descriptions_rules import SingleDescStats, set_all_depths_in_subgraph
+from genedescriptions.descriptions_rules import set_all_depths_in_subgraph, Gene, DataType
 from ontobio.ontol_factory import OntologyFactory
 from ontobio.ontol import Ontology
 from ontobio.assocmodel import AssociationSet
 from ontobio.io.gafparser import GafParser
-
-Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
-
-
-class DataType(Enum):
-    GO = 1
-    DO = 2
 
 
 class DataFetcher(object):
@@ -204,8 +196,7 @@ class DataFetcher(object):
                                  include_obsolete: bool = False, include_negative_results: bool = False,
                                  priority_list: Iterable = ("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "IC", "ISS",
                                                             "ISO", "ISA", "ISM", "IGC", "IBA", "IBD", "IKR", "IRD",
-                                                            "RCA", "IEA"),
-                                 desc_stats: SingleDescStats = None) -> List[Dict]:
+                                                            "RCA", "IEA")) -> List[Dict]:
         """
         retrieve go annotations for a given gene id and a given type. The annotations are unique for each pair
         <gene_id, term_id>. This means that when multiple annotations for the same pair are found in the go data, the
@@ -221,7 +212,6 @@ class DataFetcher(object):
                 term are found, only the one with highest priority is returned. The first element in the list has the
                 highest priority, whereas the last has the lowest. Only annotations with evidence codes in the priority
                 list are returned. All other annotations are ignored
-            desc_stats (SingleDescStats): an object containing the description statistics where to save the total number
                 of annotations for the gene
         Returns:
             List[Dict]: the list of annotations for the given gene
@@ -239,8 +229,6 @@ class DataFetcher(object):
                                                                                       not ontology.is_obsolete(
                                                                                           annotation["object"]["id"]))
                        and (include_negative_results or "NOT" not in annotation["qualifiers"])]
-        if desc_stats:
-            desc_stats.total_num_go_annotations = len(annotations)
         id_selected_annotation = {}
         for annotation in annotations:
             if annotation["evidence"]["type"] in priority_map.keys():
@@ -250,8 +238,6 @@ class DataFetcher(object):
                         id_selected_annotation[annotation["object"]["id"]] = annotation
                 else:
                     id_selected_annotation[annotation["object"]["id"]] = annotation
-        if desc_stats:
-            desc_stats.num_prioritized_go_annotations = len(id_selected_annotation.keys())
         return [annotation for annotation in id_selected_annotation.values()]
 
     def set_gene_data(self, gene_data: List[Gene]):

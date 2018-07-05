@@ -89,89 +89,14 @@ def main():
         desc_writer = JsonGDWriter()
         for gene in df.get_gene_data():
             logging.debug("processing gene " + gene.name)
-            gene_desc = GeneDesc(gene_id=gene.id, gene_name=gene.name,
-                                 publications=", ".join([annot["publication"] for annot in df.get_annotations_for_gene(
-                                     gene.id, annot_type=DataType.GO,
-                                     priority_list=conf_parser.get_go_evidence_groups_priority_list())]),
-                                 refs=", ".join([annot["refs"] for annot in df.get_annotations_for_gene(
-                                     gene.id, annot_type=DataType.GO,
-                                     priority_list=conf_parser.get_go_evidence_groups_priority_list())]),
-                                 species=species[organism]["full_name"],
-                                 release_version=conf_parser.get_release("wb_data_fetcher"))
-            joined_sent = []
-
-            best_orthologs, selected_orth_name = df.get_best_orthologs_for_gene(
-                gene.id, orth_species_full_name=orthologs_sp_fullname)
-            if best_orthologs:
-                orth_sent = generate_ortholog_sentence(best_orthologs, selected_orth_name, human_genes_props)
-                if orth_sent:
-                    joined_sent.append(orth_sent)
-            go_sent_generator = SentenceGenerator(
-                annotations=df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.GO,
-                                                        priority_list=conf_parser.get_go_annotations_priority(),
-                                                        desc_stats=gene_desc.stats),
-                ontology=df.go_ontology, **go_sent_gen_common_props)
-            func_sent = " and ".join([sentence.text for sentence in go_sent_generator.get_sentences(
-                aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True, )])
-            if func_sent:
-                joined_sent.append(func_sent)
-            contributes_to_func_sent = " and ".join([sentence.text for sentence in go_sent_generator.get_sentences(
-                aspect='F', qualifier='contributes_to', merge_groups_with_same_prefix=True,
-                keep_only_best_group=True, desc_stats=gene_desc.stats, **go_sent_common_props)])
-            if contributes_to_func_sent:
-                joined_sent.append(contributes_to_func_sent)
-            proc_sent = " and ".join([sentence.text for sentence in go_sent_generator.get_sentences(
-                aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True,
-                desc_stats=gene_desc.stats, **go_sent_common_props)])
-            if proc_sent:
-                joined_sent.append(proc_sent)
-            comp_sent = " and ".join([sentence.text for sentence in go_sent_generator.get_sentences(
-                aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True,
-                desc_stats=gene_desc.stats, **go_sent_common_props)])
-            if comp_sent:
-                joined_sent.append(comp_sent)
-            colocalizes_with_comp_sent = " and ".join([sentence.text for sentence in go_sent_generator.get_sentences(
-                aspect='C', qualifier='colocalizes_with', merge_groups_with_same_prefix=True,
-                desc_stats=gene_desc.stats, keep_only_best_group=True, **go_sent_common_props)])
-            if colocalizes_with_comp_sent:
-                joined_sent.append(colocalizes_with_comp_sent)
-
-            do_sentence_generator = SentenceGenerator(
-                df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.DO,
-                                            priority_list=conf_parser.get_do_annotations_priority(),
-                                            desc_stats=gene_desc.stats),
-                ontology=df.do_ontology, **do_sent_gen_common_prop)
-            disease_sent = "; ".join([sentence.text for sentence in do_sentence_generator.get_sentences(
-                aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False, desc_stats=gene_desc.stats,
-                **do_sent_common_props)])
-            if disease_sent:
-                joined_sent.append(disease_sent)
-
-            if conf_parser.get_data_fetcher() == "wb_data_fetcher" and "main_sister_species" in species[organism] and \
-                    species[organism]["main_sister_species"] and df.get_best_orthologs_for_gene(
-                    gene.id, orth_species_full_name=[sister_sp_fullname], sister_species_data_fetcher=sister_df,
-                    ecode_priority_list=["EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI",
-                                         "HEP"])[0]:
-                best_ortholog = df.get_best_orthologs_for_gene(
-                    gene.id, orth_species_full_name=[sister_sp_fullname], sister_species_data_fetcher=sister_df,
-                    ecode_priority_list=["EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI",
-                                         "HEP"])[0][0]
-                sister_sentences_generator = SentenceGenerator(sister_df.get_annotations_for_gene(
-                    annot_type=DataType.GO, gene_id="WB:" + best_ortholog[0],
-                    priority_list=("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI", "HEP"),
-                    desc_stats=gene_desc.stats), ontology=df.go_ontology, **go_sent_gen_common_props)
-                sister_proc_sent = " and ".join([sentence.text for sentence in sister_sentences_generator.get_sentences(
-                    aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True, **go_sent_common_props)])
-                if sister_proc_sent:
-                    joined_sent.append("in " + species[species[organism]["main_sister_species"]]["name"] + ", " +
-                                       best_ortholog[1] + " " + sister_proc_sent)
-            if len(joined_sent) > 0:
-                desc = "; ".join(joined_sent) + "."
-                if len(desc) > 0:
-                    gene_desc.description = desc[0].upper() + desc[1:]
-            else:
-                gene_desc.description = None
-            desc_writer.add_gene_desc(gene_desc)
+            compose_wormbase_description(gene=gene, conf_parser=conf_parser, species=species, organism=organism, df=df,
+                                         orthologs_sp_fullname=orthologs_sp_fullname,
+                                         go_sent_gen_common_props=go_sent_gen_common_props,
+                                         go_sent_common_props=go_sent_common_props, human_genes_props=human_genes_props,
+                                         do_sent_gen_common_prop=go_sent_gen_common_props,
+                                         do_sent_common_props=do_sent_common_props,
+                                         sister_sp_fullname=sister_sp_fullname, sister_df=sister_df,
+                                         desc_writer=desc_writer)
         desc_writer.write(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
                                        organism + "_with_stats.json"), pretty=True, include_single_gene_stats=True)
         desc_writer.write(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
