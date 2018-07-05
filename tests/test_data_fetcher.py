@@ -54,4 +54,30 @@ class TestRawDataFetcher(unittest.TestCase):
                                             exclusion_list=self.conf_parser.get_do_terms_exclusion_list())
         self.assertTrue(self.df.do_associations is not None)
 
+    def test_load_orthology_from_file(self):
+        species = self.conf_parser.get_wb_species()
+        df = WBDataFetcher(raw_files_source=self.conf_parser.get_raw_file_sources("wb_data_fetcher"),
+                           release_version="WS265", species="c_briggsae",
+                           project_id=species["c_briggsae"]["project_id"],
+                           cache_location=self.conf_parser.get_cache_location(), do_relations=None,
+                           go_relations=["subClassOf", "BFO:0000050"], sister_sp_fullname="Caenorhabditis elegans")
+        sister_df = WBDataFetcher(raw_files_source=self.conf_parser.get_raw_file_sources("wb_data_fetcher"),
+                                  release_version="WS265", species="c_elegans",
+                                  project_id=species["c_elegans"]["project_id"],
+                                  cache_location=self.conf_parser.get_cache_location(), do_relations=None,
+                                  go_relations=["subClassOf", "BFO:0000050"])
+        sister_df.load_gene_data_from_file()
+        sister_df.load_ontology_from_file(ontology_type=DataType.GO, ontology_url=sister_df.go_ontology_url,
+                                          ontology_cache_path=sister_df.go_ontology_cache_path,
+                                          terms_replacement_regex=self.conf_parser.get_go_rename_terms())
+        sister_df.load_associations_from_file(associations_type=DataType.GO,
+                                              associations_url=sister_df.go_associations_url,
+                                              associations_cache_path=sister_df.go_associations_cache_path,
+                                              exclusion_list=self.conf_parser.get_do_terms_exclusion_list())
+        df.load_orthology_from_file(sister_species_data_fetcher=sister_df,
+                                    ecode_priority_list=["EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP",
+                                                         "HGI", "HEP"])
+        best_ortholog = df.get_best_sister_ortholog_for_gene("WB:WBGene00000307")
+        pass
+
 

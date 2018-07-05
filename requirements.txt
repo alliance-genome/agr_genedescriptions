@@ -1,3 +1,4 @@
+urllib3
 namedlist==1.7
 inflect==0.3.1
 PyYAML==3.12

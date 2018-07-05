@@ -3,8 +3,9 @@ import urllib.request
 import shutil
 import os
 import re
+
 from enum import Enum
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 from typing import List, Iterable, Dict
 from ontobio import AssociationSetFactory
 from genedescriptions.descriptions_rules import SingleDescStats, set_all_depths_in_subgraph
@@ -260,12 +261,37 @@ class DataFetcher(object):
     def load_gene_data_from_file(self):
         pass
 
+    @staticmethod
+    def get_human_gene_props():
+        """ retrieve data for human genes, including Ensembl ID, symbol, name, and family name
+        Returns:
+            Dict[List[str]]: a dictionary of all human genes properties, indexed by Ensembl ID
+
+        """
+        human_genes_props = defaultdict(list)
+        human_content = urllib.request.urlopen("https://www.genenames.org/cgi-bin/download?col=gd_hgnc_id&col=g"
+                                               "d_app_sym&col=gd_app_name&col=gd_pub_ensembl_id&col=family.id&c"
+                                               "ol=family.name&status=Approved&status=Entry+Withdrawn&status_op"
+                                               "t=2&where=&order_by=gd_app_sym_sort&format=text&limit=&hgnc_dbt"
+                                               "ag=on&submit=submit")
+        header = True
+        for line in human_content:
+            if not header:
+                linearr = line.decode("utf-8").split("\t")
+                linearr[-1] = linearr[-1].strip()
+                if linearr[3] != "":
+                    human_genes_props[linearr[3]] = [linearr[1], linearr[2], linearr[5]]
+            else:
+                header = False
+        return human_genes_props
+
 
 class WBDataFetcher(DataFetcher):
     """data fetcher for WormBase raw files for a single species"""
 
     def __init__(self, raw_files_source: str, cache_location: str, release_version: str, species: str, project_id: str,
-                 go_relations: List[str] = None, do_relations: List[str] = None, use_cache: bool = False):
+                 go_relations: List[str] = None, do_relations: List[str] = None, use_cache: bool = False,
+                 sister_sp_fullname: str = ""):
         """create a new data fetcher for WormBase. Files will be downloaded from WB ftp site. For convenience, file
         locations are automatically generated and stored in class variables ending in _url for remote filed and
         _cache_path for caching
@@ -308,6 +334,13 @@ class WBDataFetcher(DataFetcher):
                                                           ".do_annotations.daf.txt")
         self.do_associations_new_url = raw_files_source + '/' + release_version + '/ONTOLOGY/disease_association.' + \
                                        release_version + '.daf.txt'
+        self.orthology_url = raw_files_source + '/' + release_version + '/species/' + species + '/' + project_id + \
+                             '/annotation/' + species + '.' + project_id + '.' + release_version + '.orthologs.txt.gz'
+        self.orthology_cache_path = os.path.join(cache_location, "wormbase", release_version, "species", species,
+                                                 project_id, "annotation", species + '.' + project_id + '.' +
+                                                 release_version + ".orthologs.txt.gz")
+        self.orthologs = defaultdict(lambda: defaultdict(list))
+        self.sister_sp_fullname = sister_sp_fullname
 
     def load_gene_data_from_file(self) -> None:
         """load gene list from pre-set file location"""
@@ -382,6 +415,55 @@ class WBDataFetcher(DataFetcher):
                                                                        ontology=self.do_ontology,
                                                                        terms_blacklist=exclusion_list)
 
+    def load_orthology_from_file(self):
+        orthology_file = self._get_cached_file(cache_path=self.orthology_cache_path,
+                                               file_source_url=self.orthology_url)
+        orthologs = defaultdict(list)
+        gene_id = ""
+        header = True
+        for line in open(orthology_file):
+            if not line.startswith("#"):
+                if line.strip() == "=":
+                    header = True
+                    self.orthologs["WB:" + gene_id] = orthologs
+                    orthologs = defaultdict(list)
+                elif header:
+                    gene_id = line.strip().split()[0]
+                    header = False
+                else:
+                    ortholog_arr = line.strip().split("\t")
+                    orthologs[ortholog_arr[0]].append(ortholog_arr[1:4])
+
+    def get_best_orthologs_for_gene(self, gene_id: str, orth_species_full_name: List[str],
+                                    sister_species_data_fetcher: DataFetcher = None,
+                                    ecode_priority_list: List[str] = None):
+        best_orthologs = None
+        curr_orth_fullname = None
+        if len(orth_species_full_name) > 0:
+            for curr_orth_fullname in orth_species_full_name:
+                if curr_orth_fullname in self.orthologs[gene_id]:
+                    orthologs = self.orthologs[gene_id][curr_orth_fullname]
+                    orthologs_keys = []
+                    if len(orthologs) > 1:
+                        for ortholog in orthologs:
+                            if sister_species_data_fetcher:
+                                orthologs_keys.append([ortholog[0], ortholog[1], len(ortholog[2].split(";")),
+                                                       len(sister_species_data_fetcher.get_annotations_for_gene(
+                                                           gene_id=ortholog[0], annot_type=DataType.GO,
+                                                           priority_list=ecode_priority_list))])
+                            else:
+                                orthologs_keys.append([ortholog[0], ortholog[1], len(ortholog[2].split(";"))])
+                        if sister_species_data_fetcher:
+                            best_orthologs = [sorted(orthologs_keys, key=lambda x: (x[2], x[3]), reverse=True)[0][0:2]]
+                        else:
+                            best_orthologs = [[orth_key[0], orth_key[1]] for orth_key in
+                                              sorted(orthologs_keys, key=lambda x: x[2], reverse=True) if
+                                              orth_key[2] == max([orth[2] for orth in orthologs_keys])]
+                    else:
+                        best_orthologs = [[orthologs[0][0], orthologs[0][1]]]
+                    break
+        return best_orthologs, curr_orth_fullname
+
     def load_all_data_from_file(self, go_terms_replacement_regex: Dict[str, str] = None,
                                 go_terms_exclusion_list: List[str] = None,
                                 do_terms_replacement_regex: Dict[str, str] = None,
@@ -413,4 +495,5 @@ class WBDataFetcher(DataFetcher):
         self.load_associations_from_file(associations_type=DataType.DO, associations_url=self.do_associations_url,
                                          associations_cache_path=self.do_associations_cache_path,
                                          exclusion_list=do_terms_exclusion_list)
+        self.load_orthology_from_file()
 

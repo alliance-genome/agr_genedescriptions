@@ -4,7 +4,7 @@ import argparse
 import os
 
 from genedescriptions.config_parser import GenedescConfigParser
-from genedescriptions.data_fetcher import WBDataFetcher, DataType
+from genedescriptions.data_fetcher import WBDataFetcher, DataType, DataFetcher
 from genedescriptions.descriptions_rules import *
 from genedescriptions.descriptions_writer import JsonGDWriter, GeneDesc
 
@@ -53,17 +53,24 @@ def main():
         organisms_list = conf_parser.get_agr_organisms_to_process()
     else:
         organisms_list = conf_parser.get_wb_organisms_to_process()
+    human_genes_props = DataFetcher.get_human_gene_props()
     for organism in organisms_list:
         logging.info("processing organism " + organism)
-        sister_gene_name_id_map = {}
         sister_df = None
-        species = None
         species = conf_parser.get_wb_species()
+        sister_sp_fullname = ""
+        if "main_sister_species" in species[organism] and "full_name" in \
+                species[species[organism]["main_sister_species"]]:
+            sister_sp_fullname = species[species[organism]["main_sister_species"]]["full_name"]
+        orthologs_sp_fullname = ""
+        if "ortholog" in species[organism] and all(["full_name" in species[ortholog_sp] for ortholog_sp in
+                                                    species[organism]["ortholog"]]):
+            orthologs_sp_fullname = [species[ortholog_sp]["full_name"] for ortholog_sp in species[organism]["ortholog"]]
         df = WBDataFetcher(raw_files_source=conf_parser.get_raw_file_sources("wb_data_fetcher"),
                            release_version=conf_parser.get_release("wb_data_fetcher"),
                            species=organism, project_id=species[organism]["project_id"],
                            cache_location=conf_parser.get_cache_location(), do_relations=None,
-                           go_relations=["subClassOf", "BFO:0000050"])
+                           go_relations=["subClassOf", "BFO:0000050"], sister_sp_fullname=sister_sp_fullname)
         if "main_sister_species" in species[organism] and species[organism]["main_sister_species"]:
             sister_df = WBDataFetcher(raw_files_source=conf_parser.get_raw_file_sources("wb_data_fetcher"),
                                       release_version=conf_parser.get_release("wb_data_fetcher"),
@@ -71,9 +78,10 @@ def main():
                                       project_id=species[species[organism]["main_sister_species"]]["project_id"],
                                       cache_location=conf_parser.get_cache_location(), do_relations=None,
                                       go_relations=["subClassOf", "BFO:0000050"])
-            sister_df.load_all_data_from_file()
-            for gene in sister_df.get_gene_data():
-                sister_gene_name_id_map[gene.name] = gene.id
+            sister_df.load_all_data_from_file(go_terms_replacement_regex=conf_parser.get_go_rename_terms(),
+                                              go_terms_exclusion_list=conf_parser.get_go_terms_exclusion_list(),
+                                              do_terms_replacement_regex=None,
+                                              do_terms_exclusion_list=conf_parser.get_do_terms_exclusion_list())
         df.load_all_data_from_file(go_terms_replacement_regex=conf_parser.get_go_rename_terms(),
                                    go_terms_exclusion_list=conf_parser.get_go_terms_exclusion_list(),
                                    do_terms_replacement_regex=None,
@@ -81,8 +89,23 @@ def main():
         desc_writer = JsonGDWriter()
         for gene in df.get_gene_data():
             logging.debug("processing gene " + gene.name)
-            gene_desc = GeneDesc(gene_id=gene.id, gene_name=gene.name)
+            gene_desc = GeneDesc(gene_id=gene.id, gene_name=gene.name,
+                                 publications=", ".join([annot["publication"] for annot in df.get_annotations_for_gene(
+                                     gene.id, annot_type=DataType.GO,
+                                     priority_list=conf_parser.get_go_evidence_groups_priority_list())]),
+                                 refs=", ".join([annot["refs"] for annot in df.get_annotations_for_gene(
+                                     gene.id, annot_type=DataType.GO,
+                                     priority_list=conf_parser.get_go_evidence_groups_priority_list())]),
+                                 species=species[organism]["full_name"],
+                                 release_version=conf_parser.get_release("wb_data_fetcher"))
             joined_sent = []
+
+            best_orthologs, selected_orth_name = df.get_best_orthologs_for_gene(
+                gene.id, orth_species_full_name=orthologs_sp_fullname)
+            if best_orthologs:
+                orth_sent = generate_ortholog_sentence(best_orthologs, selected_orth_name, human_genes_props)
+                if orth_sent:
+                    joined_sent.append(orth_sent)
             go_sent_generator = SentenceGenerator(
                 annotations=df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.GO,
                                                         priority_list=conf_parser.get_go_annotations_priority(),
@@ -125,17 +148,23 @@ def main():
                 joined_sent.append(disease_sent)
 
             if conf_parser.get_data_fetcher() == "wb_data_fetcher" and "main_sister_species" in species[organism] and \
-                    species[organism]["main_sister_species"] and gene.name.startswith("Cbr-") and gene.name[4:] in \
-                    sister_gene_name_id_map:
+                    species[organism]["main_sister_species"] and df.get_best_orthologs_for_gene(
+                    gene.id, orth_species_full_name=[sister_sp_fullname], sister_species_data_fetcher=sister_df,
+                    ecode_priority_list=["EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI",
+                                         "HEP"])[0]:
+                best_ortholog = df.get_best_orthologs_for_gene(
+                    gene.id, orth_species_full_name=[sister_sp_fullname], sister_species_data_fetcher=sister_df,
+                    ecode_priority_list=["EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI",
+                                         "HEP"])[0][0]
                 sister_sentences_generator = SentenceGenerator(sister_df.get_annotations_for_gene(
-                    annot_type=DataType.GO, gene_id=sister_gene_name_id_map[gene.name[4:]],
+                    annot_type=DataType.GO, gene_id="WB:" + best_ortholog[0],
                     priority_list=("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI", "HEP"),
                     desc_stats=gene_desc.stats), ontology=df.go_ontology, **go_sent_gen_common_props)
                 sister_proc_sent = " and ".join([sentence.text for sentence in sister_sentences_generator.get_sentences(
                     aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True, **go_sent_common_props)])
                 if sister_proc_sent:
                     joined_sent.append("in " + species[species[organism]["main_sister_species"]]["name"] + ", " +
-                                       gene.name[4:] + " " + sister_proc_sent)
+                                       best_ortholog[1] + " " + sister_proc_sent)
             if len(joined_sent) > 0:
                 desc = "; ".join(joined_sent) + "."
                 if len(desc) > 0:

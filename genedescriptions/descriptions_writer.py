@@ -1,3 +1,4 @@
+import datetime
 import json
 from abc import ABCMeta, abstractmethod
 import numpy as np
@@ -71,3 +72,24 @@ class JsonGDWriter(DescriptionsWriter):
         with open(file_path, "w") as outfile:
             json.dump(vars(json_serializable_self), outfile, indent=indent)
 
+
+class WBWriter(DescriptionsWriter):
+    def __init__(self):
+        super().__init__()
+
+    def write(self, file_path: str):
+        """write the descriptions to a WB file
+
+        Args:
+            file_path (str): the path to the file to write
+        """
+        with open(file_path, "w") as outfile:
+            for genedesc in self.data:
+                now = datetime.datetime.now()
+                outfile.write(genedesc.gene_id + "\t" + str(now.year) + "-" + str(now.month) + "-" + str(now.day) +
+                              "\t" + genedesc.publications + "\t" + genedesc.refs + "\t" + genedesc.description + "\t" +
+                              genedesc.species + "\t" + "This description was generated automatically by a script "
+                                                        "based on homology/orthology data, Gene Ontology (GO) "
+                                                        "annotations, Disease ontology (DO) annotations, and tissue "
+                                                        "expression data from the " + genedesc.release_version +
+                              " version of WormBase)")

@@ -5,44 +5,89 @@ generic_data_fetcher:
 
 # options for WormBase gene description generation - used when data_fetcher is set to 'wb_data_fetcher'
 wb_data_fetcher:
-    release: "WS265"
+    release: "WS266"
     raw_files_source: "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases"
     organisms_to_process:
         # add the species to be processed to the following list. Entries must have the same text as in 'organisms'
         # option
         - c_elegans
-        #- b_malayi
-        #- c_brenneri
+        - b_malayi
+        - c_brenneri
         - c_briggsae
-        #- c_japonica
-        #- c_remanei
-        #- o_volvulus
-        #- p_pacificus
-        #- s_ratti
-        #- t_muris
+        - c_japonica
+        - c_remanei
+        - o_volvulus
+        - p_pacificus
+        - s_ratti
+        - t_muris
     organisms:
+        human:
+            full_name: "Homo sapiens"
         b_malayi:
+            full_name: "Brugia Malayi"
             project_id: "PRJNA10729"
+            ortholog:
+                - c_elegans
+                - o_volvulus
+            main_sister_species: c_elegans
         c_brenneri:
+            full_name: "Caenorhabditis brenneri"
             project_id: "PRJNA20035"
+            ortholog:
+                - c_elegans
+            main_sister_species: c_elegans
         c_briggsae:
+            full_name: "Caenorhabditis briggsae"
             project_id: "PRJNA10731"
             main_sister_species: c_elegans
+            ortholog:
+                - c_elegans
         c_elegans:
+            full_name: "Caenorhabditis elegans"
             project_id: "PRJNA13758"
             name: "C. elegans"
+            ortholog:
+                - human
         c_japonica:
+            full_name: "Caenorhabditis japonica"
             project_id: "PRJNA12591"
+            main_sister_species: c_elegans
+            ortholog:
+                - c_elegans
         c_remanei:
+            full_name: "Caenorhabditis remanei"
             project_id: "PRJNA53967"
+            main_sister_species: c_elegans
+            ortholog:
+                - c_elegans
         o_volvulus:
+            full_name: "Onchocerca volvulus"
             project_id: "PRJEB513"
+            ortholog:
+                - c_elegans
+                - b_malayi
+            main_sister_species: c_elegans
         p_pacificus:
+            full_name: "Pristionchus pacificus"
             project_id: "PRJNA12644"
+            ortholog:
+                - c_elegans
+            main_sister_species: c_elegans
         s_ratti:
+            full_name: "Strongyloides ratti"
             project_id: "PRJEB125"
+            ortholog:
+                - c_elegans
+                - b_malayi
+                - o_volvulus
+            main_sister_species: c_elegans
         t_muris:
+            full_name: "Trichuris Muris"
             project_id: "PRJEB126"
+            ortholog:
+                - c_elegans
+                - b_malayi
+            main_sister_species: c_elegans
 
 agr_data_fetcher:
     raw_files_source: "https://s3.amazonaws.com/mod-datadumps"
@@ -107,6 +152,7 @@ go_sentences_options:
         "(.*)embryo development ending in birth or egg hatching(.*)": "\\1embryo development\\2"
         "(.*)synaptic transmission, (\\w+)(.*)": "\\1\\2 synaptic transmission\\3"
         "(.*)postsynaptic synaptic(.*)": "\\1postsynaptic\\2"
+        "(.*)binding(.*)": "\\1binding activity\\2"
     evidence_codes:
         EXP:
             group: EXPERIMENTAL
@@ -290,24 +336,6 @@ go_sentences_options:
           prefix: "is involved in"
           postfix: ""
           special_cases:
-        - aspect: P
-          group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
-          qualifier: ""
-          prefix: "is predicted to be involved in"
-          postfix: ""
-          special_cases:
-        - aspect: P
-          group: INFERRED_BY_CURATORS_AND_AUTHORS
-          qualifier: ""
-          prefix: "is predicted to be involved in"
-          postfix: ""
-          special_cases:
-        - aspect: P
-          group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
-          qualifier: ""
-          prefix: "is predicted to be involved in"
-          postfix: ""
-          special_cases:
         - aspect: C
           group: EXPERIMENTAL
           qualifier: ""
@@ -347,66 +375,6 @@ go_sentences_options:
               - id: 1
                 match_regex: "intracellular$"
                 prefix: "is"
-                postfix: ""
-        - aspect: C
-          group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
-          qualifier: ""
-          prefix: "is predicted to localize to"
-          postfix: ""
-          special_cases:
-              - id: 1
-                match_regex: "intracellular$"
-                prefix: "is predicted to be"
-                postfix: ""
-        - aspect: C
-          group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
-          qualifier: "colocalizes_with"
-          prefix: "is predicted to colocalize with"
-          postfix: ""
-          special_cases:
-              - id: 1
-                match_regex: "intracellular$"
-                prefix: "is predicted to be"
-                postfix: ""
-        - aspect: C
-          group: INFERRED_BY_CURATORS_AND_AUTHORS
-          qualifier: ""
-          prefix: "is predicted to localize to"
-          postfix: ""
-          special_cases:
-              - id: 1
-                match_regex: "intracellular$"
-                prefix: "is predicted to be"
-                postfix: ""
-        - aspect: C
-          group: INFERRED_BY_CURATORS_AND_AUTHORS
-          qualifier: "colocalizes_with"
-          prefix: "is predicted to colocalize with"
-          postfix: ""
-          special_cases:
-              - id: 1
-                match_regex: "intracellular$"
-                prefix: "is predicted to be"
-                postfix: ""
-        - aspect: C
-          group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
-          qualifier: ""
-          prefix: "is predicted to localize to"
-          postfix: ""
-          special_cases:
-              - id: 1
-                match_regex: "intracellular$"
-                prefix: "is predicted to be"
-                postfix: ""
-        - aspect: C
-          group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
-          qualifier: "colocalize_with"
-          prefix: "is predicted to colocalize with"
-          postfix: ""
-          special_cases:
-              - id: 1
-                match_regex: "intracellular$"
-                prefix: "is predicted to be"
                 postfix: ""
 
     go_truncate_others_aggregation_word: several

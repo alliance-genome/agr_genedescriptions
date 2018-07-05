@@ -338,4 +338,6 @@ class GenedescConfigParser(object):
     def get_genedesc_output_dir(self, genedesc_writer: str):
         return self.config[genedesc_writer + "_options"]["output_dir"]
 
+    def get_ortholog_species(self):
+        return
 

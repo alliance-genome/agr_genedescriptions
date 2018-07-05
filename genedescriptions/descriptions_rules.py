@@ -1,5 +1,9 @@
+import json
+
 import inflect
 import re
+import urllib.request
+
 from namedlist import namedlist
 from genedescriptions.ontology_tools import *
 from ontobio.ontol import Ontology
@@ -24,12 +28,17 @@ class SingleDescStats(object):
 class GeneDesc(object):
     """gene description"""
     def __init__(self, gene_id: str, gene_name: str = "", description: str = "", go_description: str = "",
-                 disease_description: str = "", stats: SingleDescStats = None):
+                 disease_description: str = "", stats: SingleDescStats = None, publications: str = "", refs: str = "",
+                 species: str = "", release_version: str = ""):
         self.gene_id = gene_id
         self.gene_name = gene_name
         self.description = description
         self.go_description = go_description
         self.disease_description = disease_description
+        self.publications = publications
+        self.refs = refs
+        self.species = species
+        self.release_version = release_version
         if stats:
             self.stats = stats
         else:
@@ -372,3 +381,79 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
                         ancestors_covering_multiple_terms=ancestors_with_multiple_children)
     else:
         return None
+
+
+def generate_ortholog_sentence(orthologs: List[List[str]], orthologs_sp_fullname: str, human_genes_props):
+    orth_sentence = None
+    if orthologs_sp_fullname == "Homo sapiens":
+        if len(orthologs) > 3:
+            gene_families = defaultdict(list)
+            for ortholog in orthologs:
+                if human_genes_props[ortholog[0]]:
+                    gene_families[human_genes_props[ortholog[0]][2]].append(human_genes_props[ortholog[0]])
+            if len(gene_families.values()) > 0:
+                gene_family_names = list(gene_families.keys())
+                if len(gene_family_names) > 3:
+                    gene_family_names = gene_family_names[0:3]
+                gene_names = [ortholog[0] + " (" + ortholog[1] + ")" for orthologs in gene_families.values() for
+                              ortholog in orthologs]
+                if len(gene_names) > 3:
+                    gene_names = gene_names[0:3]
+                family_word = "family"
+                if len(gene_family_names) > 1:
+                    family_word = "families"
+                if len(gene_family_names) > 2:
+                    ortholog_families_str = ", ".join(gene_family_names[0:-1]) + ", and " + gene_family_names[-1]
+                else:
+                    ortholog_families_str = " and ".join(gene_family_names)
+                if len(gene_names) > 2:
+                    ortholog_genes_str = ", ".join(gene_names[0:-1]) + ", and " + gene_names[-1]
+                else:
+                    ortholog_genes_str = " and ".join(gene_names)
+                orth_sentence = "is an ortholog of members of the human " + ortholog_families_str + " gene " + \
+                                family_word + " including " + ortholog_genes_str
+        else:
+            symbol_name_arr = sorted([human_genes_props[best_orth[0]][0] + " (" + human_genes_props[best_orth[0]][1] +
+                                      ")" for best_orth in orthologs if human_genes_props[best_orth[0]]])
+            if len(symbol_name_arr) > 0:
+                if len(symbol_name_arr) > 2:
+                    orth_sentence = "is an ortholog of human " + ", ".join(symbol_name_arr[0:-1]) + ", and " + \
+                                    symbol_name_arr[-1]
+                else:
+                    orth_sentence = "is an ortholog of human " + " and ".join(symbol_name_arr)
+    else:
+        fullname_arr = orthologs_sp_fullname.split(" ")
+        if len(fullname_arr[0]) > 2:
+            fullname_arr[0] = fullname_arr[0][0] + "."
+            orthologs_sp_fullname = " ".join(fullname_arr)
+        if len(orthologs) > 3:
+            gene_classes = defaultdict(list)
+            for ortholog in orthologs:
+                gene_class_data = json.loads(urllib.request.urlopen("http://rest.wormbase.org/rest/field/gene/" +
+                                                                    ortholog[0] + "/gene_class").read())
+                if "gene_class" in gene_class_data and gene_class_data["gene_class"]["data"] and "tag" in \
+                        gene_class_data["gene_class"]["data"] and "label" in \
+                        gene_class_data["gene_class"]["data"]["tag"]:
+                    gene_classes[gene_class_data["gene_class"]["data"]["tag"]["label"]].append(ortholog)
+            classes_gene_symbols = list(gene_classes.keys())
+            if len(classes_gene_symbols) > 0:
+                classes_word = "class"
+                if len(classes_gene_symbols) > 1:
+                    classes_word = "classes"
+                if len(classes_gene_symbols) > 2:
+                    orth_sentence = "is an ortholog of " + orthologs_sp_fullname + " " + \
+                                    ", ".join(classes_gene_symbols[0:-1]) + ", and " + classes_gene_symbols[-1] + \
+                                    " gene " + classes_word
+                else:
+                    orth_sentence = "is an ortholog of " + orthologs_sp_fullname + " " + \
+                                    " and ".join(classes_gene_symbols) + " gene " + classes_word
+                return orth_sentence
+        orthologs_symbols = [orth[1] for orth in orthologs]
+        if len(orthologs_symbols) > 2:
+            if len(orthologs_symbols) > 3:
+                orthologs_symbols = orthologs_symbols[0:3]
+            orth_sentence = "is an ortholog of " + orthologs_sp_fullname + " " + ", ".join(orthologs_symbols[0:-1]) + \
+                            ", and " + orthologs_symbols[-1]
+        else:
+            orth_sentence = "is an ortholog of " + orthologs_sp_fullname + " " + " and ".join(orthologs_symbols)
+    return orth_sentence
