@@ -28,21 +28,28 @@ class DescriptionsWriter(metaclass=ABCMeta):
     def _calculate_stats(self):
         """calculate overall stats and populate fields"""
         self.general_stats.average_number_initial_go_terms_f = np.average(
-            [gene_desc.stats.number_initial_go_terms_f for gene_desc in self.data if gene_desc.description is not None])
+            [gene_desc.stats.number_initial_go_terms_f for gene_desc in self.data if gene_desc.go_function_description
+             is not None])
         self.general_stats.average_number_initial_go_terms_p = np.average(
-            [gene_desc.stats.number_initial_go_terms_p for gene_desc in self.data if gene_desc.description is not None])
+            [gene_desc.stats.number_initial_go_terms_p for gene_desc in self.data if gene_desc.go_process_description is
+             not None])
         self.general_stats.average_number_initial_go_terms_c = np.average(
-            [gene_desc.stats.number_initial_go_terms_c for gene_desc in self.data if gene_desc.description is not None])
+            [gene_desc.stats.number_initial_go_terms_c for gene_desc in self.data if gene_desc.go_component_description
+             is not None])
         self.general_stats.average_number_final_go_terms_f = np.average(
-            [gene_desc.stats.number_final_go_terms_f for gene_desc in self.data if gene_desc.description is not None])
+            [gene_desc.stats.number_final_go_terms_f for gene_desc in self.data if gene_desc.go_function_description is
+             not None])
         self.general_stats.average_number_final_go_terms_p = np.average(
-            [gene_desc.stats.number_final_go_terms_p for gene_desc in self.data if gene_desc.description is not None])
+            [gene_desc.stats.number_final_go_terms_p for gene_desc in self.data if gene_desc.go_process_description is
+             not None])
         self.general_stats.average_number_final_go_terms_c = np.average(
-            [gene_desc.stats.number_final_go_terms_c for gene_desc in self.data if gene_desc.description is not None])
+            [gene_desc.stats.number_final_go_terms_c for gene_desc in self.data if gene_desc.go_component_description is
+             not None])
         self.general_stats.average_number_initial_do_terms = np.average(
-            [gene_desc.stats.number_initial_do_terms for gene_desc in self.data if gene_desc.description is not None])
+            [gene_desc.stats.number_initial_do_terms for gene_desc in self.data if gene_desc.do_description is not
+             None])
         self.general_stats.average_number_final_do_terms = np.average(
-            [gene_desc.stats.number_final_do_terms for gene_desc in self.data if gene_desc.description is not None])
+            [gene_desc.stats.number_final_do_terms for gene_desc in self.data if gene_desc.do_description is not None])
         self.general_stats.total_number_of_genes = len(self.data)
         self.general_stats.number_genes_with_non_null_description = len([gene_desc for gene_desc in self.data if
                                                                          gene_desc.description is not None])
@@ -57,7 +64,8 @@ class DescriptionsWriter(metaclass=ABCMeta):
         self.general_stats.number_genes_with_non_null_go_component_description = \
             len([gene_desc for gene_desc in self.data if gene_desc.go_component_description is not None])
         self.general_stats.number_genes_with_more_than_3_initial_go_terms = \
-            len([gene_desc for gene_desc in self.data if any(gene_desc.stats.number_initial_go_terms.values()) > 3])
+            len([gene_desc for gene_desc in self.data if gene_desc.stats.number_initial_go_terms_f > 3 or
+                 gene_desc.stats.number_initial_go_terms_p > 3 or gene_desc.stats.number_initial_go_terms_c > 3])
         self.general_stats.number_genes_with_non_null_do_description = len([gene_desc for gene_desc in self.data if
                                                                             gene_desc.do_description is not None])
         self.general_stats.number_genes_with_null_do_description = len([gene_desc for gene_desc in self.data if
@@ -65,13 +73,13 @@ class DescriptionsWriter(metaclass=ABCMeta):
         self.general_stats.number_genes_with_more_than_3_initial_do_terms = \
             len([gene_desc for gene_desc in self.data if gene_desc.stats.number_initial_do_terms > 3])
         self.general_stats.number_genes_with_final_do_terms_covering_multiple_initial_terms = \
-            sum([gene_desc.final_do_term_covering_multiple_initial_do_terms_present for gene_desc in self.data if
-                 gene_desc.do_description is not None])
+            len([gene_desc for gene_desc in self.data if
+                 gene_desc.stats.number_final_do_term_covering_multiple_initial_do_terms > 0])
         self.general_stats.average_number_go_annotations = np.average(
-            [gene_desc.stats.total_number_go_annotations for gene_desc in self.data if gene_desc.description is not
+            [gene_desc.stats.total_number_go_annotations for gene_desc in self.data if gene_desc.go_description is not
              None])
         self.general_stats.average_number_do_annotations = np.average(
-            [gene_desc.stats.total_number_do_annotations for gene_desc in self.data if gene_desc.description is not
+            [gene_desc.stats.total_number_do_annotations for gene_desc in self.data if gene_desc.do_description is not
              None])
 
 
@@ -91,15 +99,17 @@ class JsonGDWriter(DescriptionsWriter):
         indent = None
         if pretty:
             indent = 4
-        self._calculate_stats()
-        json_serializable_self = copy.deepcopy(self)
-        json_serializable_self.general_stats = vars(json_serializable_self.general_stats)
         if include_single_gene_stats:
+            self._calculate_stats()
+        json_serializable_self = copy.deepcopy(self)
+        if include_single_gene_stats:
+            json_serializable_self.general_stats = vars(json_serializable_self.general_stats)
             for gene_desc in json_serializable_self.data:
                 gene_desc.stats = vars(gene_desc.stats)
         else:
             for gene_desc in json_serializable_self.data:
                 gene_desc.stats = None
+            del json_serializable_self.general_stats
         json_serializable_self.data = [vars(gene_desc) for gene_desc in json_serializable_self.data]
         if not include_single_gene_stats:
             for gene_desc in json_serializable_self.data:

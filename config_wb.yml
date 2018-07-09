@@ -2,6 +2,7 @@ generic_data_fetcher:
     cache_location: "gene_descriptions_cache"
     # set 'data_fetcher' to 'agr_data_fetcher' to generate descriptions for AGR or 'wb_data_fetcher' for WormBase
     data_fetcher: "wb_data_fetcher"
+    textpresso_api_token: "ZfwjASOC2utOr01iXHeD"
 
 # options for WormBase gene description generation - used when data_fetcher is set to 'wb_data_fetcher'
 wb_data_fetcher:
@@ -24,7 +25,7 @@ wb_data_fetcher:
         human:
             full_name: "Homo sapiens"
         b_malayi:
-            full_name: "Brugia Malayi"
+            full_name: "Brugia malayi"
             project_id: "PRJNA10729"
             ortholog:
                 - c_elegans
@@ -82,7 +83,7 @@ wb_data_fetcher:
                 - o_volvulus
             main_sister_species: c_elegans
         t_muris:
-            full_name: "Trichuris Muris"
+            full_name: "Trichuris muris"
             project_id: "PRJEB126"
             ortholog:
                 - c_elegans

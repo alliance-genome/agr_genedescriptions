@@ -74,10 +74,10 @@ class TestRawDataFetcher(unittest.TestCase):
                                               associations_url=sister_df.go_associations_url,
                                               associations_cache_path=sister_df.go_associations_cache_path,
                                               exclusion_list=self.conf_parser.get_do_terms_exclusion_list())
-        df.load_orthology_from_file(sister_species_data_fetcher=sister_df,
-                                    ecode_priority_list=["EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP",
-                                                         "HGI", "HEP"])
-        best_ortholog = df.get_best_sister_ortholog_for_gene("WB:WBGene00000307")
-        pass
+        df.load_orthology_from_file()
+        best_orthologs, curr_orth_fullname = df.get_best_orthologs_for_gene(
+            "WB:WBGene00000307", ["Caenorhabditis elegans"], sister_df, ["EXP", "IDA", "IPI", "IMP", "IGI", "IEP",
+                                                                         "HTP", "HDA", "HMP", "HGI", "HEP"])
+        self.assertTrue(best_orthologs)
 
 

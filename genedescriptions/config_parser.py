@@ -7,6 +7,14 @@ class GenedescConfigParser(object):
         with open(file_path) as conf_file:
             self.config = yaml.load(conf_file)
 
+    def get_textpresso_api_token(self) -> str:
+        """get textpresso API token
+
+        Returns:
+            str: the textpresso API token
+        """
+        return self.config["generic_data_fetcher"]["textpresso_api_token"]
+
     def get_data_fetcher(self) -> str:
         """get the data fetcher type from the configuration file
 

@@ -1,16 +1,17 @@
 import json
-from collections import namedtuple
-from enum import Enum
-
+import os
+import ssl
 import inflect
 import re
 import urllib.request
+import urllib.parse
 
 from namedlist import namedlist
-
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.ontology_tools import *
 from ontobio.ontol import Ontology
+from collections import namedtuple
+from enum import Enum
 
 
 class DataType(Enum):
@@ -38,7 +39,7 @@ class SingleDescStats(object):
         self.total_number_do_annotations = 0
         self.number_initial_do_terms = 0
         self.number_final_do_terms = 0
-        self.number_final_do_term_covering_multiple_initial_do_terms_present = 0
+        self.number_final_do_term_covering_multiple_initial_do_terms = 0
 
 
 class GeneDesc(object):
@@ -68,7 +69,7 @@ class GeneDesc(object):
 class DescriptionsStats(object):
     """overall statistics for a set of gene descriptions"""
     def __init__(self):
-        self.total_number__of_genes = 0
+        self.total_number_of_genes = 0
         self.number_genes_with_non_null_description = 0
         self.number_genes_with_non_null_go_description = 0
         self.number_genes_with_non_null_go_function_description = 0
@@ -415,80 +416,129 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
         return None
 
 
-def generate_ortholog_sentence(orthologs: List[List[str]], orthologs_sp_fullname: str, human_genes_props):
-    orth_sentence = None
-    if orthologs_sp_fullname == "Homo sapiens":
-        if len(orthologs) > 3:
-            gene_families = defaultdict(list)
-            for ortholog in orthologs:
-                if human_genes_props[ortholog[0]]:
-                    gene_families[human_genes_props[ortholog[0]][2]].append(human_genes_props[ortholog[0]])
-            if len(gene_families.values()) > 0:
-                gene_family_names = list(gene_families.keys())
-                if len(gene_family_names) > 3:
-                    gene_family_names = gene_family_names[0:3]
-                gene_names = [ortholog[0] + " (" + ortholog[1] + ")" for orthologs in gene_families.values() for
-                              ortholog in orthologs]
-                if len(gene_names) > 3:
-                    gene_names = gene_names[0:3]
-                family_word = "family"
-                if len(gene_family_names) > 1:
-                    family_word = "families"
-                if len(gene_family_names) > 2:
-                    ortholog_families_str = ", ".join(gene_family_names[0:-1]) + ", and " + gene_family_names[-1]
-                else:
-                    ortholog_families_str = " and ".join(gene_family_names)
-                if len(gene_names) > 2:
-                    ortholog_genes_str = ", ".join(gene_names[0:-1]) + ", and " + gene_names[-1]
-                else:
-                    ortholog_genes_str = " and ".join(gene_names)
-                orth_sentence = "is an ortholog of members of the human " + ortholog_families_str + " gene " + \
-                                family_word + " including " + ortholog_genes_str
+def _generate_ortholog_sentence_wormbase_human(orthologs, human_genes_props):
+    if len(orthologs) > 3:
+        gene_families = defaultdict(list)
+        gene_symbols_wo_family = []
+        for ortholog in orthologs:
+            if human_genes_props[ortholog[0]]:
+                gene_families[human_genes_props[ortholog[0]][2]].append(human_genes_props[ortholog[0]])
+            else:
+                gene_symbols_wo_family.append(ortholog[1])
+        if len(list(gene_families.keys())) == 1:
+            gene_symbols_wo_family.extend([human_p[0] + " (" + human_p[1] + ")" for human_p in
+                                           gene_families[list(gene_families.keys())[0]]])
+            gene_families = {}
         else:
-            symbol_name_arr = sorted([human_genes_props[best_orth[0]][0] + " (" + human_genes_props[best_orth[0]][1] +
-                                      ")" for best_orth in orthologs if human_genes_props[best_orth[0]]])
-            if len(symbol_name_arr) > 0:
-                if len(symbol_name_arr) > 2:
-                    orth_sentence = "is an ortholog of human " + ", ".join(symbol_name_arr[0:-1]) + ", and " + \
-                                    symbol_name_arr[-1]
-                else:
-                    orth_sentence = "is an ortholog of human " + " and ".join(symbol_name_arr)
+            for family_name, human_ps in gene_families.items():
+                if family_name == "" or len(orthologs) == 1:
+                    gene_symbols_wo_family.append(human_ps[0][0] + " (" + human_ps[0][1] + ")")
+            gene_families = {family_name: human_ps for family_name, human_ps in gene_families.items() if
+                             len(human_ps) > 1 and family_name != ""}
+        gene_family_names = list(gene_families.keys())
+        genes_in_families = [hps[0][0] for hps in gene_families.values()]
+        if len(gene_family_names) > 3:
+            gene_family_names = gene_family_names[0:3]
+            genes_in_families = genes_in_families[0:3]
+        family_word = "family"
+        if len(gene_family_names) > 1:
+            family_word = "families"
+        sentences_arr = []
+        if len(gene_symbols_wo_family) > 0:
+            sentences_arr.append("human " + concatenate_words_with_oxford_comma(gene_symbols_wo_family))
+        if len(gene_family_names) > 0:
+            sentences_arr.append("members of the human " + concatenate_words_with_oxford_comma(gene_family_names) +
+                                 " gene " + family_word + " including " + concatenate_words_with_oxford_comma(
+                genes_in_families))
+        orth_sentence = "is an ortholog of " + " and ".join(sentences_arr)
     else:
+        symbol_name_arr = sorted([human_genes_props[best_orth[0]][0] + " (" + human_genes_props[best_orth[0]][1] +
+                                  ")" if human_genes_props[best_orth[0]] else best_orth[1] for best_orth in orthologs])
+        orth_sentence = "is an ortholog of human " + concatenate_words_with_oxford_comma(symbol_name_arr)
+    return orth_sentence
+
+
+def _generate_ortholog_sentence_wormbase_non_c_elegans(orthologs, orthologs_sp_fullname, textpresso_api_token):
+    orth_sentence = None
+    if len(orthologs) > 0:
         fullname_arr = orthologs_sp_fullname.split(" ")
         if len(fullname_arr[0]) > 2:
             fullname_arr[0] = fullname_arr[0][0] + "."
             orthologs_sp_fullname = " ".join(fullname_arr)
         if len(orthologs) > 3:
-            gene_classes = defaultdict(list)
-            for ortholog in orthologs:
-                gene_class_data = json.loads(urllib.request.urlopen("http://rest.wormbase.org/rest/field/gene/" +
-                                                                    ortholog[0] + "/gene_class").read())
-                if "gene_class" in gene_class_data and gene_class_data["gene_class"]["data"] and "tag" in \
-                        gene_class_data["gene_class"]["data"] and "label" in \
-                        gene_class_data["gene_class"]["data"]["tag"]:
-                    gene_classes[gene_class_data["gene_class"]["data"]["tag"]["label"]].append(ortholog)
-            classes_gene_symbols = list(gene_classes.keys())
-            if len(classes_gene_symbols) > 0:
-                classes_word = "class"
-                if len(classes_gene_symbols) > 1:
-                    classes_word = "classes"
-                if len(classes_gene_symbols) > 2:
-                    orth_sentence = "is an ortholog of " + orthologs_sp_fullname + " " + \
-                                    ", ".join(classes_gene_symbols[0:-1]) + ", and " + classes_gene_symbols[-1] + \
-                                    " gene " + classes_word
+            # sort orthologs by tpc popularity and alphabetically (if tied)
+            orthologs_pop = [o_p for o_p in sorted([[ortholog, get_textpresso_popularity(
+                    textpresso_api_token, ortholog[1])] for ortholog in orthologs], key=lambda x: (x[1], x[0][1]),
+                                                  reverse=True)]
+            classes_orth_pop = defaultdict(list)
+            orthologs_pop_wo_class = []
+            for o_p in orthologs_pop:
+                gene_class = get_gene_class(o_p[0][0])
+                if gene_class:
+                    classes_orth_pop[gene_class].append(o_p)
                 else:
-                    orth_sentence = "is an ortholog of " + orthologs_sp_fullname + " " + \
-                                    " and ".join(classes_gene_symbols) + " gene " + classes_word
-                return orth_sentence
-        orthologs_symbols = [orth[1] for orth in orthologs]
-        if len(orthologs_symbols) > 2:
-            if len(orthologs_symbols) > 3:
-                orthologs_symbols = orthologs_symbols[0:3]
-            orth_sentence = "is an ortholog of " + orthologs_sp_fullname + " " + ", ".join(orthologs_symbols[0:-1]) + \
-                            ", and " + orthologs_symbols[-1]
+                    orthologs_pop_wo_class.append(o_p)
+            if len(list(classes_orth_pop.keys())) == 1:
+                orthologs_pop_wo_class.extend(classes_orth_pop[list(classes_orth_pop.keys())[0]])
+                classes_orth_pop = {}
+            else:
+                for gene_class, orths_with_pop in classes_orth_pop.items():
+                    if len(orths_with_pop) == 1:
+                        orthologs_pop_wo_class.extend(orths_with_pop)
+            classes_orth_pop = {gene_class: ops[0] for gene_class, ops in classes_orth_pop.items() if len(ops) > 1}
+            sorted_items = [[o_p, 0] for o_p in orthologs_pop_wo_class]
+            sorted_items.extend([[o_p, 1, gene_class] for gene_class, o_p in classes_orth_pop.items()])
+            sorted_items.sort(key=lambda x: x[0][1], reverse=True)
+            if len(sorted_items) > 3:
+                sorted_items = sorted_items[0:3]
+            gene_symbols_wo_class = [item[0][0][1] for item in sorted_items if item[1] == 0]
+            classes_symbols = [item[2] for item in sorted_items if item[1] == 1]
+            genes_symbols_in_classes = [item[0][0][1] for item in sorted_items if item[1] == 1]
+            sentences_arr = []
+            if len(gene_symbols_wo_class) > 0:
+                sentences_arr.append(concatenate_words_with_oxford_comma(gene_symbols_wo_class))
+            if len(classes_symbols) > 0:
+                genes_symbols_in_classes_sent = concatenate_words_with_oxford_comma(genes_symbols_in_classes)
+                classes_symbols_sent = concatenate_words_with_oxford_comma(classes_symbols)
+                classes_word = "classes" if len(classes_symbols) > 1 else "class"
+                sentences_arr.append("members of the " + orthologs_sp_fullname + " " + classes_symbols_sent +
+                                     " gene " + classes_word + " including " + genes_symbols_in_classes_sent)
+            orth_sentence = "is an ortholog of " + " and ".join(sentences_arr)
         else:
-            orth_sentence = "is an ortholog of " + orthologs_sp_fullname + " " + " and ".join(orthologs_symbols)
+            # sort orthologs alphabetically
+            orthologs_symbols = sorted([orth[1] for orth in orthologs])
+            orth_sentence = "is an ortholog of " + orthologs_sp_fullname + " " + \
+                            concatenate_words_with_oxford_comma(orthologs_symbols)
     return orth_sentence
+
+
+def get_gene_class(gene_id: str):
+    gene_class_data = json.loads(urllib.request.urlopen("http://rest.wormbase.org/rest/field/gene/" + gene_id +
+                                                        "/gene_class").read())
+    if "gene_class" in gene_class_data and gene_class_data["gene_class"]["data"] and "tag" in \
+            gene_class_data["gene_class"]["data"] and "label" in gene_class_data["gene_class"]["data"]["tag"]:
+            return gene_class_data["gene_class"]["data"]["tag"]["label"]
+    return None
+
+
+def get_textpresso_popularity(textpresso_api_token, keywords):
+    if not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None):
+        ssl._create_default_https_context = ssl._create_unverified_context
+    api_endpoint = "https://textpressocentral.org:18080/v1/textpresso/api/get_documents_count"
+    data = json.dumps({"token": textpresso_api_token, "query": {
+        "keywords": keywords, "type": "document", "corpora": ["C. elegans"]}})
+    data = data.encode('utf-8')
+    req = urllib.request.Request(api_endpoint, data, headers={'Content-type': 'application/json',
+                                                              'Accept': 'application/json'})
+    res = urllib.request.urlopen(req)
+    return int(json.loads(res.read().decode('utf-8')))
+
+
+def concatenate_words_with_oxford_comma(words):
+    if len(words) > 2:
+        return ", ".join(words[0:-1]) + ", and " + words[-1]
+    else:
+        return " and ".join(words)
 
 
 def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, species, organism, df,
@@ -509,7 +559,11 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
     best_orthologs, selected_orth_name = df.get_best_orthologs_for_gene(
         gene.id, orth_species_full_name=orthologs_sp_fullname)
     if best_orthologs:
-        orth_sent = generate_ortholog_sentence(best_orthologs, selected_orth_name, human_genes_props)
+        if len(orthologs_sp_fullname) == 1 and orthologs_sp_fullname[0] == "Homo sapiens":
+            orth_sent = _generate_ortholog_sentence_wormbase_human(best_orthologs, human_genes_props)
+        else:
+            orth_sent = _generate_ortholog_sentence_wormbase_non_c_elegans(best_orthologs, selected_orth_name,
+                                                                           conf_parser.get_textpresso_api_token())
         if orth_sent:
             joined_sent.append(orth_sent)
     go_annotations = df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.GO,
@@ -517,34 +571,61 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
     go_sent_generator = SentenceGenerator(annotations=go_annotations, ontology=df.go_ontology,
                                           **go_sent_gen_common_props)
     gene_desc.stats.total_number_go_annotations = len(go_annotations)
-    gene_desc.stats.number_initial_go_terms = {aspect: len(terms) for aspect, terms in
-                                               go_sent_generator.terms_groups.items()}
+    gene_desc.stats.number_initial_go_terms_f = sum(
+        [len(sets) for key, sets in go_sent_generator.terms_groups[('F', '')].items() if
+         ('F', key, '') in conf_parser.get_go_prepostfix_sentences_map()]) + sum(
+        [len(sets) for key, sets in go_sent_generator.terms_groups[('F', 'contributes_to')].items() if
+         ('F', key, 'contributes_to') in conf_parser.get_go_prepostfix_sentences_map()])
+    gene_desc.stats.number_initial_go_terms_p = sum(
+        [len(sets) for key, sets in go_sent_generator.terms_groups[('P', '')].items() if
+         ('P', key, '') in conf_parser.get_go_prepostfix_sentences_map()])
+    gene_desc.stats.number_initial_go_terms_c = sum(
+        [len(sets) for key, sets in go_sent_generator.terms_groups[('C', '')].items() if
+         ('C', key, '') in conf_parser.get_go_prepostfix_sentences_map()]) + sum(
+        [len(sets) for key, sets in go_sent_generator.terms_groups[('C', 'colocalizes_with')].items() if
+         ('C', key, 'colocalizes_with') in conf_parser.get_go_prepostfix_sentences_map()])
     raw_func_sent = go_sent_generator.get_sentences(aspect='F', merge_groups_with_same_prefix=True,
                                                     keep_only_best_group=True, **go_sent_common_props)
     gene_desc.stats.number_final_go_terms_f += sum([len(sentence.terms_ids) for sentence in raw_func_sent])
     func_sent = " and ".join([sentence.text for sentence in raw_func_sent])
     if func_sent:
         joined_sent.append(func_sent)
+        gene_desc.go_function_description = func_sent
+        gene_desc.go_description = func_sent
     contributes_to_raw_func_sent = go_sent_generator.get_sentences(
         aspect='F', qualifier='contributes_to', merge_groups_with_same_prefix=True, keep_only_best_group=True,
         **go_sent_common_props)
     gene_desc.stats.number_final_go_terms_f += sum([len(sentence.terms_ids) for sentence in
-                                                       contributes_to_raw_func_sent])
+                                                    contributes_to_raw_func_sent])
     contributes_to_func_sent = " and ".join([sentence.text for sentence in contributes_to_raw_func_sent])
     if contributes_to_func_sent:
         joined_sent.append(contributes_to_func_sent)
+        if not gene_desc.go_function_description:
+            gene_desc.go_function_description = contributes_to_func_sent
+        else:
+            gene_desc.go_function_description += " " + contributes_to_func_sent
+        if not gene_desc.go_description:
+            gene_desc.go_description = contributes_to_func_sent
+        else:
+            gene_desc.go_description += " " + contributes_to_func_sent
     raw_proc_sent = go_sent_generator.get_sentences(aspect='P', merge_groups_with_same_prefix=True,
                                                     keep_only_best_group=True, **go_sent_common_props)
     gene_desc.stats.number_final_go_terms_p += sum([len(sentence.terms_ids) for sentence in raw_proc_sent])
     proc_sent = " and ".join([sentence.text for sentence in raw_proc_sent])
     if proc_sent:
         joined_sent.append(proc_sent)
+        gene_desc.go_process_description = proc_sent
     raw_comp_sent = go_sent_generator.get_sentences(
         aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True, **go_sent_common_props)
     gene_desc.stats.number_final_go_terms_c += sum([len(sentence.terms_ids) for sentence in raw_comp_sent])
     comp_sent = " and ".join([sentence.text for sentence in raw_comp_sent])
     if comp_sent:
         joined_sent.append(comp_sent)
+        gene_desc.go_component_description = comp_sent
+        if not gene_desc.go_description:
+            gene_desc.go_description = comp_sent
+        else:
+            gene_desc.go_description += " " + comp_sent
     colocalizes_with_raw_comp_sent = go_sent_generator.get_sentences(
         aspect='C', qualifier='colocalizes_with', merge_groups_with_same_prefix=True,
         keep_only_best_group=True, **go_sent_common_props)
@@ -553,21 +634,31 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
     colocalizes_with_comp_sent = " and ".join([sentence.text for sentence in colocalizes_with_raw_comp_sent])
     if colocalizes_with_comp_sent:
         joined_sent.append(colocalizes_with_comp_sent)
+        if not gene_desc.go_component_description:
+            gene_desc.go_component_description = colocalizes_with_comp_sent
+        else:
+            gene_desc.go_component_description += " " + colocalizes_with_comp_sent
+        if not gene_desc.go_description:
+            gene_desc.go_description = colocalizes_with_comp_sent
+        else:
+            gene_desc.go_description += " " + colocalizes_with_comp_sent
     do_annotations = df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.DO,
                                                  priority_list=conf_parser.get_do_annotations_priority())
     do_sentence_generator = SentenceGenerator(annotations=do_annotations, ontology=df.do_ontology,
                                               **do_sent_gen_common_prop)
     gene_desc.stats.total_number_do_annotations = len(do_annotations)
-    gene_desc.stats.number_initial_do_terms = sum([len(terms) for terms in
-                                                   do_sentence_generator.terms_groups.values()])
+    gene_desc.stats.number_initial_do_terms = sum([len(tvalues) for terms in
+                                                   do_sentence_generator.terms_groups.values() for tvalues in
+                                                   terms.values()])
     raw_disease_sent = do_sentence_generator.get_sentences(
         aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False, **do_sent_common_props)
     disease_sent = "; ".join([sentence.text for sentence in raw_disease_sent])
     if disease_sent:
         joined_sent.append(disease_sent)
+        gene_desc.do_description = disease_sent
     gene_desc.stats.number_final_do_terms += sum([len(sentence.terms_ids) for sentence in raw_disease_sent])
     if "(multiple)" in disease_sent:
-        gene_desc.stats.number_final_do_term_covering_multiple_initial_do_terms_present = \
+        gene_desc.stats.number_final_do_term_covering_multiple_initial_do_terms = \
             disease_sent.count("(multiple)")
     if conf_parser.get_data_fetcher() == "wb_data_fetcher" and "main_sister_species" in species[organism] and \
             species[organism]["main_sister_species"] and df.get_best_orthologs_for_gene(

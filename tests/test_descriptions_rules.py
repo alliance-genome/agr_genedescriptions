@@ -10,7 +10,7 @@ class TestDescriptionsRules(unittest.TestCase):
 
     def setUp(self):
         this_dir = os.path.split(__file__)[0]
-        self.conf_parser = GenedescConfigParser(os.path.join(this_dir, os.path.pardir, "config_wb_non_c_elegans.yml"))
+        self.conf_parser = GenedescConfigParser(os.path.join(this_dir, os.path.pardir, "config_wb.yml"))
 
     def test_generate_sentences(self):
         df = WBDataFetcher(raw_files_source=self.conf_parser.get_raw_file_sources("wb_data_fetcher"),

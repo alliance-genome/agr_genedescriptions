@@ -38,10 +38,10 @@ def main():
                             "truncate_others_generic_word": conf_parser.get_go_truncate_others_aggregation_word(),
                             "truncate_others_aspect_words": conf_parser.get_go_truncate_others_terms(),
                             "add_multiple_if_covers_more_children": False}
-    do_sent_gen_common_prop = {"evidence_groups_priority_list": conf_parser.get_do_evidence_groups_priority_list(),
-                               "prepostfix_sentences_map": conf_parser.get_do_prepostfix_sentences_map(),
-                               "prepostfix_special_cases_sent_map": None,
-                               "evidence_codes_groups_map": conf_parser.get_do_evidence_codes_groups_map()}
+    do_sent_gen_common_props = {"evidence_groups_priority_list": conf_parser.get_do_evidence_groups_priority_list(),
+                                "prepostfix_sentences_map": conf_parser.get_do_prepostfix_sentences_map(),
+                                "prepostfix_special_cases_sent_map": None,
+                                "evidence_codes_groups_map": conf_parser.get_do_evidence_codes_groups_map()}
     do_sent_common_props = {"remove_parent_terms": conf_parser.get_do_remove_parents_if_children_are_present(),
                             "merge_num_terms_threshold": conf_parser.get_do_trim_min_num_terms(),
                             "merge_min_distance_from_root": conf_parser.get_do_trim_min_distance_from_root(),
@@ -89,11 +89,12 @@ def main():
         desc_writer = JsonGDWriter()
         for gene in df.get_gene_data():
             logging.debug("processing gene " + gene.name)
+
             compose_wormbase_description(gene=gene, conf_parser=conf_parser, species=species, organism=organism, df=df,
                                          orthologs_sp_fullname=orthologs_sp_fullname,
                                          go_sent_gen_common_props=go_sent_gen_common_props,
                                          go_sent_common_props=go_sent_common_props, human_genes_props=human_genes_props,
-                                         do_sent_gen_common_prop=go_sent_gen_common_props,
+                                         do_sent_gen_common_prop=do_sent_gen_common_props,
                                          do_sent_common_props=do_sent_common_props,
                                          sister_sp_fullname=sister_sp_fullname, sister_df=sister_df,
                                          desc_writer=desc_writer)
