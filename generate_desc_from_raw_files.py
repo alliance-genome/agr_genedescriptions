@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
-import os
+import datetime
 
-from genedescriptions.config_parser import GenedescConfigParser
-from genedescriptions.data_fetcher import WBDataFetcher, DataType, DataFetcher
+from genedescriptions.data_fetcher import WBDataFetcher, DataFetcher
 from genedescriptions.descriptions_rules import *
-from genedescriptions.descriptions_writer import JsonGDWriter, GeneDesc
+from genedescriptions.descriptions_writer import JsonGDWriter
 
 
 def main():
@@ -87,6 +86,9 @@ def main():
                                    do_terms_replacement_regex=None,
                                    do_terms_exclusion_list=conf_parser.get_do_terms_exclusion_list())
         desc_writer = JsonGDWriter()
+        desc_writer.overall_properties.species = organism
+        desc_writer.overall_properties.release_version = conf_parser.get_release("wb_data_fetcher")
+        desc_writer.overall_properties.date = datetime.date.today().strftime("%B %d, %Y")
         for gene in df.get_gene_data():
             logging.debug("processing gene " + gene.name)
 

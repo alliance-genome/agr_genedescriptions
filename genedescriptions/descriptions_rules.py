@@ -47,7 +47,7 @@ class GeneDesc(object):
     def __init__(self, gene_id: str, gene_name: str = "", description: str = None, go_description: str = None,
                  go_function_description: str = None, go_process_description: str = None,
                  go_component_description: str = None, do_description: str = None, stats: SingleDescStats = None,
-                 publications: str = "", refs: str = "", species: str = "", release_version: str = ""):
+                 publications: str = "", refs: str = ""):
         self.gene_id = gene_id
         self.gene_name = gene_name
         self.description = description
@@ -58,8 +58,6 @@ class GeneDesc(object):
         self.do_description = do_description
         self.publications = publications
         self.refs = refs
-        self.species = species
-        self.release_version = release_version
         if stats:
             self.stats = stats
         else:
@@ -91,6 +89,13 @@ class DescriptionsStats(object):
         self.average_number_final_do_terms = 0
         self.average_number_go_annotations = 0
         self.average_number_do_annotations = 0
+
+
+class DescriptionsOverallProperties(object):
+    def __init__(self, species: str = "", release_version: str = "", date: str = ""):
+        self.species = species
+        self.release_version = release_version
+        self.date = date
 
 
 class SentenceMerger(object):
@@ -218,8 +223,8 @@ class SentenceGenerator(object):
                     terms_already_covered.update([e for subset in merged_terms_coverset.values() for e in subset])
                 else:
                     merged_terms = find_set_covering([(k, self.ontology.node(k)["label"], v) for k, v in
-                                                      merged_terms_coverset.items()],
-                                                     max_num_subsets=merge_num_terms_threshold)
+                                                      merged_terms_coverset.items() if "label" in
+                                                      self.ontology.node(k)], max_num_subsets=merge_num_terms_threshold)
                     for merged_term in merged_terms:
                         terms_already_covered.update(merged_terms_coverset[merged_term])
                     add_others = True
@@ -551,9 +556,7 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
                              priority_list=conf_parser.get_go_evidence_groups_priority_list())]),
                          refs=", ".join([annot["refs"] for annot in df.get_annotations_for_gene(
                              gene.id, annot_type=DataType.GO,
-                             priority_list=conf_parser.get_go_evidence_groups_priority_list())]),
-                         species=species[organism]["full_name"],
-                         release_version=conf_parser.get_release("wb_data_fetcher"))
+                             priority_list=conf_parser.get_go_evidence_groups_priority_list())]))
     joined_sent = []
 
     best_orthologs, selected_orth_name = df.get_best_orthologs_for_gene(

@@ -3,13 +3,14 @@ import json
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import copy
-from genedescriptions.descriptions_rules import DescriptionsStats, GeneDesc
+from genedescriptions.descriptions_rules import DescriptionsStats, GeneDesc, DescriptionsOverallProperties
 
 
 class DescriptionsWriter(metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(self):
+        self.overall_properties = DescriptionsOverallProperties()
         self.general_stats = DescriptionsStats()
         self.data = []
 
