@@ -146,7 +146,8 @@ class SentenceGenerator(object):
                     if prepostfix_special_cases_sent_map and (aspect, ev_group, qualifier) in \
                             prepostfix_special_cases_sent_map:
                         for special_case in prepostfix_special_cases_sent_map[(aspect, ev_group, qualifier)]:
-                            if re.match(re.escape(special_case[1]), ontology.node(annotation["object"]["id"])["label"]):
+                            if re.match(re.escape(special_case[1]), ontology.label(annotation["object"]["id"],
+                                                                                   id_if_null=True)):
                                 ev_group = evidence_codes_groups_map[annotation["evidence"]["type"]] + \
                                            str(special_case[0])
                                 if ev_group not in self.evidence_groups_priority_list:
@@ -222,15 +223,15 @@ class SentenceGenerator(object):
                     merged_terms = list(merged_terms_coverset.keys())
                     terms_already_covered.update([e for subset in merged_terms_coverset.values() for e in subset])
                 else:
-                    merged_terms = find_set_covering([(k, self.ontology.node(k)["label"], v) for k, v in
-                                                      merged_terms_coverset.items() if "label" in
-                                                      self.ontology.node(k)], max_num_subsets=merge_num_terms_threshold)
+                    merged_terms = find_set_covering([(k, self.ontology.label(k, id_if_null=True), v) for k, v in
+                                                      merged_terms_coverset.items()],
+                                                     max_num_subsets=merge_num_terms_threshold)
                     for merged_term in merged_terms:
                         terms_already_covered.update(merged_terms_coverset[merged_term])
                     add_others = True
                 if add_multiple_if_covers_more_children:
-                    ancestors_covering_multiple_children = {self.ontology.label(ancestor) for ancestor in merged_terms
-                                                            if len(merged_terms_coverset[ancestor]) > 1}
+                    ancestors_covering_multiple_children = {self.ontology.label(ancestor, id_if_null=True) for ancestor
+                                                            in merged_terms if len(merged_terms_coverset[ancestor]) > 1}
                 logging.debug("Reduced number of terms by merging from " + str(len(terms)) + " to " +
                               str(len(merged_terms)))
                 terms = merged_terms
@@ -292,7 +293,7 @@ class SentenceGenerator(object):
         return [Sentence(prefix=prefix, terms_ids=list(sent_merger.terms_ids),
                          postfix=SentenceGenerator.merge_postfix_phrases(sent_merger.postfix_list),
                          text=compose_sentence(prefix=prefix,
-                         term_names=[self.ontology.label(node) for node in sent_merger.terms_ids],
+                         term_names=[self.ontology.label(node, id_if_null=True) for node in sent_merger.terms_ids],
                          postfix=SentenceGenerator.merge_postfix_phrases(sent_merger.postfix_list),
                          additional_prefix=sent_merger.additional_prefix,
                          ancestors_with_multiple_children=sent_merger.ancestors_covering_multiple_terms),
@@ -409,7 +410,7 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
         if aspect == "C":
             additional_prefix += " the"
         postfix = prepostfix_sentences_map[(aspect, evidence_group, qualifier)][1]
-        term_labels = [ontology.label(node_id) for node_id in node_ids]
+        term_labels = [ontology.label(node_id, id_if_null=True) for node_id in node_ids]
         return Sentence(prefix=prefix, terms_ids=node_ids, postfix=postfix,
                         text=compose_sentence(prefix=prefix, term_names=term_labels, postfix=postfix,
                                               additional_prefix=additional_prefix,
