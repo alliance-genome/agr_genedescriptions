@@ -103,6 +103,7 @@ class JsonGDWriter(DescriptionsWriter):
         if include_single_gene_stats:
             self._calculate_stats()
         json_serializable_self = copy.deepcopy(self)
+        json_serializable_self.overall_properties = vars(json_serializable_self.overall_properties)
         if include_single_gene_stats:
             json_serializable_self.general_stats = vars(json_serializable_self.general_stats)
             for gene_desc in json_serializable_self.data:

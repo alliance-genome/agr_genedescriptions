@@ -422,7 +422,15 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
         return None
 
 
-def _generate_ortholog_sentence_wormbase_human(orthologs, human_genes_props):
+def _generate_ortholog_sentence_wormbase_human(orthologs: List[List[str]], human_genes_props: Dict[str, List[str]]):
+    """build orthology sentence for WormBase human orthologs
+
+    Args:
+        orthologs (List[List[str]]): list of human orthologs, containing gene_id, gene_symbol
+        human_genes_props (Dict[str, List[str]]): dictionary containing human gene properties
+    Returns:
+        str: the orthology sentence
+    """
     if len(orthologs) > 3:
         gene_families = defaultdict(list)
         gene_symbols_wo_family = []
@@ -464,7 +472,17 @@ def _generate_ortholog_sentence_wormbase_human(orthologs, human_genes_props):
     return orth_sentence
 
 
-def _generate_ortholog_sentence_wormbase_non_c_elegans(orthologs, orthologs_sp_fullname, textpresso_api_token):
+def _generate_ortholog_sentence_wormbase_non_c_elegans(orthologs: List[List[str]], orthologs_sp_fullname: str,
+                                                       textpresso_api_token: str):
+    """build orthology sentence for WormBase non-human hortologs
+
+        Args:
+            orthologs (List[str]): list of human orthologs, containing gene_id, gene_symbol
+            orthologs_sp_fullname (str): full name of species from which to extract orthologs
+            textpresso_api_token (str): token to access Textpresso Central API
+        Returns:
+            str: the orthology sentence
+        """
     orth_sentence = None
     if len(orthologs) > 0:
         fullname_arr = orthologs_sp_fullname.split(" ")
@@ -519,6 +537,13 @@ def _generate_ortholog_sentence_wormbase_non_c_elegans(orthologs, orthologs_sp_f
 
 
 def get_gene_class(gene_id: str):
+    """get the gene class of a gene from WormBase API
+
+    Args:
+        gene_id (str): the Wormbase WBGene ID of the gene
+    Returns:
+        str: the class of the gene
+    """
     gene_class_data = json.loads(urllib.request.urlopen("http://rest.wormbase.org/rest/field/gene/" + gene_id +
                                                         "/gene_class").read())
     if "gene_class" in gene_class_data and gene_class_data["gene_class"]["data"] and "tag" in \
@@ -527,7 +552,15 @@ def get_gene_class(gene_id: str):
     return None
 
 
-def get_textpresso_popularity(textpresso_api_token, keywords):
+def get_textpresso_popularity(textpresso_api_token: str, keywords: str):
+    """get the number of papers in the C. elegans literature that mention a certain keyword from Textpresso Central API
+
+    Args:
+        textpresso_api_token (str): a valid token to access Textpresso Central API
+        keywords (str): the keyword to search, or any combination of keywords containing AND and OR operators
+    Returns:
+        int: the popularity of the specified keyword
+    """
     if not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None):
         ssl._create_default_https_context = ssl._create_unverified_context
     api_endpoint = "https://textpressocentral.org:18080/v1/textpresso/api/get_documents_count"
@@ -540,7 +573,15 @@ def get_textpresso_popularity(textpresso_api_token, keywords):
     return int(json.loads(res.read().decode('utf-8')))
 
 
-def concatenate_words_with_oxford_comma(words):
+def concatenate_words_with_oxford_comma(words: List[str]):
+    """concatenate words by separating them with commas and a final oxford comma if more than two or by 'and' if two
+
+    Args:
+        words (List[str]): a list of words
+
+    Returns:
+        str: a concatenated string representing the list of words
+    """
     if len(words) > 2:
         return ", ".join(words[0:-1]) + ", and " + words[-1]
     else:
@@ -551,6 +592,24 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
                                  orthologs_sp_fullname, go_sent_gen_common_props, go_sent_common_props,
                                  human_genes_props, do_sent_gen_common_prop, do_sent_common_props, sister_sp_fullname,
                                  sister_df, desc_writer):
+    """compose gene descriptions for WormBase
+
+    Args:
+        gene (Gene): a gene object
+        conf_parser (GenedescConfigParser): a configuration parser
+        species: the species to process
+        organism: (str): the organism to process
+        df (DataFetcher): the data fetcher containing the data for the description
+        orthologs_sp_fullname (str): full name of the organism for orthology
+        go_sent_gen_common_props (dict): common properties for go sentences generator
+        go_sent_common_props (dict): common properties for go sentences
+        human_genes_props (dict): human gene properties
+        do_sent_gen_common_prop (dict]): common properties for do sentences generator
+        do_sent_common_props (dict): common properties for do sentences
+        sister_sp_fullname (str): full name of sister species
+        sister_df (DataFetcher): sister species data fetcher
+        desc_writer (DescriptionWriter): description writer
+    """
     gene_desc = GeneDesc(gene_id=gene.id, gene_name=gene.name,
                          publications=", ".join([annot["publication"] for annot in df.get_annotations_for_gene(
                              gene.id, annot_type=DataType.GO,
