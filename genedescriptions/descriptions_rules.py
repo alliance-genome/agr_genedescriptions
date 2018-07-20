@@ -30,15 +30,7 @@ class SingleDescStats(object):
     """statistics for a single gene description"""
     def __init__(self):
         self.total_number_go_annotations = 0
-        self.number_initial_go_terms_f = 0
-        self.number_initial_go_terms_p = 0
-        self.number_initial_go_terms_c = 0
-        self.number_final_go_terms_f = 0
-        self.number_final_go_terms_p = 0
-        self.number_final_go_terms_c = 0
         self.total_number_do_annotations = 0
-        self.number_initial_do_terms = 0
-        self.number_final_do_terms = 0
         self.number_final_do_term_covering_multiple_initial_do_terms = 0
         self.set_initial_go_ids_f = []
         self.set_initial_go_ids_p = []
@@ -100,10 +92,15 @@ class DescriptionsStats(object):
 
 
 class DescriptionsOverallProperties(object):
-    def __init__(self, species: str = "", release_version: str = "", date: str = ""):
+    def __init__(self, species: str = "", release_version: str = "", date: str = "", go_ontology_url: str = "",
+                 go_association_url: str = "", do_ontology_url: str = "", do_association_url: str = ""):
         self.species = species
         self.release_version = release_version
         self.date = date
+        self.go_ontology_url = go_ontology_url
+        self.go_association_url = go_association_url
+        self.do_ontology_url = do_ontology_url
+        self.do_association_url = do_association_url
 
 
 class SentenceMerger(object):
@@ -647,20 +644,16 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
          conf_parser.get_go_prepostfix_sentences_map()], [elem for key, sets in go_sent_generator.terms_groups[
             ('F', 'contributes_to')].items() for elem in sets if ('F', key, 'contributes_to') in
                                                           conf_parser.get_go_prepostfix_sentences_map()]))
-    gene_desc.stats.number_initial_go_terms_f = len(gene_desc.stats.set_initial_go_ids_f)
     gene_desc.stats.set_initial_go_ids_p = [elem for key, sets in go_sent_generator.terms_groups[('P', '')].items() for
                                             elem in sets if ('P', key, '') in
                                             conf_parser.get_go_prepostfix_sentences_map()]
-    gene_desc.stats.number_initial_go_terms_p = len(gene_desc.stats.set_initial_go_ids_p)
     gene_desc.stats.set_initial_go_ids_c = list(set().union(
         [elem for key, sets in go_sent_generator.terms_groups[('C', '')].items() for elem in sets if ('C', key, '') in
          conf_parser.get_go_prepostfix_sentences_map()],
         [elem for key, sets in go_sent_generator.terms_groups[('C', 'colocalizes_with')].items() for elem in sets if
          ('C', key, 'colocalizes_with') in conf_parser.get_go_prepostfix_sentences_map()]))
-    gene_desc.stats.number_initial_go_terms_c = len(gene_desc.stats.set_initial_go_ids_c)
     raw_func_sent = go_sent_generator.get_sentences(aspect='F', merge_groups_with_same_prefix=True,
                                                     keep_only_best_group=True, **go_sent_common_props)
-    gene_desc.stats.number_final_go_terms_f += sum([len(sentence.terms_ids) for sentence in raw_func_sent])
     func_sent = " and ".join([sentence.text for sentence in raw_func_sent])
     if func_sent:
         joined_sent.append(func_sent)
@@ -669,8 +662,6 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
     contributes_to_raw_func_sent = go_sent_generator.get_sentences(
         aspect='F', qualifier='contributes_to', merge_groups_with_same_prefix=True, keep_only_best_group=True,
         **go_sent_common_props)
-    gene_desc.stats.number_final_go_terms_f += sum([len(sentence.terms_ids) for sentence in
-                                                    contributes_to_raw_func_sent])
     gene_desc.stats.set_final_go_ids_f = list(set().union([term_id for sentence in raw_func_sent for
                                                            term_id in sentence.terms_ids],
                                                           [term_id for sentence in contributes_to_raw_func_sent for
@@ -688,7 +679,6 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
             gene_desc.go_description += " " + contributes_to_func_sent
     raw_proc_sent = go_sent_generator.get_sentences(aspect='P', merge_groups_with_same_prefix=True,
                                                     keep_only_best_group=True, **go_sent_common_props)
-    gene_desc.stats.number_final_go_terms_p += sum([len(sentence.terms_ids) for sentence in raw_proc_sent])
     gene_desc.stats.set_final_go_ids_p = [term_id for sentence in raw_proc_sent for term_id in sentence.terms_ids]
     proc_sent = " and ".join([sentence.text for sentence in raw_proc_sent])
     if proc_sent:
@@ -696,7 +686,6 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
         gene_desc.go_process_description = proc_sent
     raw_comp_sent = go_sent_generator.get_sentences(
         aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True, **go_sent_common_props)
-    gene_desc.stats.number_final_go_terms_c += sum([len(sentence.terms_ids) for sentence in raw_comp_sent])
     comp_sent = " and ".join([sentence.text for sentence in raw_comp_sent])
     if comp_sent:
         joined_sent.append(comp_sent)
@@ -708,8 +697,6 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
     colocalizes_with_raw_comp_sent = go_sent_generator.get_sentences(
         aspect='C', qualifier='colocalizes_with', merge_groups_with_same_prefix=True,
         keep_only_best_group=True, **go_sent_common_props)
-    gene_desc.stats.number_final_go_terms_c += sum([len(sentence.terms_ids) for sentence in
-                                                    colocalizes_with_raw_comp_sent])
     gene_desc.stats.set_final_go_ids_c = list(set().union([term_id for sentence in raw_comp_sent for
                                                            term_id in sentence.terms_ids],
                                                           [term_id for sentence in colocalizes_with_raw_comp_sent for
@@ -732,7 +719,6 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
     gene_desc.stats.total_number_do_annotations = len(do_annotations)
     gene_desc.stats.set_initial_do_ids = [term_id for terms in do_sentence_generator.terms_groups.values() for tvalues
                                           in terms.values() for term_id in tvalues]
-    gene_desc.stats.number_initial_do_terms = len(gene_desc.stats.set_initial_do_ids)
     raw_disease_sent = do_sentence_generator.get_sentences(
         aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False, **do_sent_common_props)
     disease_sent = "; ".join([sentence.text for sentence in raw_disease_sent])
@@ -740,7 +726,6 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
         joined_sent.append(disease_sent)
         gene_desc.do_description = disease_sent
     gene_desc.stats.set_final_do_ids = [term_id for sentence in raw_disease_sent for term_id in sentence.terms_ids]
-    gene_desc.stats.number_final_do_terms += sum([len(sentence.terms_ids) for sentence in raw_disease_sent])
     if "(multiple)" in disease_sent:
         gene_desc.stats.number_final_do_term_covering_multiple_initial_do_terms = \
             disease_sent.count("(multiple)")
