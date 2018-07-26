@@ -249,27 +249,37 @@ class DataFetcher(object):
 
     @staticmethod
     def get_human_gene_props():
-        """ retrieve data for human genes, including Ensembl ID, symbol, name, and family name
+        """ retrieve data for human genes, including Ensembl ID, symbol, name, and family symbol and name
         Returns:
             Dict[List[str]]: a dictionary of all human genes properties, indexed by Ensembl ID
 
         """
         human_genes_props = defaultdict(list)
-        human_content = urllib.request.urlopen("https://www.genenames.org/cgi-bin/download?col=gd_hgnc_id&col=g"
-                                               "d_app_sym&col=gd_app_name&col=gd_pub_ensembl_id&col=family.id&c"
-                                               "ol=family.name&status=Approved&status=Entry+Withdrawn&status_op"
-                                               "t=2&where=&order_by=gd_app_sym_sort&format=text&limit=&hgnc_dbt"
-                                               "ag=on&submit=submit")
+        human_content_w_ensmbl = urllib.request.urlopen("https://www.genenames.org/cgi-bin/download?col=gd_hgnc_id&col="
+                                                        "gd_pub_ensembl_id&status=Approved&status=Entry+Withdrawn&statu"
+                                                        "s_opt=2&where=&order_by=gd_app_sym_sort&format=text&limit=&hgn"
+                                                        "c_dbtag=on&submit=submit")
+        human_content_w_fam_sym = urllib.request.urlopen(
+            "https://www.genenames.org/cgi-bin/genefamilies/download-all/tsv")
+
         header = True
-        for line in human_content:
+        for line in human_content_w_ensmbl:
             if not header:
                 linearr = line.decode("utf-8").split("\t")
                 linearr[-1] = linearr[-1].strip()
-                if linearr[3] != "":
-                    human_genes_props[linearr[3]] = [linearr[1], linearr[2], linearr[5]]
+                if linearr[1] != "":
+                    human_genes_props[linearr[0][5:]] = [linearr[1]]
             else:
                 header = False
-        return human_genes_props
+        header = True
+        for line in human_content_w_fam_sym:
+            if not header:
+                linearr = line.decode("utf-8").split("\t")
+                linearr[-1] = linearr[-1].strip()
+                human_genes_props[linearr[0]].extend([linearr[1], linearr[2], linearr[9], linearr[10]])
+            else:
+                header = False
+        return {v[0]: v[1:] for k, v in human_genes_props.items()}
 
 
 class WBDataFetcher(DataFetcher):

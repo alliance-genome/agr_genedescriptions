@@ -438,27 +438,33 @@ def _generate_ortholog_sentence_wormbase_human(orthologs: List[List[str]], human
     """
     if len(orthologs) > 3:
         gene_families = defaultdict(list)
-        gene_symbols_wo_family = []
+        gene_symbols_wo_family = set()
         for ortholog in orthologs:
-            if human_genes_props[ortholog[0]]:
+            if ortholog[0] in human_genes_props and human_genes_props[ortholog[0]] and \
+                    len(human_genes_props[ortholog[0]]) == 4:
                 gene_families[human_genes_props[ortholog[0]][2]].append(human_genes_props[ortholog[0]])
             else:
-                gene_symbols_wo_family.append(ortholog[1])
+                gene_symbols_wo_family.add(ortholog[1])
         if len(list(gene_families.keys())) == 1:
-            gene_symbols_wo_family.extend([human_p[0] + " (" + human_p[1] + ")" for human_p in
-                                           gene_families[list(gene_families.keys())[0]]])
+            gene_symbols_wo_family.update(set([human_p[0] + " (" + human_p[1] + ")" for human_p in
+                                               gene_families[list(gene_families.keys())[0]]]))
             gene_families = {}
         else:
-            for family_name, human_ps in gene_families.items():
-                if family_name == "" or len(orthologs) == 1:
-                    gene_symbols_wo_family.append(human_ps[0][0] + " (" + human_ps[0][1] + ")")
+            for family_symbol, human_ps in gene_families.items():
+                if family_symbol == "" or len(human_ps) == 1:
+                    for human_p in human_ps:
+                        gene_symbols_wo_family.add(human_p[0] + " (" + human_p[1] + ")")
             gene_families = {family_name: human_ps for family_name, human_ps in gene_families.items() if
                              len(human_ps) > 1 and family_name != ""}
-        gene_family_names = list(gene_families.keys())
-        genes_in_families = [hps[0][0] for hps in gene_families.values()]
+        gene_family_names = [human_ps[0][2] + " (" + human_ps[0][3] + ")" for human_ps in gene_families.values()]
+        genes_in_families = list(set([hps[0] for gene_list in gene_families.values() for hps in gene_list]))
+        gene_symbols_wo_family = list(gene_symbols_wo_family)
         if len(gene_family_names) > 3:
             gene_family_names = gene_family_names[0:3]
+        if len(genes_in_families) > 3:
             genes_in_families = genes_in_families[0:3]
+        if len(gene_symbols_wo_family) > 3:
+            gene_symbols_wo_family = gene_symbols_wo_family[0:3]
         family_word = "family"
         if len(gene_family_names) > 1:
             family_word = "families"
@@ -472,7 +478,8 @@ def _generate_ortholog_sentence_wormbase_human(orthologs: List[List[str]], human
         orth_sentence = "is an ortholog of " + " and ".join(sentences_arr)
     else:
         symbol_name_arr = sorted([human_genes_props[best_orth[0]][0] + " (" + human_genes_props[best_orth[0]][1] +
-                                  ")" if human_genes_props[best_orth[0]] else best_orth[1] for best_orth in orthologs])
+                                  ")" if best_orth[0] in human_genes_props and human_genes_props[best_orth[0]] else
+                                  best_orth[1] for best_orth in orthologs])
         orth_sentence = "is an ortholog of human " + concatenate_words_with_oxford_comma(symbol_name_arr)
     return orth_sentence
 
