@@ -40,6 +40,7 @@ class SingleDescStats(object):
         self.set_final_go_ids_c = []
         self.set_initial_do_ids = []
         self.set_final_do_ids = []
+        self.set_best_orthologs = []
 
 
 class GeneDesc(object):
@@ -89,6 +90,7 @@ class DescriptionsStats(object):
         self.average_number_final_do_terms = 0
         self.average_number_go_annotations = 0
         self.average_number_do_annotations = 0
+        self.number_genes_with_more_than_3_best_orthologs = 0
 
 
 class DescriptionsOverallProperties(object):

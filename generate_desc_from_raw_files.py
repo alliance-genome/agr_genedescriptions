@@ -15,8 +15,7 @@ def main():
     parser.add_argument("-C", "--use-cache", dest="use_cache", action="store_true", default=False,
                         help="Use cached source files from cache_location specified in config file. Download them from "
                              "raw_file_source (configured in config file) if not yet cached")
-    parser.add_argument("-l", "--log-file", metavar="log_file", dest="log_file", type=str,
-                        default="genedescriptions.log",
+    parser.add_argument("-l", "--log-file", metavar="log_file", dest="log_file", type=str, default=None,
                         help="path to the log file to generate. Default ./genedescriptions.log")
     parser.add_argument("-L", "--log-level", dest="log_level", choices=['DEBUG', 'INFO', 'WARNING', 'ERROR',
                                                                         'CRITICAL'], help="set the logging level")
@@ -25,7 +24,8 @@ def main():
 
     args = parser.parse_args()
     conf_parser = GenedescConfigParser(args.config_file)
-    logging.basicConfig(filename=args.log_file, level=args.log_level)
+    logging.basicConfig(filename=args.log_file, level=args.log_level, format='%(asctime)s - %(name)s - %(levelname)s:'
+                                                                             '%(message)s')
 
     go_sent_gen_common_props = {"evidence_groups_priority_list": conf_parser.get_go_evidence_groups_priority_list(),
                                 "prepostfix_sentences_map": conf_parser.get_go_prepostfix_sentences_map(),
@@ -54,7 +54,7 @@ def main():
         organisms_list = conf_parser.get_wb_organisms_to_process()
     human_genes_props = DataFetcher.get_human_gene_props()
     for organism in organisms_list:
-        logging.info("processing organism " + organism)
+        logging.info("Processing organism " + organism)
         sister_df = None
         species = conf_parser.get_wb_species()
         sister_sp_fullname = ""
@@ -77,10 +77,12 @@ def main():
                                       project_id=species[species[organism]["main_sister_species"]]["project_id"],
                                       cache_location=conf_parser.get_cache_location(), do_relations=None,
                                       go_relations=["subClassOf", "BFO:0000050"])
+            logging.info("Loading all data for sister species")
             sister_df.load_all_data_from_file(go_terms_replacement_regex=conf_parser.get_go_rename_terms(),
                                               go_terms_exclusion_list=conf_parser.get_go_terms_exclusion_list(),
                                               do_terms_replacement_regex=None,
                                               do_terms_exclusion_list=conf_parser.get_do_terms_exclusion_list())
+        logging.info("Loading all data for main species")
         df.load_all_data_from_file(go_terms_replacement_regex=conf_parser.get_go_rename_terms(),
                                    go_terms_exclusion_list=conf_parser.get_go_terms_exclusion_list(),
                                    do_terms_replacement_regex=None,
@@ -90,7 +92,7 @@ def main():
         desc_writer.overall_properties.release_version = conf_parser.get_release("wb_data_fetcher")
         desc_writer.overall_properties.date = datetime.date.today().strftime("%B %d, %Y")
         for gene in df.get_gene_data():
-            logging.debug("processing gene " + gene.name)
+            logging.debug("Generating description for gene " + gene.name)
 
             compose_wormbase_description(gene=gene, conf_parser=conf_parser, species=species, organism=organism, df=df,
                                          orthologs_sp_fullname=orthologs_sp_fullname,
