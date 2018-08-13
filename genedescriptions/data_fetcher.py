@@ -248,10 +248,13 @@ class DataFetcher(object):
         pass
 
     @staticmethod
-    def get_human_gene_props():
+    def get_human_gene_props(use_ensembl_id: bool = True):
         """ retrieve data for human genes, including Ensembl ID, symbol, name, and family symbol and name
+
+        Args:
+            use_ensembl_id (bool): use ensembl id as key instead of hgnc id
         Returns:
-            Dict[List[str]]: a dictionary of all human genes properties, indexed by Ensembl ID
+            Dict[str, List[str]]: a dictionary of all human genes properties, indexed by Ensembl ID
 
         """
         human_genes_props = defaultdict(list)
@@ -279,7 +282,10 @@ class DataFetcher(object):
                 human_genes_props[linearr[0]].extend([linearr[1], linearr[2], linearr[9], linearr[10]])
             else:
                 header = False
-        return {v[0]: v[1:] for k, v in human_genes_props.items()}
+        if use_ensembl_id:
+            return {v[0]: v[1:] for k, v in human_genes_props.items()}
+        else:
+            return {k: v[1:] for k, v in human_genes_props.items()}
 
 
 class WBDataFetcher(DataFetcher):
