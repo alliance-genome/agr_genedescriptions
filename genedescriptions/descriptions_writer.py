@@ -28,29 +28,38 @@ class DescriptionsWriter(metaclass=ABCMeta):
 
     def _calculate_stats(self):
         """calculate overall stats and populate fields"""
-        self.general_stats.average_number_initial_go_terms_f = np.average(
-            [len(gene_desc.stats.set_initial_go_ids_f) for gene_desc in self.data if gene_desc.go_function_description
-             is not None])
-        self.general_stats.average_number_initial_go_terms_p = np.average(
-            [len(gene_desc.stats.set_initial_go_ids_p) for gene_desc in self.data if gene_desc.go_process_description is
-             not None])
-        self.general_stats.average_number_initial_go_terms_c = np.average(
-            [len(gene_desc.stats.set_initial_go_ids_c) for gene_desc in self.data if gene_desc.go_component_description
-             is not None])
-        self.general_stats.average_number_final_go_terms_f = np.average(
-            [len(gene_desc.stats.set_final_go_ids_f) for gene_desc in self.data if gene_desc.go_function_description is
-             not None])
-        self.general_stats.average_number_final_go_terms_p = np.average(
-            [len(gene_desc.stats.set_final_go_ids_p) for gene_desc in self.data if gene_desc.go_process_description is
-             not None])
-        self.general_stats.average_number_final_go_terms_c = np.average(
-            [len(gene_desc.stats.set_final_go_ids_c) for gene_desc in self.data if gene_desc.go_component_description is
-             not None])
-        self.general_stats.average_number_initial_do_terms = np.average(
-            [len(gene_desc.stats.set_initial_do_ids) for gene_desc in self.data if gene_desc.do_description is not
-             None])
-        self.general_stats.average_number_final_do_terms = np.average(
-            [len(gene_desc.stats.set_final_do_ids) for gene_desc in self.data if gene_desc.do_description is not None])
+        num_initial_go_ids_f_arr = [len(gene_desc.stats.set_initial_go_ids_f) for gene_desc in self.data if
+                                    gene_desc.go_function_description is not None]
+        self.general_stats.average_number_initial_go_terms_f = np.average(num_initial_go_ids_f_arr) if \
+            len(num_initial_go_ids_f_arr) > 0 else 0
+        num_initial_go_ids_p_arr = [len(gene_desc.stats.set_initial_go_ids_p) for gene_desc in self.data if
+                                    gene_desc.go_process_description is not None]
+        self.general_stats.average_number_initial_go_terms_p = np.average(num_initial_go_ids_p_arr) if \
+            len(num_initial_go_ids_p_arr) > 0 else 0
+        num_initial_go_ids_c_arr = [len(gene_desc.stats.set_initial_go_ids_c) for gene_desc in self.data if
+                                    gene_desc.go_component_description is not None]
+        self.general_stats.average_number_initial_go_terms_c = np.average(num_initial_go_ids_c_arr) if \
+            len(num_initial_go_ids_c_arr) > 0 else 0
+        num_final_go_ids_f_arr = [len(gene_desc.stats.set_final_go_ids_f) for gene_desc in self.data if
+                                  gene_desc.go_function_description is not None]
+        self.general_stats.average_number_final_go_terms_f = np.average(num_final_go_ids_f_arr) if \
+            len(num_final_go_ids_f_arr) > 0 else 0
+        num_final_go_ids_p_arr = [len(gene_desc.stats.set_final_go_ids_p) for gene_desc in self.data if
+                                  gene_desc.go_process_description is not None]
+        self.general_stats.average_number_final_go_terms_p = np.average(num_final_go_ids_p_arr) if \
+            len(num_final_go_ids_p_arr) > 0 else 0
+        num_final_go_ids_c_arr = [len(gene_desc.stats.set_final_go_ids_c) for gene_desc in self.data if
+                                  gene_desc.go_component_description is not None]
+        self.general_stats.average_number_final_go_terms_c = np.average(num_final_go_ids_c_arr) if \
+            len(num_final_go_ids_c_arr) > 0 else 0
+        num_initial_do_terms_arr = [len(gene_desc.stats.set_initial_do_ids) for gene_desc in self.data if
+                                    gene_desc.do_description is not None]
+        self.general_stats.average_number_initial_do_terms = np.average(num_initial_do_terms_arr) if \
+            len(num_initial_do_terms_arr) > 0 else 0
+        num_final_do_terms_arr = [len(gene_desc.stats.set_final_do_ids) for gene_desc in self.data if
+                                  gene_desc.do_description is not None]
+        self.general_stats.average_number_final_do_terms = np.average(num_final_do_terms_arr) if \
+            len(num_final_do_terms_arr) > 0 else 0
         self.general_stats.total_number_of_genes = len(self.data)
         self.general_stats.number_genes_with_non_null_description = len([gene_desc for gene_desc in self.data if
                                                                          gene_desc.description is not None])
@@ -76,12 +85,14 @@ class DescriptionsWriter(metaclass=ABCMeta):
         self.general_stats.number_genes_with_final_do_terms_covering_multiple_initial_terms = \
             len([gene_desc for gene_desc in self.data if
                  gene_desc.stats.number_final_do_term_covering_multiple_initial_do_terms > 0])
-        self.general_stats.average_number_go_annotations = np.average(
-            [gene_desc.stats.total_number_go_annotations for gene_desc in self.data if gene_desc.go_description is not
-             None])
-        self.general_stats.average_number_do_annotations = np.average(
-            [gene_desc.stats.total_number_do_annotations for gene_desc in self.data if gene_desc.do_description is not
-             None])
+        num_go_annot_arr = [gene_desc.stats.total_number_go_annotations for gene_desc in self.data if
+                            gene_desc.go_description is not None]
+        self.general_stats.average_number_go_annotations = np.average(num_go_annot_arr) if len(num_go_annot_arr) > 0 \
+            else 0
+        num_do_annot_arr = [gene_desc.stats.total_number_do_annotations for gene_desc in self.data if
+                            gene_desc.do_description is not None]
+        self.general_stats.average_number_do_annotations = np.average(num_do_annot_arr) if len(num_do_annot_arr) > 0 \
+            else 0
         self.general_stats.number_genes_with_more_than_3_best_orthologs = \
             len([gene_desc for gene_desc in self.data if len(gene_desc.stats.set_best_orthologs) > 3])
 

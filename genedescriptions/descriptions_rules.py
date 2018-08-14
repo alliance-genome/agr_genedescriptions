@@ -486,6 +486,23 @@ def _generate_ortholog_sentence_wormbase_human(orthologs: List[List[str]], human
     return orth_sentence
 
 
+def generate_orthology_sentence_alliance_human(orthologs: List[List[str]]):
+    """build orthology sentence for Alliance human orthologs
+
+    Args:
+        orthologs (List[List[str]]): list of human orthologs, containing gene_id, gene_symbol, and gene_name
+    Returns:
+        str: the orthology sentence
+    """
+    prefix = "human"
+    orthologs_display = sorted(orthologs, key=lambda x: x[2])
+    if len(orthologs) > 3:
+        orthologs_display = orthologs_display[0:3]
+        prefix = "several human genes including"
+    return "orthologous to " + prefix + " and ".join([orth[1] + " (" + orth[2] + ")" if orth[2] else orth[1] for orth
+                                                      in orthologs_display])
+
+
 def _generate_ortholog_sentence_wormbase_non_c_elegans(orthologs: List[List[str]], orthologs_sp_fullname: str,
                                                        textpresso_api_token: str):
     """build orthology sentence for WormBase non-human hortologs
