@@ -47,8 +47,8 @@ class GeneDesc(object):
     """gene description"""
     def __init__(self, gene_id: str, gene_name: str = "", description: str = None, go_description: str = None,
                  go_function_description: str = None, go_process_description: str = None,
-                 go_component_description: str = None, do_description: str = None, stats: SingleDescStats = None,
-                 publications: str = "", refs: str = ""):
+                 go_component_description: str = None, do_description: str = None, orthology_description: str = None,
+                 stats: SingleDescStats = None, publications: str = "", refs: str = ""):
         self.gene_id = gene_id
         self.gene_name = gene_name
         self.description = description
@@ -57,6 +57,7 @@ class GeneDesc(object):
         self.go_process_description = go_process_description
         self.go_component_description = go_component_description
         self.do_description = do_description
+        self.orthology_description = orthology_description
         self.publications = publications
         self.refs = refs
         if stats:
@@ -90,6 +91,9 @@ class DescriptionsStats(object):
         self.average_number_final_do_terms = 0
         self.average_number_go_annotations = 0
         self.average_number_do_annotations = 0
+        self.average_number_orthologs = 0
+        self.number_genes_with_non_null_orthology_description = 0
+        self.number_genes_with_null_orthology_description = 0
         self.number_genes_with_more_than_3_best_orthologs = 0
 
 
@@ -653,6 +657,7 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
     best_orthologs, selected_orth_name = df.get_best_orthologs_for_gene(
         gene.id, orth_species_full_name=orthologs_sp_fullname)
     if best_orthologs:
+        gene_desc.stats.set_best_orthologs = [orth[0] for orth in best_orthologs]
         if len(orthologs_sp_fullname) == 1 and orthologs_sp_fullname[0] == "Homo sapiens":
             orth_sent = _generate_ortholog_sentence_wormbase_human(best_orthologs, human_genes_props)
         else:
@@ -660,6 +665,7 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
                                                                            conf_parser.get_textpresso_api_token())
         if orth_sent:
             joined_sent.append(orth_sent)
+            gene_desc.orthology_description = orth_sent
     go_annotations = df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.GO,
                                                  priority_list=conf_parser.get_go_annotations_priority())
     go_sent_generator = SentenceGenerator(annotations=go_annotations, ontology=df.go_ontology,

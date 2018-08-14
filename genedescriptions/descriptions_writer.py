@@ -95,6 +95,14 @@ class DescriptionsWriter(metaclass=ABCMeta):
             else 0
         self.general_stats.number_genes_with_more_than_3_best_orthologs = \
             len([gene_desc for gene_desc in self.data if len(gene_desc.stats.set_best_orthologs) > 3])
+        self.general_stats.number_genes_with_non_null_orthology_description = len(
+            [gene_desc for gene_desc in self.data if gene_desc.orthology_description is not None])
+        self.general_stats.number_genes_with_null_orthology_description = len(
+            [gene_desc for gene_desc in self.data if gene_desc.orthology_description is None])
+        num_orthologs = [len(gene_desc.stats.set_best_orthologs) for gene_desc in self.data if
+                         gene_desc.orthology_description is not None]
+        self.general_stats.average_number_orthologs = np.average(num_orthologs) if len(num_orthologs) > 0 \
+            else 0
 
 
 class JsonGDWriter(DescriptionsWriter):
