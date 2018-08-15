@@ -7,7 +7,8 @@ import re
 from collections import defaultdict
 from typing import List, Iterable, Dict
 from ontobio import AssociationSetFactory
-from genedescriptions.descriptions_rules import set_all_depths_in_subgraph, Gene, DataType
+from genedescriptions.descriptions_rules import set_all_depths_in_subgraph, Gene, DataType, \
+    is_human_ortholog_name_valid, rename_human_ortholog_name
 from ontobio.ontol_factory import OntologyFactory
 from ontobio.ontol import Ontology
 from ontobio.assocmodel import AssociationSet
@@ -279,7 +280,11 @@ class DataFetcher(object):
             if not header:
                 linearr = line.decode("utf-8").split("\t")
                 linearr[-1] = linearr[-1].strip()
-                human_genes_props[linearr[0]].extend([linearr[1], linearr[2], linearr[9], linearr[10]])
+                if is_human_ortholog_name_valid(linearr[2]):
+                    human_genes_props[linearr[0]].extend([linearr[1], rename_human_ortholog_name(linearr[2]),
+                                                          linearr[9], linearr[10]])
+                else:
+                    del human_genes_props[linearr[0]]
             else:
                 header = False
         if use_ensembl_id:

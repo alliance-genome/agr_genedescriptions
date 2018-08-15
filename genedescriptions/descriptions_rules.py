@@ -498,13 +498,16 @@ def generate_orthology_sentence_alliance_human(orthologs: List[List[str]]):
     Returns:
         str: the orthology sentence
     """
-    prefix = "human"
-    orthologs_display = sorted(orthologs, key=lambda x: x[2])
-    if len(orthologs) > 3:
-        orthologs_display = orthologs_display[0:3]
-        prefix = "several human genes including"
-    return "orthologous to " + prefix + " and ".join([orth[1] + " (" + orth[2] + ")" if orth[2] else orth[1] for orth
-                                                      in orthologs_display])
+    if len(orthologs) > 0:
+        prefix = "human"
+        orthologs_display = sorted(orthologs, key=lambda x: x[2])
+        if len(orthologs) > 3:
+            orthologs_display = orthologs_display[0:3]
+            prefix = "several human genes including"
+        return "orthologous to " + prefix + " " + concatenate_words_with_oxford_comma(
+            [orth[1] + " (" + orth[2] + ")" if orth[2] else orth[1] for orth in orthologs_display])
+    else:
+        return None
 
 
 def _generate_ortholog_sentence_wormbase_non_c_elegans(orthologs: List[List[str]], orthologs_sp_fullname: str,
@@ -569,6 +572,20 @@ def _generate_ortholog_sentence_wormbase_non_c_elegans(orthologs: List[List[str]
             orth_sentence = "is an ortholog of " + orthologs_sp_fullname + " " + \
                             concatenate_words_with_oxford_comma(orthologs_symbols)
     return orth_sentence
+
+
+def rename_human_ortholog_name(ortholog_name: str):
+    new_name = ortholog_name
+    if " family member " in ortholog_name:
+        new_name = new_name.replace(" family member ", " ")
+    new_name = re.sub(r"[,]? kDa$", "", new_name)
+    return new_name
+
+
+def is_human_ortholog_name_valid(ortholog_name: str):
+    if "human uncharacterized protein" in ortholog_name.lower():
+        return False
+    return True
 
 
 def get_gene_class(gene_id: str):
