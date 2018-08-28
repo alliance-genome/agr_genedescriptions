@@ -58,6 +58,15 @@ class GenedescConfigParser(object):
         """
         return self.config["do_sentences_options"]["evidence_codes"]
 
+    def get_expression_evidence_codes(self) -> Dict[str, Dict[str, Union[str, id]]]:
+        """get the configured evidence codes for expression
+
+        Returns:
+            Dict[str, Dict[str, Union[str, id]]]: a dictionary of the configured evidence codes, with evidence code
+                names as keys and a dictionary with 'evidence group' and 'priority' and their values
+        """
+        return self.config["expression_sentences_options"]["evidence_codes"]
+
     def get_go_prepostfix_sentences_map(self) -> Dict[Tuple[str, str, str], Tuple[str, str]]:
         """get the map that links go aspects and evidence groups with their pre- and postfix phrases, including special
         cases
@@ -87,6 +96,19 @@ class GenedescConfigParser(object):
         prepost_map = {(prepost["aspect"], prepost["group"], prepost["qualifier"]): (prepost["prefix"],
                                                                                      prepost["postfix"])
                        for prepost in self.config["do_sentences_options"]["do_prepostfix_sentences_map"]}
+        return prepost_map
+
+    def get_expression_prepostfix_sentences_map(self) -> Dict[Tuple[str, str, str], Tuple[str, str]]:
+        """get the map that links expression aspects and evidence groups with their pre- and postfix phrases
+
+        Returns:
+            Dict[Tuple[str, str, str], Tuple[str, str]]: a dictionary that maps a tuple of aspect and group with prefix
+                and postfix phrases to be used to build the automatically generated sentences
+        """
+        prepost_map = {(prepost["aspect"], prepost["group"], prepost["qualifier"]): (prepost["prefix"],
+                                                                                     prepost["postfix"])
+                       for prepost in self.config["expression_sentences_options"]
+                       ["expression_prepostfix_sentences_map"]}
         return prepost_map
 
     def get_do_prepostfix_sentences_map_humans(self) -> Dict[Tuple[str, str, str], Tuple[str, str]]:
@@ -134,6 +156,15 @@ class GenedescConfigParser(object):
         return [key for key, priority in sorted([(key, ec["priority"]) for key, ec in
                                                  self.get_do_evidence_codes().items()], key=lambda x: x[1])]
 
+    def get_expression_annotations_priority(self) -> List[str]:
+        """get the priority list for expression evidence codes
+
+        Returns:
+            List[str]: a list of evidence codes, sorted by priority. The first element has the highest priority
+        """
+        return [key for key, priority in sorted([(key, ec["priority"]) for key, ec in
+                                                 self.get_expression_evidence_codes().items()], key=lambda x: x[1])]
+
     def get_go_evidence_groups_priority_list(self) -> List[str]:
         """get the priority list for go evidence groups
 
@@ -154,6 +185,16 @@ class GenedescConfigParser(object):
                                               self.config["do_sentences_options"]["group_priority"].items()],
                                              key=lambda x: x[1])]
 
+    def get_expression_evidence_groups_priority_list(self) -> List[str]:
+        """get the priority list for expression evidence groups
+
+        Returns:
+            List[str]: the priority list for evidence groups
+        """
+        return [group for group, p in sorted([(g, p) for g, p in
+                                              self.config["expression_sentences_options"]["group_priority"].items()],
+                                             key=lambda x: x[1])]
+
     def get_go_evidence_codes_groups_map(self) -> Dict[str, str]:
         """get the map between evidence codes and evidence groups for go
 
@@ -170,6 +211,14 @@ class GenedescConfigParser(object):
         """
         return {name: evidence["group"] for name, evidence in self.get_do_evidence_codes().items()}
 
+    def get_expression_evidence_codes_groups_map(self) -> Dict[str, str]:
+        """get the map between evidence codes and evidence groups for expression
+
+        Returns:
+            Dict[str, str]: the map between codes and groups
+        """
+        return {name: evidence["group"] for name, evidence in self.get_expression_evidence_codes().items()}
+
     def get_go_terms_exclusion_list(self) -> List[str]:
         """get the list of go terms to exclude from the gene descriptions
 
@@ -185,6 +234,15 @@ class GenedescConfigParser(object):
             List[str]: the exclusion list
         """
         return self.config["do_sentences_options"]["exclude_terms"]
+
+    def get_expression_terms_exclusion_list(self) -> List[str]:
+        """get the list of expression terms to exclude from the gene descriptions
+
+        Returns:
+            List[str]: the exclusion list
+        """
+        return self.config["expression_sentences_options"]["exclude_terms"] \
+            if "exclude_terms" in self.config["expression_sentences_options"] else None
 
     def get_raw_file_sources(self, data_fetcher: str) -> str:
         """get the url pointing to the raw files source
@@ -239,6 +297,14 @@ class GenedescConfigParser(object):
         """
         return self.config["go_sentences_options"]["rename_terms"]
 
+    def get_expression_rename_terms(self) -> Dict[str, str]:
+        """get the regexp to rename expression terms and their replacement strings
+
+        Returns:
+            Dict[str, str]: a map of replacements for expression terms
+        """
+        return self.config["expression_sentences_options"]["rename_terms"]
+
     def get_go_remove_parents_if_children_are_present(self) -> bool:
         """get the value of the option to remove parent terms from sentences if children are present in the term set
 
@@ -247,6 +313,14 @@ class GenedescConfigParser(object):
         """
         return self.config["go_sentences_options"]["remove_parents_if_children_are_present"]
 
+    def get_go_remove_children_if_parent_is_present(self) -> bool:
+        """get the value of the option to remove child terms from sentences if parent is present in the term set
+
+        Returns:
+            bool: the value of the option
+        """
+        return self.config["go_sentences_options"]["remove_children_if_parent_is_present"]
+
     def get_do_remove_parents_if_children_are_present(self) -> bool:
         """get the value of the option to remove parent terms from sentences if children are present in the term set
 
@@ -254,6 +328,30 @@ class GenedescConfigParser(object):
             bool: the value of the option
         """
         return self.config["do_sentences_options"]["remove_parents_if_children_are_present"]
+
+    def get_do_remove_children_if_parent_is_present(self) -> bool:
+        """get the value of the option to remove child terms from sentences if parent is present in the term set
+
+        Returns:
+            bool: the value of the option
+        """
+        return self.config["do_sentences_options"]["remove_children_if_parent_is_present"]
+
+    def get_expression_remove_parents_if_children_are_present(self) -> bool:
+        """get the value of the option to remove parent terms from sentences if children are present in the term set
+
+        Returns:
+            bool: the value of the option
+        """
+        return self.config["expression_sentences_options"]["remove_parents_if_children_are_present"]
+
+    def get_expression_remove_children_if_parent_is_present(self) -> bool:
+        """get the value of the option to remove child terms from sentences if parent is present in the term set
+
+        Returns:
+            bool: the value of the option
+        """
+        return self.config["expression_sentences_options"]["remove_children_if_parent_is_present"]
 
     def get_go_trim_terms_by_common_ancestors(self) -> bool:
         """get the value of the option to trim terms by common ancestors
@@ -271,6 +369,14 @@ class GenedescConfigParser(object):
             int: the value of the option
         """
         return self.config["go_sentences_options"]["trim_if_more_than_terms"]
+
+    def get_go_max_num_terms(self) -> int:
+        """get the maximum number of terms per go aspect to be displayed in the final description
+
+        Returns:
+            int: the value of the option
+        """
+        return self.config["go_sentences_options"]["max_num_terms"]
 
     def get_go_trim_min_distance_from_root(self):
         """get the minimum distance from root in the GO ontology to be considered while looking for common ancestors
@@ -308,6 +414,14 @@ class GenedescConfigParser(object):
         """
         return self.config["do_sentences_options"]["trim_if_more_than_terms"]
 
+    def get_do_max_num_terms(self) -> int:
+        """get the maximum number of terms to be displayed in the final description
+
+        Returns:
+            int: the value of the option
+        """
+        return self.config["do_sentences_options"]["max_num_terms"]
+
     def get_do_trim_min_distance_from_root(self):
         """get the minimum distance from root in the GO ontology to be considered while looking for common ancestors
         between terms
@@ -335,6 +449,50 @@ class GenedescConfigParser(object):
         """
         return self.config["do_sentences_options"]["do_truncate_others_terms"]
 
+    def get_expression_trim_min_num_terms(self) -> int:
+        """get the threshold value that indicates the minimum number of terms per go aspect for which trimming has to
+        be applied
+
+        Returns:
+            int: the value of the option
+        """
+        return self.config["expression_sentences_options"]["trim_if_more_than_terms"]
+
+    def get_expression_trim_min_distance_from_root(self):
+        """get the minimum distance from root in the GO ontology to be considered while looking for common ancestors
+        between terms
+
+        Returns:
+            Dict[str, int]: the distances for all go aspects
+        """
+        return self.config["expression_sentences_options"]["trim_min_distance_from_root"]
+
+    def get_expression_max_num_terms(self) -> int:
+        """get the maximum number of terms to be displayed in the final description
+
+        Returns:
+            int: the value of the option
+        """
+        return self.config["expression_sentences_options"]["max_num_terms"]
+
+    def get_expression_truncate_others_aggregation_word(self) -> str:
+        """get the generic word used to indicate that one or more terms have been omitted from the sentence, e.g.,
+        'several'
+
+        Returns:
+            str: the aggregation word
+        """
+        return self.config["expression_sentences_options"]["expression_truncate_others_aggregation_word"]
+
+    def get_expression_truncate_others_terms(self) -> Dict[str, str]:
+        """get the specific words used for each aspect to indicate that one or more terms have been omitted from the
+        sentence
+
+        Returns:
+            str: a dictionary containing one word for each aspect
+        """
+        return self.config["expression_sentences_options"]["expression_truncate_others_terms"]
+
     def get_genedesc_writer(self):
         """get the type of writer
 
@@ -348,4 +506,10 @@ class GenedescConfigParser(object):
 
     def get_ortholog_species(self):
         return
+
+    def get_wb_human_orthologs_go_ontology(self):
+        return self.config["wb_data_fetcher"]["agr_go_ontology"]
+
+    def get_wb_human_orthologs_go_associations(self):
+        return self.config["wb_data_fetcher"]["agr_human_go_associations"]
 

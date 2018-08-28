@@ -9,10 +9,10 @@ class TestRawDataFetcher(unittest.TestCase):
 
     def setUp(self):
         this_dir = os.path.split(__file__)[0]
-        self.conf_parser = GenedescConfigParser(os.path.join(this_dir, os.path.pardir, "config.yml"))
+        self.conf_parser = GenedescConfigParser(os.path.join(this_dir, os.path.pardir, "config_wb.yml"))
         species = self.conf_parser.get_wb_species()
         self.df = WBDataFetcher(raw_files_source=self.conf_parser.get_raw_file_sources("wb_data_fetcher"),
-                                release_version="WS265", species="c_elegans",
+                                release_version="WS266", species="c_elegans",
                                 project_id=species["c_elegans"]["project_id"],
                                 cache_location=self.conf_parser.get_cache_location(), do_relations=None,
                                 go_relations=["subClassOf", "BFO:0000050"])
@@ -53,6 +53,12 @@ class TestRawDataFetcher(unittest.TestCase):
                                             associations_cache_path=self.df.do_associations_cache_path,
                                             exclusion_list=self.conf_parser.get_do_terms_exclusion_list())
         self.assertTrue(self.df.do_associations is not None)
+
+    def test_load_expression_ontology_from_file(self):
+        self.df.load_ontology_from_file(ontology_type=DataType.EXPR, ontology_url=self.df.expression_ontology_url,
+                                        ontology_cache_path=self.df.expression_ontology_cache_path,
+                                        terms_replacement_regex=self.conf_parser.get_expression_rename_terms())
+        self.assertTrue(self.df.expression_ontology is not None)
 
     def test_load_orthology_from_file(self):
         species = self.conf_parser.get_wb_species()

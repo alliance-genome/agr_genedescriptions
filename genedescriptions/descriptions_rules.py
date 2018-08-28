@@ -17,6 +17,7 @@ from enum import Enum
 class DataType(Enum):
     GO = 1
     DO = 2
+    EXPR = 3
 
 
 Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
@@ -169,12 +170,14 @@ class SentenceGenerator(object):
 
     def get_sentences(self, aspect: str, qualifier: str = '', keep_only_best_group: bool = False,
                       merge_groups_with_same_prefix: bool = False, remove_parent_terms: bool = True,
-                      merge_num_terms_threshold: int = 3, merge_min_distance_from_root: dict = None,
+                      remove_child_terms: bool = False,
+                      merge_num_terms_threshold: int = 3, merge_max_num_terms: int = 3,
+                      merge_min_distance_from_root: dict = None,
                       truncate_others_generic_word: str = "several",
                       truncate_others_aspect_words: Dict[str, str] = None,
                       remove_successive_overlapped_terms: bool = True,
                       exclude_terms_ids: List[str] = None,
-                      add_multiple_if_covers_more_children: bool = False) -> List[Sentence]:
+                      add_multiple_if_covers_more_children: bool = False, rename_cell: bool = False) -> List[Sentence]:
         """generate sentences for specific combination of aspect and qualifier
 
         Args:
@@ -185,9 +188,12 @@ class SentenceGenerator(object):
             merge_groups_with_same_prefix (bool): whether to merge the phrases for evidence groups with the same prefix
             remove_parent_terms: whether to remove parent terms from the list of terms in each sentence if at least
                 one children term is present
+            remove_child_terms (bool): whether to remove child terms from the list of terms in each sentence if at least
+                one parent term is present
             merge_num_terms_threshold (int): whether to merge terms by common ancestor to reduce the number of terms in
                 the set. The trimming algorithm will be applied only if the number of terms is greater than the
                 specified number and the specified threshold is greater than 0
+            merge_max_num_terms (int): maximum number of terms to display in the final sentence
             merge_min_distance_from_root (dict): minimum distance from root terms for the selection of common ancestors
                 during merging operations. Three values must be provided in the form of a dictionary with keys 'F', 'P',
                 and 'C' for go aspect names and values integers indicating the threshold for each aspect
@@ -200,6 +206,7 @@ class SentenceGenerator(object):
             exclude_terms_ids (List[str]): list of term ids to exclude
             add_multiple_if_covers_more_children (bool): whether to add the label '(multiple)' to terms that are
                 ancestors covering multiple children
+            rename_cell (bool): rename term cell if present
         Returns:
             List[Sentence]: a list of sentences
         """
@@ -236,7 +243,7 @@ class SentenceGenerator(object):
                 else:
                     merged_terms = find_set_covering([(k, self.ontology.label(k, id_if_null=True), v) for k, v in
                                                       merged_terms_coverset.items()],
-                                                     max_num_subsets=merge_num_terms_threshold)
+                                                     max_num_subsets=merge_max_num_terms)
                     for merged_term in merged_terms:
                         terms_already_covered.update(merged_terms_coverset[merged_term])
                     add_others = True
@@ -248,6 +255,9 @@ class SentenceGenerator(object):
                 terms = merged_terms
             else:
                 terms_already_covered.update(terms)
+            if remove_child_terms:
+                terms = [term for term in terms if
+                         len(set(self.ontology.ancestors(term)).intersection(set(terms))) == 0]
             if (aspect, evidence_group, qualifier) in self.prepostfix_sentences_map:
                 sentences.append(
                     _get_single_sentence(node_ids=terms, ontology=self.ontology, aspect=aspect,
@@ -257,20 +267,24 @@ class SentenceGenerator(object):
                                          add_others=add_others,
                                          truncate_others_generic_word=truncate_others_generic_word,
                                          truncate_others_aspect_words=truncate_others_aspect_words,
-                                         ancestors_with_multiple_children=ancestors_covering_multiple_children))
+                                         ancestors_with_multiple_children=ancestors_covering_multiple_children,
+                                         rename_cell=rename_cell))
                 if keep_only_best_group:
                     return sentences
         if merge_groups_with_same_prefix:
             sentences = self.merge_sentences_with_same_prefix(sentences=sentences,
-                                                              remove_parent_terms=remove_parent_terms)
+                                                              remove_parent_terms=remove_parent_terms,
+                                                              rename_cell=rename_cell)
         return sentences
 
-    def merge_sentences_with_same_prefix(self, sentences: List[Sentence], remove_parent_terms: bool = True):
+    def merge_sentences_with_same_prefix(self, sentences: List[Sentence], remove_parent_terms: bool = True,
+                                         rename_cell: bool = False):
         """merge sentences with the same prefix
 
         Args:
             sentences (List[Sentence]): a list of sentences
             remove_parent_terms (bool): whether to remove parent terms if present in the merged set of terms
+            rename_cell (bool): whether to rename the term 'cell'
         Returns:
             List[Sentence]: the list of merged sentences, sorted by (merged) evidence group priority
         """
@@ -307,7 +321,8 @@ class SentenceGenerator(object):
                          term_names=[self.ontology.label(node, id_if_null=True) for node in sent_merger.terms_ids],
                          postfix=SentenceGenerator.merge_postfix_phrases(sent_merger.postfix_list),
                          additional_prefix=sent_merger.additional_prefix,
-                         ancestors_with_multiple_children=sent_merger.ancestors_covering_multiple_terms),
+                         ancestors_with_multiple_children=sent_merger.ancestors_covering_multiple_terms,
+                         rename_cell=rename_cell),
                          aspect=sent_merger.aspect, evidence_group=", ".join(sent_merger.evidence_groups),
                          terms_merged=True, additional_prefix=sent_merger.additional_prefix,
                          qualifier=sent_merger.qualifier,
@@ -358,7 +373,7 @@ class SentenceGenerator(object):
 
 
 def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str], postfix: str,
-                     ancestors_with_multiple_children: Set[str] = None) -> str:
+                     ancestors_with_multiple_children: Set[str] = None, rename_cell: bool = False) -> str:
     """compose the text of a sentence given its prefix, terms, and postfix
 
     Args:
@@ -374,14 +389,18 @@ def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str],
     prefix = prefix + additional_prefix + " "
     term_names = [term_name + " (multiple)" if term_name in ancestors_with_multiple_children else term_name for
                   term_name in sorted(term_names)]
+
     if postfix != "":
         postfix = " " + postfix
-    if len(term_names) > 2:
-        return prefix + ", ".join(term_names[0:-1]) + ", and " + term_names[len(term_names) - 1] + postfix
-    elif len(term_names) > 1:
-        return prefix + " and ".join(term_names) + postfix
-    else:
-        return prefix + term_names[0] + postfix
+    if rename_cell:
+        if "the cell" in term_names or "the Cell" in term_names:
+            if len(term_names) == 1:
+                prefix = prefix[0:-3]
+                term_names = ["widely"]
+            else:
+                prefix += " several tissues including"
+                term_names = [term for term in term_names if term != "the cell" and term != "the Cell"]
+    return prefix + concatenate_words_with_oxford_comma(term_names) + postfix
 
 
 def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, evidence_group: str, qualifier: str,
@@ -389,7 +408,8 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
                          terms_merged: bool = False, add_others: bool = False,
                          truncate_others_generic_word: str = "several",
                          truncate_others_aspect_words: Dict[str, str] = None,
-                         ancestors_with_multiple_children: Set[str] = None) -> Union[Sentence, None]:
+                         ancestors_with_multiple_children: Set[str] = None,
+                         rename_cell: bool = False) -> Union[Sentence, None]:
     """build a sentence object
 
     Args:
@@ -407,6 +427,7 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
             included in the aspect
         ancestors_with_multiple_children (Set[str]): set containing labels of terms that cover more than one children
             term in the original set and which will appear with the label '(multiple)'
+        rename_cell (bool): whether to rename the term 'cell'
     Returns:
         Union[Sentence,None]: the combined go sentence
     """
@@ -425,7 +446,8 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
         return Sentence(prefix=prefix, terms_ids=node_ids, postfix=postfix,
                         text=compose_sentence(prefix=prefix, term_names=term_labels, postfix=postfix,
                                               additional_prefix=additional_prefix,
-                                              ancestors_with_multiple_children=ancestors_with_multiple_children),
+                                              ancestors_with_multiple_children=ancestors_with_multiple_children,
+                                              rename_cell=rename_cell),
                         aspect=aspect, evidence_group=evidence_group, terms_merged=terms_merged,
                         additional_prefix=additional_prefix, qualifier=qualifier,
                         ancestors_covering_multiple_terms=ancestors_with_multiple_children)
@@ -558,7 +580,8 @@ def _generate_ortholog_sentence_wormbase_non_c_elegans(orthologs: List[List[str]
             genes_symbols_in_classes = [item[0][0][1] for item in sorted_items if item[1] == 1]
             sentences_arr = []
             if len(gene_symbols_wo_class) > 0:
-                sentences_arr.append(concatenate_words_with_oxford_comma(gene_symbols_wo_class))
+                sentences_arr.append(orthologs_sp_fullname + " " + concatenate_words_with_oxford_comma(
+                    gene_symbols_wo_class))
             if len(classes_symbols) > 0:
                 genes_symbols_in_classes_sent = concatenate_words_with_oxford_comma(genes_symbols_in_classes)
                 classes_symbols_sent = concatenate_words_with_oxford_comma(classes_symbols)
@@ -640,10 +663,38 @@ def concatenate_words_with_oxford_comma(words: List[str]):
         return " and ".join(words)
 
 
+def get_best_human_ortholog_for_info_poor(human_orthologs, ensembl_hgnc_ids_map, evidence_codes, human_df_agr,
+                                          go_sent_gen_common_props):
+    best_orth = ""
+    if len(human_orthologs) > 0:
+        exp_orthologs = defaultdict(int)
+        predicted_orthologs = defaultdict(int)
+        for ortholog in human_orthologs:
+            if ortholog[0] in ensembl_hgnc_ids_map and ensembl_hgnc_ids_map[ortholog[0]]:
+                ortholog_annotations = human_df_agr.get_annotations_for_gene(
+                    gene_id="RGD:" + ensembl_hgnc_ids_map[ortholog[0]], annot_type=DataType.GO,
+                    priority_list=evidence_codes)
+                for annotation in ortholog_annotations:
+                    if annotation['aspect'] == 'F':
+                        if go_sent_gen_common_props["evidence_codes_groups_map"][annotation["evidence"]['type']] \
+                                in ["EXPERIMENTAL", "HIGH_THROUGHPUT_EXPERIMENTAL"]:
+                            exp_orthologs[ensembl_hgnc_ids_map[ortholog[0]]] += 1
+                        else:
+                            predicted_orthologs[ensembl_hgnc_ids_map[ortholog[0]]] += 1
+        if len(exp_orthologs) > 0:
+            best_orth = sorted([(key, value) for key, value in exp_orthologs.items()], key=lambda x: x[1],
+                               reverse=True)[0][0]
+        elif len(predicted_orthologs) > 0:
+            best_orth = sorted([(key, value) for key, value in predicted_orthologs.items()], key=lambda x: x[1],
+                               reverse=True)[0][0]
+    return best_orth
+
+
 def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, species, organism, df,
                                  orthologs_sp_fullname, go_sent_gen_common_props, go_sent_common_props,
                                  human_genes_props, do_sent_gen_common_prop, do_sent_common_props, sister_sp_fullname,
-                                 sister_df, desc_writer):
+                                 sister_df, human_df_agr, desc_writer, ensembl_hgnc_ids_map,
+                                 expr_sent_gen_common_props, expr_sent_common_props):
     """compose gene descriptions for WormBase
 
     Args:
@@ -660,7 +711,11 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
         do_sent_common_props (dict): common properties for do sentences
         sister_sp_fullname (str): full name of sister species
         sister_df (DataFetcher): sister species data fetcher
+        human_df_agr (DataFetcher): data fetcher to generate GO sentences for information poor genes from AGR human data
         desc_writer (DescriptionWriter): description writer
+        ensembl_hgnc_ids_map (Dict[str, str]): ensembl hgnc map
+        expr_sent_gen_common_props (dict): common properties for expression sentences generator
+        expr_sent_common_props (dict) common properties for expression sentences
     """
     gene_desc = GeneDesc(gene_id=gene.id, gene_name=gene.name,
                          publications=", ".join([annot["publication"] for annot in df.get_annotations_for_gene(
@@ -685,6 +740,12 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
             gene_desc.orthology_description = orth_sent
     go_annotations = df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.GO,
                                                  priority_list=conf_parser.get_go_annotations_priority())
+    go_sent_gen_common_props_exp = go_sent_gen_common_props.copy()
+    go_sent_gen_common_props_exp["evidence_codes_groups_map"] = {
+        evcode: group for evcode, group in go_sent_gen_common_props["evidence_codes_groups_map"].items() if
+        "EXPERIMENTAL" in go_sent_gen_common_props["evidence_codes_groups_map"][evcode]}
+    go_sent_generator_exp = SentenceGenerator(annotations=go_annotations, ontology=df.go_ontology,
+                                              **go_sent_gen_common_props_exp)
     go_sent_generator = SentenceGenerator(annotations=go_annotations, ontology=df.go_ontology,
                                           **go_sent_gen_common_props)
     gene_desc.stats.total_number_go_annotations = len(go_annotations)
@@ -701,16 +762,20 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
          conf_parser.get_go_prepostfix_sentences_map()],
         [elem for key, sets in go_sent_generator.terms_groups[('C', 'colocalizes_with')].items() for elem in sets if
          ('C', key, 'colocalizes_with') in conf_parser.get_go_prepostfix_sentences_map()]))
-    raw_func_sent = go_sent_generator.get_sentences(aspect='F', merge_groups_with_same_prefix=True,
-                                                    keep_only_best_group=True, **go_sent_common_props)
+    contributes_to_raw_func_sent = go_sent_generator.get_sentences(
+        aspect='F', qualifier='contributes_to', merge_groups_with_same_prefix=True, keep_only_best_group=True,
+        **go_sent_common_props)
+    if contributes_to_raw_func_sent:
+        raw_func_sent = go_sent_generator_exp.get_sentences(aspect='F', merge_groups_with_same_prefix=True,
+                                                            keep_only_best_group=True, **go_sent_common_props)
+    else:
+        raw_func_sent = go_sent_generator.get_sentences(aspect='F', merge_groups_with_same_prefix=True,
+                                                        keep_only_best_group=True, **go_sent_common_props)
     func_sent = " and ".join([sentence.text for sentence in raw_func_sent])
     if func_sent:
         joined_sent.append(func_sent)
         gene_desc.go_function_description = func_sent
         gene_desc.go_description = func_sent
-    contributes_to_raw_func_sent = go_sent_generator.get_sentences(
-        aspect='F', qualifier='contributes_to', merge_groups_with_same_prefix=True, keep_only_best_group=True,
-        **go_sent_common_props)
     gene_desc.stats.set_final_go_ids_f = list(set().union([term_id for sentence in raw_func_sent for
                                                            term_id in sentence.terms_ids],
                                                           [term_id for sentence in contributes_to_raw_func_sent for
@@ -721,11 +786,11 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
         if not gene_desc.go_function_description:
             gene_desc.go_function_description = contributes_to_func_sent
         else:
-            gene_desc.go_function_description += " " + contributes_to_func_sent
+            gene_desc.go_function_description += "; " + contributes_to_func_sent
         if not gene_desc.go_description:
             gene_desc.go_description = contributes_to_func_sent
         else:
-            gene_desc.go_description += " " + contributes_to_func_sent
+            gene_desc.go_description += "; " + contributes_to_func_sent
     raw_proc_sent = go_sent_generator.get_sentences(aspect='P', merge_groups_with_same_prefix=True,
                                                     keep_only_best_group=True, **go_sent_common_props)
     gene_desc.stats.set_final_go_ids_p = [term_id for sentence in raw_proc_sent for term_id in sentence.terms_ids]
@@ -733,8 +798,19 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
     if proc_sent:
         joined_sent.append(proc_sent)
         gene_desc.go_process_description = proc_sent
-    raw_comp_sent = go_sent_generator.get_sentences(
-        aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True, **go_sent_common_props)
+        if not gene_desc.go_description:
+            gene_desc.go_description = proc_sent
+        else:
+            gene_desc.go_description += "; " + proc_sent
+    colocalizes_with_raw_comp_sent = go_sent_generator.get_sentences(
+        aspect='C', qualifier='colocalizes_with', merge_groups_with_same_prefix=True,
+        keep_only_best_group=True, **go_sent_common_props)
+    if colocalizes_with_raw_comp_sent:
+        raw_comp_sent = go_sent_generator_exp.get_sentences(aspect='C', merge_groups_with_same_prefix=True,
+                                                            keep_only_best_group=True, **go_sent_common_props)
+    else:
+        raw_comp_sent = go_sent_generator.get_sentences(aspect='C', merge_groups_with_same_prefix=True,
+                                                        keep_only_best_group=True, **go_sent_common_props)
     comp_sent = " and ".join([sentence.text for sentence in raw_comp_sent])
     if comp_sent:
         joined_sent.append(comp_sent)
@@ -743,9 +819,7 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
             gene_desc.go_description = comp_sent
         else:
             gene_desc.go_description += " " + comp_sent
-    colocalizes_with_raw_comp_sent = go_sent_generator.get_sentences(
-        aspect='C', qualifier='colocalizes_with', merge_groups_with_same_prefix=True,
-        keep_only_best_group=True, **go_sent_common_props)
+
     gene_desc.stats.set_final_go_ids_c = list(set().union([term_id for sentence in raw_comp_sent for
                                                            term_id in sentence.terms_ids],
                                                           [term_id for sentence in colocalizes_with_raw_comp_sent for
@@ -756,28 +830,40 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
         if not gene_desc.go_component_description:
             gene_desc.go_component_description = colocalizes_with_comp_sent
         else:
-            gene_desc.go_component_description += " " + colocalizes_with_comp_sent
+            gene_desc.go_component_description += "; " + colocalizes_with_comp_sent
         if not gene_desc.go_description:
             gene_desc.go_description = colocalizes_with_comp_sent
         else:
-            gene_desc.go_description += " " + colocalizes_with_comp_sent
-    do_annotations = df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.DO,
-                                                 priority_list=conf_parser.get_do_annotations_priority())
-    do_sentence_generator = SentenceGenerator(annotations=do_annotations, ontology=df.do_ontology,
-                                              **do_sent_gen_common_prop)
-    gene_desc.stats.total_number_do_annotations = len(do_annotations)
-    gene_desc.stats.set_initial_do_ids = [term_id for terms in do_sentence_generator.terms_groups.values() for tvalues
-                                          in terms.values() for term_id in tvalues]
-    raw_disease_sent = do_sentence_generator.get_sentences(
-        aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False, **do_sent_common_props)
-    disease_sent = "; ".join([sentence.text for sentence in raw_disease_sent])
-    if disease_sent:
-        joined_sent.append(disease_sent)
-        gene_desc.do_description = disease_sent
-    gene_desc.stats.set_final_do_ids = [term_id for sentence in raw_disease_sent for term_id in sentence.terms_ids]
-    if "(multiple)" in disease_sent:
-        gene_desc.stats.number_final_do_term_covering_multiple_initial_do_terms = \
-            disease_sent.count("(multiple)")
+            gene_desc.go_description += "; " + colocalizes_with_comp_sent
+    if not gene_desc.go_description:
+        human_func_sent = None
+        if len(orthologs_sp_fullname) == 1 and orthologs_sp_fullname[0] == "Homo sapiens":
+            human_orthologs = df.get_all_orthologs_for_gene(gene_id=gene.id, organism="Homo sapiens")
+            best_orth = get_best_human_ortholog_for_info_poor(human_orthologs, ensembl_hgnc_ids_map,
+                                                              conf_parser.get_go_annotations_priority(), human_df_agr,
+                                                              go_sent_gen_common_props)
+            if best_orth:
+                best_orth = "RGD:" + best_orth
+                human_go_annotations = human_df_agr.get_annotations_for_gene(
+                    gene_id=best_orth, annot_type=DataType.GO, priority_list=conf_parser.get_go_annotations_priority())
+                human_go_sent_generator = SentenceGenerator(annotations=human_go_annotations,
+                                                            ontology=human_df_agr.go_ontology, **go_sent_gen_common_props)
+                raw_human_func_sent = human_go_sent_generator.get_sentences(aspect='F', merge_groups_with_same_prefix=True,
+                                                                            keep_only_best_group=True,
+                                                                            **go_sent_common_props)
+                human_func_sent = " and ".join([sentence.text for sentence in raw_human_func_sent])
+                if human_func_sent:
+                    joined_sent.append("human " + human_df_agr.go_associations.subject_label_map[best_orth] + " " +
+                                       human_func_sent)
+        if not human_func_sent:
+            protein_domains = df.protein_domains[gene.id[3:]]
+            if protein_domains:
+                dom_word = "domain"
+                if len(protein_domains) > 1:
+                    dom_word = "domains"
+                joined_sent.append("is predicted to encode a protein with the following " + dom_word + ": " +
+                                   concatenate_words_with_oxford_comma([ptdom[1] if ptdom[1] != "" else ptdom[0] for
+                                                                        ptdom in protein_domains]))
     if conf_parser.get_data_fetcher() == "wb_data_fetcher" and "main_sister_species" in species[organism] and \
             species[organism]["main_sister_species"] and df.get_best_orthologs_for_gene(
         gene.id, orth_species_full_name=[sister_sp_fullname], sister_species_data_fetcher=sister_df,
@@ -796,10 +882,45 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
         if sister_proc_sent:
             joined_sent.append("in " + species[species[organism]["main_sister_species"]]["name"] + ", " +
                                best_ortholog[1] + " " + sister_proc_sent)
+    expr_annotations = df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.EXPR,
+                                                   priority_list=conf_parser.get_expression_annotations_priority())
+    expr_sentence_generator = SentenceGenerator(annotations=expr_annotations, ontology=df.expression_ontology,
+                                                **expr_sent_gen_common_props)
+    raw_expression_sent = expr_sentence_generator.get_sentences(
+        aspect='A', qualifier="Verified", merge_groups_with_same_prefix=True, keep_only_best_group=False,
+        **expr_sent_common_props)
+    expression_sent = "; ".join([sentence.text for sentence in raw_expression_sent])
+    if expression_sent:
+        joined_sent.append(expression_sent)
+    if len(joined_sent) == 0:
+        raw_expression_sent_enriched = expr_sentence_generator.get_sentences(
+            aspect='A', qualifier="Enriched", merge_groups_with_same_prefix=True, keep_only_best_group=False,
+            **expr_sent_common_props)
+        expression_sent_enriched = "; ".join([sentence.text for sentence in raw_expression_sent_enriched])
+        if expression_sent_enriched:
+            joined_sent.append(expression_sent_enriched)
+    do_annotations = df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.DO,
+                                                 priority_list=conf_parser.get_do_annotations_priority())
+    do_sentence_generator = SentenceGenerator(annotations=do_annotations, ontology=df.do_ontology,
+                                              **do_sent_gen_common_prop)
+    gene_desc.stats.total_number_do_annotations = len(do_annotations)
+    gene_desc.stats.set_initial_do_ids = [term_id for terms in do_sentence_generator.terms_groups.values() for tvalues
+                                          in terms.values() for term_id in tvalues]
+    raw_disease_sent = do_sentence_generator.get_sentences(
+        aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False, **do_sent_common_props)
+    disease_sent = "; ".join([sentence.text for sentence in raw_disease_sent])
+    if disease_sent:
+        joined_sent.append(disease_sent)
+        gene_desc.do_description = disease_sent
+    gene_desc.stats.set_final_do_ids = [term_id for sentence in raw_disease_sent for term_id in sentence.terms_ids]
+    if "(multiple)" in disease_sent:
+        gene_desc.stats.number_final_do_term_covering_multiple_initial_do_terms = \
+            disease_sent.count("(multiple)")
+
     if len(joined_sent) > 0:
         desc = "; ".join(joined_sent) + "."
         if len(desc) > 0:
-            gene_desc.description = desc[0].upper() + desc[1:]
+            gene_desc.description = gene.name + " " + desc
     else:
         gene_desc.description = None
     desc_writer.add_gene_desc(gene_desc)

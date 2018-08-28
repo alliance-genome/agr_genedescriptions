@@ -6,21 +6,23 @@ generic_data_fetcher:
 
 # options for WormBase gene description generation - used when data_fetcher is set to 'wb_data_fetcher'
 wb_data_fetcher:
-    release: "WS266"
+    release: "WS267"
     raw_files_source: "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases"
+    agr_human_go_associations: "http://download.alliancegenome.org/GO/ANNOT/gene_association_1.7.1.human.gz"
+    agr_go_ontology: "http://download.alliancegenome.org/GO/go_1.7.obo"
     organisms_to_process:
         # add the species to be processed to the following list. Entries must have the same text as in 'organisms'
         # option
         - c_elegans
-        - b_malayi
-        - c_brenneri
-        - c_briggsae
-        - c_japonica
-        - c_remanei
-        - o_volvulus
-        - p_pacificus
-        - s_ratti
-        - t_muris
+        #- b_malayi
+        #- c_brenneri
+        #- c_briggsae
+        #- c_japonica
+        #- c_remanei
+        #- o_volvulus
+        #- p_pacificus
+        #- s_ratti
+        #- t_muris
     organisms:
         human:
             full_name: "Homo sapiens"
@@ -233,7 +235,7 @@ go_sentences_options:
           special_cases:
               - id: 1
                 match_regex: "structural constituent"
-                prefix: "a"
+                prefix: "is a"
                 postfix: ""
         - aspect: F
           group: EXPERIMENTAL
@@ -386,8 +388,10 @@ go_sentences_options:
         D: "diseases"
 
     remove_parents_if_children_are_present: true
+    remove_children_if_parent_is_present: false
     trim_terms_by_common_ancestors: true
     trim_if_more_than_terms: 3
+    max_num_terms: 3
     trim_min_distance_from_root: 
         F: 3
         P: 5
@@ -448,7 +452,7 @@ do_sentences_options:
         - aspect: "D"
           group: ORTHOLOGY_BASED
           qualifier: ""
-          prefix: "human ortholog of this gene is implicated in"
+          prefix: "human orthologs of this gene are implicated in"
           postfix: ""
     do_prepostfix_sentences_map_humans:
         - aspect: "D"
@@ -464,15 +468,53 @@ do_sentences_options:
         - aspect: "D"
           group: ORTHOLOGY_BASED
           qualifier: ""
-          prefix: "human ortholog of this gene is implicated in"
+          prefix: "human orthologs of this gene are implicated in"
           postfix: ""
 
     remove_parents_if_children_are_present: true
+    remove_children_if_parent_is_present: false
     trim_terms_by_common_ancestors: true
     trim_if_more_than_terms: 3
+    max_num_terms: 3
     trim_min_distance_from_root:
         D: 4
     do_truncate_others_aggregation_word: several
     do_truncate_others_terms:
         D: "diseases"
 
+expression_sentences_options:
+    rename_terms:
+        "^neuron$": "nervous system"
+        "(.*)([a-z]+ )neuron$": "\\1\\2neurons"
+        "^germ cell$": "germ cells"
+        "^hypodermis$": "the hypodermis"
+        "(.*)hermaphrodite-specific$": "\\1hermaphrodite"
+    evidence_codes:
+        IDA:
+            group: EXPERIMENTAL
+            priority: 1
+    group_priority:
+        EXPERIMENTAL: 1
+    expression_prepostfix_sentences_map:
+        - aspect: A
+          group: EXPERIMENTAL
+          qualifier: "Verified"
+          prefix: "is expressed in"
+          postfix: ""
+        - aspect: A
+          group: EXPERIMENTAL
+          qualifier: "Enriched"
+          prefix: "is enriched in"
+          postfix: "based on microarray studies"
+
+    expression_truncate_others_aggregation_word: several
+    expression_truncate_others_terms:
+        A: "tissues"
+
+    remove_parents_if_children_are_present: false
+    remove_children_if_parent_is_present: true
+    trim_terms_by_common_ancestors: true
+    trim_if_more_than_terms: 5
+    max_num_terms: 5
+    trim_min_distance_from_root:
+        A: 3

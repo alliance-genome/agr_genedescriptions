@@ -3,6 +3,7 @@ import urllib.request
 import shutil
 import os
 import re
+import inflect
 
 from collections import defaultdict
 from typing import List, Iterable, Dict
@@ -31,6 +32,8 @@ class DataFetcher(object):
         self.do_ontology = None
         self.do_associations = None
         self.gene_data = None
+        self.expression_ontology = None
+        self.expression_associations = None
         self.go_relations = go_relations
         self.do_relations = do_relations
         self.use_cache = use_cache
@@ -118,6 +121,9 @@ class DataFetcher(object):
         elif ontology_type == DataType.DO:
             self.do_ontology = ontology.subontology(relations=self.do_relations)
             new_ontology = self.do_ontology
+        elif ontology_type == DataType.EXPR:
+            self.expression_ontology = ontology.subontology(relations=self.do_relations)
+            new_ontology = self.expression_ontology
         self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
         for root_id in new_ontology.get_roots():
             set_all_depths_in_subgraph(ontology=new_ontology, root_id=root_id, relations=None)
@@ -145,8 +151,19 @@ class DataFetcher(object):
                                                                               cache_path=ontology_cache_path)
                                                         ).subontology(relations=self.do_relations)
             new_ontology = self.do_ontology
+        elif ontology_type == DataType.EXPR:
+            self.expression_ontology = OntologyFactory().create(self._get_cached_file(
+                file_source_url=ontology_url, cache_path=ontology_cache_path)).subontology(relations=self.do_relations)
+            new_ontology = self.expression_ontology
         if terms_replacement_regex:
             self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
+        if ontology_type == DataType.EXPR:
+            inflect_engine = inflect.engine()
+            for term in self.expression_ontology.nodes():
+                if "label" in self.expression_ontology.node(term) and \
+                        inflect_engine.singular_noun(self.expression_ontology.node(term)["label"].split(" ")[-1]) is \
+                        False:
+                    self.expression_ontology.node(term)["label"] = "the " + self.expression_ontology.node(term)["label"]
         for root_id in new_ontology.get_roots():
             set_all_depths_in_subgraph(ontology=new_ontology, root_id=root_id, relations=None)
 
@@ -167,6 +184,10 @@ class DataFetcher(object):
             self.do_associations = self.remove_blacklisted_annotations(association_set=associations,
                                                                        ontology=self.do_ontology,
                                                                        terms_blacklist=exclusion_list)
+        elif associations_type == DataType.EXPR:
+            self.expression_associations = self.remove_blacklisted_annotations(association_set=associations,
+                                                                               ontology=self.do_ontology,
+                                                                               terms_blacklist=exclusion_list)
 
     def load_associations_from_file(self, associations_type: DataType, associations_url: str,
                                     associations_cache_path: str, exclusion_list: List[str]) -> None:
@@ -192,6 +213,13 @@ class DataFetcher(object):
             self.do_associations = self.remove_blacklisted_annotations(association_set=self.do_associations,
                                                                        ontology=self.do_ontology,
                                                                        terms_blacklist=exclusion_list)
+        elif associations_type == DataType.EXPR:
+            self.expression_associations = AssociationSetFactory().create_from_assocs(assocs=GafParser().parse(
+                file=self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url),
+                skipheader=True), ontology=self.expression_ontology)
+            self.expression_associations = self.remove_blacklisted_annotations(
+                association_set=self.expression_associations, ontology=self.expression_ontology,
+                terms_blacklist=exclusion_list)
 
     def get_annotations_for_gene(self, gene_id: str, annot_type: DataType = DataType.GO,
                                  include_obsolete: bool = False, include_negative_results: bool = False,
@@ -225,6 +253,9 @@ class DataFetcher(object):
         elif annot_type == DataType.DO:
             dataset = self.do_associations
             ontology = self.do_ontology
+        elif annot_type == DataType.EXPR:
+            dataset = self.expression_associations
+            ontology = self.expression_ontology
         priority_map = dict(zip(priority_list, reversed(range(len(list(priority_list))))))
         annotations = [annotation for annotation in dataset.associations(gene_id) if (include_obsolete or
                                                                                       not ontology.is_obsolete(
@@ -292,13 +323,32 @@ class DataFetcher(object):
         else:
             return {k: v[1:] for k, v in human_genes_props.items()}
 
+    @staticmethod
+    def get_ensembl_hgnc_ids_map():
+        human_genes_props = {}
+        human_content_w_ensmbl = urllib.request.urlopen("https://www.genenames.org/cgi-bin/download?col=gd_hgnc_id&col="
+                                                        "gd_pub_ensembl_id&status=Approved&status=Entry+Withdrawn&statu"
+                                                        "s_opt=2&where=&order_by=gd_app_sym_sort&format=text&limit=&hgn"
+                                                        "c_dbtag=on&submit=submit")
+        header = True
+        for line in human_content_w_ensmbl:
+            if not header:
+                linearr = line.decode("utf-8").split("\t")
+                linearr[-1] = linearr[-1].strip()
+                if linearr[1] != "":
+                    human_genes_props[linearr[1]] = linearr[0]
+            else:
+                header = False
+        return human_genes_props
+
 
 class WBDataFetcher(DataFetcher):
     """data fetcher for WormBase raw files for a single species"""
 
     def __init__(self, raw_files_source: str, cache_location: str, release_version: str, species: str, project_id: str,
                  go_relations: List[str] = None, do_relations: List[str] = None, use_cache: bool = False,
-                 sister_sp_fullname: str = ""):
+                 sister_sp_fullname: str = "", human_orthologs_go_ontology_url: str = None,
+                 human_orthologs_go_associations_url: str = None):
         """create a new data fetcher for WormBase. Files will be downloaded from WB ftp site. For convenience, file
         locations are automatically generated and stored in class variables ending in _url for remote filed and
         _cache_path for caching
@@ -309,6 +359,10 @@ class WBDataFetcher(DataFetcher):
             release_version (str): WormBase release version for the input files
             species (str): WormBase species to fetch
             project_id (str): project id associated with the species
+            human_orthologs_go_ontology_url: ontology for go sentences for human orthologs, to be used in case of
+                information poor genes
+            human_orthologs_go_associations_url: association file url for go sentences for human orthologs, to be used
+                in case of information poor genes
         """
         super().__init__(go_relations=go_relations, do_relations=do_relations, use_cache=use_cache)
         self.gene_data_cache_path = os.path.join(cache_location, "wormbase", release_version, "species", species,
@@ -348,6 +402,21 @@ class WBDataFetcher(DataFetcher):
                                                  release_version + ".orthologs.txt.gz")
         self.orthologs = defaultdict(lambda: defaultdict(list))
         self.sister_sp_fullname = sister_sp_fullname
+        self.protein_domain_url = raw_files_source + '/' + release_version + '/species/' + species + '/' + \
+                                  project_id + '/annotation/' + species + '.' + project_id + '.' + release_version + \
+                                  '.protein_domains.csv.gz'
+        self.protein_domain_cache_path = os.path.join(cache_location, "wormbase", release_version, "species", species,
+                                                      project_id, "annotation", species + '.' + project_id +
+                                                      '.' + release_version + ".protein_domains.csv.gz")
+        self.protein_domains = defaultdict(list)
+        self.expression_ontology_cache_path = os.path.join(cache_location, "wormbase", release_version, "ONTOLOGY",
+                                                           "anatomy_ontology." + release_version + ".obo")
+        self.expression_ontology_url = raw_files_source + '/' + release_version + '/ONTOLOGY/anatomy_ontology.' + \
+                                       release_version + '.obo'
+        self.expression_associations_cache_path = os.path.join(cache_location, "wormbase", release_version, "ONTOLOGY",
+                                                           "anatomy_association." + release_version + ".wb")
+        self.expression_associations_url = raw_files_source + '/' + release_version + \
+                                           '/ONTOLOGY/anatomy_association.' + release_version + '.wb'
 
     def load_gene_data_from_file(self) -> None:
         """load gene list from pre-set file location"""
@@ -362,10 +431,20 @@ class WBDataFetcher(DataFetcher):
 
     def load_associations_from_file(self, associations_type: DataType, associations_url: str,
                                     associations_cache_path: str, exclusion_list: List[str]) -> None:
-        if associations_type == DataType.GO:
+        if associations_type == DataType.GO or associations_type == DataType.EXPR:
             super().load_associations_from_file(associations_type=associations_type, associations_url=associations_url,
                                                 associations_cache_path=associations_cache_path,
                                                 exclusion_list=exclusion_list)
+            if associations_type == DataType.EXPR:
+                associations = []
+                for subj_associations in self.expression_associations.associations_by_subj.values():
+                    for association in subj_associations:
+                        if len(association["qualifiers"]) == 0 or "Partial" in association["qualifiers"] or "Certain" \
+                                in association["qualifiers"]:
+                            association["qualifiers"] = ["Verified"]
+                        associations.append(association)
+                self.expression_associations = AssociationSetFactory().create_from_assocs(
+                    assocs=associations, ontology=self.expression_ontology)
         elif associations_type == DataType.DO:
             self.do_associations = AssociationSetFactory().create_from_assocs(
                 assocs=GafParser().parse(file=self._get_cached_file(cache_path=self.do_associations_cache_path,
@@ -385,9 +464,9 @@ class WBDataFetcher(DataFetcher):
                     if not header:
                         linearr = line.strip().split("\t")
                         if self.do_ontology.node(linearr[10]) and linearr[16] != "IEA":
-                            gene_id = line[2]
+                            gene_id = linearr[2]
                             if linearr[1] == "allele":
-                                gene_id = linearr[4]
+                                gene_id = linearr[4].split(",")[0]
                             associations.append({"source_line": line,
                                                  "subject": {
                                                      "id": gene_id,
@@ -475,6 +554,18 @@ class WBDataFetcher(DataFetcher):
                         break
         return best_orthologs, curr_orth_fullname
 
+    def get_all_orthologs_for_gene(self, gene_id: str, organism: str):
+        return self.orthologs[gene_id][organism]
+
+    def load_protein_domain_information(self):
+        protein_domain_file = self._get_cached_file(cache_path=self.protein_domain_cache_path,
+                                                    file_source_url=self.protein_domain_url)
+        for line in open(protein_domain_file):
+            linearr = line.strip().split("\t")
+            if len(linearr) > 3 and linearr[3] != "":
+                self.protein_domains[linearr[0]] = [domain[0:-1].split(" \"") if len(domain[0:-1].split(" \"")) > 1 else
+                                                    [domain, ""] for domain in linearr[3:]]
+
     def load_all_data_from_file(self, go_terms_replacement_regex: Dict[str, str] = None,
                                 go_terms_exclusion_list: List[str] = None,
                                 do_terms_replacement_regex: Dict[str, str] = None,
@@ -507,4 +598,5 @@ class WBDataFetcher(DataFetcher):
                                          associations_cache_path=self.do_associations_cache_path,
                                          exclusion_list=do_terms_exclusion_list)
         self.load_orthology_from_file()
+        self.load_protein_domain_information()
 
