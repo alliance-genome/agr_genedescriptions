@@ -398,7 +398,8 @@ def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str],
                 prefix = prefix[0:-3]
                 term_names = ["widely"]
             else:
-                prefix += " several tissues including"
+                if not additional_prefix:
+                    prefix += "several tissues including "
                 term_names = [term for term in term_names if term != "the cell" and term != "the Cell"]
     return prefix + concatenate_words_with_oxford_comma(term_names) + postfix
 
@@ -462,8 +463,11 @@ def _generate_ortholog_sentence_wormbase_human(orthologs: List[List[str]], human
         orthologs (List[List[str]]): list of human orthologs, containing gene_id, gene_symbol
         human_genes_props (Dict[str, List[str]]): dictionary containing human gene properties
     Returns:
-        str: the orthology sentence
+        Tuple[list, str]: the orthologs and the sentence
     """
+    symbol_name_arr = []
+    genes_in_families = []
+    gene_symbols_wo_family = []
     if len(orthologs) > 3:
         gene_families = defaultdict(list)
         gene_symbols_wo_family = set()
@@ -509,7 +513,9 @@ def _generate_ortholog_sentence_wormbase_human(orthologs: List[List[str]], human
                                   ")" if best_orth[0] in human_genes_props and human_genes_props[best_orth[0]] else
                                   best_orth[1] for best_orth in orthologs])
         orth_sentence = "is an ortholog of human " + concatenate_words_with_oxford_comma(symbol_name_arr)
-    return orth_sentence
+
+    return [gene.split(" ")[0] for gene in [*genes_in_families, *gene_symbols_wo_family, *symbol_name_arr]], \
+           orth_sentence
 
 
 def generate_orthology_sentence_alliance_human(orthologs: List[List[str]]):
@@ -619,11 +625,15 @@ def get_gene_class(gene_id: str):
     Returns:
         str: the class of the gene
     """
-    gene_class_data = json.loads(urllib.request.urlopen("http://rest.wormbase.org/rest/field/gene/" + gene_id +
-                                                        "/gene_class").read())
-    if "gene_class" in gene_class_data and gene_class_data["gene_class"]["data"] and "tag" in \
-            gene_class_data["gene_class"]["data"] and "label" in gene_class_data["gene_class"]["data"]["tag"]:
-            return gene_class_data["gene_class"]["data"]["tag"]["label"]
+    logging.debug("Getting gene class for gene " + gene_id)
+    try:
+        gene_class_data = json.loads(urllib.request.urlopen("http://rest.wormbase.org/rest/field/gene/" + gene_id +
+                                                            "/gene_class").read())
+        if "gene_class" in gene_class_data and gene_class_data["gene_class"]["data"] and "tag" in \
+                gene_class_data["gene_class"]["data"] and "label" in gene_class_data["gene_class"]["data"]["tag"]:
+                return gene_class_data["gene_class"]["data"]["tag"]["label"]
+    except:
+        return None
     return None
 
 
@@ -728,10 +738,12 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
 
     best_orthologs, selected_orth_name = df.get_best_orthologs_for_gene(
         gene.id, orth_species_full_name=orthologs_sp_fullname)
+    selected_orthologs = []
     if best_orthologs:
         gene_desc.stats.set_best_orthologs = [orth[0] for orth in best_orthologs]
         if len(orthologs_sp_fullname) == 1 and orthologs_sp_fullname[0] == "Homo sapiens":
-            orth_sent = _generate_ortholog_sentence_wormbase_human(best_orthologs, human_genes_props)
+            sel_orthologs, orth_sent = _generate_ortholog_sentence_wormbase_human(best_orthologs, human_genes_props)
+            selected_orthologs = [orth for orth in best_orthologs if orth[1] in sel_orthologs]
         else:
             orth_sent = _generate_ortholog_sentence_wormbase_non_c_elegans(best_orthologs, selected_orth_name,
                                                                            conf_parser.get_textpresso_api_token())
@@ -835,35 +847,6 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
             gene_desc.go_description = colocalizes_with_comp_sent
         else:
             gene_desc.go_description += "; " + colocalizes_with_comp_sent
-    if not gene_desc.go_description:
-        human_func_sent = None
-        if len(orthologs_sp_fullname) == 1 and orthologs_sp_fullname[0] == "Homo sapiens":
-            human_orthologs = df.get_all_orthologs_for_gene(gene_id=gene.id, organism="Homo sapiens")
-            best_orth = get_best_human_ortholog_for_info_poor(human_orthologs, ensembl_hgnc_ids_map,
-                                                              conf_parser.get_go_annotations_priority(), human_df_agr,
-                                                              go_sent_gen_common_props)
-            if best_orth:
-                best_orth = "RGD:" + best_orth
-                human_go_annotations = human_df_agr.get_annotations_for_gene(
-                    gene_id=best_orth, annot_type=DataType.GO, priority_list=conf_parser.get_go_annotations_priority())
-                human_go_sent_generator = SentenceGenerator(annotations=human_go_annotations,
-                                                            ontology=human_df_agr.go_ontology, **go_sent_gen_common_props)
-                raw_human_func_sent = human_go_sent_generator.get_sentences(aspect='F', merge_groups_with_same_prefix=True,
-                                                                            keep_only_best_group=True,
-                                                                            **go_sent_common_props)
-                human_func_sent = " and ".join([sentence.text for sentence in raw_human_func_sent])
-                if human_func_sent:
-                    joined_sent.append("human " + human_df_agr.go_associations.subject_label_map[best_orth] + " " +
-                                       human_func_sent)
-        if not human_func_sent:
-            protein_domains = df.protein_domains[gene.id[3:]]
-            if protein_domains:
-                dom_word = "domain"
-                if len(protein_domains) > 1:
-                    dom_word = "domains"
-                joined_sent.append("is predicted to encode a protein with the following " + dom_word + ": " +
-                                   concatenate_words_with_oxford_comma([ptdom[1] if ptdom[1] != "" else ptdom[0] for
-                                                                        ptdom in protein_domains]))
     if conf_parser.get_data_fetcher() == "wb_data_fetcher" and "main_sister_species" in species[organism] and \
             species[organism]["main_sister_species"] and df.get_best_orthologs_for_gene(
         gene.id, orth_species_full_name=[sister_sp_fullname], sister_species_data_fetcher=sister_df,
@@ -891,14 +874,35 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
         **expr_sent_common_props)
     expression_sent = "; ".join([sentence.text for sentence in raw_expression_sent])
     if expression_sent:
-        joined_sent.append(expression_sent)
+        postfix = ""
+        if len(df.expression_enriched_extra_data[gene.id[3:]]) > 0:
+            postfix = " " + concatenate_words_with_oxford_comma(df.expression_enriched_extra_data[gene.id[3:]]) + \
+                      " studies"
+        joined_sent.append(expression_sent + postfix)
     if len(joined_sent) == 0:
         raw_expression_sent_enriched = expr_sentence_generator.get_sentences(
             aspect='A', qualifier="Enriched", merge_groups_with_same_prefix=True, keep_only_best_group=False,
             **expr_sent_common_props)
-        expression_sent_enriched = "; ".join([sentence.text for sentence in raw_expression_sent_enriched])
+        expression_sent_enriched = ""
+        postfix = ""
+        if df.expression_ontology is not None:
+            expression_sent_enriched = "; ".join([sentence.text for sentence in raw_expression_sent_enriched])
+            postfix = " " + concatenate_words_with_oxford_comma(
+                df.expression_enriched_extra_data[gene.id[3:]]) + " studies"
+        elif df.expression_enriched_bma_data[gene.id[3:]] and len(df.expression_enriched_bma_data[gene.id[3:]][3]) > 0:
+            expression_sent_enriched = "is enriched in " + concatenate_words_with_oxford_comma(
+                df.expression_enriched_bma_data[gene.id[3:]][2])
+            postfix = " based on " + concatenate_words_with_oxford_comma(
+                df.expression_enriched_bma_data[gene.id[3:]][3]) + " studies"
         if expression_sent_enriched:
-            joined_sent.append(expression_sent_enriched)
+            joined_sent.append(expression_sent_enriched + postfix)
+        if df.expression_ontology is None and df.expression_affected_bma_data[gene.id[3:]] and \
+                len(df.expression_affected_bma_data[gene.id[3:]][3]) > 0:
+            expression_sent_affected = "is affected by " + concatenate_words_with_oxford_comma(
+                df.expression_affected_bma_data[gene.id[3:]][2]) + " based on " + \
+                                       concatenate_words_with_oxford_comma(
+                                           df.expression_affected_bma_data[gene.id[3:]][3]) + " studies"
+            joined_sent.append(expression_sent_affected)
     do_annotations = df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.DO,
                                                  priority_list=conf_parser.get_do_annotations_priority())
     do_sentence_generator = SentenceGenerator(annotations=do_annotations, ontology=df.do_ontology,
@@ -916,6 +920,39 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
     if "(multiple)" in disease_sent:
         gene_desc.stats.number_final_do_term_covering_multiple_initial_do_terms = \
             disease_sent.count("(multiple)")
+
+    if not gene_desc.go_description:
+        human_func_sent = None
+        if len(orthologs_sp_fullname) == 1 and orthologs_sp_fullname[0] == "Homo sapiens":
+            # human_orthologs = df.get_all_orthologs_for_gene(gene_id=gene.id, organism="Homo sapiens")
+            best_orth = get_best_human_ortholog_for_info_poor(selected_orthologs, ensembl_hgnc_ids_map,
+                                                              conf_parser.get_go_annotations_priority(), human_df_agr,
+                                                              go_sent_gen_common_props)
+            if best_orth:
+                best_orth = "RGD:" + best_orth
+                human_go_annotations = human_df_agr.get_annotations_for_gene(
+                    gene_id=best_orth, annot_type=DataType.GO, priority_list=("EXP", "IDA", "IPI", "IMP", "IGI", "IEP",
+                                                                              "HTP", "HDA", "HMP", "HGI", "HEP"))
+                human_go_sent_generator = SentenceGenerator(annotations=human_go_annotations,
+                                                            ontology=human_df_agr.go_ontology,
+                                                            **go_sent_gen_common_props)
+                raw_human_func_sent = human_go_sent_generator.get_sentences(aspect='F',
+                                                                            merge_groups_with_same_prefix=True,
+                                                                            keep_only_best_group=True,
+                                                                            **go_sent_common_props)
+                human_func_sent = " and ".join([sentence.text for sentence in raw_human_func_sent])
+                if human_func_sent:
+                    joined_sent.append("human " + human_df_agr.go_associations.subject_label_map[best_orth] + " " +
+                                       human_func_sent)
+        if not human_func_sent:
+            protein_domains = df.protein_domains[gene.id[3:]]
+            if protein_domains:
+                dom_word = "domain"
+                if len(protein_domains) > 1:
+                    dom_word = "domains"
+                joined_sent.append("is predicted to encode a protein with the following " + dom_word + ": " +
+                                   concatenate_words_with_oxford_comma([ptdom[1] if ptdom[1] != "" else ptdom[0] for
+                                                                        ptdom in protein_domains]))
 
     if len(joined_sent) > 0:
         desc = "; ".join(joined_sent) + "."

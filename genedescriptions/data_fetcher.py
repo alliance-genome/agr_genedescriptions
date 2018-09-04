@@ -256,21 +256,24 @@ class DataFetcher(object):
         elif annot_type == DataType.EXPR:
             dataset = self.expression_associations
             ontology = self.expression_ontology
-        priority_map = dict(zip(priority_list, reversed(range(len(list(priority_list))))))
-        annotations = [annotation for annotation in dataset.associations(gene_id) if (include_obsolete or
-                                                                                      not ontology.is_obsolete(
-                                                                                          annotation["object"]["id"]))
-                       and (include_negative_results or "NOT" not in annotation["qualifiers"])]
-        id_selected_annotation = {}
-        for annotation in annotations:
-            if annotation["evidence"]["type"] in priority_map.keys():
-                if annotation["object"]["id"] in id_selected_annotation:
-                    if priority_map[annotation["evidence"]["type"]] > \
-                            priority_map[id_selected_annotation[annotation["object"]["id"]]["evidence"]["type"]]:
+        if dataset is not None and ontology is not None:
+            priority_map = dict(zip(priority_list, reversed(range(len(list(priority_list))))))
+            annotations = [annotation for annotation in dataset.associations(gene_id) if (include_obsolete or
+                                                                                          not ontology.is_obsolete(
+                                                                                              annotation["object"]["id"]))
+                           and (include_negative_results or "NOT" not in annotation["qualifiers"])]
+            id_selected_annotation = {}
+            for annotation in annotations:
+                if annotation["evidence"]["type"] in priority_map.keys():
+                    if annotation["object"]["id"] in id_selected_annotation:
+                        if priority_map[annotation["evidence"]["type"]] > \
+                                priority_map[id_selected_annotation[annotation["object"]["id"]]["evidence"]["type"]]:
+                            id_selected_annotation[annotation["object"]["id"]] = annotation
+                    else:
                         id_selected_annotation[annotation["object"]["id"]] = annotation
-                else:
-                    id_selected_annotation[annotation["object"]["id"]] = annotation
-        return [annotation for annotation in id_selected_annotation.values()]
+            return [annotation for annotation in id_selected_annotation.values()]
+        else:
+            return []
 
     def set_gene_data(self, gene_data: List[Gene]):
         for gene in gene_data:
@@ -417,6 +420,34 @@ class WBDataFetcher(DataFetcher):
                                                            "anatomy_association." + release_version + ".wb")
         self.expression_associations_url = raw_files_source + '/' + release_version + \
                                            '/ONTOLOGY/anatomy_association.' + release_version + '.wb'
+        self.expression_enriched_extra_url = "ftp://caltech.wormbase.org/pub/wormbase/ExprClusterSummary/" + \
+                                             release_version[0:-1] + str(int(release_version[-1]) + 1) + \
+                                             "/ceECsummary_anatomy." + release_version + ".txt"
+        self.expression_enriched_extra_cache_path = os.path.join(cache_location, "wormbase", release_version,
+                                                                 "ExprClusterSummary", "ceECsummary_anatomy." +
+                                                                 release_version + ".txt")
+        self.expression_enriched_extra_data = defaultdict(list)
+        self.expression_enriched_bma_url = "ftp://caltech.wormbase.org/pub/wormbase/ExprClusterSummary/" + \
+                                            release_version[0:-1] + str(int(release_version[-1]) + 1) + \
+                                            "/bmaECsummary_anatomy." + release_version + ".txt"
+        self.expression_enriched_bma_cache_path = os.path.join(cache_location, "wormbase", release_version,
+                                                               "ExprClusterSummary", "bmaECsummary_anatomy." +
+                                                               release_version + ".txt")
+        self.expression_enriched_bma_data = defaultdict(list)
+        self.expression_affected_bma_url = "ftp://caltech.wormbase.org/pub/wormbase/ExprClusterSummary/" + \
+                                            release_version[0:-1] + str(int(release_version[-1]) + 1) + \
+                                            "/bmaECsummary_molReg." + release_version + ".txt"
+        self.expression_affected_bma_cache_path = os.path.join(cache_location, "wormbase", release_version,
+                                                               "ExprClusterSummary", "bmaECsummary_molReg." +
+                                                               release_version + ".txt")
+        self.expression_affected_bma_data = defaultdict(list)
+        self.expression_enriched_ppa_url = "ftp://caltech.wormbase.org/pub/wormbase/ExprClusterSummary/" + \
+                                           release_version[0:-1] + str(int(release_version[-1]) + 1) + \
+                                           "/ppaECsummary_anatomy." + release_version + ".txt"
+        self.expression_enriched_ppa_cache_path = os.path.join(cache_location, "wormbase", release_version,
+                                                               "ExprClusterSummary", "ppaECsummary_anatomy." +
+                                                               release_version + ".txt")
+        self.expression_enriched_ppa_data = defaultdict(list)
 
     def load_gene_data_from_file(self) -> None:
         """load gene list from pre-set file location"""
@@ -437,12 +468,16 @@ class WBDataFetcher(DataFetcher):
                                                 exclusion_list=exclusion_list)
             if associations_type == DataType.EXPR:
                 associations = []
+                primary_ids = set()
                 for subj_associations in self.expression_associations.associations_by_subj.values():
                     for association in subj_associations:
                         if len(association["qualifiers"]) == 0 or "Partial" in association["qualifiers"] or "Certain" \
                                 in association["qualifiers"]:
                             association["qualifiers"] = ["Verified"]
-                        associations.append(association)
+                            associations.append(association)
+                            primary_ids.add(association["object"]["id"])
+                        elif association["object"]["id"] not in primary_ids:
+                            associations.append(association)
                 self.expression_associations = AssociationSetFactory().create_from_assocs(
                     assocs=associations, ontology=self.expression_ontology)
         elif associations_type == DataType.DO:
@@ -565,6 +600,75 @@ class WBDataFetcher(DataFetcher):
             if len(linearr) > 3 and linearr[3] != "":
                 self.protein_domains[linearr[0]] = [domain[0:-1].split(" \"") if len(domain[0:-1].split(" \"")) > 1 else
                                                     [domain, ""] for domain in linearr[3:]]
+
+    def load_expression_enriched_extra_info(self):
+        expr_enriched_extra_file = self._get_cached_file(cache_path=self.expression_enriched_extra_cache_path,
+                                                         file_source_url=self.expression_enriched_extra_url)
+        header = True
+        for line in open(expr_enriched_extra_file):
+            if not header:
+                linearr = line.strip().split("\t")
+                self.expression_enriched_extra_data[linearr[0]] = linearr[4].split(",")
+                self.expression_enriched_extra_data[linearr[0]] = \
+                    [" ".join([word for word in words if word != "study"]) for study in
+                     self.expression_enriched_extra_data[linearr[0]].split(",") for words in study.split(" ")]
+            else:
+                header = False
+
+    def load_bma_expression_data(self):
+        expr_enriched_extra_file = self._get_cached_file(cache_path=self.expression_enriched_bma_cache_path,
+                                                         file_source_url=self.expression_enriched_bma_url)
+        header = True
+        for line in open(expr_enriched_extra_file):
+            if not header:
+                linearr = line.strip().split("\t")
+                self.expression_enriched_bma_data[linearr[0]] = linearr[1:]
+                self.expression_enriched_bma_data[linearr[0]][2] = \
+                    self.transform_expression_cluster_terms(self.expression_enriched_bma_data[linearr[0]][2].split(","))
+                if self.expression_enriched_bma_data[linearr[0]] and self.expression_enriched_bma_data[linearr[0]][3]:
+                    self.expression_enriched_bma_data[linearr[0]][3] = \
+                        [word for study in self.expression_enriched_bma_data[linearr[0]][3].split(",") for word in
+                        study.split(" ") if word != "study"]
+            else:
+                header = False
+        expr_enriched_extra_file = self._get_cached_file(cache_path=self.expression_affected_bma_cache_path,
+                                                         file_source_url=self.expression_affected_bma_url)
+        header = True
+        for line in open(expr_enriched_extra_file):
+            if not header:
+                linearr = line.strip().split("\t")
+                self.expression_affected_bma_data[linearr[0]] = linearr[1:]
+                self.expression_affected_bma_data[linearr[0]][2] = self.transform_expression_cluster_terms(
+                    self.expression_affected_bma_data[linearr[0]][2].split(","))
+                if self.expression_affected_bma_data[linearr[0]] and self.expression_affected_bma_data[linearr[0]][3]:
+                    self.expression_affected_bma_data[linearr[0]][3] = \
+                        [word for study in self.expression_affected_bma_data[linearr[0]][3].split(",") for word in
+                         study.split(" ") if word != "study"]
+            else:
+                header = False
+
+    def load_ppa_expression_data(self):
+        expr_enriched_extra_file = self._get_cached_file(cache_path=self.expression_enriched_ppa_cache_path,
+                                                         file_source_url=self.expression_enriched_ppa_url)
+        header = True
+        for line in open(expr_enriched_extra_file):
+            if not header:
+                linearr = line.strip().split("\t")
+                self.expression_enriched_ppa_data[linearr[0]] = linearr[1:]
+                self.expression_enriched_ppa_data[linearr[0]][2] = self.transform_expression_cluster_terms(
+                    self.expression_enriched_ppa_data[linearr[0]][2].split(","))
+                if self.expression_enriched_ppa_data[linearr[0]][3]:
+                    self.expression_enriched_ppa_data[linearr[0]][3] = \
+                        [word for study in self.expression_enriched_ppa_data[linearr[0]][3].split(",") for word in
+                         study.split(" ") if word != "study"]
+            else:
+                header = False
+
+    @staticmethod
+    def transform_expression_cluster_terms(terms_list: List[str]):
+        inflect_engine = inflect.engine()
+        return ["the " + term if inflect_engine.singular_noun(term.split(" ")[-1]) is False else
+                term for term in terms_list]
 
     def load_all_data_from_file(self, go_terms_replacement_regex: Dict[str, str] = None,
                                 go_terms_exclusion_list: List[str] = None,

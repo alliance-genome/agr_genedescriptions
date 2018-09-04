@@ -127,6 +127,11 @@ def main():
                                            associations_url=df.expression_associations_url,
                                            associations_cache_path=df.expression_associations_cache_path,
                                            exclusion_list=conf_parser.get_expression_terms_exclusion_list())
+            df.load_expression_enriched_extra_info()
+        elif organism == "b_malayi":
+            df.load_bma_expression_data()
+        elif organism == "p_pacificus":
+            df.load_ppa_expression_data()
         desc_writer = JsonGDWriter()
         desc_writer.overall_properties.species = organism
         desc_writer.overall_properties.release_version = conf_parser.get_release("wb_data_fetcher")
