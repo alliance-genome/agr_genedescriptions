@@ -20,25 +20,27 @@ def main():
                 "select joinkey from con_nodump)")
     rows = cur.fetchall()
     for row in rows:
+        desc_text = row[1].replace("\n", "")
         print("Gene : \"" + row[0] + "\"")
-        print("Concise_description", "\"" + row[1] + "\"", sep="\t")
+        print("Concise_description", "\"" + desc_text + "\"", sep="\t")
         if row[2]:
             for accession in row[2].split(", "):
                 accession_arr = accession.split(":")
-                print("Concise_description", "\"" + row[1] + "\"", "Accession_evidence", "\"" + accession_arr[0] +
+                print("Concise_description", "\"" + desc_text + "\"", "Accession_evidence", "\"" + accession_arr[0] +
                       "\" \"" + accession_arr[1] + "\"", sep="\t")
         if row[3]:
             for person in row[3].split(", "):
-                print("Concise_description", "\"" + row[1] + "\"", "Curator_confirmed", "\"" + person + "\"", sep="\t")
+                print("Concise_description", "\"" + desc_text + "\"", "Curator_confirmed", "\"" + person + "\"",
+                      sep="\t")
         if row[4]:
             for paper in row[4].split(","):
-                print("Concise_description", "\"" + row[1] + "\"", "Paper_evidence", paper, sep="\t")
+                print("Concise_description", "\"" + desc_text + "\"", "Paper_evidence", paper, sep="\t")
         if row[5]:
-            print("Concise_description", "\"" + row[1] + "\"", "Date_last_updated", "\"" + row[5].split(" ")[0] +
+            print("Concise_description", "\"" + desc_text + "\"", "Date_last_updated", "\"" + row[5].split(" ")[0] +
                   "\"", sep="\t")
         if row[6]:
             for person in row[3].split(","):
-                print("Concise_description", "\"" + row[1] + "\"", "Person_evidence", person, sep="\t")
+                print("Concise_description", "\"" + desc_text + "\"", "Person_evidence", person, sep="\t")
         print()
 
 

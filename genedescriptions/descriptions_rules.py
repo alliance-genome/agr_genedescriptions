@@ -739,8 +739,6 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
                          refs=", ".join([annot["refs"] for annot in df.get_annotations_for_gene(
                              gene.id, annot_type=DataType.GO,
                              priority_list=conf_parser.get_go_evidence_groups_priority_list())]))
-    gene_desc.paper_evidences = df.paper_evidences[gene.id]
-    gene_desc.paper_evidences.extend(human_df_agr)
     joined_sent = []
 
     best_orthologs, selected_orth_name = df.get_best_orthologs_for_gene(
