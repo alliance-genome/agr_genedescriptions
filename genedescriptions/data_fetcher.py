@@ -122,7 +122,7 @@ class DataFetcher(object):
             self.do_ontology = ontology.subontology(relations=self.do_relations)
             new_ontology = self.do_ontology
         elif ontology_type == DataType.EXPR:
-            self.expression_ontology = ontology.subontology(relations=self.do_relations)
+            self.expression_ontology = ontology.subontology()
             new_ontology = self.expression_ontology
         self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
         for root_id in new_ontology.get_roots():
@@ -153,7 +153,7 @@ class DataFetcher(object):
             new_ontology = self.do_ontology
         elif ontology_type == DataType.EXPR:
             self.expression_ontology = OntologyFactory().create(self._get_cached_file(
-                file_source_url=ontology_url, cache_path=ontology_cache_path)).subontology(relations=self.do_relations)
+                file_source_url=ontology_url, cache_path=ontology_cache_path)).subontology()
             new_ontology = self.expression_ontology
         if terms_replacement_regex:
             self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
@@ -608,10 +608,9 @@ class WBDataFetcher(DataFetcher):
         for line in open(expr_enriched_extra_file):
             if not header:
                 linearr = line.strip().split("\t")
-                self.expression_enriched_extra_data[linearr[0]] = linearr[4].split(",")
-                self.expression_enriched_extra_data[linearr[0]] = \
-                    [" ".join([word for word in words if word != "study"]) for study in
-                     self.expression_enriched_extra_data[linearr[0]].split(",") for words in study.split(" ")]
+                self.expression_enriched_extra_data[linearr[0]] = [word for study in linearr[4].split(",") for word in
+                                                                   study.split(" ") if word != "study" and word !=
+                                                                   "analysis"]
             else:
                 header = False
 
@@ -628,7 +627,7 @@ class WBDataFetcher(DataFetcher):
                 if self.expression_enriched_bma_data[linearr[0]] and self.expression_enriched_bma_data[linearr[0]][3]:
                     self.expression_enriched_bma_data[linearr[0]][3] = \
                         [word for study in self.expression_enriched_bma_data[linearr[0]][3].split(",") for word in
-                        study.split(" ") if word != "study"]
+                         study.split(" ") if word != "study" and word != "analysis"]
             else:
                 header = False
         expr_enriched_extra_file = self._get_cached_file(cache_path=self.expression_affected_bma_cache_path,
@@ -660,7 +659,7 @@ class WBDataFetcher(DataFetcher):
                 if self.expression_enriched_ppa_data[linearr[0]][3]:
                     self.expression_enriched_ppa_data[linearr[0]][3] = \
                         [word for study in self.expression_enriched_ppa_data[linearr[0]][3].split(",") for word in
-                         study.split(" ") if word != "study"]
+                         study.split(" ") if word != "study" and word != "analysis"]
             else:
                 header = False
 

@@ -13,12 +13,12 @@ wb_data_fetcher:
     organisms_to_process:
         # add the species to be processed to the following list. Entries must have the same text as in 'organisms'
         # option
-        #- c_elegans
-        #- b_malayi
-        #- c_brenneri
-        #- c_briggsae
-        #- c_japonica
-        #- c_remanei
+        - c_elegans
+        - b_malayi
+        - c_brenneri
+        - c_briggsae
+        - c_japonica
+        - c_remanei
         - o_volvulus
         - p_pacificus
         - s_ratti
@@ -486,12 +486,14 @@ expression_sentences_options:
     exclude_terms:
         - "WBbt:0005758"
         - "WBbt:0007849"
+        - "WBbt:0005738"
     rename_terms:
         "^neuron$": "nervous system"
         "(.*)([a-z]+ )neuron$": "\\1\\2neurons"
         "^germ cell$": "germ cells"
         "^hypodermis$": "the hypodermis"
         "(.*)hermaphrodite-specific$": "\\1hermaphrodite"
+        "(.*)male-specific$": "\\1male"
     evidence_codes:
         IDA:
             group: EXPERIMENTAL

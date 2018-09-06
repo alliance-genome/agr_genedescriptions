@@ -65,6 +65,8 @@ class GeneDesc(object):
             self.stats = stats
         else:
             self.stats = SingleDescStats()
+        self.paper_evidences = []
+        self.accession_evidences = []
 
 
 class DescriptionsStats(object):
@@ -177,7 +179,8 @@ class SentenceGenerator(object):
                       truncate_others_aspect_words: Dict[str, str] = None,
                       remove_successive_overlapped_terms: bool = True,
                       exclude_terms_ids: List[str] = None,
-                      add_multiple_if_covers_more_children: bool = False, rename_cell: bool = False) -> List[Sentence]:
+                      add_multiple_if_covers_more_children: bool = False, rename_cell: bool = False,
+                      blacklisted_ancestors: List[str] = None) -> List[Sentence]:
         """generate sentences for specific combination of aspect and qualifier
 
         Args:
@@ -207,13 +210,15 @@ class SentenceGenerator(object):
             add_multiple_if_covers_more_children (bool): whether to add the label '(multiple)' to terms that are
                 ancestors covering multiple children
             rename_cell (bool): rename term cell if present
+            blacklisted_ancestors (List[str]): list of common ancestor terms to be blacklisted
         Returns:
             List[Sentence]: a list of sentences
         """
         if not merge_min_distance_from_root:
-            merge_min_distance_from_root = {'F': 1, 'P': 1, 'C': 2, 'D': 3}
+            merge_min_distance_from_root = {'F': 1, 'P': 1, 'C': 2, 'D': 3, 'A': 3}
         if not truncate_others_aspect_words:
-            truncate_others_aspect_words = {'F': 'functions', 'P': 'processes', 'C': 'components', 'D': 'diseases'}
+            truncate_others_aspect_words = {'F': 'functions', 'P': 'processes', 'C': 'components', 'D': 'diseases',
+                                            'A': 'tissues'}
         sentences = []
         terms_already_covered = set()
         evidence_group_priority = {eg: p for p, eg in enumerate(self.evidence_groups_priority_list)}
@@ -236,7 +241,7 @@ class SentenceGenerator(object):
                 merged_terms_coverset = get_merged_nodes_by_common_ancestor(
                     node_ids=list(terms), ontology=self.ontology,
                     min_distance_from_root=merge_min_distance_from_root[aspect],
-                    min_number_of_terms=merge_num_terms_threshold)
+                    min_number_of_terms=merge_num_terms_threshold, nodeids_blacklist=blacklisted_ancestors)
                 if len(merged_terms_coverset.keys()) <= merge_num_terms_threshold:
                     merged_terms = list(merged_terms_coverset.keys())
                     terms_already_covered.update([e for subset in merged_terms_coverset.values() for e in subset])
@@ -734,6 +739,8 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
                          refs=", ".join([annot["refs"] for annot in df.get_annotations_for_gene(
                              gene.id, annot_type=DataType.GO,
                              priority_list=conf_parser.get_go_evidence_groups_priority_list())]))
+    gene_desc.paper_evidences = df.paper_evidences[gene.id]
+    gene_desc.paper_evidences.extend(human_df_agr)
     joined_sent = []
 
     best_orthologs, selected_orth_name = df.get_best_orthologs_for_gene(
@@ -847,24 +854,6 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
             gene_desc.go_description = colocalizes_with_comp_sent
         else:
             gene_desc.go_description += "; " + colocalizes_with_comp_sent
-    if conf_parser.get_data_fetcher() == "wb_data_fetcher" and "main_sister_species" in species[organism] and \
-            species[organism]["main_sister_species"] and df.get_best_orthologs_for_gene(
-        gene.id, orth_species_full_name=[sister_sp_fullname], sister_species_data_fetcher=sister_df,
-        ecode_priority_list=["EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI",
-                             "HEP"])[0]:
-        best_ortholog = df.get_best_orthologs_for_gene(
-            gene.id, orth_species_full_name=[sister_sp_fullname], sister_species_data_fetcher=sister_df,
-            ecode_priority_list=["EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI",
-                                 "HEP"])[0][0]
-        sister_sentences_generator = SentenceGenerator(sister_df.get_annotations_for_gene(
-            annot_type=DataType.GO, gene_id="WB:" + best_ortholog[0],
-            priority_list=("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI", "HEP")),
-            ontology=df.go_ontology, **go_sent_gen_common_props)
-        sister_proc_sent = " and ".join([sentence.text for sentence in sister_sentences_generator.get_sentences(
-            aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True, **go_sent_common_props)])
-        if sister_proc_sent:
-            joined_sent.append("in " + species[species[organism]["main_sister_species"]]["name"] + ", " +
-                               best_ortholog[1] + " " + sister_proc_sent)
     expr_annotations = df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.EXPR,
                                                    priority_list=conf_parser.get_expression_annotations_priority())
     expr_sentence_generator = SentenceGenerator(annotations=expr_annotations, ontology=df.expression_ontology,
@@ -874,11 +863,7 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
         **expr_sent_common_props)
     expression_sent = "; ".join([sentence.text for sentence in raw_expression_sent])
     if expression_sent:
-        postfix = ""
-        if len(df.expression_enriched_extra_data[gene.id[3:]]) > 0:
-            postfix = " " + concatenate_words_with_oxford_comma(df.expression_enriched_extra_data[gene.id[3:]]) + \
-                      " studies"
-        joined_sent.append(expression_sent + postfix)
+        joined_sent.append(expression_sent)
     if len(joined_sent) == 0:
         raw_expression_sent_enriched = expr_sentence_generator.get_sentences(
             aspect='A', qualifier="Enriched", merge_groups_with_same_prefix=True, keep_only_best_group=False,
@@ -894,6 +879,11 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
                 df.expression_enriched_bma_data[gene.id[3:]][2])
             postfix = " based on " + concatenate_words_with_oxford_comma(
                 df.expression_enriched_bma_data[gene.id[3:]][3]) + " studies"
+        elif df.expression_enriched_ppa_data[gene.id[3:]] and len(df.expression_enriched_ppa_data[gene.id[3:]][3]) > 0:
+            expression_sent_enriched = "is enriched in " + concatenate_words_with_oxford_comma(
+                df.expression_enriched_ppa_data[gene.id[3:]][2])
+            postfix = " based on " + concatenate_words_with_oxford_comma(
+                df.expression_enriched_ppa_data[gene.id[3:]][3]) + " studies"
         if expression_sent_enriched:
             joined_sent.append(expression_sent_enriched + postfix)
         if df.expression_ontology is None and df.expression_affected_bma_data[gene.id[3:]] and \
@@ -953,6 +943,24 @@ def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, 
                 joined_sent.append("is predicted to encode a protein with the following " + dom_word + ": " +
                                    concatenate_words_with_oxford_comma([ptdom[1] if ptdom[1] != "" else ptdom[0] for
                                                                         ptdom in protein_domains]))
+    if conf_parser.get_data_fetcher() == "wb_data_fetcher" and "main_sister_species" in species[organism] and \
+            species[organism]["main_sister_species"] and df.get_best_orthologs_for_gene(
+        gene.id, orth_species_full_name=[sister_sp_fullname], sister_species_data_fetcher=sister_df,
+        ecode_priority_list=["EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI",
+                             "HEP"])[0]:
+        best_ortholog = df.get_best_orthologs_for_gene(
+            gene.id, orth_species_full_name=[sister_sp_fullname], sister_species_data_fetcher=sister_df,
+            ecode_priority_list=["EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI",
+                                 "HEP"])[0][0]
+        sister_sentences_generator = SentenceGenerator(sister_df.get_annotations_for_gene(
+            annot_type=DataType.GO, gene_id="WB:" + best_ortholog[0],
+            priority_list=("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI", "HEP")),
+            ontology=df.go_ontology, **go_sent_gen_common_props)
+        sister_proc_sent = " and ".join([sentence.text for sentence in sister_sentences_generator.get_sentences(
+            aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True, **go_sent_common_props)])
+        if sister_proc_sent:
+            joined_sent.append("in " + species[species[organism]["main_sister_species"]]["name"] + ", " +
+                               best_ortholog[1] + " " + sister_proc_sent)
 
     if len(joined_sent) > 0:
         desc = "; ".join(joined_sent) + "."

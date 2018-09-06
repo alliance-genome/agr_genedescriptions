@@ -157,7 +157,5 @@ class WBWriter(DescriptionsWriter):
                 outfile.write(genedesc.gene_id + "\t" + str(now.year) + "-" + str(now.month) + "-" + str(now.day) +
                               "\t" + genedesc.publications + "\t" + genedesc.refs + "\t" + genedesc.description + "\t" +
                               genedesc.species + "\t" + "This description was generated automatically by a script "
-                                                        "based on homology/orthology data, Gene Ontology (GO) "
-                                                        "annotations, Disease ontology (DO) annotations, and tissue "
-                                                        "expression data from the " + genedesc.release_version +
-                              " version of WormBase)")
+                                                        "based on several types of data from the " +
+                              genedesc.release_version + " version of WormBase)")

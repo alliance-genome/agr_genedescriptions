@@ -65,7 +65,8 @@ def main():
         "merge_min_distance_from_root": conf_parser.get_expression_trim_min_distance_from_root(),
         "truncate_others_generic_word": conf_parser.get_expression_truncate_others_aggregation_word(),
         "truncate_others_aspect_words": conf_parser.get_expression_truncate_others_terms(),
-        "add_multiple_if_covers_more_children": False, "rename_cell": True}
+        "add_multiple_if_covers_more_children": False, "rename_cell": True,
+        "blacklisted_ancestors": conf_parser.get_expression_terms_exclusion_list()}
 
     organisms_list = conf_parser.get_wb_organisms_to_process()
     human_genes_props = DataFetcher.get_human_gene_props()
@@ -151,9 +152,47 @@ def main():
                                          expr_sent_gen_common_props=expr_sent_gen_common_props,
                                          expr_sent_common_props=expr_sent_common_props)
         desc_writer.write(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
-                                       organism + "_with_stats.json"), pretty=True, include_single_gene_stats=True)
-        desc_writer.write(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
-                                       organism + "_no_stats.json"), pretty=True, include_single_gene_stats=False)
+                                       organism + ".json"), pretty=True, include_single_gene_stats=True)
+        with open(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
+                               organism + ".txt"), "w") as outfile:
+            for genedesc in desc_writer.data:
+                if genedesc.description:
+                    outfile.write(genedesc.gene_id + "\t" + genedesc.gene_name + "\n" + genedesc.description + "\n\n")
+                else:
+                    outfile.write(genedesc.gene_id + "\t" + genedesc.gene_name + "\nNo description available\n\n")
+        with open(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
+                               organism + ".tsv"), "w") as outfile:
+            for genedesc in desc_writer.data:
+                if genedesc.description:
+                    outfile.write(genedesc.gene_id + "\t" + genedesc.gene_name + "\t" + genedesc.description + "\n")
+                else:
+                    outfile.write(genedesc.gene_id + "\t" + genedesc.gene_name + "\tNo description available\n")
+
+        curators = ["WBPerson324", "WBPerson37462"]
+        now = datetime.datetime.now()
+        with open(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
+                               organism + ".ace"), "w") as outfile:
+            for genedesc in desc_writer.data:
+                if genedesc.description:
+                    outfile.write("Gene : \"" + genedesc.gene_id[3:] + "\"\n")
+                    outfile.write("Automated_description\t\"" + genedesc.description + "\"\n")
+                    #for evidence in genedesc.evidences:
+                    #    accession_arr = evidence.split(":")
+                    #    outfile.write("Automated_description\t\"" + genedesc.description +
+                    #                  "\"\tAccession_evidence\t\"" + accession_arr[0] + "\" \"" + accession_arr[1] +
+                    #                  "\"\n")
+                    for curator in curators:
+                        outfile.write("Automated_description\t\"" + genedesc.description +
+                                      "\"\tCurator_confirmed\t\"" + curator + "\"\n")
+                    #for paper in genedesc.papersref:
+                    #    outfile.write("Automated_description\t\"" + genedesc.description +
+                    #                  "\"\tPaper_evidence\t\"" + paper + "\"\n")
+                    outfile.write("Automated_description\t\"" + genedesc.description + "\"\tDate_last_updated\t\"" +
+                                  str(now.year) + "-" + str(now.month) + "-" + str(now.day) + "\"\n")
+                    outfile.write("Automated_description\t\"" + genedesc.description +
+                                  "\"\tInferred_automatically\t\"" + "This description was generated automatically by a"
+                                                                     " script based on data from the " +
+                                  genedesc.release_version + " version of WormBase\"\n\n")
 
 
 if __name__ == '__main__':

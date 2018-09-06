@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+import psycopg2 as psycopg2
+
+
+def main():
+    conn = psycopg2.connect("dbname='testdb' user='acedb' password='' host='tazendra.caltech.edu'")
+    cur = conn.cursor()
+    cur.execute("select g.con_wbgene, d.con_desctext, a.con_accession, c.con_curator, p.con_paper, l.con_lastupdate, "
+                "per.con_person "
+                "from con_wbgene g "
+                "join con_desctext d ON g.joinkey = d.joinkey "
+                "left outer join con_curator c ON g.joinkey = c.joinkey "
+                "left outer join con_paper p ON g.joinkey = p.joinkey "
+                "left outer join con_accession a ON g.joinkey = a.joinkey "
+                "left outer join con_lastupdate l ON g.joinkey = l.joinkey "
+                "join con_desctype t ON g.joinkey = t.joinkey "
+                "left outer join con_person per ON g.joinkey = per.joinkey "
+                "WHERE t.con_desctype = 'Concise_description' "
+                "AND g.joinkey not in ("
+                "select joinkey from con_nodump)")
+    rows = cur.fetchall()
+    for row in rows:
+        print("Gene : \"" + row[0] + "\"")
+        print("Concise_description", "\"" + row[1] + "\"", sep="\t")
+        if row[2]:
+            for accession in row[2].split(", "):
+                accession_arr = accession.split(":")
+                print("Concise_description", "\"" + row[1] + "\"", "Accession_evidence", "\"" + accession_arr[0] +
+                      "\" \"" + accession_arr[1] + "\"", sep="\t")
+        if row[3]:
+            for person in row[3].split(", "):
+                print("Concise_description", "\"" + row[1] + "\"", "Curator_confirmed", "\"" + person + "\"", sep="\t")
+        if row[4]:
+            for paper in row[4].split(","):
+                print("Concise_description", "\"" + row[1] + "\"", "Paper_evidence", paper, sep="\t")
+        if row[5]:
+            print("Concise_description", "\"" + row[1] + "\"", "Date_last_updated", "\"" + row[5].split(" ")[0] +
+                  "\"", sep="\t")
+        if row[6]:
+            for person in row[3].split(","):
+                print("Concise_description", "\"" + row[1] + "\"", "Person_evidence", person, sep="\t")
+        print()

@@ -28,7 +28,8 @@ def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List
 
 
 def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_root: int = 0,
-                          relations: List[str] = None, previous_path: Union[None, List[str]] = None) -> Set[Tuple[str]]:
+                          relations: List[str] = None, nodeids_blacklist: List[str] = None,
+                          previous_path: Union[None, List[str]] = None) -> Set[Tuple[str]]:
     """get all possible paths connecting a go term to its root terms
 
     Args:
@@ -36,6 +37,7 @@ def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_ro
         ontology (Ontology): the go ontology
         min_distance_from_root (int): return only terms at a specified minimum distance from root terms
         relations (List[str]): the list of relations to be used
+        nodeids_blacklist (List[str]): a list of node ids to exclude from the paths
         previous_path (Union[None, List[str]]): the path to get to the current node
     Returns:
         Set[Tuple[str]]: the set of paths connecting the specified term to its root terms, each of which contains a
@@ -44,7 +46,8 @@ def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_ro
     if previous_path is None:
         previous_path = []
     new_path = previous_path[:]
-    new_path.append(node_id)
+    if not nodeids_blacklist or node_id not in nodeids_blacklist:
+        new_path.append(node_id)
     parents = [parent for parent in ontology.parents(node=node_id, relations=relations) if
                ontology.node(parent)["depth"] >= min_distance_from_root]
     if len(parents) > 0:
@@ -52,7 +55,8 @@ def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_ro
         paths_to_return = set()
         for parent in parents:
             for path in get_all_paths_to_root(node_id=parent, ontology=ontology, previous_path=new_path,
-                                              min_distance_from_root=min_distance_from_root, relations=relations):
+                                              min_distance_from_root=min_distance_from_root, relations=relations,
+                                              nodeids_blacklist=nodeids_blacklist):
                 paths_to_return.add(path)
         return paths_to_return
     if len(new_path) == 0:
@@ -62,13 +66,15 @@ def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_ro
 
 
 def get_merged_nodes_by_common_ancestor(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 3,
-                                        min_number_of_terms: int = 3) -> Dict[str, Set[str]]:
+                                        min_number_of_terms: int = 3,
+                                        nodeids_blacklist: List[str] = None) -> Dict[str, Set[str]]:
     """remove terms with common ancestor and keep the ancestor term instead
 
     Args:
         node_ids (List[str]): the list of nodes to merge by common ancestor
         min_distance_from_root (int): set a minimum distance from root terms for ancestors that can group children terms
         min_number_of_terms (int): minimum number of terms above which the merge operation is performed
+        nodeids_blacklist (List[str]): a list of node ids to be excluded from common ancestors list
         ontology (Ontology): the ontology
     Returns:
         Set[str]: the set of merged terms, together with the set of original terms that each of them covers
@@ -81,7 +87,8 @@ def get_merged_nodes_by_common_ancestor(node_ids: List[str], ontology: Ontology,
         # step 1: get all path for each term and populate data structures
         for node_id in node_ids:
             paths = get_all_paths_to_root(node_id=node_id, ontology=ontology,
-                                          min_distance_from_root=min_distance_from_root, relations=None)
+                                          min_distance_from_root=min_distance_from_root, relations=None,
+                                          nodeids_blacklist=nodeids_blacklist)
             for path in paths:
                 term_paths[node_id].add(path)
                 ancestor_paths[path[-1]].append(path)
