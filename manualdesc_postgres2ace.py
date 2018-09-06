@@ -17,7 +17,8 @@ def main():
                 "left outer join con_person per ON g.joinkey = per.joinkey "
                 "WHERE t.con_desctype = 'Concise_description' "
                 "AND g.joinkey not in ("
-                "select joinkey from con_nodump)")
+                "select joinkey from con_nodump) AND g.con_wbgene not in "
+                "(select w.gin_wbgene from gin_dead d join gin_wbgene w ON d.joinkey = w.joinkey)")
     rows = cur.fetchall()
     for row in rows:
         desc_text = row[1].replace("\n", "")

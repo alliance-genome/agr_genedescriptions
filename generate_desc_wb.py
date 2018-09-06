@@ -192,7 +192,7 @@ def main():
                     outfile.write("Automated_description\t\"" + genedesc.description +
                                   "\"\tInferred_automatically\t\"" + "This description was generated automatically by a"
                                                                      " script based on data from the " +
-                                  genedesc.release_version + " version of WormBase\"\n\n")
+                                  conf_parser.get_release("wb_data_fetcher") + " version of WormBase\"\n\n")
 
 
 if __name__ == '__main__':
