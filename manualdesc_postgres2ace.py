@@ -40,3 +40,7 @@ def main():
             for person in row[3].split(","):
                 print("Concise_description", "\"" + row[1] + "\"", "Person_evidence", person, sep="\t")
         print()
+
+
+if __name__ == '__main__':
+    main()
