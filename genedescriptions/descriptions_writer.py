@@ -1,22 +1,18 @@
 import datetime
 import json
-from abc import ABCMeta, abstractmethod
+from typing import List
+
 import numpy as np
 import copy
 from genedescriptions.descriptions_rules import DescriptionsStats, GeneDesc, DescriptionsOverallProperties
 
 
-class DescriptionsWriter(metaclass=ABCMeta):
+class DescriptionsWriter(object):
 
-    @abstractmethod
     def __init__(self):
         self.overall_properties = DescriptionsOverallProperties()
         self.general_stats = DescriptionsStats()
         self.data = []
-
-    @abstractmethod
-    def write(self):
-        pass
 
     def add_gene_desc(self, gene_description: GeneDesc):
         """add a gene description to the writer object
@@ -104,13 +100,7 @@ class DescriptionsWriter(metaclass=ABCMeta):
         self.general_stats.average_number_orthologs = np.average(num_orthologs) if len(num_orthologs) > 0 \
             else 0
 
-
-class JsonGDWriter(DescriptionsWriter):
-    """generate gene descriptions in json format"""
-    def __init__(self):
-        super().__init__()
-
-    def write(self, file_path: str, pretty: bool = False, include_single_gene_stats: bool = False):
+    def write_json(self, file_path: str, pretty: bool = False, include_single_gene_stats: bool = False):
         """write the descriptions to a json file
 
         Args:
@@ -140,22 +130,60 @@ class JsonGDWriter(DescriptionsWriter):
         with open(file_path, "w") as outfile:
             json.dump(vars(json_serializable_self), outfile, indent=indent)
 
+    def write_ace(self, file_path: str, curators_list: List[str], release_version: str):
+        """write the descriptions to an ace file
 
-class WBWriter(DescriptionsWriter):
-    def __init__(self):
-        super().__init__()
+        Args:
+            file_path (str): the path to the file to write
+            curators_list (List[str]): list of WBPerson Ids to be attached as evidences to the automated descriptions
+        """
+        now = datetime.datetime.now()
+        with open(file_path, "w") as outfile:
+            outfile.write("\n")
+            for genedesc in self.data:
+                if genedesc.description:
+                    outfile.write("Gene : \"" + genedesc.gene_id[3:] + "\"\n")
+                    outfile.write("Automated_description\t\"" + genedesc.description + "\"\n")
+                    # for evidence in genedesc.evidences:
+                    #    accession_arr = evidence.split(":")
+                    #    outfile.write("Automated_description\t\"" + genedesc.description +
+                    #                  "\"\tAccession_evidence\t\"" + accession_arr[0] + "\" \"" + accession_arr[1] +
+                    #                  "\"\n")
+                    for curator in curators_list:
+                        outfile.write("Automated_description\t\"" + genedesc.description +
+                                      "\"\tCurator_confirmed\t\"" + curator + "\"\n")
+                    # for paper in genedesc.papersref:
+                    #    outfile.write("Automated_description\t\"" + genedesc.description +
+                    #                  "\"\tPaper_evidence\t\"" + paper + "\"\n")
+                    outfile.write("Automated_description\t\"" + genedesc.description + "\"\tDate_last_updated\t\"" +
+                                  str(now.year) + "-" + str(now.month) + "-" + str(now.day) + "\"\n")
+                    outfile.write("Automated_description\t\"" + genedesc.description +
+                                  "\"\tInferred_automatically\t\"" + "This description was generated automatically by a"
+                                                                     " script based on data from the " +
+                                  release_version + " version of WormBase\"\n\n")
 
-    def write(self, file_path: str):
-        """write the descriptions to a WB file
+    def write_plain_text(self, file_path):
+        """write the descriptions to a plain text file
 
         Args:
             file_path (str): the path to the file to write
         """
         with open(file_path, "w") as outfile:
             for genedesc in self.data:
-                now = datetime.datetime.now()
-                outfile.write(genedesc.gene_id + "\t" + str(now.year) + "-" + str(now.month) + "-" + str(now.day) +
-                              "\t" + genedesc.publications + "\t" + genedesc.refs + "\t" + genedesc.description + "\t" +
-                              genedesc.species + "\t" + "This description was generated automatically by a script "
-                                                        "based on several types of data from the " +
-                              genedesc.release_version + " version of WormBase)")
+                if genedesc.description:
+                    outfile.write(genedesc.gene_id + "\t" + genedesc.gene_name + "\n" + genedesc.description + "\n\n")
+                else:
+                    outfile.write(genedesc.gene_id + "\t" + genedesc.gene_name + "\nNo description available\n\n")
+
+    def write_tsv(self, file_path):
+        """write the descriptions to a tsv file
+
+        Args:
+            file_path (str): the path to the file to write
+        """
+        with open(file_path, "w") as outfile:
+            for genedesc in self.data:
+                if genedesc.description:
+                    outfile.write(genedesc.gene_id + "\t" + genedesc.gene_name + "\t" + genedesc.description + "\n")
+                else:
+                    outfile.write(genedesc.gene_id + "\t" + genedesc.gene_name + "\tNo description available\n")

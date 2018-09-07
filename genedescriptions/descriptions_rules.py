@@ -705,12 +705,12 @@ def get_best_human_ortholog_for_info_poor(human_orthologs, ensembl_hgnc_ids_map,
     return best_orth
 
 
-def compose_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, species, organism, df,
-                                 orthologs_sp_fullname, go_sent_gen_common_props, go_sent_common_props,
-                                 human_genes_props, do_sent_gen_common_prop, do_sent_common_props, sister_sp_fullname,
-                                 sister_df, human_df_agr, desc_writer, ensembl_hgnc_ids_map,
-                                 expr_sent_gen_common_props, expr_sent_common_props):
-    """compose gene descriptions for WormBase
+def generate_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser, species, organism, df,
+                                  orthologs_sp_fullname, go_sent_gen_common_props, go_sent_common_props,
+                                  human_genes_props, do_sent_gen_common_prop, do_sent_common_props, sister_sp_fullname,
+                                  sister_df, human_df_agr, desc_writer, ensembl_hgnc_ids_map,
+                                  expr_sent_gen_common_props, expr_sent_common_props):
+    """create gene descriptions for WormBase
 
     Args:
         gene (Gene): a gene object

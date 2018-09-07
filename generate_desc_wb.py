@@ -5,7 +5,7 @@ import datetime
 
 from genedescriptions.data_fetcher import WBDataFetcher, DataFetcher
 from genedescriptions.descriptions_rules import *
-from genedescriptions.descriptions_writer import JsonGDWriter
+from genedescriptions.descriptions_writer import DescriptionsWriter
 
 
 def main():
@@ -133,66 +133,36 @@ def main():
             df.load_bma_expression_data()
         elif organism == "p_pacificus":
             df.load_ppa_expression_data()
-        desc_writer = JsonGDWriter()
+        desc_writer = DescriptionsWriter()
         desc_writer.overall_properties.species = organism
         desc_writer.overall_properties.release_version = conf_parser.get_release("wb_data_fetcher")
         desc_writer.overall_properties.date = datetime.date.today().strftime("%B %d, %Y")
         for gene in df.get_gene_data():
             logging.debug("Generating description for gene " + gene.name)
 
-            compose_wormbase_description(gene=gene, conf_parser=conf_parser, species=species, organism=organism, df=df,
-                                         orthologs_sp_fullname=orthologs_sp_fullname,
-                                         go_sent_gen_common_props=go_sent_gen_common_props,
-                                         go_sent_common_props=go_sent_common_props, human_genes_props=human_genes_props,
-                                         do_sent_gen_common_prop=do_sent_gen_common_props,
-                                         do_sent_common_props=do_sent_common_props,
-                                         sister_sp_fullname=sister_sp_fullname, sister_df=sister_df,
-                                         human_df_agr=df_agr, desc_writer=desc_writer,
-                                         ensembl_hgnc_ids_map=ensembl_hgnc_ids_map,
-                                         expr_sent_gen_common_props=expr_sent_gen_common_props,
-                                         expr_sent_common_props=expr_sent_common_props)
-        desc_writer.write(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
-                                       organism + ".json"), pretty=True, include_single_gene_stats=True)
-        with open(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
-                               organism + ".txt"), "w") as outfile:
-            for genedesc in desc_writer.data:
-                if genedesc.description:
-                    outfile.write(genedesc.gene_id + "\t" + genedesc.gene_name + "\n" + genedesc.description + "\n\n")
-                else:
-                    outfile.write(genedesc.gene_id + "\t" + genedesc.gene_name + "\nNo description available\n\n")
-        with open(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
-                               organism + ".tsv"), "w") as outfile:
-            for genedesc in desc_writer.data:
-                if genedesc.description:
-                    outfile.write(genedesc.gene_id + "\t" + genedesc.gene_name + "\t" + genedesc.description + "\n")
-                else:
-                    outfile.write(genedesc.gene_id + "\t" + genedesc.gene_name + "\tNo description available\n")
+            generate_wormbase_description(gene=gene, conf_parser=conf_parser, species=species, organism=organism, df=df,
+                                          orthologs_sp_fullname=orthologs_sp_fullname,
+                                          go_sent_gen_common_props=go_sent_gen_common_props,
+                                          go_sent_common_props=go_sent_common_props,
+                                          human_genes_props=human_genes_props,
+                                          do_sent_gen_common_prop=do_sent_gen_common_props,
+                                          do_sent_common_props=do_sent_common_props,
+                                          sister_sp_fullname=sister_sp_fullname, sister_df=sister_df,
+                                          human_df_agr=df_agr, desc_writer=desc_writer,
+                                          ensembl_hgnc_ids_map=ensembl_hgnc_ids_map,
+                                          expr_sent_gen_common_props=expr_sent_gen_common_props,
+                                          expr_sent_common_props=expr_sent_common_props)
+        desc_writer.write_json(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
+                                            organism + ".json"), pretty=True, include_single_gene_stats=True)
+        desc_writer.write_plain_text(os.path.join(
+            conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()), organism + ".txt"))
 
+        desc_writer.write_tsv(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
+                                           organism + ".tsv"))
         curators = ["WBPerson324", "WBPerson37462"]
-        now = datetime.datetime.now()
-        with open(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
-                               organism + ".ace"), "w") as outfile:
-            for genedesc in desc_writer.data:
-                if genedesc.description:
-                    outfile.write("Gene : \"" + genedesc.gene_id[3:] + "\"\n")
-                    outfile.write("Automated_description\t\"" + genedesc.description + "\"\n")
-                    #for evidence in genedesc.evidences:
-                    #    accession_arr = evidence.split(":")
-                    #    outfile.write("Automated_description\t\"" + genedesc.description +
-                    #                  "\"\tAccession_evidence\t\"" + accession_arr[0] + "\" \"" + accession_arr[1] +
-                    #                  "\"\n")
-                    for curator in curators:
-                        outfile.write("Automated_description\t\"" + genedesc.description +
-                                      "\"\tCurator_confirmed\t\"" + curator + "\"\n")
-                    #for paper in genedesc.papersref:
-                    #    outfile.write("Automated_description\t\"" + genedesc.description +
-                    #                  "\"\tPaper_evidence\t\"" + paper + "\"\n")
-                    outfile.write("Automated_description\t\"" + genedesc.description + "\"\tDate_last_updated\t\"" +
-                                  str(now.year) + "-" + str(now.month) + "-" + str(now.day) + "\"\n")
-                    outfile.write("Automated_description\t\"" + genedesc.description +
-                                  "\"\tInferred_automatically\t\"" + "This description was generated automatically by a"
-                                                                     " script based on data from the " +
-                                  conf_parser.get_release("wb_data_fetcher") + " version of WormBase\"\n\n")
+        release_version = conf_parser.get_release("wb_data_fetcher")
+        desc_writer.write_ace(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
+                                           organism + ".ace"), curators, release_version)
 
 
 if __name__ == '__main__':
