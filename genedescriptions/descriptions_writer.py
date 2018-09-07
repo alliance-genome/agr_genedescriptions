@@ -142,7 +142,6 @@ class DescriptionsWriter(object):
             outfile.write("\n")
             for genedesc in self.data:
                 if genedesc.description:
-                    outfile.write("Gene : \"" + genedesc.gene_id[3:] + "\"\n")
                     outfile.write("Automated_description\t\"" + genedesc.description + "\"\n")
                     # for evidence in genedesc.evidences:
                     #    accession_arr = evidence.split(":")

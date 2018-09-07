@@ -40,7 +40,7 @@ def main():
             print("Concise_description", "\"" + desc_text + "\"", "Date_last_updated", "\"" + row[5].split(" ")[0] +
                   "\"", sep="\t")
         if row[6]:
-            for person in row[3].split(","):
+            for person in row[6].split(","):
                 print("Concise_description", "\"" + desc_text + "\"", "Person_evidence", person, sep="\t")
         print()
 
