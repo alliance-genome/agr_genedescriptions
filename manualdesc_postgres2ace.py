@@ -23,7 +23,8 @@ def main():
     for row in rows:
         desc_text = row[1].replace("\n", "")
         print("Gene : \"" + row[0] + "\"")
-        print("Concise_description", "\"" + desc_text + "\"", sep="\t")
+        if not row[2] and not row[3] and not row[4] and not row[6]:
+            print("Concise_description", "\"" + desc_text + "\"", sep="\t")
         if row[2]:
             for accession in row[2].split(", "):
                 accession_arr = accession.split(":")
