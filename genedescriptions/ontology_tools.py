@@ -5,6 +5,9 @@ from typing import List, Dict, Tuple, Union, Set
 from ontobio.ontol import Ontology
 
 
+logger = logging.getLogger("Ontology Tools")
+
+
 def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None, comparison_func=max,
                                current_depth: int = 0):
     """calculate and set max_depth and min_depth (maximum and minimum distances from root terms in the ontology)
@@ -80,7 +83,7 @@ def get_merged_nodes_by_common_ancestor(node_ids: List[str], ontology: Ontology,
         Set[str]: the set of merged terms, together with the set of original terms that each of them covers
     """
     if len(node_ids) > min_number_of_terms:
-        logging.debug("applying trimming through naive algorithm")
+        logger.debug("applying trimming through naive algorithm")
         final_terms_set = {}
         ancestor_paths = defaultdict(list)
         term_paths = defaultdict(set)
@@ -126,7 +129,7 @@ def get_merged_nodes_by_common_ancestor(node_ids: List[str], ontology: Ontology,
                     term_paths_copy = term_paths[node_id].copy()
                 else:
                     break
-        logging.debug("trimming done")
+        logger.debug("trimming done")
         return final_terms_set
     else:
         return {node_id: {node_id} for node_id in node_ids}
@@ -144,7 +147,7 @@ def find_set_covering(subsets: List[Tuple[str, str, Set[str]]], costs: List[floa
     Returns:
         List[str]: the list of IDs of the subsets that maximize coverage with respect to the elements in the universe
     """
-    logging.debug("starting set covering optimization")
+    logger.debug("starting set covering optimization")
     if costs and len(costs) != len(subsets) and any(map(lambda x: x <= 0, costs)):
         return None
     universe = [e for subset in subsets for e in subset[1]]
@@ -160,7 +163,7 @@ def find_set_covering(subsets: List[Tuple[str, str, Set[str]]], costs: List[floa
                                  key=lambda x: (- x[0], x[2]))
         included_elmts |= effect_sets[0][1]
         included_sets.append(effect_sets[0][3])
-    logging.debug("finished set covering optimization")
+    logger.debug("finished set covering optimization")
     return included_sets
 
 

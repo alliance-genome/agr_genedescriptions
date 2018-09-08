@@ -19,13 +19,16 @@ def main():
                         help="path to the log file to generate. Default ./genedescriptions.log")
     parser.add_argument("-L", "--log-level", dest="log_level", choices=['DEBUG', 'INFO', 'WARNING', 'ERROR',
                                                                         'CRITICAL'], help="set the logging level")
-    parser.add_argument("-v", "--output-version", metavar="version_number", dest="version_number", type=str,
-                        help="release version number")
+    parser.add_argument("-o", "--output-formats", metavar="output_formats", dest="output_formats", type=str, nargs="+",
+                        default=["ace", "txt", "json", "tsv"], help="file formats to generate. Accepted values "
+                                                                    "are: ace, txt, json, tsv")
 
     args = parser.parse_args()
     conf_parser = GenedescConfigParser(args.config_file)
     logging.basicConfig(filename=args.log_file, level=args.log_level, format='%(asctime)s - %(name)s - %(levelname)s:'
                                                                              '%(message)s')
+
+    logger = logging.getLogger("WB Gene Description Pipeline")
 
     go_sent_gen_common_props = {"evidence_groups_priority_list": conf_parser.get_go_evidence_groups_priority_list(),
                                 "prepostfix_sentences_map": conf_parser.get_go_prepostfix_sentences_map(),
@@ -72,7 +75,7 @@ def main():
     human_genes_props = DataFetcher.get_human_gene_props()
     ensembl_hgnc_ids_map = DataFetcher.get_ensembl_hgnc_ids_map()
     for organism in organisms_list:
-        logging.info("Processing organism " + organism)
+        logger.info("Processing organism " + organism)
         sister_df = None
         species = conf_parser.get_wb_species()
         sister_sp_fullname = ""
@@ -110,12 +113,12 @@ def main():
                                       project_id=species[species[organism]["main_sister_species"]]["project_id"],
                                       cache_location=conf_parser.get_cache_location(), do_relations=None,
                                       go_relations=["subClassOf", "BFO:0000050"])
-            logging.info("Loading all data for sister species")
+            logger.info("Loading all data for sister species")
             sister_df.load_all_data_from_file(go_terms_replacement_regex=conf_parser.get_go_rename_terms(),
                                               go_terms_exclusion_list=conf_parser.get_go_terms_exclusion_list(),
                                               do_terms_replacement_regex=None,
                                               do_terms_exclusion_list=conf_parser.get_do_terms_exclusion_list())
-        logging.info("Loading all data for main species")
+        logger.info("Loading all data for main species")
         df.load_all_data_from_file(go_terms_replacement_regex=conf_parser.get_go_rename_terms(),
                                    go_terms_exclusion_list=conf_parser.get_go_terms_exclusion_list(),
                                    do_terms_replacement_regex=None,
@@ -138,7 +141,7 @@ def main():
         desc_writer.overall_properties.release_version = conf_parser.get_release("wb_data_fetcher")
         desc_writer.overall_properties.date = datetime.date.today().strftime("%B %d, %Y")
         for gene in df.get_gene_data():
-            logging.debug("Generating description for gene " + gene.name)
+            logger.debug("Generating description for gene " + gene.name)
 
             generate_wormbase_description(gene=gene, conf_parser=conf_parser, species=species, organism=organism, df=df,
                                           orthologs_sp_fullname=orthologs_sp_fullname,
@@ -152,17 +155,20 @@ def main():
                                           ensembl_hgnc_ids_map=ensembl_hgnc_ids_map,
                                           expr_sent_gen_common_props=expr_sent_gen_common_props,
                                           expr_sent_common_props=expr_sent_common_props)
-        desc_writer.write_json(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
-                                            organism + ".json"), pretty=True, include_single_gene_stats=True)
-        desc_writer.write_plain_text(os.path.join(
-            conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()), organism + ".txt"))
-
-        desc_writer.write_tsv(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
-                                           organism + ".tsv"))
-        curators = ["WBPerson324", "WBPerson37462"]
-        release_version = conf_parser.get_release("wb_data_fetcher")
-        desc_writer.write_ace(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
-                                           organism + ".ace"), curators, release_version)
+        if "json" in args.output_formats:
+            desc_writer.write_json(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
+                                                organism + ".json"), pretty=True, include_single_gene_stats=True)
+        if "txt" in args.output_formats:
+            desc_writer.write_plain_text(os.path.join(
+                conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()), organism + ".txt"))
+        if "tsv" in args.output_formats:
+            desc_writer.write_tsv(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
+                                               organism + ".tsv"))
+        if "ace" in args.output_formats:
+            curators = ["WBPerson324", "WBPerson37462"]
+            release_version = conf_parser.get_release("wb_data_fetcher")
+            desc_writer.write_ace(os.path.join(conf_parser.get_genedesc_output_dir(conf_parser.get_genedesc_writer()),
+                                               organism + ".ace"), curators, release_version)
 
 
 if __name__ == '__main__':

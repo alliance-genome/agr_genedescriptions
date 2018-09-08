@@ -26,6 +26,8 @@ Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
 Sentence = namedlist('Sentence', ['prefix', 'terms_ids', 'postfix', 'text', 'aspect', 'evidence_group', 'terms_merged',
                                   'additional_prefix', 'qualifier', 'ancestors_covering_multiple_terms'])
 
+logger = logging.getLogger("Description Generator")
+
 
 class SingleDescStats(object):
     """statistics for a single gene description"""
@@ -235,7 +237,7 @@ class SentenceGenerator(object):
                 terms_no_ancestors = terms - set([ancestor for node_id in terms for ancestor in
                                                   self.ontology.ancestors(node_id)])
                 if len(terms) > len(terms_no_ancestors):
-                    logging.debug("Removed " + str(len(terms) - len(terms_no_ancestors)) + " parents from terms")
+                    logger.debug("Removed " + str(len(terms) - len(terms_no_ancestors)) + " parents from terms")
                     terms = terms_no_ancestors
             if 0 < merge_num_terms_threshold <= len(terms):
                 merged_terms_coverset = get_merged_nodes_by_common_ancestor(
@@ -255,7 +257,7 @@ class SentenceGenerator(object):
                 if add_multiple_if_covers_more_children:
                     ancestors_covering_multiple_children = {self.ontology.label(ancestor, id_if_null=True) for ancestor
                                                             in merged_terms if len(merged_terms_coverset[ancestor]) > 1}
-                logging.debug("Reduced number of terms by merging from " + str(len(terms)) + " to " +
+                logger.debug("Reduced number of terms by merging from " + str(len(terms)) + " to " +
                               str(len(merged_terms)))
                 terms = merged_terms
             else:
@@ -317,7 +319,7 @@ class SentenceGenerator(object):
                 terms_no_ancestors = sent_merger.terms_ids - set([ancestor for node_id in sent_merger.terms_ids for
                                                                   ancestor in self.ontology.ancestors(node_id)])
                 if len(sent_merger.terms_ids) > len(terms_no_ancestors):
-                    logging.debug("Removed " + str(len(sent_merger.terms_ids) - len(terms_no_ancestors)) +
+                    logger.debug("Removed " + str(len(sent_merger.terms_ids) - len(terms_no_ancestors)) +
                                   " parents from terms while merging sentences with same prefix")
                     sent_merger.terms_ids = terms_no_ancestors
         return [Sentence(prefix=prefix, terms_ids=list(sent_merger.terms_ids),
@@ -630,7 +632,7 @@ def get_gene_class(gene_id: str):
     Returns:
         str: the class of the gene
     """
-    logging.debug("Getting gene class for gene " + gene_id)
+    logger.debug("Getting gene class for gene " + gene_id)
     try:
         gene_class_data = json.loads(urllib.request.urlopen("http://rest.wormbase.org/rest/field/gene/" + gene_id +
                                                             "/gene_class").read())
