@@ -138,7 +138,8 @@ def main():
             df.load_ppa_expression_data()
         desc_writer = DescriptionsWriter()
         desc_writer.overall_properties.species = organism
-        desc_writer.overall_properties.release_version = conf_parser.get_release("wb_data_fetcher")
+        desc_writer.overall_properties.release_version = conf_parser.get_release("wb_data_fetcher")[0:-1] + str(
+            int(conf_parser.get_release("wb_data_fetcher")[-1]) + 1)
         desc_writer.overall_properties.date = datetime.date.today().strftime("%B %d, %Y")
         for gene in df.get_gene_data():
             logger.debug("Generating description for gene " + gene.name)

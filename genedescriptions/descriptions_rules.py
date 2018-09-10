@@ -50,8 +50,14 @@ class GeneDesc(object):
     """gene description"""
     def __init__(self, gene_id: str, gene_name: str = "", description: str = None, go_description: str = None,
                  go_function_description: str = None, go_process_description: str = None,
-                 go_component_description: str = None, do_description: str = None, orthology_description: str = None,
-                 stats: SingleDescStats = None, publications: str = "", refs: str = ""):
+                 go_component_description: str = None, do_description: str = None,
+                 do_experimental_description: str = None, do_biomarker_description: str = None,
+                 do_orthology_description: str = None, orthology_description: str = None,
+                 tissue_expression_description: str = None, gene_expression_cluster_description: str = None,
+                 molecule_expression_cluster_description: str = None,
+                 anatomy_expression_cluster_description: str = None, stats: SingleDescStats = None,
+                 protein_domain_description: str = None, human_gene_function_description: str = None,
+                 sister_species_description: str = None, publications: str = "", refs: str = ""):
         self.gene_id = gene_id
         self.gene_name = gene_name
         self.description = description
@@ -60,7 +66,17 @@ class GeneDesc(object):
         self.go_process_description = go_process_description
         self.go_component_description = go_component_description
         self.do_description = do_description
+        self.do_experimental_description = do_experimental_description
+        self.do_biomarker_description = do_biomarker_description
+        self.do_orthology_description = do_orthology_description
         self.orthology_description = orthology_description
+        self.tissue_expression_description = tissue_expression_description
+        self.gene_expression_cluster_description = gene_expression_cluster_description
+        self.molecule_expression_cluster_description = molecule_expression_cluster_description
+        self.anatomy_expression_cluster_description = anatomy_expression_cluster_description
+        self.protein_domain_description = protein_domain_description
+        self.human_gene_function_description = human_gene_function_description
+        self.sister_species_description = sister_species_description
         self.publications = publications
         self.refs = refs
         if stats:
@@ -86,6 +102,16 @@ class DescriptionsStats(object):
         self.number_genes_with_null_do_description = 0
         self.number_genes_with_more_than_3_initial_do_terms = 0
         self.number_genes_with_final_do_terms_covering_multiple_initial_terms = 0
+        self.number_genes_with_non_null_do_experimental_description = 0
+        self.number_genes_with_non_null_do_biomarker_description = 0
+        self.number_genes_with_non_null_do_orthology_description = 0
+        self.number_genes_with_non_null_protein_domain_description = 0
+        self.number_genes_with_non_null_human_gene_function_description = 0
+        self.number_genes_with_non_null_sister_species_description = 0
+        self.number_genes_with_non_null_tissue_expression_description = 0
+        self.number_genes_with_non_null_gene_expression_cluster_description = 0
+        self.number_genes_with_non_null_molecule_expression_cluster_description = 0
+        self.number_genes_with_non_null_anatomy_expression_cluster_description = 0
         self.average_number_initial_go_terms_f = 0
         self.average_number_initial_go_terms_p = 0
         self.average_number_initial_go_terms_c = 0
@@ -863,6 +889,7 @@ def generate_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser,
         **expr_sent_common_props)
     expression_sent = "; ".join([sentence.text for sentence in raw_expression_sent])
     if expression_sent:
+        gene_desc.tissue_expression_description = expression_sent
         joined_sent.append(expression_sent)
     if len(joined_sent) == 0:
         raw_expression_sent_enriched = expr_sentence_generator.get_sentences(
@@ -874,16 +901,22 @@ def generate_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser,
             expression_sent_enriched = "; ".join([sentence.text for sentence in raw_expression_sent_enriched])
             postfix = " " + concatenate_words_with_oxford_comma(
                 df.expression_enriched_extra_data[gene.id[3:]]) + " studies"
+            if expression_sent_enriched:
+                gene_desc.gene_expression_cluster_description = expression_sent_enriched + postfix
         elif df.expression_enriched_bma_data[gene.id[3:]] and len(df.expression_enriched_bma_data[gene.id[3:]][3]) > 0:
             expression_sent_enriched = "is enriched in " + concatenate_words_with_oxford_comma(
                 df.expression_enriched_bma_data[gene.id[3:]][2])
             postfix = " based on " + concatenate_words_with_oxford_comma(
                 df.expression_enriched_bma_data[gene.id[3:]][3]) + " studies"
+            if expression_sent_enriched:
+                gene_desc.anatomy_expression_cluster_description = expression_sent_enriched + postfix
         elif df.expression_enriched_ppa_data[gene.id[3:]] and len(df.expression_enriched_ppa_data[gene.id[3:]][3]) > 0:
             expression_sent_enriched = "is enriched in " + concatenate_words_with_oxford_comma(
                 df.expression_enriched_ppa_data[gene.id[3:]][2])
             postfix = " based on " + concatenate_words_with_oxford_comma(
                 df.expression_enriched_ppa_data[gene.id[3:]][3]) + " studies"
+            if expression_sent_enriched:
+                gene_desc.anatomy_expression_cluster_description = expression_sent_enriched + postfix
         if expression_sent_enriched:
             joined_sent.append(expression_sent_enriched + postfix)
         if df.expression_ontology is None and df.expression_affected_bma_data[gene.id[3:]] and \
@@ -892,6 +925,7 @@ def generate_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser,
                 df.expression_affected_bma_data[gene.id[3:]][2]) + " based on " + \
                                        concatenate_words_with_oxford_comma(
                                            df.expression_affected_bma_data[gene.id[3:]][3]) + " studies"
+            gene_desc.molecule_expression_cluster_description = expression_sent_enriched + postfix
             joined_sent.append(expression_sent_affected)
     do_annotations = df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.DO,
                                                  priority_list=conf_parser.get_do_annotations_priority())
@@ -906,11 +940,22 @@ def generate_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser,
     if disease_sent:
         joined_sent.append(disease_sent)
         gene_desc.do_description = disease_sent
+        experimental_disease_sent = "; ".join([sentence.text for sentence in raw_disease_sent if
+                                               sentence.evidence_group == "EXPERIMENTAL"])
+        if experimental_disease_sent:
+            gene_desc.do_experimental_description = experimental_disease_sent
+        biomarker_disease_sent = "; ".join([sentence.text for sentence in raw_disease_sent if
+                                            sentence.evidence_group == "BIOMARKER"])
+        if biomarker_disease_sent:
+            gene_desc.do_biomarker_description = biomarker_disease_sent
+        orthology_disease_sent = "; ".join([sentence.text for sentence in raw_disease_sent if
+                                            sentence.evidence_group == "ORTHOLOGY_BASED"])
+        if orthology_disease_sent:
+            gene_desc.do_orthology_description = orthology_disease_sent
     gene_desc.stats.set_final_do_ids = [term_id for sentence in raw_disease_sent for term_id in sentence.terms_ids]
     if "(multiple)" in disease_sent:
         gene_desc.stats.number_final_do_term_covering_multiple_initial_do_terms = \
             disease_sent.count("(multiple)")
-
     if not gene_desc.go_description:
         human_func_sent = None
         if len(orthologs_sp_fullname) == 1 and orthologs_sp_fullname[0] == "Homo sapiens":
@@ -932,6 +977,9 @@ def generate_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser,
                                                                             **go_sent_common_props)
                 human_func_sent = " and ".join([sentence.text for sentence in raw_human_func_sent])
                 if human_func_sent:
+                    gene_desc.human_gene_function_description = "human " + \
+                                                                human_df_agr.go_associations.subject_label_map[
+                                                                    best_orth] + " " + human_func_sent
                     joined_sent.append("human " + human_df_agr.go_associations.subject_label_map[best_orth] + " " +
                                        human_func_sent)
         if not human_func_sent:
@@ -943,6 +991,10 @@ def generate_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser,
                 joined_sent.append("is predicted to encode a protein with the following " + dom_word + ": " +
                                    concatenate_words_with_oxford_comma([ptdom[1] if ptdom[1] != "" else ptdom[0] for
                                                                         ptdom in protein_domains]))
+                gene_desc.protein_domain_description = \
+                    "is predicted to encode a protein with the following " + dom_word + ": " + \
+                    concatenate_words_with_oxford_comma([ptdom[1] if ptdom[1] != "" else ptdom[0] for ptdom in
+                                                         protein_domains])
     if conf_parser.get_data_fetcher() == "wb_data_fetcher" and "main_sister_species" in species[organism] and \
             species[organism]["main_sister_species"] and df.get_best_orthologs_for_gene(
         gene.id, orth_species_full_name=[sister_sp_fullname], sister_species_data_fetcher=sister_df,
@@ -959,6 +1011,8 @@ def generate_wormbase_description(gene: Gene, conf_parser: GenedescConfigParser,
         sister_proc_sent = " and ".join([sentence.text for sentence in sister_sentences_generator.get_sentences(
             aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True, **go_sent_common_props)])
         if sister_proc_sent:
+            gene_desc.sister_species_description = "in " + species[species[organism]["main_sister_species"]]["name"] + \
+                                                   ", " + best_ortholog[1] + " " + sister_proc_sent
             joined_sent.append("in " + species[species[organism]["main_sister_species"]]["name"] + ", " +
                                best_ortholog[1] + " " + sister_proc_sent)
 

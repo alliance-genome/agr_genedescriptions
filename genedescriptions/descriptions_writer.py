@@ -76,6 +76,26 @@ class DescriptionsWriter(object):
                                                                             gene_desc.do_description is not None])
         self.general_stats.number_genes_with_null_do_description = len([gene_desc for gene_desc in self.data if
                                                                         gene_desc.do_description is None])
+        self.general_stats.number_genes_with_non_null_do_experimental_description = \
+            len([gene_desc for gene_desc in self.data if gene_desc.do_experimental_description is not None])
+        self.general_stats.number_genes_with_non_null_do_biomarker_description = \
+            len([gene_desc for gene_desc in self.data if gene_desc.do_biomarker_description is not None])
+        self.general_stats.number_genes_with_non_null_do_orthology_description = \
+            len([gene_desc for gene_desc in self.data if gene_desc.do_orthology_description is not None])
+        self.general_stats.number_genes_with_non_null_tissue_expression_description = \
+            len([gene_desc for gene_desc in self.data if gene_desc.tissue_expression_description is not None])
+        self.general_stats.number_genes_with_non_null_gene_expression_cluster_description = \
+            len([gene_desc for gene_desc in self.data if gene_desc.gene_expression_cluster_description is not None])
+        self.general_stats.number_genes_with_non_null_molecule_expression_cluster_description = \
+            len([gene_desc for gene_desc in self.data if gene_desc.molecule_expression_cluster_description is not None])
+        self.general_stats.number_genes_with_non_null_anatomy_expression_cluster_description = \
+            len([gene_desc for gene_desc in self.data if gene_desc.anatomy_expression_cluster_description is not None])
+        self.general_stats.number_genes_with_non_null_protein_domain_description = \
+            len([gene_desc for gene_desc in self.data if gene_desc.protein_domain_description is not None])
+        self.general_stats.number_genes_with_non_null_human_gene_function_description = \
+            len([gene_desc for gene_desc in self.data if gene_desc.human_gene_function_description is not None])
+        self.general_stats.number_genes_with_non_null_sister_species_description = \
+            len([gene_desc for gene_desc in self.data if gene_desc.sister_species_description is not None])
         self.general_stats.number_genes_with_more_than_3_initial_do_terms = \
             len([gene_desc for gene_desc in self.data if len(gene_desc.stats.set_initial_do_ids) > 3])
         self.general_stats.number_genes_with_final_do_terms_covering_multiple_initial_terms = \

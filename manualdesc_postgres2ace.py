@@ -5,8 +5,8 @@ import psycopg2 as psycopg2
 def main():
     conn = psycopg2.connect("dbname='testdb' user='acedb' password='' host='tazendra.caltech.edu'")
     cur = conn.cursor()
-    cur.execute("select g.con_wbgene, d.con_desctext, a.con_accession, c.con_curator, p.con_paper, l.con_lastupdate, "
-                "per.con_person "
+    cur.execute("select g.con_wbgene, d.con_desctext, a.con_accession, c.con_curator_hst, p.con_paper, "
+                "l.con_lastupdate, per.con_person "
                 "from con_wbgene g "
                 "join con_desctext d ON g.joinkey = d.joinkey "
                 "left outer join con_curator c ON g.joinkey = c.joinkey "
@@ -20,28 +20,35 @@ def main():
                 "select joinkey from con_nodump) AND g.con_wbgene not in "
                 "(select w.gin_wbgene from gin_dead d join gin_wbgene w ON d.joinkey = w.joinkey)")
     rows = cur.fetchall()
+    genedesc = {}
     for row in rows:
-        desc_text = row[1].replace("\n", "")
-        print("Gene : \"" + row[0] + "\"")
-        if not row[2] and not row[3] and not row[4] and not row[6]:
+        if row[0] in genedesc and row[3]:
+            genedesc[row[0]][2].append(row[3])
+        else:
+            genedesc[row[0]] = [row[1].replace("\n", ""), row[2], [row[3]] if row[3] else [], row[4], row[5], row[6]]
+
+    for gene_id, gene_props in genedesc.items():
+        desc_text = gene_props[0]
+        print("Gene : \"" + gene_id + "\"")
+        if not gene_props[1] and not gene_props[2] and not len(gene_props[4]) > 0 and not gene_props[5]:
             print("Concise_description", "\"" + desc_text + "\"", sep="\t")
-        if row[2]:
-            for accession in row[2].split(", "):
+        if gene_props[1]:
+            for accession in gene_props[1].split(", "):
                 accession_arr = accession.split(":")
                 print("Concise_description", "\"" + desc_text + "\"", "Accession_evidence", "\"" + accession_arr[0] +
                       "\" \"" + accession_arr[1] + "\"", sep="\t")
-        if row[3]:
-            for person in row[3].split(", "):
+        if gene_props[2]:
+            for person in gene_props[2].split(", "):
                 print("Concise_description", "\"" + desc_text + "\"", "Curator_confirmed", "\"" + person + "\"",
                       sep="\t")
-        if row[4]:
-            for paper in row[4].split(","):
+        if gene_props[3]:
+            for paper in gene_props[3].split(","):
                 print("Concise_description", "\"" + desc_text + "\"", "Paper_evidence", paper, sep="\t")
-        if row[5]:
-            print("Concise_description", "\"" + desc_text + "\"", "Date_last_updated", "\"" + row[5].split(" ")[0] +
+        if gene_props[4]:
+            print("Concise_description", "\"" + desc_text + "\"", "Date_last_updated", "\"" + gene_props[4].split(" ")[0] +
                   "\"", sep="\t")
-        if row[6]:
-            for person in row[6].split(","):
+        if gene_props[5]:
+            for person in gene_props[5].split(","):
                 print("Concise_description", "\"" + desc_text + "\"", "Person_evidence", person, sep="\t")
         print()
 
