@@ -10,11 +10,11 @@ def main():
     parser.add_argument("-i", "--input-dir", metavar="input_dir", dest="input_dir", type=str,
                         default="./", help="working directory where input json files are located")
     parser.add_argument("-m", "--manual-desc", metavar="manual_desc", dest="manual_desc", type=str,
-                        help="path to the manual descriptions ace file")
+                        help="path to the manual descriptions ace file", required=True)
     args = parser.parse_args()
 
     genes_with_automated_desc = set()
-    genes_with_manual_desc = set([line.split(" : ")[1].replace("\"", "") for line in open(args.manual_desc) if
+    genes_with_manual_desc = set([line.split(" : ")[1].replace("\"", "").strip() for line in open(args.manual_desc) if
                                   line.startswith("Gene : ")])
     num_orthology_sentences = 0
     num_go_process_sentences = 0
@@ -33,47 +33,87 @@ def main():
 
     for json_file_path in os.listdir(args.input_dir):
         if json_file_path.endswith(".json"):
-            with open(json_file_path) as json_file:
-                json_data = json.loads(json_file)
-                genes_with_automated_desc.update(set([desc["gene_id"] for desc in json_data["data"] if
-                                                      desc["description"] is not None]))
-                num_orthology_sentences += len([desc for desc in json_data["data"] if desc["orthology_description"]
-                                                is not None])
-                num_go_process_sentences += len([desc for desc in json_data["data"] if desc["go_process_description"]
-                                                is not None])
-                num_go_function_sentences += len([desc for desc in json_data["data"] if desc["go_function_description"]
-                                                  is not None])
-                num_go_component_sentences += len([desc for desc in json_data["data"] if
-                                                   desc["go_component_description"] is not None])
-                num_tissue_expression_sentences += len([desc for desc in json_data["data"] if
-                                                        desc["tissue_expression_description"] is not None])
-                num_gene_expression_cluster_sentences += len([desc for desc in json_data["data"] if
-                                                              desc["gene_expression_cluster_description"] is not None])
-                num_molecule_expression_cluster_sentences += len([desc for desc in json_data["data"] if
-                                                                  desc["molecule_expression_cluster_description"] is not
-                                                                  None])
-                num_anatomy_expression_cluster_sentences += len([desc for desc in json_data["data"] if
-                                                                 desc["anatomy_expression_cluster_description"] is not
-                                                                 None])
-                num_disease_experimental_sentences += len([desc for desc in json_data["data"] if
-                                                           desc["do_experimental_description"] is not None])
-                num_disease_biomarker_sentences += len([desc for desc in json_data["data"] if
-                                                        desc["do_biomarker_description"] is not None])
-                num_disease_orthology_sentences += len([desc for desc in json_data["data"] if
-                                                        desc["do_orthology_description"] is not None])
-                num_protein_domain_sentences += len([desc for desc in json_data["data"] if
-                                                     desc["protein_domain_description"] is not None])
-                num_human_gene_function_sentences += len([desc for desc in json_data["data"] if
-                                                          desc["human_gene_function_description"] is not None])
-                num_sister_species_sentences += len([desc for desc in json_data["data"] if
-                                                     desc["sister_species_description"] is not None])
+            with open(os.path.join(args.input_dir, json_file_path)) as json_file:
+                json_data = json.load(json_file)
+                genes_with_non_null_descriptions = set([desc["gene_id"] for desc in json_data["data"] if
+                                                        desc["description"] is not None])
+                partial_num_orthology_sentences = len([desc for desc in json_data["data"] if
+                                                       desc["orthology_description"] is not None])
+                partial_num_go_process_sentences = len([desc for desc in json_data["data"] if
+                                                        desc["go_process_description"] is not None])
+                partial_num_go_function_sentences = len([desc for desc in json_data["data"] if
+                                                         desc["go_function_description"] is not None])
+                partial_num_go_component_sentences = len([desc for desc in json_data["data"] if
+                                                          desc["go_component_description"] is not None])
+                partial_num_tissue_expression_sentences = len([desc for desc in json_data["data"] if
+                                                               desc["tissue_expression_description"] is not None])
+                partial_num_gene_expression_cluster_sentences = len([desc for desc in json_data["data"] if
+                                                                     desc["gene_expression_cluster_description"] is not
+                                                                     None])
+                partial_num_molecule_expression_cluster_sentences = len([desc for desc in json_data["data"] if
+                                                                         desc["molecule_expression_cluster_description"]
+                                                                         is not None])
+                partial_num_anatomy_expression_cluster_sentences = len([desc for desc in json_data["data"] if
+                                                                        desc["anatomy_expression_cluster_description"]
+                                                                        is not None])
+                partial_num_disease_experimental_sentences = len([desc for desc in json_data["data"] if
+                                                                  desc["do_experimental_description"] is not None])
+                partial_num_disease_biomarker_sentences = len([desc for desc in json_data["data"] if
+                                                               desc["do_biomarker_description"] is not None])
+                partial_num_disease_orthology_sentences = len([desc for desc in json_data["data"] if
+                                                               desc["do_orthology_description"] is not None])
+                partial_num_protein_domain_sentences = len([desc for desc in json_data["data"] if
+                                                            desc["protein_domain_description"] is not None])
+                partial_num_human_gene_function_sentences = len([desc for desc in json_data["data"] if
+                                                                 desc["human_gene_function_description"] is not None])
+                partial_num_sister_species_sentences = len([desc for desc in json_data["data"] if
+                                                            desc["sister_species_description"] is not None])
+                genes_with_automated_desc.update(genes_with_non_null_descriptions)
+                num_orthology_sentences += partial_num_orthology_sentences
+                num_go_process_sentences += partial_num_go_process_sentences
+                num_go_function_sentences += partial_num_go_function_sentences
+                num_go_component_sentences += partial_num_go_component_sentences
+                num_tissue_expression_sentences += partial_num_tissue_expression_sentences
+                num_gene_expression_cluster_sentences += partial_num_gene_expression_cluster_sentences
+                num_molecule_expression_cluster_sentences += partial_num_molecule_expression_cluster_sentences
+                num_anatomy_expression_cluster_sentences += partial_num_anatomy_expression_cluster_sentences
+                num_disease_experimental_sentences += partial_num_disease_experimental_sentences
+                num_disease_biomarker_sentences += partial_num_disease_biomarker_sentences
+                num_disease_orthology_sentences += partial_num_disease_orthology_sentences
+                num_protein_domain_sentences += partial_num_protein_domain_sentences
+                num_human_gene_function_sentences += partial_num_human_gene_function_sentences
+                num_sister_species_sentences += partial_num_sister_species_sentences
 
-    genes_with_both_desc = len(genes_with_automated_desc.intersection(genes_with_manual_desc))
+                print(json_data["overall_properties"]["species"])
+                print(str(len(genes_with_non_null_descriptions)) + " individual gene descriptions")
+                print(str(len(set([desc["gene_id"] for desc in json_data["data"]]).intersection(
+                    genes_with_manual_desc))) + " genes have manual descriptions")
+                print(str(len(genes_with_non_null_descriptions.difference(genes_with_manual_desc))) +
+                      " genes have only automated descriptions")
+                print(str(partial_num_orthology_sentences) + " orthology sentences")
+                print(str(partial_num_go_process_sentences) + " gene ontology process sentences")
+                print(str(partial_num_go_function_sentences) + " gene ontology molecular function sentences")
+                print(str(partial_num_go_component_sentences) + " gene ontology cellular component sentences")
+                print(str(partial_num_tissue_expression_sentences) + " tissue expression sentences")
+                print(str(partial_num_gene_expression_cluster_sentences) + " gene expression cluster sentences")
+                print(str(partial_num_molecule_expression_cluster_sentences) + " molecule expression cluster sentences")
+                print(str(partial_num_anatomy_expression_cluster_sentences) + " anatomy expression cluster sentences")
+                print(str(partial_num_disease_experimental_sentences) + " disease sentences based on experimental data")
+                print(str(partial_num_disease_biomarker_sentences) + " disease sentences based on biomarker data")
+                print(str(partial_num_disease_orthology_sentences) + " disease sentences based on orthology data")
+                print(str(partial_num_protein_domain_sentences) + " protein domain sentences")
+                print(str(partial_num_human_gene_function_sentences) + " human gene ontology molecular function "
+                                                                       "sentences")
+                print(str(partial_num_sister_species_sentences) + " elegans process sentences in non-elegans species")
+                print()
 
-    # TODO add total number of automated and concise descriptions
-    # TODO add number of genes with both concise and automated
-
-
+    print()
+    print("Total number of concise descriptions is " + str(len(genes_with_automated_desc.union(
+        genes_with_manual_desc))))
+    print("Total number of concise descriptions that are automated only is " + str(len(
+        genes_with_automated_desc.difference(genes_with_manual_desc))))
+    print("Total number of concise descriptions that are manually curated as well is " + str(len(
+        genes_with_manual_desc.intersection(genes_with_automated_desc))))
 
 
 if __name__ == '__main__':
