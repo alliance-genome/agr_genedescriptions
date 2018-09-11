@@ -1,5 +1,6 @@
 import datetime
 import json
+from collections import OrderedDict
 from typing import List
 
 import numpy as np
@@ -148,7 +149,7 @@ class DescriptionsWriter(object):
             for gene_desc in json_serializable_self.data:
                 del gene_desc["stats"]
         with open(file_path, "w") as outfile:
-            json.dump(vars(json_serializable_self), outfile, indent=indent)
+            json.dump(OrderedDict(vars(json_serializable_self)), outfile, indent=indent)
 
     def write_ace(self, file_path: str, curators_list: List[str], release_version: str):
         """write the descriptions to an ace file
