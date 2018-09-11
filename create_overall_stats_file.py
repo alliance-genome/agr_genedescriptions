@@ -35,8 +35,8 @@ def main():
         if json_file_path.endswith(".json"):
             with open(os.path.join(args.input_dir, json_file_path)) as json_file:
                 json_data = json.load(json_file)
-                genes_with_non_null_descriptions = set([desc["gene_id"] for desc in json_data["data"] if
-                                                        desc["description"] is not None])
+                genes_with_non_null_descriptions = set([desc["gene_id"].replace("WB:", "") for desc in json_data["data"]
+                                                        if desc["description"] is not None])
                 partial_num_orthology_sentences = len([desc for desc in json_data["data"] if
                                                        desc["orthology_description"] is not None])
                 partial_num_go_process_sentences = len([desc for desc in json_data["data"] if
@@ -86,8 +86,8 @@ def main():
 
                 print(json_data["overall_properties"]["species"])
                 print(str(len(genes_with_non_null_descriptions)) + " individual gene descriptions")
-                print(str(len(set([desc["gene_id"] for desc in json_data["data"]]).intersection(
-                    genes_with_manual_desc))) + " genes have manual descriptions")
+                print(str(len(genes_with_non_null_descriptions.intersection(genes_with_manual_desc))) +
+                      " genes have manual descriptions")
                 print(str(len(genes_with_non_null_descriptions.difference(genes_with_manual_desc))) +
                       " genes have only automated descriptions")
                 print(str(partial_num_orthology_sentences) + " orthology sentences")
