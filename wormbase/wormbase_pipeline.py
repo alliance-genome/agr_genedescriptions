@@ -3,7 +3,7 @@
 import argparse
 import datetime
 
-from genedescriptions.data_manager import WBDataFetcher, DataFetcher
+from genedescriptions.data_manager import WBDataManager, DataManager
 from genedescriptions.descriptions_generator import *
 from genedescriptions.descriptions_generator import generate_ortholog_sentence_wormbase_human, \
     generate_ortholog_sentence_wormbase_non_c_elegans
@@ -21,13 +21,13 @@ def load_data(species, organism, conf_parser):
     if "ortholog" in species[organism] and all(["full_name" in species[ortholog_sp] for ortholog_sp in
                                                 species[organism]["ortholog"]]):
         orthologs_sp_fullname = [species[ortholog_sp]["full_name"] for ortholog_sp in species[organism]["ortholog"]]
-    df = WBDataFetcher(raw_files_source=conf_parser.get_raw_file_sources("wb_data_fetcher"),
+    df = WBDataManager(raw_files_source=conf_parser.get_raw_file_sources("wb_data_fetcher"),
                        release_version=conf_parser.get_release("wb_data_fetcher"),
                        species=organism, project_id=species[organism]["project_id"],
                        cache_location=conf_parser.get_cache_location(), do_relations=None,
                        go_relations=["subClassOf", "BFO:0000050"], sister_sp_fullname=sister_sp_fullname)
     if organism == "c_elegans":
-        df_agr = DataFetcher(go_relations=["subClassOf", "BFO:0000050"], do_relations=None)
+        df_agr = DataManager(go_relations=["subClassOf", "BFO:0000050"], do_relations=None)
         df_agr.load_ontology_from_file(ontology_type=DataType.GO,
                                        ontology_url=conf_parser.get_wb_human_orthologs_go_ontology(),
                                        ontology_cache_path=os.path.join(
@@ -41,7 +41,7 @@ def load_data(species, organism, conf_parser):
                                                "go_assoc.daf.gz"),
                                            exclusion_list=conf_parser.get_go_terms_exclusion_list())
     if "main_sister_species" in species[organism] and species[organism]["main_sister_species"]:
-        sister_df = WBDataFetcher(raw_files_source=conf_parser.get_raw_file_sources("wb_data_fetcher"),
+        sister_df = WBDataManager(raw_files_source=conf_parser.get_raw_file_sources("wb_data_fetcher"),
                                   release_version=conf_parser.get_release("wb_data_fetcher"),
                                   species=species[organism]["main_sister_species"],
                                   project_id=species[species[organism]["main_sister_species"]]["project_id"],
@@ -271,7 +271,7 @@ def set_expression_sentence(expr_sentence_generator, expr_sent_common_props, gen
             joined_sent.append(expression_sent_affected)
 
 
-def set_do_sentence_and_set_stats(df: DataFetcher, conf_parser, do_sent_gen_common_props,
+def set_do_sentence_and_set_stats(df: DataManager, conf_parser, do_sent_gen_common_props,
                                   do_via_orth_sent_gen_common_props, do_sent_common_props,
                                   do_via_orth_sent_common_props,
                                   gene, gene_desc, joined_sent):
@@ -480,8 +480,8 @@ def main():
         "blacklisted_ancestors": conf_parser.get_expression_terms_exclusion_list()}
 
     organisms_list = conf_parser.get_wb_organisms_to_process()
-    human_genes_props = DataFetcher.get_human_gene_props()
-    ensembl_hgnc_ids_map = DataFetcher.get_ensembl_hgnc_ids_map()
+    human_genes_props = DataManager.get_human_gene_props()
+    ensembl_hgnc_ids_map = DataManager.get_ensembl_hgnc_ids_map()
     for organism in organisms_list:
         logger.info("Processing organism " + organism)
         species = conf_parser.get_wb_species()
