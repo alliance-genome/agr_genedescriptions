@@ -8,7 +8,7 @@ import inflect
 from collections import defaultdict
 from typing import List, Iterable, Dict
 from ontobio import AssociationSetFactory
-from genedescriptions.descriptions_rules import set_all_depths_in_subgraph, Gene, DataType, \
+from genedescriptions.descriptions_generator import set_all_depths_in_subgraph, Gene, DataType, \
     is_human_ortholog_name_valid, rename_human_ortholog_name
 from ontobio.ontol_factory import OntologyFactory
 from ontobio.ontol import Ontology
@@ -16,7 +16,7 @@ from ontobio.assocmodel import AssociationSet
 from ontobio.io.gafparser import GafParser
 
 
-class DataFetcher(object):
+class DataManager(object):
     """retrieve data for gene descriptions from different sources"""
 
     def __init__(self, go_relations: List[str] = None, do_relations: List[str] = None, use_cache: bool = False):
@@ -345,7 +345,7 @@ class DataFetcher(object):
         return human_genes_props
 
 
-class WBDataFetcher(DataFetcher):
+class WBDataManager(DataManager):
     """data fetcher for WormBase raw files for a single species"""
 
     def __init__(self, raw_files_source: str, cache_location: str, release_version: str, species: str, project_id: str,
@@ -556,7 +556,7 @@ class WBDataFetcher(DataFetcher):
                     orthologs[ortholog_arr[0]].append(ortholog_arr[1:4])
 
     def get_best_orthologs_for_gene(self, gene_id: str, orth_species_full_name: List[str],
-                                    sister_species_data_fetcher: DataFetcher = None,
+                                    sister_species_data_fetcher: DataManager = None,
                                     ecode_priority_list: List[str] = None):
         best_orthologs = None
         curr_orth_fullname = None

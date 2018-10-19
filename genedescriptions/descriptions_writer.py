@@ -5,7 +5,7 @@ from typing import List
 
 import numpy as np
 import copy
-from genedescriptions.descriptions_rules import DescriptionsStats, GeneDesc, DescriptionsOverallProperties
+from genedescriptions.descriptions_generator import DescriptionsStats, GeneDesc, DescriptionsOverallProperties
 
 
 class DescriptionsWriter(object):

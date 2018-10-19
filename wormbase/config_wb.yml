@@ -428,16 +428,9 @@ do_sentences_options:
         IEP:
             group: BIOMARKER
             priority: 6
-        ISS:
-            group: ORTHOLOGY_BASED
-            priority: 7
-        IEA:
-            group: ORTHOLOGY_BASED
-            priority: 8
     group_priority:
         EXPERIMENTAL: 1
         BIOMARKER: 2
-        ORTHOLOGY_BASED: 3
     do_prepostfix_sentences_map:
         - aspect: "D"
           group: EXPERIMENTAL
@@ -448,11 +441,6 @@ do_sentences_options:
           group: BIOMARKER
           qualifier: ""
           prefix: "is biomarker of"
-          postfix: ""
-        - aspect: "D"
-          group: ORTHOLOGY_BASED
-          qualifier: ""
-          prefix: "human orthologs of this gene are implicated in"
           postfix: ""
     do_prepostfix_sentences_map_humans:
         - aspect: "D"
@@ -465,10 +453,50 @@ do_sentences_options:
           qualifier: ""
           prefix: "is biomarker of"
           postfix: ""
+
+    remove_parents_if_children_are_present: true
+    remove_children_if_parent_is_present: false
+    trim_terms_by_common_ancestors: true
+    trim_if_more_than_terms: 3
+    max_num_terms: 3
+    trim_min_distance_from_root:
+        D: 4
+    do_truncate_others_aggregation_word: several
+    do_truncate_others_terms:
+        D: "diseases"
+
+do_via_orth_sentences_options:
+    exclude_terms:
+        - "DOID:0050736"
+        - "DOID:0050737"
+        - "DOID:0050739"
+        - "DOID:0050177"
+        - "DOID:630"
+        - "DOID:225"
+        - "DOID:7"
+        - "DOID:0080015"
+        - "DOID:0050117"
+        - "DOID:0080014"
+    evidence_codes:
+        ISS:
+            group: ORTHOLOGY_BASED
+            priority: 1
+        IEA:
+            group: ORTHOLOGY_BASED
+            priority: 2
+    group_priority:
+        ORTHOLOGY_BASED: 1
+    do_prepostfix_sentences_map:
         - aspect: "D"
           group: ORTHOLOGY_BASED
           qualifier: ""
           prefix: "human orthologs of this gene are implicated in"
+          postfix: ""
+    do_prepostfix_sentences_map_humans:
+        - aspect: "D"
+          group: ORTHOLOGY_BASED
+          qualifier: ""
+          prefix: "orthologs of this gene are implicated in"
           postfix: ""
 
     remove_parents_if_children_are_present: true
@@ -481,6 +509,7 @@ do_sentences_options:
     do_truncate_others_aggregation_word: several
     do_truncate_others_terms:
         D: "diseases"
+
 
 expression_sentences_options:
     exclude_terms:

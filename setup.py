@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='genedescriptions',
-      version='0.1',
+      version='2.0.7',
       description='gene descriptions package',
       url='',
       author='Valerio Arnaboldi',
@@ -13,7 +13,9 @@ setup(name='genedescriptions',
           'namedlist',
           'inflect',
           'PyYAML',
-          'numpy'
+          'numpy',
+          'urllib3',
+          'ontobio'
       ],
       test_suite='nose.collector',
       tests_require=['nose'],

@@ -2,8 +2,8 @@ import unittest
 import os
 
 from genedescriptions.config_parser import GenedescConfigParser
-from genedescriptions.data_fetcher import WBDataFetcher, DataType
-from genedescriptions.descriptions_rules import SentenceGenerator
+from genedescriptions.data_manager import WBDataManager, DataType
+from genedescriptions.descriptions_generator import SentenceGenerator
 
 
 class TestDescriptionsRules(unittest.TestCase):
@@ -13,7 +13,7 @@ class TestDescriptionsRules(unittest.TestCase):
         self.conf_parser = GenedescConfigParser(os.path.join(this_dir, os.path.pardir, "config_wb.yml"))
 
     def test_generate_sentences(self):
-        df = WBDataFetcher(raw_files_source=self.conf_parser.get_raw_file_sources("wb_data_fetcher"),
+        df = WBDataManager(raw_files_source=self.conf_parser.get_raw_file_sources("wb_data_fetcher"),
                            release_version="WS265", species="c_elegans",
                            project_id=self.conf_parser.get_wb_species()["c_elegans"]["project_id"],
                            cache_location=self.conf_parser.get_cache_location(), do_relations=None,

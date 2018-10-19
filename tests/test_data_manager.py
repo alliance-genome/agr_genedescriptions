@@ -2,7 +2,7 @@ import unittest
 import os
 
 from genedescriptions.config_parser import GenedescConfigParser
-from genedescriptions.data_fetcher import WBDataFetcher, DataType
+from genedescriptions.data_manager import WBDataManager, DataType
 
 
 class TestRawDataFetcher(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestRawDataFetcher(unittest.TestCase):
         this_dir = os.path.split(__file__)[0]
         self.conf_parser = GenedescConfigParser(os.path.join(this_dir, os.path.pardir, "config_wb.yml"))
         species = self.conf_parser.get_wb_species()
-        self.df = WBDataFetcher(raw_files_source=self.conf_parser.get_raw_file_sources("wb_data_fetcher"),
+        self.df = WBDataManager(raw_files_source=self.conf_parser.get_raw_file_sources("wb_data_fetcher"),
                                 release_version="WS266", species="c_elegans",
                                 project_id=species["c_elegans"]["project_id"],
                                 cache_location=self.conf_parser.get_cache_location(), do_relations=None,
@@ -62,12 +62,12 @@ class TestRawDataFetcher(unittest.TestCase):
 
     def test_load_orthology_from_file(self):
         species = self.conf_parser.get_wb_species()
-        df = WBDataFetcher(raw_files_source=self.conf_parser.get_raw_file_sources("wb_data_fetcher"),
+        df = WBDataManager(raw_files_source=self.conf_parser.get_raw_file_sources("wb_data_fetcher"),
                            release_version="WS265", species="c_briggsae",
                            project_id=species["c_briggsae"]["project_id"],
                            cache_location=self.conf_parser.get_cache_location(), do_relations=None,
                            go_relations=["subClassOf", "BFO:0000050"], sister_sp_fullname="Caenorhabditis elegans")
-        sister_df = WBDataFetcher(raw_files_source=self.conf_parser.get_raw_file_sources("wb_data_fetcher"),
+        sister_df = WBDataManager(raw_files_source=self.conf_parser.get_raw_file_sources("wb_data_fetcher"),
                                   release_version="WS265", species="c_elegans",
                                   project_id=species["c_elegans"]["project_id"],
                                   cache_location=self.conf_parser.get_cache_location(), do_relations=None,
