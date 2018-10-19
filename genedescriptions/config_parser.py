@@ -58,6 +58,15 @@ class GenedescConfigParser(object):
         """
         return self.config["do_sentences_options"]["evidence_codes"]
 
+    def get_do_via_orth_evidence_codes(self) -> Dict[str, Dict[str, Union[str, id]]]:
+        """get the configured evidence codes for do via orthology
+
+        Returns:
+            Dict[str, Dict[str, Union[str, id]]]: a dictionary of the configured evidence codes, with evidence code
+                names as keys and a dictionary with 'evidence group' and 'priority' and their values
+        """
+        return self.config["do_via_orth_sentences_options"]["evidence_codes"]
+
     def get_expression_evidence_codes(self) -> Dict[str, Dict[str, Union[str, id]]]:
         """get the configured evidence codes for expression
 
@@ -98,6 +107,18 @@ class GenedescConfigParser(object):
                        for prepost in self.config["do_sentences_options"]["do_prepostfix_sentences_map"]}
         return prepost_map
 
+    def get_do_via_orth_prepostfix_sentences_map(self) -> Dict[Tuple[str, str, str], Tuple[str, str]]:
+        """get the map that links do via orthology aspects and evidence groups with their pre- and postfix phrases
+
+        Returns:
+            Dict[Tuple[str, str, str], Tuple[str, str]]: a dictionary that maps a tuple of aspect and group with prefix
+                and postfix phrases to be used to build the automatically generated sentences
+        """
+        prepost_map = {(prepost["aspect"], prepost["group"], prepost["qualifier"]): (prepost["prefix"],
+                                                                                     prepost["postfix"])
+                       for prepost in self.config["do_via_orth_sentences_options"]["do_prepostfix_sentences_map"]}
+        return prepost_map
+
     def get_expression_prepostfix_sentences_map(self) -> Dict[Tuple[str, str, str], Tuple[str, str]]:
         """get the map that links expression aspects and evidence groups with their pre- and postfix phrases
 
@@ -123,6 +144,21 @@ class GenedescConfigParser(object):
             prepost_map = {(prepost["aspect"], prepost["group"], prepost["qualifier"]): (prepost["prefix"],
                                                                                          prepost["postfix"])
                            for prepost in self.config["do_sentences_options"]["do_prepostfix_sentences_map_humans"]}
+        return prepost_map
+
+    def get_do_via_orth_prepostfix_sentences_map_humans(self) -> Dict[Tuple[str, str, str], Tuple[str, str]]:
+        """get the map that links do aspects and evidence groups with their pre- and postfix phrases
+
+        Returns:
+            Dict[Tuple[str, str, str], Tuple[str, str]]: a dictionary that maps a tuple of aspect and group with prefix
+                and postfix phrases to be used to build the automatically generated sentences
+        """
+        prepost_map = None
+        if "do_prepostfix_sentences_map_humans" in self.config["do_sentences_options"]:
+            prepost_map = {(prepost["aspect"], prepost["group"], prepost["qualifier"]): (prepost["prefix"],
+                                                                                         prepost["postfix"])
+                           for prepost in self.config["do_via_orth_sentences_options"][
+                               "do_prepostfix_sentences_map_humans"]}
         return prepost_map
 
     def get_go_prepostfix_special_cases_sent_map(self) -> Dict[Tuple[str, str, str], Tuple[int, str, str, str]]:
@@ -156,6 +192,15 @@ class GenedescConfigParser(object):
         return [key for key, priority in sorted([(key, ec["priority"]) for key, ec in
                                                  self.get_do_evidence_codes().items()], key=lambda x: x[1])]
 
+    def get_do_via_orth_annotations_priority(self) -> List[str]:
+        """get the priority list for do evidence codes
+
+        Returns:
+            List[str]: a list of evidence codes, sorted by priority. The first element has the highest priority
+        """
+        return [key for key, priority in sorted([(key, ec["priority"]) for key, ec in
+                                                 self.get_do_via_orth_evidence_codes().items()], key=lambda x: x[1])]
+
     def get_expression_annotations_priority(self) -> List[str]:
         """get the priority list for expression evidence codes
 
@@ -185,6 +230,16 @@ class GenedescConfigParser(object):
                                               self.config["do_sentences_options"]["group_priority"].items()],
                                              key=lambda x: x[1])]
 
+    def get_do_via_orth_evidence_groups_priority_list(self) -> List[str]:
+        """get the priority list for do evidence groups
+
+        Returns:
+            List[str]: the priority list for evidence groups
+        """
+        return [group for group, p in sorted([(g, p) for g, p in
+                                              self.config["do_via_orth_sentences_options"]["group_priority"].items()],
+                                             key=lambda x: x[1])]
+
     def get_expression_evidence_groups_priority_list(self) -> List[str]:
         """get the priority list for expression evidence groups
 
@@ -211,6 +266,14 @@ class GenedescConfigParser(object):
         """
         return {name: evidence["group"] for name, evidence in self.get_do_evidence_codes().items()}
 
+    def get_do_via_orth_evidence_codes_groups_map(self) -> Dict[str, str]:
+        """get the map between evidence codes and evidence groups for do
+
+        Returns:
+            Dict[str, str]: the map between codes and groups
+        """
+        return {name: evidence["group"] for name, evidence in self.get_do_via_orth_evidence_codes().items()}
+
     def get_expression_evidence_codes_groups_map(self) -> Dict[str, str]:
         """get the map between evidence codes and evidence groups for expression
 
@@ -234,6 +297,14 @@ class GenedescConfigParser(object):
             List[str]: the exclusion list
         """
         return self.config["do_sentences_options"]["exclude_terms"]
+
+    def get_do_via_orth_terms_exclusion_list(self) -> List[str]:
+        """get the list of go terms to exclude from the gene descriptions
+
+        Returns:
+            List[str]: the exclusion list
+        """
+        return self.config["do_via_orth_sentences_options"]["exclude_terms"]
 
     def get_expression_terms_exclusion_list(self) -> List[str]:
         """get the list of expression terms to exclude from the gene descriptions
@@ -336,6 +407,22 @@ class GenedescConfigParser(object):
             bool: the value of the option
         """
         return self.config["do_sentences_options"]["remove_children_if_parent_is_present"]
+
+    def get_do_via_orth_remove_parents_if_children_are_present(self) -> bool:
+        """get the value of the option to remove parent terms from sentences if children are present in the term set
+
+        Returns:
+            bool: the value of the option
+        """
+        return self.config["do_via_orth_sentences_options"]["remove_parents_if_children_are_present"]
+
+    def get_do_via_orth_remove_children_if_parent_is_present(self) -> bool:
+        """get the value of the option to remove child terms from sentences if parent is present in the term set
+
+        Returns:
+            bool: the value of the option
+        """
+        return self.config["do_via_orth_sentences_options"]["remove_children_if_parent_is_present"]
 
     def get_expression_remove_parents_if_children_are_present(self) -> bool:
         """get the value of the option to remove parent terms from sentences if children are present in the term set
@@ -448,6 +535,50 @@ class GenedescConfigParser(object):
             str: a dictionary containing one word for each aspect
         """
         return self.config["do_sentences_options"]["do_truncate_others_terms"]
+
+    def get_do_via_orth_trim_min_num_terms(self) -> int:
+        """get the threshold value that indicates the minimum number of terms per do via orth aspect for which trimming
+        has to be applied
+
+        Returns:
+            int: the value of the option
+        """
+        return self.config["do_via_orth_sentences_options"]["trim_if_more_than_terms"]
+
+    def get_do_via_orth_max_num_terms(self) -> int:
+        """get the maximum number of terms to be displayed in the final description
+
+        Returns:
+            int: the value of the option
+        """
+        return self.config["do_via_orth_sentences_options"]["max_num_terms"]
+
+    def get_do_via_orth_trim_min_distance_from_root(self):
+        """get the minimum distance from root in the GO ontology to be considered while looking for common ancestors
+        between terms
+
+        Returns:
+            Dict[str, int]: the distances for all go aspects
+        """
+        return self.config["do_via_orth_sentences_options"]["trim_min_distance_from_root"]
+
+    def get_do_via_orth_truncate_others_aggregation_word(self) -> str:
+        """get the generic word used to indicate that one or more terms have been omitted from the sentence, e.g.,
+        'several'
+
+        Returns:
+            str: the aggregation word
+        """
+        return self.config["do_via_orth_sentences_options"]["do_truncate_others_aggregation_word"]
+
+    def get_do_via_orth_truncate_others_terms(self) -> Dict[str, str]:
+        """get the specific words used for each aspect to indicate that one or more terms have been omitted from the
+        sentence
+
+        Returns:
+            str: a dictionary containing one word for each aspect
+        """
+        return self.config["do_via_orth_sentences_options"]["do_truncate_others_terms"]
 
     def get_expression_trim_min_num_terms(self) -> int:
         """get the threshold value that indicates the minimum number of terms per go aspect for which trimming has to
