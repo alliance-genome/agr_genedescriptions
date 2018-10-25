@@ -8,13 +8,14 @@ from typing import List
 
 from genedescriptions.commons import DataType, Module, Gene
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
-from genedescriptions.data_manager import WBDataManager, DataManager, ExpressionClusterType, ExpressionClusterFeature
+from genedescriptions.data_manager import DataManager, ExpressionClusterType, ExpressionClusterFeature
 from genedescriptions.gene_description import GeneDescription
 from genedescriptions.descriptions_generator import OntologySentenceGenerator
 from genedescriptions.descriptions_writer import DescriptionsWriter
 from genedescriptions.sentence_generation_functions import generate_ortholog_sentence_wormbase_human, \
     generate_ortholog_sentence_wormbase_non_c_elegans, concatenate_words_with_oxford_comma, \
     get_best_human_ortholog_for_info_poor
+from wormbase.wb_data_manager import WBDataManager
 
 
 def load_data(species, organism, conf_parser: GenedescConfigParser):

@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='genedescriptions',
-      version='2.0.7',
+      version='2.1.0',
       description='gene descriptions package',
       url='',
       author='Valerio Arnaboldi',
