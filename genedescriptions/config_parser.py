@@ -12,12 +12,13 @@ class ConfigModuleProperty(Enum):
     APPLY_TRIMMING = 4
     MAX_NUM_TERMS_BEFORE_TRIMMING = 5
     MAX_NUM_TERMS_IN_SENTENCE = 6
-    TRIMMING_MIN_DIST_FROM_ROOT = 7
+    DISTANCE_FROM_ROOT = 7
     CUTOFF_SEVERAL_WORD = 8
     CUTOFF_SEVERAL_CATEGORY_WORD = 9
     EXCLUDE_TERMS = 10
     ADD_MULTIPLE_TO_COMMON_ANCEST = 11
     RENAME_CELL = 12
+    REMOVE_OVERLAP = 13
 
 
 class GenedescConfigParser(object):
@@ -63,7 +64,7 @@ class GenedescConfigParser(object):
             property_name = "trim_if_more_than_terms"
         elif prop == ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE:
             property_name = "max_num_terms"
-        elif prop == ConfigModuleProperty.TRIMMING_MIN_DIST_FROM_ROOT:
+        elif prop == ConfigModuleProperty.DISTANCE_FROM_ROOT:
             property_name = "trim_min_distance_from_root"
         elif prop == ConfigModuleProperty.CUTOFF_SEVERAL_WORD:
             property_name = "truncate_others_aggregation_word"
@@ -73,6 +74,8 @@ class GenedescConfigParser(object):
             property_name = "add_multiple_if_covers_more_children"
         elif prop == ConfigModuleProperty.RENAME_CELL:
             property_name = "rename_cell"
+        elif prop == ConfigModuleProperty.REMOVE_OVERLAP:
+            property_name = "remove_overlapped_terms"
         return property_name
 
     def get_prepostfix_sentence_map(self, module: Module, special_cases: bool = False, humans: bool = False):
@@ -133,12 +136,15 @@ class GenedescConfigParser(object):
     def get_wb_organisms_info(self):
         return self.config["wb_options"]["organisms"]
 
-    def get_sentence_generator_common_properties(self, module: Module, humans: bool = False):
+    def get_sentence_generator_common_properties(self, module: Module, humans: bool = False, start_with: str = None):
+        ev_codes_groups_maps = self.get_evidence_codes_groups_map(module=module)
         return {"evidence_groups_priority_list": self.get_evidence_groups_priority_list(module=module),
                 "prepostfix_sentences_map": self.get_prepostfix_sentence_map(module=module, humans=humans),
                 "prepostfix_special_cases_sent_map": self.get_prepostfix_sentence_map(module=module, special_cases=True,
                                                                                       humans=humans),
-                "evidence_codes_groups_map": self.get_evidence_codes_groups_map(module=module)}
+                "evidence_codes_groups_map": {evcode: group for evcode, group in ev_codes_groups_maps.items() if
+                                              start_with is None or ev_codes_groups_maps[evcode].startswith(
+                                                  start_with)}}
 
     def get_sentence_common_properties(self, module: Module):
         return {"remove_parent_terms": self.get_module_simple_property(module=module,
@@ -150,7 +156,7 @@ class GenedescConfigParser(object):
                 "merge_max_num_terms": self.get_module_simple_property(
                     module=module, prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE),
                 "merge_min_distance_from_root": self.get_module_simple_property(
-                    module=module, prop=ConfigModuleProperty.TRIMMING_MIN_DIST_FROM_ROOT),
+                    module=module, prop=ConfigModuleProperty.DISTANCE_FROM_ROOT),
                 "truncate_others_generic_word": self.get_module_simple_property(
                     module=module, prop=ConfigModuleProperty.CUTOFF_SEVERAL_WORD),
                 "truncate_others_aspect_words": self.get_module_simple_property(

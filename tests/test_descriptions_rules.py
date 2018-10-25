@@ -1,9 +1,10 @@
 import unittest
 import os
 
-from genedescriptions.config_parser import GenedescConfigParser
+from genedescriptions.commons import Module
+from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import WBDataManager, DataType
-from genedescriptions.descriptions_generator import SentenceGenerator
+from genedescriptions.descriptions_generator import OntologySentenceGenerator
 
 
 class TestDescriptionsRules(unittest.TestCase):
@@ -13,37 +14,32 @@ class TestDescriptionsRules(unittest.TestCase):
         self.conf_parser = GenedescConfigParser(os.path.join(this_dir, os.path.pardir, "config_wb.yml"))
 
     def test_generate_sentences(self):
-        df = WBDataManager(raw_files_source=self.conf_parser.get_raw_file_sources("wb_data_fetcher"),
+        df = WBDataManager(raw_files_source=self.conf_parser.get_wb_raw_file_sources(),
                            release_version="WS265", species="c_elegans",
-                           project_id=self.conf_parser.get_wb_species()["c_elegans"]["project_id"],
-                           cache_location=self.conf_parser.get_data_fetcher_property("default_data_fetcher",
-                                                                                     "cache_location"),
+                           project_id=self.conf_parser.get_wb_organisms_info()["c_elegans"]["project_id"],
+                           cache_location=self.conf_parser.get_cache_dir(),
                            do_relations=None,
                            go_relations=["subClassOf", "BFO:0000050"])
-        df.load_all_data_from_file(go_terms_replacement_regex=self.conf_parser.get_go_rename_terms(),
-                                   go_terms_exclusion_list=self.conf_parser.get_go_terms_exclusion_list(),
-                                   do_terms_replacement_regex=None,
-                                   do_terms_exclusion_list=self.conf_parser.get_do_terms_exclusion_list())
+        df.load_all_data_from_file(go_terms_replacement_regex=self.conf_parser.get_module_simple_property(
+            module=Module.GO, prop=ConfigModuleProperty.RENAME_TERMS),
+                                   go_terms_exclusion_list=self.conf_parser.get_module_simple_property(
+            module=Module.GO, prop=ConfigModuleProperty.EXCLUDE_TERMS),
+                                   do_terms_replacement_regex=self.conf_parser.get_module_simple_property(
+            module=Module.DO_EXP_AND_BIO, prop=ConfigModuleProperty.RENAME_TERMS),
+                                   do_terms_exclusion_list=self.conf_parser.get_module_simple_property(
+            module=Module.DO_EXP_AND_BIO, prop=ConfigModuleProperty.EXCLUDE_TERMS))
         sentences = []
         for gene in df.get_gene_data():
-            joined_sentence = []
-            go_sent_generator = SentenceGenerator(
-                annotations=df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.GO,
-                                                        priority_list=self.conf_parser.get_go_annotations_priority()),
-                evidence_groups_priority_list=self.conf_parser.get_go_evidence_groups_priority_list(),
-                prepostfix_sentences_map=self.conf_parser.get_go_prepostfix_sentences_map(),
-                prepostfix_special_cases_sent_map=self.conf_parser.get_go_prepostfix_special_cases_sent_map(),
-                evidence_codes_groups_map=self.conf_parser.get_go_evidence_codes_groups_map(),
-                ontology=df.go_ontology)
-            go_sent = go_sent_generator.get_module_sentences(aspect='F', remove_parent_terms=True,
-                                                             merge_num_terms_threshold=self.conf_parser.
-                                                             get_go_trim_min_num_terms(),
-                                                             merge_min_distance_from_root=self.conf_parser.
-                                                             get_go_trim_min_distance_from_root(),
-                                                             remove_successive_overlapped_terms=True,
-                                                             keep_only_best_group=False, merge_groups_with_same_prefix=True)
-            if go_sent:
-                joined_sentence.append("; ".join([sent.text for sent in go_sent]))
-            sentences.append("; ".join(joined_sentence))
+            go_sent_gen_common_props = self.conf_parser.get_sentence_generator_common_properties(Module.GO)
+            go_sent_common_props = self.conf_parser.get_sentence_common_properties(module=Module.GO)
+            annotations = df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.GO,
+                                                      priority_list=self.conf_parser.get_annotations_priority(
+                                                          module=Module.GO))
+            go_sent_generator = OntologySentenceGenerator(annotations=annotations, ontology=df.go_ontology,
+                                                          **go_sent_gen_common_props)
+            go_module_sentences = go_sent_generator.get_module_sentences(aspect='F', remove_parent_terms=True,
+                                                                         **go_sent_common_props)
+            if go_module_sentences.contains_sentences():
+                sentences.append(go_module_sentences.get_description())
         self.assertTrue(any([True if sentence and len(sentence) > 0 else False for sentence in sentences]))
 

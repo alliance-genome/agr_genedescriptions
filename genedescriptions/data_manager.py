@@ -460,6 +460,7 @@ class WBDataManager(DataManager):
             self.expression_cluster_molreg_data = defaultdict(list)
         else:
             self.expression_cluster_molreg_data = None
+        self.protein_domains = None
 
     def load_gene_data_from_file(self) -> None:
         """load gene list from pre-set file location"""

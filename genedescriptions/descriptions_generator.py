@@ -1,9 +1,10 @@
 import inflect
 import re
 
-from genedescriptions.commons import Sentence
+from genedescriptions.commons import Sentence, Module, DataType
+from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
+from genedescriptions.data_manager import DataManager
 from genedescriptions.ontology_tools import *
-from ontobio.ontol import Ontology
 from genedescriptions.sentence_generation_functions import _get_single_sentence, compose_sentence
 
 
@@ -38,33 +39,37 @@ class SentenceMerger(object):
         self.ancestors_covering_multiple_terms = set()
 
 
-class SentenceGenerator(object):
+class OntologySentenceGenerator(object):
     """generates sentences based on description rules"""
 
-    def __init__(self, annotations: List[Dict], ontology: Ontology, evidence_groups_priority_list: List[str],
-                 prepostfix_sentences_map: Dict[Tuple[str, str, str], Tuple[str, str]],
-                 evidence_codes_groups_map: Dict[str, str],
-                 prepostfix_special_cases_sent_map: Dict[Tuple[str, str, str], Tuple[int, str, str, str]] = None):
+    def __init__(self, gene_id: str, annot_type: DataType, module: Module, data_manager: DataManager,
+                 config: GenedescConfigParser, limit_to_group: str = None, humans: bool = False):
         """initialize sentence generator object
 
         Args:
-            annotations (List[Dict]): the list of annotations for a given gene
-            ontology (Ontology): the ontology linked to the annotations
-            evidence_groups_priority_list (List[str]): the list of evidence groups to consider, sorted by priority.
-                Sentences of the first group (with highest priority) will be returned in first position and so on
-            prepostfix_sentences_map (Dict[Tuple[str, str, str], Tuple[str, str]]): a map with prefix and postfix
-                phrases, where keys are tuples of go_aspect, evidence_group and values are tuples prefix, postfix
-            prepostfix_special_cases_sent_map (Dict[Tuple[str, str, str], Tuple[int, str, str, str]]): a map for
-                special prefix and postfix cases, where keys are tuples of aspect, evidence_group and values are tuples
-                of id, match_regex, prefix, postfix. Match_regex is a regular expression that defines the match for the
-                special case
-            evidence_codes_groups_map (Dict[str, str]): a map between evidence codes and the groups they belong to
+            config (GenedescConfigParser): an optional config object from which to read the options
+            limit_to_group (str): limit the evidence codes to the specified group
         """
-        self.evidence_groups_priority_list = evidence_groups_priority_list
-        self.prepostfix_sentences_map = prepostfix_sentences_map
-        self.ontology = ontology
+        if annot_type == DataType.DO:
+            self.ontology = data_manager.do_ontology
+        elif annot_type == DataType.GO:
+            self.ontology = data_manager.go_ontology
+        elif annot_type == DataType.EXPR:
+            self.ontology = data_manager.expression_ontology
+        self.evidence_groups_priority_list = config.get_evidence_groups_priority_list(module=module)
+        self.prepostfix_sentences_map = config.get_prepostfix_sentence_map(module=module, humans=humans)
         self.terms_groups = defaultdict(lambda: defaultdict(set))
-
+        ev_codes_groups_maps = config.get_evidence_codes_groups_map(module=module)
+        annotations = data_manager.get_annotations_for_gene(gene_id=gene_id, annot_type=annot_type,
+                                                            priority_list=config.get_annotations_priority(
+                                                                module=Module.DO_EXP_AND_BIO))
+        self.annotations = annotations
+        self.module = module
+        self.annot_type = annot_type
+        evidence_codes_groups_map = {evcode: group for evcode, group in ev_codes_groups_maps.items() if
+                                     limit_to_group is None or limit_to_group in ev_codes_groups_maps[evcode]}
+        prepostfix_special_cases_sent_map = config.get_prepostfix_sentence_map(module=module, special_cases=True,
+                                                                               humans=humans)
         if len(annotations) > 0:
             for annotation in annotations:
                 if annotation["evidence"]["type"] in evidence_codes_groups_map:
@@ -74,63 +79,52 @@ class SentenceGenerator(object):
                     if prepostfix_special_cases_sent_map and (aspect, ev_group, qualifier) in \
                             prepostfix_special_cases_sent_map:
                         for special_case in prepostfix_special_cases_sent_map[(aspect, ev_group, qualifier)]:
-                            if re.match(re.escape(special_case[1]), ontology.label(annotation["object"]["id"],
-                                                                                   id_if_null=True)):
+                            if re.match(re.escape(special_case[1]), self.ontology.label(annotation["object"]["id"],
+                                                                                        id_if_null=True)):
                                 ev_group = evidence_codes_groups_map[annotation["evidence"]["type"]] + \
                                            str(special_case[0])
                                 if ev_group not in self.evidence_groups_priority_list:
-                                    self.evidence_groups_priority_list.insert(evidence_groups_priority_list.index(
+                                    self.evidence_groups_priority_list.insert(self.evidence_groups_priority_list.index(
                                         evidence_codes_groups_map[annotation["evidence"]["type"]]) + 1, ev_group)
                                 break
                     self.terms_groups[(aspect, qualifier)][ev_group].add(annotation["object"]["id"])
 
-    def get_module_sentences(self, aspect: str, qualifier: str = '', keep_only_best_group: bool = False,
-                             merge_groups_with_same_prefix: bool = False, remove_parent_terms: bool = True,
-                             remove_child_terms: bool = False, merge_num_terms_threshold: int = 3,
-                             merge_max_num_terms: int = 3, merge_min_distance_from_root: dict = None,
-                             truncate_others_generic_word: str = "several",
-                             truncate_others_aspect_words: Dict[str, str] = None,
-                             remove_successive_overlapped_terms: bool = True, exclude_terms_ids: List[str] = None,
-                             add_multiple_if_covers_more_children: bool = False, rename_cell: bool = False,
-                             blacklisted_ancestors: List[str] = None) -> ModuleSentences:
+    def get_module_sentences(self,  config: GenedescConfigParser, aspect: str, qualifier: str = '',
+                             keep_only_best_group: bool = False, merge_groups_with_same_prefix: bool = False):
         """generate description for a specific combination of aspect and qualifier
 
         Args:
+            config (GenedescConfigParser): a configuration object from which to read properties
             aspect (str): a data type aspect
             qualifier (str): qualifier
             keep_only_best_group (bool): whether to get only the evidence group with highest priority and discard
                 the other evidence groups
             merge_groups_with_same_prefix (bool): whether to merge the phrases for evidence groups with the same prefix
-            remove_parent_terms: whether to remove parent terms from the list of terms in each sentence if at least
-                one children term is present
-            remove_child_terms (bool): whether to remove child terms from the list of terms in each sentence if at least
-                one parent term is present
-            merge_num_terms_threshold (int): whether to merge terms by common ancestor to reduce the number of terms in
-                the set. The trimming algorithm will be applied only if the number of terms is greater than the
-                specified number and the specified threshold is greater than 0
-            merge_max_num_terms (int): maximum number of terms to display in the final sentence
-            merge_min_distance_from_root (dict): minimum distance from root terms for the selection of common ancestors
-                during merging operations. Three values must be provided in the form of a dictionary with keys 'F', 'P',
-                and 'C' for go aspect names and values integers indicating the threshold for each aspect
-            truncate_others_generic_word (str): a generic word to indicate that the set of terms reported in the
-                sentence is only a subset of the original terms, e.g., 'several'
-            truncate_others_aspect_words (Dict[str, str]): one word for each aspect describing the kind of terms that
-                are included in the aspect
-            remove_successive_overlapped_terms (bool): whether to remove terms in lower priority evidence groups when
-                already present in higher priority groups
-            exclude_terms_ids (List[str]): list of term ids to exclude
-            add_multiple_if_covers_more_children (bool): whether to add the label '(multiple)' to terms that are
-                ancestors covering multiple children
-            rename_cell (bool): rename term cell if present
-            blacklisted_ancestors (List[str]): list of common ancestor terms to be blacklisted
         Returns:
             ModuleSentences: the module sentences
         """
-        if not merge_min_distance_from_root:
-            merge_min_distance_from_root = {'F': 1, 'P': 1, 'C': 2, 'D': 3, 'A': 3}
-        if not truncate_others_aspect_words:
-            truncate_others_aspect_words = {'F': 'functions', 'P': 'processes', 'C': 'components', 'D': 'diseases',
-                                            'A': 'tissues'}
+        dist_root = config.get_module_simple_property(module=self.module, prop=ConfigModuleProperty.DISTANCE_FROM_ROOT)
+        cat_several_words = config.get_module_simple_property(module=self.module,
+                                                              prop=ConfigModuleProperty.CUTOFF_SEVERAL_CATEGORY_WORD)
+        del_overlap = config.get_module_simple_property(module=self.module, prop=ConfigModuleProperty.REMOVE_OVERLAP)
+        remove_parents = config.get_module_simple_property(module=self.module,
+                                                           prop=ConfigModuleProperty.DEL_PARENTS_IF_CHILD)
+        remove_child_terms = config.get_module_simple_property(module=self.module,
+                                                               prop=ConfigModuleProperty.DEL_CHILDREN_IF_PARENT)
+        add_mul_common_anc = config.get_module_simple_property(module=self.module,
+                                                               prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
+        trim_if_more_than = config.get_module_simple_property(module=self.module,
+                                                              prop=ConfigModuleProperty.MAX_NUM_TERMS_BEFORE_TRIMMING)
+        max_terms = config.get_module_simple_property(module=self.module,
+                                                      prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
+        exclude_terms = config.get_module_simple_property(module=self.module, prop=ConfigModuleProperty.EXCLUDE_TERMS)
+        cutoff_final_word = config.get_module_simple_property(module=self.module,
+                                                              prop=ConfigModuleProperty.CUTOFF_SEVERAL_WORD)
+        rename_cell = config.get_module_simple_property(module=self.module, prop=ConfigModuleProperty.RENAME_CELL)
+        if not dist_root:
+            dist_root = {'F': 1, 'P': 1, 'C': 2, 'D': 3, 'A': 3}
+        if not cat_several_words:
+            cat_several_words = {'F': 'functions', 'P': 'processes', 'C': 'components', 'D': 'diseases', 'A': 'tissues'}
         sentences = []
         terms_already_covered = set()
         evidence_group_priority = {eg: p for p, eg in enumerate(self.evidence_groups_priority_list)}
@@ -138,33 +132,33 @@ class SentenceGenerator(object):
                                                        self.terms_groups[(aspect, qualifier)].items()],
                                                       key=lambda x: x[2]):
             ancestors_covering_multiple_children = set()
-            if remove_successive_overlapped_terms:
+            if del_overlap:
                 terms -= terms_already_covered
-            if exclude_terms_ids:
-                terms -= set(exclude_terms_ids)
+            if exclude_terms:
+                terms -= set(exclude_terms)
             add_others = False
-            if remove_parent_terms:
+            if remove_parents:
                 terms_no_ancestors = terms - set([ancestor for node_id in terms for ancestor in
                                                   self.ontology.ancestors(node_id)])
                 if len(terms) > len(terms_no_ancestors):
                     logger.debug("Removed " + str(len(terms) - len(terms_no_ancestors)) + " parents from terms")
                     terms = terms_no_ancestors
-            if 0 < merge_num_terms_threshold <= len(terms):
+            if 0 < trim_if_more_than <= len(terms):
                 merged_terms_coverset = get_merged_nodes_by_common_ancestor(
                     node_ids=list(terms), ontology=self.ontology,
-                    min_distance_from_root=merge_min_distance_from_root[aspect],
-                    min_number_of_terms=merge_num_terms_threshold, nodeids_blacklist=blacklisted_ancestors)
-                if len(merged_terms_coverset.keys()) <= merge_num_terms_threshold:
+                    min_distance_from_root=dist_root[aspect],
+                    min_number_of_terms=trim_if_more_than, nodeids_blacklist=exclude_terms)
+                if len(merged_terms_coverset.keys()) <= trim_if_more_than:
                     merged_terms = list(merged_terms_coverset.keys())
                     terms_already_covered.update([e for subset in merged_terms_coverset.values() for e in subset])
                 else:
                     merged_terms = find_set_covering([(k, self.ontology.label(k, id_if_null=True), v) for k, v in
                                                       merged_terms_coverset.items()],
-                                                     max_num_subsets=merge_max_num_terms)
+                                                     max_num_subsets=max_terms)
                     for merged_term in merged_terms:
                         terms_already_covered.update(merged_terms_coverset[merged_term])
                     add_others = True
-                if add_multiple_if_covers_more_children:
+                if add_mul_common_anc:
                     ancestors_covering_multiple_children = {self.ontology.label(ancestor, id_if_null=True) for ancestor
                                                             in merged_terms if len(merged_terms_coverset[ancestor]) > 1}
                 logger.debug("Reduced number of terms by merging from " + str(len(terms)) + " to " +
@@ -180,17 +174,17 @@ class SentenceGenerator(object):
                     _get_single_sentence(node_ids=terms, ontology=self.ontology, aspect=aspect,
                                          evidence_group=evidence_group, qualifier=qualifier,
                                          prepostfix_sentences_map=self.prepostfix_sentences_map,
-                                         terms_merged=True if 0 < merge_num_terms_threshold < len(terms) else False,
+                                         terms_merged=True if 0 < trim_if_more_than < len(terms) else False,
                                          add_others=add_others,
-                                         truncate_others_generic_word=truncate_others_generic_word,
-                                         truncate_others_aspect_words=truncate_others_aspect_words,
+                                         truncate_others_generic_word=cutoff_final_word,
+                                         truncate_others_aspect_words=cat_several_words,
                                          ancestors_with_multiple_children=ancestors_covering_multiple_children,
                                          rename_cell=rename_cell))
                 if keep_only_best_group:
                     return ModuleSentences(sentences)
         if merge_groups_with_same_prefix:
             sentences = self.merge_sentences_with_same_prefix(sentences=sentences,
-                                                              remove_parent_terms=remove_parent_terms,
+                                                              remove_parent_terms=remove_parents,
                                                               rename_cell=rename_cell)
         return ModuleSentences(sentences)
 
@@ -233,11 +227,11 @@ class SentenceGenerator(object):
                                  " parents from terms while merging sentences with same prefix")
                     sent_merger.terms_ids = terms_no_ancestors
         return [Sentence(prefix=prefix, terms_ids=list(sent_merger.terms_ids),
-                         postfix=SentenceGenerator.merge_postfix_phrases(sent_merger.postfix_list),
+                         postfix=OntologySentenceGenerator.merge_postfix_phrases(sent_merger.postfix_list),
                          text=compose_sentence(prefix=prefix,
                                                term_names=[self.ontology.label(node, id_if_null=True) for node in
                                                            sent_merger.terms_ids],
-                                               postfix=SentenceGenerator.merge_postfix_phrases(
+                                               postfix=OntologySentenceGenerator.merge_postfix_phrases(
                                                    sent_merger.postfix_list),
                                                additional_prefix=sent_merger.additional_prefix,
                                                ancestors_with_multiple_children=sent_merger.ancestors_covering_multiple_terms,

@@ -13,15 +13,15 @@ wb_options:
         # add the species to be processed to the following list. Entries must have the same text as in 'organisms'
         # option
         - c_elegans
-        #- b_malayi
-        #- c_brenneri
-        #- c_briggsae
-        #- c_japonica
-        #- c_remanei
-        #- o_volvulus
-        #- p_pacificus
-        #- s_ratti
-        #- t_muris
+        - b_malayi
+        - c_brenneri
+        - c_briggsae
+        - c_japonica
+        - c_remanei
+        - o_volvulus
+        - p_pacificus
+        - s_ratti
+        - t_muris
     organisms:
         human:
             full_name: "Homo sapiens"
@@ -352,6 +352,7 @@ go_sentences_options:
         P: 5
         C: 5
     add_multiple_if_covers_more_children: false
+    remove_overlapped_terms: true
 
 do_sentences_options:
     exclude_terms:

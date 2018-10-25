@@ -10,7 +10,7 @@ from collections import defaultdict
 from typing import Set, List, Tuple, Dict, Union
 from ontobio import Ontology
 
-from genedescriptions.commons import Sentence, DataType
+from genedescriptions.commons import Sentence, DataType, Module
 
 logger = logging.getLogger("Sentence generation functions")
 
@@ -318,10 +318,10 @@ def concatenate_words_with_oxford_comma(words: List[str]):
         return " and ".join(words)
 
 
-def get_best_human_ortholog_for_info_poor(human_orthologs, ensembl_hgnc_ids_map, evidence_codes, human_df_agr,
-                                          go_sent_gen_common_props):
+def get_best_human_ortholog_for_info_poor(human_orthologs, ensembl_hgnc_ids_map, evidence_codes, human_df_agr, config):
     best_orth = ""
     if len(human_orthologs) > 0:
+        ev_codes_group_map = config.get_evidence_codes_groups_map(module=Module.GO)
         exp_orthologs = defaultdict(int)
         predicted_orthologs = defaultdict(int)
         for ortholog in human_orthologs:
@@ -331,8 +331,7 @@ def get_best_human_ortholog_for_info_poor(human_orthologs, ensembl_hgnc_ids_map,
                     priority_list=evidence_codes)
                 for annotation in ortholog_annotations:
                     if annotation['aspect'] == 'F':
-                        if go_sent_gen_common_props["evidence_codes_groups_map"][annotation["evidence"]['type']] \
-                                in ["EXPERIMENTAL", "HIGH_THROUGHPUT_EXPERIMENTAL"]:
+                        if "EXPERIMENTAL" in ev_codes_group_map[annotation["evidence"]['type']]:
                             exp_orthologs[ensembl_hgnc_ids_map[ortholog[0]]] += 1
                         else:
                             predicted_orthologs[ensembl_hgnc_ids_map[ortholog[0]]] += 1

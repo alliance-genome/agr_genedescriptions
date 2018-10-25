@@ -3,90 +3,9 @@ import inflect
 from typing import List, Dict
 
 from genedescriptions.commons import Module
-from genedescriptions.descriptions_generator import SentenceGenerator, ModuleSentences
+from genedescriptions.descriptions_generator import OntologySentenceGenerator, ModuleSentences
 from genedescriptions.sentence_generation_functions import concatenate_words_with_oxford_comma
-
-
-class SingleDescStats(object):
-    """statistics for a single gene description"""
-
-    def __init__(self):
-        self.total_number_go_annotations = 0
-        self.total_number_do_annotations = 0
-        self.total_number_do_exp_bio_annotations = 0
-        self.total_number_do_via_orth_annotations = 0
-        self.number_final_do_term_covering_multiple_initial_do_terms = 0
-        self.set_initial_experimental_go_ids_f = []
-        self.set_initial_experimental_go_ids_p = []
-        self.set_initial_experimental_go_ids_c = []
-        self.set_initial_go_ids_f = []
-        self.set_initial_go_ids_p = []
-        self.set_initial_go_ids_c = []
-        self.set_final_experimental_go_ids_f = []
-        self.set_final_experimental_go_ids_p = []
-        self.set_final_experimental_go_ids_c = []
-        self.set_final_go_ids_f = []
-        self.set_final_go_ids_p = []
-        self.set_final_go_ids_c = []
-        self.set_initial_do_ids = []
-        self.set_final_do_ids = []
-        self.set_best_orthologs = []
-        self.set_initial_expression_ids = []
-        self.set_final_expression_ids = []
-
-
-class DescriptionsStats(object):
-    """overall statistics for a set of gene descriptions"""
-
-    def __init__(self):
-        self.total_number_of_genes = 0
-        self.number_genes_with_non_null_description = 0
-        self.number_genes_with_non_null_go_description = 0
-        self.number_genes_with_non_null_go_function_description = 0
-        self.number_genes_with_non_null_go_process_description = 0
-        self.number_genes_with_non_null_go_component_description = 0
-        self.number_genes_with_null_go_description = 0
-        self.number_genes_with_more_than_3_initial_go_terms = 0
-        self.number_genes_with_non_null_do_description = 0
-        self.number_genes_with_null_do_description = 0
-        self.number_genes_with_more_than_3_initial_do_terms = 0
-        self.number_genes_with_final_do_terms_covering_multiple_initial_terms = 0
-        self.number_genes_with_non_null_do_experimental_description = 0
-        self.number_genes_with_non_null_do_biomarker_description = 0
-        self.number_genes_with_non_null_do_orthology_description = 0
-        self.number_genes_with_non_null_protein_domain_description = 0
-        self.number_genes_with_non_null_human_gene_function_description = 0
-        self.number_genes_with_non_null_sister_species_description = 0
-        self.number_genes_with_non_null_tissue_expression_description = 0
-        self.number_genes_with_non_null_gene_expression_cluster_description = 0
-        self.number_genes_with_non_null_molecule_expression_cluster_description = 0
-        self.number_genes_with_non_null_anatomy_expression_cluster_description = 0
-        self.average_number_initial_go_terms_f = 0
-        self.average_number_initial_go_terms_p = 0
-        self.average_number_initial_go_terms_c = 0
-        self.average_number_final_go_terms_f = 0
-        self.average_number_final_go_terms_p = 0
-        self.average_number_final_go_terms_c = 0
-        self.average_number_initial_do_terms = 0
-        self.average_number_final_do_terms = 0
-        self.average_number_go_annotations = 0
-        self.average_number_do_annotations = 0
-        self.average_number_orthologs = 0
-        self.number_genes_with_non_null_orthology_description = 0
-        self.number_genes_with_null_orthology_description = 0
-        self.number_genes_with_more_than_3_best_orthologs = 0
-
-
-class DescriptionsOverallProperties(object):
-    def __init__(self, species: str = "", release_version: str = "", date: str = "", go_ontology_url: str = "",
-                 go_association_url: str = "", do_ontology_url: str = "", do_association_url: str = ""):
-        self.species = species
-        self.release_version = release_version
-        self.date = date
-        self.go_ontology_url = go_ontology_url
-        self.go_association_url = go_association_url
-        self.do_ontology_url = do_ontology_url
-        self.do_association_url = do_association_url
+from genedescriptions.stats import SingleDescStats
 
 
 class GeneDescription(object):
@@ -135,7 +54,6 @@ class GeneDescription(object):
 
     def set_or_extend_module_description_and_final_stats(self, module: Module,
                                                          module_sentences: ModuleSentences = None,
-                                                         annotations: List[Dict] = None,
                                                          description: str = None,
                                                          additional_postfix_terms_list: List[str] = None,
                                                          additional_postfix_final_word: str = None,
@@ -149,7 +67,6 @@ class GeneDescription(object):
             module (Module): the description module to update
             module_sentences (ModuleSentences): optional - module sentences object from which to take the description
                 and stats
-            annotations (List[Dict]): list of annotations from which to take initial stats
             description (str): optional - description text to be added
             additional_postfix_terms_list (List[str]): optional - list of terms to be merged and added as postfix to the
                 description
@@ -209,17 +126,14 @@ class GeneDescription(object):
                 self.do_experimental_description = self._get_description(desc, self.do_experimental_description)
                 self.stats.set_final_do_ids = self._get_merged_ids(module_sentences.get_ids(experimental_only=False),
                                                                    self.stats.set_final_do_ids)
-                self.stats.total_number_do_exp_bio_annotations = len(annotations)
             elif module == Module.DO_BIOMARKER:
                 self.do_biomarker_description = self._get_description(desc, self.do_biomarker_description)
                 self.stats.set_final_do_ids = self._get_merged_ids(module_sentences.get_ids(experimental_only=False),
                                                                    self.stats.set_final_do_ids)
-                self.stats.total_number_do_exp_bio_annotations = len(annotations)
             elif module == Module.DO_ORTHOLOGY:
                 self.do_orthology_description = self._get_description(desc, self.do_orthology_description)
                 self.stats.set_final_do_ids = self._get_merged_ids(module_sentences.get_ids(experimental_only=False),
                                                                    self.stats.set_final_do_ids)
-                self.stats.total_number_do_via_orth_annotations = len(annotations)
             elif module == Module.SISTER_SP:
                 self.sister_species_description = self._get_description(desc, self.sister_species_description)
             elif module == Module.ORTHOLOGY:
@@ -233,19 +147,15 @@ class GeneDescription(object):
                 self.go_description = "; ".join([sent for sent in [self.go_function_description,
                                                                    self.go_process_description,
                                                                    self.go_component_description] if sent])
-                if annotations:
-                    self.stats.total_number_go_annotations = len(annotations)
             if module == Module.DO_EXPERIMENTAL or module == Module.DO_BIOMARKER or module == Module.DO_ORTHOLOGY:
                 self.do_description = "; ".join([sent for sent in [self.do_experimental_description,
                                                                    self.do_biomarker_description,
                                                                    self.do_orthology_description] if sent])
-                self.stats.total_number_do_annotations = self.stats.total_number_do_exp_bio_annotations + \
-                                                         self.stats.total_number_do_via_orth_annotations
                 self.stats.number_final_do_term_covering_multiple_initial_do_terms = self.do_description.count(
                     "(multiple)")
 
     @staticmethod
-    def _get_module_initial_stats(aspect: str, sentence_generator: SentenceGenerator, main_qualifier:str = "",
+    def _get_module_initial_stats(aspect: str, sentence_generator: OntologySentenceGenerator, main_qualifier: str = "",
                                   additional_qualifier: str = None):
         if not additional_qualifier:
             return [elem for key, sets in sentence_generator.terms_groups[(aspect, main_qualifier)].items() for elem in
@@ -258,8 +168,8 @@ class GeneDescription(object):
                     (aspect, additional_qualifier)].items() for elem in sets if (aspect, key, additional_qualifier) in
                  sentence_generator.prepostfix_sentences_map]))
 
-    def set_initial_stats(self, module: Module, sentence_generator: SentenceGenerator,
-                          sentence_generator_exp_only: SentenceGenerator = None):
+    def set_initial_stats(self, module: Module, sentence_generator: OntologySentenceGenerator,
+                          sentence_generator_exp_only: OntologySentenceGenerator = None):
         """set initial stats for a specific module
 
         Args:
@@ -289,14 +199,21 @@ class GeneDescription(object):
             self.stats.set_initial_expression_ids = self._get_module_initial_stats(
                 aspect="A", main_qualifier="Verified", sentence_generator=sentence_generator)
         elif module == Module.DO_EXPERIMENTAL:
+            self.stats.total_number_do_exp_bio_annotations += len(sentence_generator.annotations)
             self.stats.set_initial_do_ids = self._get_merged_ids(
                 [term_id for terms in sentence_generator.terms_groups.values() for tvalues in terms.values() for
                  term_id in tvalues], self.stats.set_initial_do_ids)
         elif module == Module.DO_BIOMARKER:
+            self.stats.total_number_do_exp_bio_annotations += len(sentence_generator.annotations)
             self.stats.set_initial_do_ids = self._get_merged_ids(
                 [term_id for terms in sentence_generator.terms_groups.values() for tvalues in terms.values() for term_id
                  in tvalues], self.stats.set_initial_do_ids)
         elif module == Module.DO_ORTHOLOGY:
+            self.stats.total_number_do_via_orth_annotations = len(sentence_generator.annotations)
             self.stats.set_initial_do_ids = self._get_merged_ids(
                 [term_id for terms in sentence_generator.terms_groups.values() for tvalues in terms.values() for term_id
                  in tvalues], self.stats.set_initial_do_ids)
+        self.stats.total_number_do_annotations = self.stats.total_number_do_exp_bio_annotations + \
+                                                 self.stats.total_number_do_via_orth_annotations
+        if module == Module.GO_PROCESS or module == Module.GO_FUNCTION or module == Module.GO_COMPONENT:
+            self.stats.total_number_go_annotations = len(sentence_generator.annotations)

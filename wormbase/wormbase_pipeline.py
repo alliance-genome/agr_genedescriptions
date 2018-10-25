@@ -4,12 +4,13 @@ import argparse
 import datetime
 import logging
 import os
+from typing import List
 
-from genedescriptions.commons import DataType, Module
+from genedescriptions.commons import DataType, Module, Gene
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import WBDataManager, DataManager, ExpressionClusterType, ExpressionClusterFeature
-from genedescriptions.descriptions_and_stats import GeneDescription
-from genedescriptions.descriptions_generator import SentenceGenerator
+from genedescriptions.gene_description import GeneDescription
+from genedescriptions.descriptions_generator import OntologySentenceGenerator
 from genedescriptions.descriptions_writer import DescriptionsWriter
 from genedescriptions.sentence_generation_functions import generate_ortholog_sentence_wormbase_human, \
     generate_ortholog_sentence_wormbase_non_c_elegans, concatenate_words_with_oxford_comma, \
@@ -24,10 +25,10 @@ def load_data(species, organism, conf_parser: GenedescConfigParser):
     if "main_sister_species" in species[organism] and "full_name" in \
             species[species[organism]["main_sister_species"]]:
         sister_sp_fullname = species[species[organism]["main_sister_species"]]["full_name"]
-    orthologs_sp_fullname = ""
+    orth_fullnames = ""
     if "ortholog" in species[organism] and all(["full_name" in species[ortholog_sp] for ortholog_sp in
                                                 species[organism]["ortholog"]]):
-        orthologs_sp_fullname = [species[ortholog_sp]["full_name"] for ortholog_sp in species[organism]["ortholog"]]
+        orth_fullnames = [species[ortholog_sp]["full_name"] for ortholog_sp in species[organism]["ortholog"]]
     ec_anatomy_prefix = species[organism]["ec_anatomy_prefix"] if "ec_anatomy_prefix" in species[organism] else None
     ec_molreg_prefix = species[organism]["ec_molreg_prefix"] if "ec_molreg_prefix" in species[organism] else None
     df = WBDataManager(raw_files_source=conf_parser.get_wb_raw_file_sources(),
@@ -90,16 +91,17 @@ def load_data(species, organism, conf_parser: GenedescConfigParser):
                                        exclusion_list=conf_parser.get_module_simple_property(
                                            module=Module.EXPRESSION, prop=ConfigModuleProperty.EXCLUDE_TERMS))
     df.load_expression_cluster_data()
-    return df, sister_df, df_agr, orthologs_sp_fullname, sister_sp_fullname
+    return df, sister_df, df_agr, orth_fullnames, sister_sp_fullname
 
 
-def set_orthology_sentence(df, gene, orthologs_sp_fullname, human_genes_props, gene_desc, tpc_token):
-    best_orthologs, selected_orth_name = df.get_best_orthologs_for_gene(gene.id,
-                                                                        orth_species_full_name=orthologs_sp_fullname)
+def set_orthology_sentence(dm: WBDataManager, orth_fullnames: List[str], gene_desc: GeneDescription, tpc_token: str,
+                           human_genes_props):
+    best_orthologs, selected_orth_name = dm.get_best_orthologs_for_gene(gene_desc.gene_id,
+                                                                        orth_species_full_name=orth_fullnames)
     selected_orthologs = []
     if best_orthologs:
         gene_desc.stats.set_best_orthologs = [orth[0] for orth in best_orthologs]
-        if len(orthologs_sp_fullname) == 1 and orthologs_sp_fullname[0] == "Homo sapiens":
+        if len(orth_fullnames) == 1 and orth_fullnames[0] == "Homo sapiens":
             sel_orthologs, orth_sent = generate_ortholog_sentence_wormbase_human(best_orthologs, human_genes_props)
             selected_orthologs = [orth for orth in best_orthologs if orth[1] in sel_orthologs]
         else:
@@ -108,49 +110,46 @@ def set_orthology_sentence(df, gene, orthologs_sp_fullname, human_genes_props, g
     return selected_orthologs
 
 
-def set_go_sentences(df, go_sent_gen_common_props, go_sent_gen_common_props_exp, go_sent_common_props, gene,
-                     conf_parser: GenedescConfigParser, gene_desc):
-    go_annotations = df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.GO,
-                                                 priority_list=conf_parser.get_annotations_priority(module=Module.GO))
-
-    go_sent_generator_exp = SentenceGenerator(annotations=go_annotations, ontology=df.go_ontology,
-                                              **go_sent_gen_common_props_exp)
-    go_sent_generator = SentenceGenerator(annotations=go_annotations, ontology=df.go_ontology,
-                                          **go_sent_gen_common_props)
+def set_go_sentences(dm: WBDataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription, gene: Gene):
+    go_sent_generator_exp = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.GO,
+                                                      module=Module.GO, data_manager=dm,
+                                                      config=conf_parser, limit_to_group="EXPERIMENTAL")
+    go_sent_generator = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.GO,
+                                                  module=Module.GO, data_manager=dm, config=conf_parser)
     contributes_to_module_sentences = go_sent_generator.get_module_sentences(
-        aspect='F', qualifier='contributes_to', merge_groups_with_same_prefix=True, keep_only_best_group=True,
-        **go_sent_common_props)
+        config=conf_parser, aspect='F', qualifier='contributes_to', merge_groups_with_same_prefix=True,
+        keep_only_best_group=True)
     if contributes_to_module_sentences.contains_sentences():
         func_module_sentences = go_sent_generator_exp.get_module_sentences(
-            aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True, **go_sent_common_props)
-        gene_desc.set_or_extend_module_description_and_final_stats(
-            module_sentences=func_module_sentences, module=Module.GO_FUNCTION, annotations=go_annotations)
+            config=conf_parser, aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+        gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=func_module_sentences,
+                                                                   module=Module.GO_FUNCTION)
     else:
         func_module_sentences = go_sent_generator.get_module_sentences(
-            aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True, **go_sent_common_props)
+            config=conf_parser, aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(
-            module_sentences=func_module_sentences, module=Module.GO_FUNCTION, annotations=go_annotations)
+            module_sentences=func_module_sentences, module=Module.GO_FUNCTION)
     gene_desc.set_or_extend_module_description_and_final_stats(
-        module_sentences=contributes_to_module_sentences, module=Module.GO_FUNCTION, annotations=go_annotations)
-    proc_module_sentences = go_sent_generator.get_module_sentences(aspect='P', merge_groups_with_same_prefix=True,
-                                                                   keep_only_best_group=True, **go_sent_common_props)
+        module_sentences=contributes_to_module_sentences, module=Module.GO_FUNCTION)
+    proc_module_sentences = go_sent_generator.get_module_sentences(
+        config=conf_parser, aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True)
     gene_desc.set_or_extend_module_description_and_final_stats(
-        module_sentences=proc_module_sentences, module=Module.GO_PROCESS, annotations=go_annotations)
+        module_sentences=proc_module_sentences, module=Module.GO_PROCESS)
     colocalizes_with_module_sentences = go_sent_generator.get_module_sentences(
-        aspect='C', qualifier='colocalizes_with', merge_groups_with_same_prefix=True,
-        keep_only_best_group=True, **go_sent_common_props)
+        config=conf_parser, aspect='C', qualifier='colocalizes_with', merge_groups_with_same_prefix=True,
+        keep_only_best_group=True)
     if colocalizes_with_module_sentences.contains_sentences():
         comp_module_sentences = go_sent_generator_exp.get_module_sentences(
-            aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True, **go_sent_common_props)
+            config=conf_parser, aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(
-            module_sentences=comp_module_sentences, module=Module.GO_COMPONENT, annotations=go_annotations)
+            module_sentences=comp_module_sentences, module=Module.GO_COMPONENT)
     else:
         comp_module_sentences = go_sent_generator.get_module_sentences(
-            aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True, **go_sent_common_props)
+            config=conf_parser, aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(
-            module_sentences=comp_module_sentences, module=Module.GO_COMPONENT, annotations=go_annotations)
+            module_sentences=comp_module_sentences, module=Module.GO_COMPONENT)
     gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=colocalizes_with_module_sentences,
-                                                               module=Module.GO_COMPONENT, annotations=go_annotations)
+                                                               module=Module.GO_COMPONENT)
     gene_desc.set_initial_stats(module=Module.GO_FUNCTION, sentence_generator=go_sent_generator,
                                 sentence_generator_exp_only=go_sent_generator_exp)
     gene_desc.set_initial_stats(module=Module.GO_PROCESS, sentence_generator=go_sent_generator,
@@ -159,32 +158,30 @@ def set_go_sentences(df, go_sent_gen_common_props, go_sent_gen_common_props_exp,
                                 sentence_generator_exp_only=go_sent_generator_exp)
 
 
-def set_expression_sentence(expr_sent_gen_common_props, expr_sent_common_props, gene_desc, gene, df,
-                            conf_parser: GenedescConfigParser):
-    expr_annotations = df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.EXPR,
-                                                   priority_list=conf_parser.get_annotations_priority(
-                                                       module=Module.EXPRESSION))
-    expr_sentence_generator = SentenceGenerator(annotations=expr_annotations, ontology=df.expression_ontology,
-                                                **expr_sent_gen_common_props)
+def set_expression_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription,
+                            gene: Gene):
+    expr_sentence_generator = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.GO,
+                                                        module=Module.GO, data_manager=dm,
+                                                        config=conf_parser, limit_to_group="EXPERIMENTAL")
     expression_module_sentences = expr_sentence_generator.get_module_sentences(
-        aspect='A', qualifier="Verified", merge_groups_with_same_prefix=True, keep_only_best_group=False,
-        **expr_sent_common_props)
+        config=conf_parser, aspect='A', qualifier="Verified", merge_groups_with_same_prefix=True,
+        keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=expression_module_sentences,
                                                                module=Module.EXPRESSION)
     gene_desc.set_initial_stats(module=Module.EXPRESSION, sentence_generator=expr_sentence_generator)
     # Information poor genes
     if not gene_desc.description:
-        ec_gene_id = gene.id[3:]
-        ec_anatomy_studies = df.get_expression_cluster_feature(gene_id=ec_gene_id,
+        ec_gene_id = gene_desc.gene_id[3:]
+        ec_anatomy_studies = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
                                                                expression_cluster_type=ExpressionClusterType.ANATOMY,
                                                                feature=ExpressionClusterFeature.STUDIES)
-        ec_anatomy_terms = df.get_expression_cluster_feature(gene_id=ec_gene_id,
+        ec_anatomy_terms = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
                                                              feature=ExpressionClusterFeature.TERMS,
                                                              expression_cluster_type=ExpressionClusterType.ANATOMY)
-        if df.expression_ontology is not None:
+        if dm.expression_ontology is not None:
             expression_enriched_module_sentences = expr_sentence_generator.get_module_sentences(
-                aspect='A', qualifier="Enriched", merge_groups_with_same_prefix=True, keep_only_best_group=False,
-                **expr_sent_common_props)
+                config=conf_parser, aspect='A', qualifier="Enriched", merge_groups_with_same_prefix=True,
+                keep_only_best_group=False)
             gene_desc.set_or_extend_module_description_and_final_stats(
                 module=Module.EXPRESSION_CLUSTER_GENE,
                 description=expression_enriched_module_sentences.get_description(),
@@ -196,14 +193,14 @@ def set_expression_sentence(expr_sent_gen_common_props, expr_sent_common_props, 
                 description="is enriched in " + concatenate_words_with_oxford_comma(ec_anatomy_terms) + " based on ",
                 additional_postfix_terms_list=ec_anatomy_studies,
                 additional_postfix_final_word="studies", use_single_form=True)
-        ec_molreg_terms = df.get_expression_cluster_feature(gene_id=ec_gene_id,
+        ec_molreg_terms = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
                                                             expression_cluster_type=ExpressionClusterType.MOLREG,
                                                             feature=ExpressionClusterFeature.TERMS)
-        ec_molereg_studies = df.get_expression_cluster_feature(gene_id=ec_gene_id,
+        ec_molereg_studies = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
                                                                feature=ExpressionClusterFeature.STUDIES,
                                                                expression_cluster_type=ExpressionClusterType.MOLREG)
 
-        if df.expression_ontology is None and ec_molreg_terms:
+        if dm.expression_ontology is None and ec_molreg_terms:
             gene_desc.set_or_extend_module_description_and_final_stats(
                 module=Module.EXPRESSION_CLUSTER_MOLECULE,
                 description="is affected by " + concatenate_words_with_oxford_comma(ec_molreg_terms) + " based on ",
@@ -211,70 +208,49 @@ def set_expression_sentence(expr_sent_gen_common_props, expr_sent_common_props, 
                 additional_postfix_final_word="studies", use_single_form=True)
 
 
-def set_do_sentence(df: DataManager, conf_parser: GenedescConfigParser, do_sent_gen_common_props,
-                    do_via_orth_sent_gen_common_props, do_sent_common_props, do_via_orth_sent_common_props, gene,
-                    gene_desc):
-    do_annotations = df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.DO,
-                                                 priority_list=conf_parser.get_annotations_priority(
-                                                     module=Module.DO_EXP_AND_BIO))
-    # Experimental
-    do_sent_gen_common_props_exp = do_sent_gen_common_props.copy()
-    do_sent_gen_common_props_exp["evidence_codes_groups_map"] = {
-        evcode: group for evcode, group in do_sent_gen_common_props["evidence_codes_groups_map"].items() if
-        "EXPERIMENTAL" in do_sent_gen_common_props["evidence_codes_groups_map"][evcode]}
-    do_sentence_exp_generator = SentenceGenerator(annotations=do_annotations, ontology=df.do_ontology,
-                                                  **do_sent_gen_common_props_exp)
+def set_do_sentence(df: DataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription, gene: Gene):
+    do_sentence_exp_generator = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.DO,
+                                                          module=Module.DO_EXP_AND_BIO, data_manager=df,
+                                                          config=conf_parser, limit_to_group="EXPERIMENTAL")
     disease_exp_module_sentences = do_sentence_exp_generator.get_module_sentences(
-        aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False, **do_sent_common_props)
+        config=conf_parser, aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module=Module.DO_EXPERIMENTAL,
-                                                               module_sentences=disease_exp_module_sentences,
-                                                               annotations=do_annotations)
-    # Biomarker
-    do_sent_gen_common_props_bio = do_sent_gen_common_props.copy()
-    do_sent_gen_common_props_bio["evidence_codes_groups_map"] = {
-        evcode: group for evcode, group in do_sent_gen_common_props["evidence_codes_groups_map"].items() if
-        "BIOMARKER" in do_sent_gen_common_props["evidence_codes_groups_map"][evcode]}
-    do_sentence_bio_generator = SentenceGenerator(annotations=do_annotations, ontology=df.do_ontology,
-                                                  **do_sent_gen_common_props_bio)
+                                                               module_sentences=disease_exp_module_sentences)
+    do_sentence_bio_generator = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.DO,
+                                                          module=Module.DO_EXP_AND_BIO, data_manager=df,
+                                                          config=conf_parser, limit_to_group="BIOMARKER")
     disease_bio_module_sentences = do_sentence_bio_generator.get_module_sentences(
-        aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False, **do_sent_common_props)
+        config=conf_parser, aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module=Module.DO_BIOMARKER,
-                                                               module_sentences=disease_bio_module_sentences,
-                                                               annotations=do_annotations)
-    # Disease via orthology module
-    do_via_orth_annotations = df.get_annotations_for_gene(gene_id=gene.id, annot_type=DataType.DO,
-                                                          priority_list=conf_parser.
-                                                          get_annotations_priority(module=Module.DO_ORTHOLOGY))
-    do_via_orth_sentence_generator = SentenceGenerator(annotations=do_via_orth_annotations, ontology=df.do_ontology,
-                                                       **do_via_orth_sent_gen_common_props)
+                                                               module_sentences=disease_bio_module_sentences)
+    do_via_orth_sentence_generator = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.DO,
+                                                               module=Module.DO_ORTHOLOGY, data_manager=df,
+                                                               config=conf_parser)
     disease_via_orth_module_sentences = do_via_orth_sentence_generator.get_module_sentences(
-        aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False, **do_via_orth_sent_common_props)
+        config=conf_parser, aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module=Module.DO_ORTHOLOGY,
-                                                               module_sentences=disease_via_orth_module_sentences,
-                                                               annotations=do_via_orth_annotations)
+                                                               module_sentences=disease_via_orth_module_sentences)
     gene_desc.set_initial_stats(module=Module.DO_EXPERIMENTAL, sentence_generator=do_sentence_exp_generator)
     gene_desc.set_initial_stats(module=Module.DO_BIOMARKER, sentence_generator=do_sentence_bio_generator)
     gene_desc.set_initial_stats(module=Module.DO_ORTHOLOGY, sentence_generator=do_via_orth_sentence_generator)
 
 
-def set_information_poor_sentence(orthologs_sp_fullname, selected_orthologs, ensembl_hgnc_ids_map,
-                                  conf_parser: GenedescConfigParser, human_df_agr, go_sent_gen_common_props,
-                                  go_sent_common_props, gene_desc, df, gene):
+def set_information_poor_sentence(orth_fullnames: List[str], selected_orthologs, ensembl_hgnc_ids_map,
+                                  conf_parser: GenedescConfigParser, human_df_agr: DataManager,
+                                  gene_desc: GeneDescription, dm: WBDataManager, gene: Gene):
     human_func_sent = None
-    if len(orthologs_sp_fullname) == 1 and orthologs_sp_fullname[0] == "Homo sapiens":
+    if len(orth_fullnames) == 1 and orth_fullnames[0] == "Homo sapiens":
         best_orth = get_best_human_ortholog_for_info_poor(selected_orthologs, ensembl_hgnc_ids_map,
                                                           conf_parser.get_annotations_priority(module=Module.GO),
-                                                          human_df_agr, go_sent_gen_common_props)
+                                                          human_df_agr, config=conf_parser)
         if best_orth:
             best_orth = "RGD:" + best_orth
-            human_go_annotations = human_df_agr.get_annotations_for_gene(
-                gene_id=best_orth, annot_type=DataType.GO, priority_list=("EXP", "IDA", "IPI", "IMP", "IGI", "IEP",
-                                                                          "HTP", "HDA", "HMP", "HGI", "HEP"))
-            human_go_sent_generator = SentenceGenerator(annotations=human_go_annotations,
-                                                        ontology=human_df_agr.go_ontology,
-                                                        **go_sent_gen_common_props)
+            human_go_sent_generator = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.DO,
+                                                                module=Module.DO_ORTHOLOGY, data_manager=dm,
+                                                                config=conf_parser, humans=True,
+                                                                limit_to_group="EXPERIMENTAL")
             human_func_module_sentences = human_go_sent_generator.get_module_sentences(
-                aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True, **go_sent_common_props)
+                config=conf_parser, aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True)
             human_func_sent = human_func_module_sentences.get_description()
             if human_func_sent:
                 gene_desc.set_or_extend_module_description_and_final_stats(
@@ -282,7 +258,7 @@ def set_information_poor_sentence(orthologs_sp_fullname, selected_orthologs, ens
                                                                         human_df_agr.go_associations.subject_label_map[
                                                                             best_orth] + " " + human_func_sent)
     if not human_func_sent:
-        protein_domains = df.protein_domains[gene.id[3:]]
+        protein_domains = dm.protein_domains[gene_desc.gene_id[3:]]
         if protein_domains:
             dom_word = "domain"
             if len(protein_domains) > 1:
@@ -294,19 +270,19 @@ def set_information_poor_sentence(orthologs_sp_fullname, selected_orthologs, ens
                                                                  ptdom in protein_domains]))
 
 
-def set_sister_species_sentence(df, sister_sp_fullname, sister_df, go_sent_gen_common_props, go_sent_common_props,
-                                species, organism, gene_desc, gene):
-    best_ortholog = df.get_best_orthologs_for_gene(
-        gene.id, orth_species_full_name=[sister_sp_fullname], sister_species_data_fetcher=sister_df,
+def set_sister_species_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser, sister_sp_fullname,
+                                sister_df: WBDataManager, species, organism, gene_desc: GeneDescription, gene: Gene):
+    best_ortholog = dm.get_best_orthologs_for_gene(
+        gene_desc.gene_id, orth_species_full_name=[sister_sp_fullname], sister_species_data_fetcher=sister_df,
         ecode_priority_list=["EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI",
                              "HEP"])[0][0]
-    sister_sentences_generator = SentenceGenerator(sister_df.get_annotations_for_gene(
-        annot_type=DataType.GO, gene_id="WB:" + best_ortholog[0],
-        priority_list=("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI", "HEP")),
-        ontology=df.go_ontology, **go_sent_gen_common_props)
+    sister_sentences_generator = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.DO,
+                                                           module=Module.DO_ORTHOLOGY, data_manager=dm,
+                                                           config=conf_parser,
+                                                           humans=sister_sp_fullname == "Homo sapiens",
+                                                           limit_to_group="EXPERIMENTAL")
     sister_sp_module_sentences = sister_sentences_generator.get_module_sentences(
-        aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True, **go_sent_common_props)\
-        .get_description()
+        config=conf_parser, aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True).get_description()
     gene_desc.set_or_extend_module_description_and_final_stats(
         module=Module.SISTER_SP, description="in " + species[species[organism]["main_sister_species"]]["name"] +
                                              ", " + best_ortholog[1] + " " + sister_sp_module_sentences)
@@ -328,74 +304,47 @@ def main():
     parser.add_argument("-o", "--output-formats", metavar="output_formats", dest="output_formats", type=str, nargs="+",
                         default=["ace", "txt", "json", "tsv"], help="file formats to generate. Accepted values "
                                                                     "are: ace, txt, json, tsv")
-
     args = parser.parse_args()
     conf_parser = GenedescConfigParser(args.config_file)
     logging.basicConfig(filename=args.log_file, level=args.log_level, format='%(asctime)s - %(name)s - %(levelname)s:'
                                                                              '%(message)s')
-
     logger = logging.getLogger("WB Gene Description Pipeline")
     organisms_list = conf_parser.get_wb_organisms_to_process()
     human_genes_props = DataManager.get_human_gene_props()
     ensembl_hgnc_ids_map = DataManager.get_ensembl_hgnc_ids_map()
-    go_sent_gen_common_props = conf_parser.get_sentence_generator_common_properties(Module.GO)
-    go_sent_gen_common_props_exp = go_sent_gen_common_props.copy()
-    go_sent_common_props = conf_parser.get_sentence_common_properties(module=Module.GO)
-    expr_sent_gen_common_props = conf_parser.get_sentence_generator_common_properties(module=Module.EXPRESSION)
-    expr_sent_common_props = conf_parser.get_sentence_common_properties(module=Module.EXPRESSION)
-    do_sent_gen_common_props = conf_parser.get_sentence_generator_common_properties(module=Module.DO_EXP_AND_BIO)
-    do_sent_common_props = conf_parser.get_sentence_common_properties(module=Module.DO_EXP_AND_BIO)
-    do_via_orth_sent_gen_common_props = conf_parser.get_sentence_generator_common_properties(module=Module.DO_ORTHOLOGY)
-    do_via_orth_sent_common_props = conf_parser.get_sentence_common_properties(module=Module.DO_ORTHOLOGY)
-    go_sent_gen_common_props_exp["evidence_codes_groups_map"] = {
-        evcode: group for evcode, group in go_sent_gen_common_props["evidence_codes_groups_map"].items() if
-        "EXPERIMENTAL" in go_sent_gen_common_props["evidence_codes_groups_map"][evcode]}
     for organism in organisms_list:
         logger.info("Processing organism " + organism)
         species = conf_parser.get_wb_organisms_info()
-        df, sister_df, df_agr, orthologs_sp_fullname, sister_sp_fullname = load_data(
+        dm, sister_df, df_agr, orth_fullnames, sister_sp_fullname = load_data(
             species=species, organism=organism, conf_parser=conf_parser)
         desc_writer = DescriptionsWriter()
         desc_writer.overall_properties.species = organism
         desc_writer.overall_properties.release_version = conf_parser.get_wb_release()[0:-1] + str(
             int(conf_parser.get_wb_release()[-1]) + 1)
         desc_writer.overall_properties.date = datetime.date.today().strftime("%B %d, %Y")
-        for gene in df.get_gene_data():
+        for gene in dm.get_gene_data():
             logger.debug("Generating description for gene " + gene.name)
 
             gene_desc = GeneDescription(gene_id=gene.id, gene_name=gene.name, add_gene_name=True)
-            selected_orthologs = set_orthology_sentence(df=df, gene=gene, orthologs_sp_fullname=orthologs_sp_fullname,
+            selected_orthologs = set_orthology_sentence(dm=dm, orth_fullnames=orth_fullnames,
                                                         human_genes_props=human_genes_props, gene_desc=gene_desc,
                                                         tpc_token=args.textpresso_token)
-            set_go_sentences(df=df, go_sent_gen_common_props=go_sent_gen_common_props,
-                             go_sent_gen_common_props_exp=go_sent_gen_common_props_exp,
-                             go_sent_common_props=go_sent_common_props, gene=gene, conf_parser=conf_parser,
-                             gene_desc=gene_desc)
-            set_expression_sentence(expr_sent_gen_common_props=expr_sent_gen_common_props,
-                                    expr_sent_common_props=expr_sent_common_props, gene_desc=gene_desc, gene=gene,
-                                    df=df, conf_parser=conf_parser)
-
-            set_do_sentence(df=df, conf_parser=conf_parser, do_sent_common_props=do_sent_common_props,
-                            do_via_orth_sent_common_props=do_via_orth_sent_common_props, gene=gene,
-                            gene_desc=gene_desc, do_sent_gen_common_props=do_sent_gen_common_props,
-                            do_via_orth_sent_gen_common_props=do_via_orth_sent_gen_common_props)
+            set_go_sentences(dm=dm, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene)
+            set_expression_sentence(dm=dm, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene)
+            set_do_sentence(df=dm, conf_parser=conf_parser, gene=gene, gene_desc=gene_desc)
             if not gene_desc.go_description:
-                set_information_poor_sentence(orthologs_sp_fullname=orthologs_sp_fullname,
+                set_information_poor_sentence(orth_fullnames=orth_fullnames,
                                               selected_orthologs=selected_orthologs,
-                                              ensembl_hgnc_ids_map=ensembl_hgnc_ids_map,
-                                              conf_parser=conf_parser, human_df_agr=df_agr,
-                                              go_sent_gen_common_props=go_sent_gen_common_props,
-                                              go_sent_common_props=go_sent_common_props, gene_desc=gene_desc, df=df,
-                                              gene=gene)
+                                              ensembl_hgnc_ids_map=ensembl_hgnc_ids_map, conf_parser=conf_parser,
+                                              human_df_agr=df_agr, gene_desc=gene_desc, dm=dm, gene=gene)
             if "main_sister_species" in species[organism] and species[organism]["main_sister_species"] and \
-                    df.get_best_orthologs_for_gene(gene.id, orth_species_full_name=[sister_sp_fullname],
+                    dm.get_best_orthologs_for_gene(gene.id, orth_species_full_name=[sister_sp_fullname],
                                                    sister_species_data_fetcher=sister_df,
                                                    ecode_priority_list=["EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP",
                                                                         "HDA", "HMP", "HGI", "HEP"])[0]:
-                set_sister_species_sentence(df=df, sister_sp_fullname=sister_sp_fullname, sister_df=sister_df,
-                                            go_sent_gen_common_props=go_sent_gen_common_props,
-                                            go_sent_common_props=go_sent_common_props,
-                                            species=species, organism=organism, gene_desc=gene_desc, gene=gene)
+                set_sister_species_sentence(dm=dm, sister_sp_fullname=sister_sp_fullname, sister_df=sister_df,
+                                            species=species, organism=organism, gene_desc=gene_desc,
+                                            conf_parser=conf_parser, gene=gene)
             desc_writer.add_gene_desc(gene_desc)
         if "json" in args.output_formats:
             desc_writer.write_json(os.path.join(conf_parser.get_out_dir(), organism + ".json"),
