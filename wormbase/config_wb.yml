@@ -1,11 +1,10 @@
-generic_data_fetcher:
+generic:
     cache_location: "gene_descriptions_cache"
+    output_dir: "./generated_descriptions"
     # set 'data_fetcher' to 'agr_data_fetcher' to generate descriptions for AGR or 'wb_data_fetcher' for WormBase
-    data_fetcher: "wb_data_fetcher"
-    textpresso_api_token: "ZfwjASOC2utOr01iXHeD"
 
 # options for WormBase gene description generation - used when data_fetcher is set to 'wb_data_fetcher'
-wb_data_fetcher:
+wb_options:
     release: "WS267"
     raw_files_source: "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases"
     agr_human_go_associations: "http://download.alliancegenome.org/GO/ANNOT/gene_association_1.7.1.human.gz"
@@ -13,7 +12,7 @@ wb_data_fetcher:
     organisms_to_process:
         # add the species to be processed to the following list. Entries must have the same text as in 'organisms'
         # option
-        #- c_elegans
+        - c_elegans
         #- b_malayi
         #- c_brenneri
         #- c_briggsae
@@ -21,8 +20,8 @@ wb_data_fetcher:
         #- c_remanei
         #- o_volvulus
         #- p_pacificus
-        - s_ratti
-        - t_muris
+        #- s_ratti
+        #- t_muris
     organisms:
         human:
             full_name: "Homo sapiens"
@@ -33,6 +32,8 @@ wb_data_fetcher:
                 - c_elegans
                 - o_volvulus
             main_sister_species: c_elegans
+            ec_anatomy_prefix: bma
+            ec_molreg_prefix: bma
         c_brenneri:
             full_name: "Caenorhabditis brenneri"
             project_id: "PRJNA20035"
@@ -51,6 +52,7 @@ wb_data_fetcher:
             name: "C. elegans"
             ortholog:
                 - human
+            ec_anatomy_prefix: ce
         c_japonica:
             full_name: "Caenorhabditis japonica"
             project_id: "PRJNA12591"
@@ -76,6 +78,7 @@ wb_data_fetcher:
             ortholog:
                 - c_elegans
             main_sister_species: c_elegans
+            ec_anatomy_prefix: ppa
         s_ratti:
             full_name: "Strongyloides ratti"
             project_id: "PRJEB125"
@@ -91,54 +94,6 @@ wb_data_fetcher:
                 - c_elegans
                 - b_malayi
             main_sister_species: c_elegans
-
-agr_data_fetcher:
-    raw_files_source: "https://s3.amazonaws.com/mod-datadumps"
-    release: "1.0"
-    organisms_to_process:
-        - wb
-        - fb
-        - zfin
-        - sgd
-        - rgd
-        - mgi
-    organisms:
-        wb:
-            name: "c_elegans"
-            main_files: "WB_1.0.4_3.tar.gz"
-            bgi_file: "WB_1.0.4_BGI.json"
-            go_annotations: "gene_association.wb.gz"
-        zfin:
-            name: "zebra_fish"
-            main_files: "ZFIN_1.1_1.tar.gz"
-            bgi_file: "ZFIN_1.1_basicGeneInformation.json"
-            go_annotations: "gene_association.zfin.gz"
-        fb:
-            name: "drosophila melanogaster"
-            main_files: "FB_1.0.4_4.tar.gz"
-            bgi_file: "FB_1.0.4_BGI.json"
-            go_annotations: "gene_association.fb.gz"
-        rgd:
-            name: "rat"
-            main_files: "RGD_1.0_4.tar.gz"
-            bgi_file: "RGD_1.0_basicGeneInformation.10116.json"
-            go_annotations: "gene_association.rgd.gz"
-        sgd:
-            name: "yeast"
-            main_files: "SGD_1.0.3.tar.gz"
-            bgi_file: "SGD_1.0.3/SGD_1.0.2_basicGeneInformation.json"
-            go_annotations: "gene_association.sgd.gz"
-        mgi:
-            name: "mouse"
-            main_files: "MGI_1.0.6.tar.gz"
-            bgi_file: "MGI_1.0.6_basicGeneInformation.json"
-            go_annotations: "gene_association.mgi.gz"
-
-generic_genedesc_writer:
-    genedesc_writer: "json_writer"
-
-json_writer_options:
-    output_dir: "./generated_descriptions"
 
 go_sentences_options:
     exclude_terms:
@@ -226,7 +181,7 @@ go_sentences_options:
         PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS: 3
         INFERRED_BY_CURATORS_AND_AUTHORS: 4
         ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS: 5
-    go_prepostfix_sentences_map:
+    prepostfix_sentences_map:
         - aspect: F
           group: EXPERIMENTAL
           qualifier: ""
@@ -380,8 +335,8 @@ go_sentences_options:
                 prefix: "is"
                 postfix: ""
 
-    go_truncate_others_aggregation_word: several
-    go_truncate_others_terms:
+    truncate_others_aggregation_word: several
+    truncate_others_terms:
         F: "functions"
         P: "processes"
         C: "cellular components"
@@ -396,6 +351,7 @@ go_sentences_options:
         F: 3
         P: 5
         C: 5
+    add_multiple_if_covers_more_children: false
 
 do_sentences_options:
     exclude_terms:
@@ -431,7 +387,7 @@ do_sentences_options:
     group_priority:
         EXPERIMENTAL: 1
         BIOMARKER: 2
-    do_prepostfix_sentences_map:
+    prepostfix_sentences_map:
         - aspect: "D"
           group: EXPERIMENTAL
           qualifier: ""
@@ -442,7 +398,7 @@ do_sentences_options:
           qualifier: ""
           prefix: "is biomarker of"
           postfix: ""
-    do_prepostfix_sentences_map_humans:
+    prepostfix_sentences_map_humans:
         - aspect: "D"
           group: EXPERIMENTAL
           qualifier: ""
@@ -461,9 +417,10 @@ do_sentences_options:
     max_num_terms: 3
     trim_min_distance_from_root:
         D: 4
-    do_truncate_others_aggregation_word: several
-    do_truncate_others_terms:
+    truncate_others_aggregation_word: several
+    truncate_others_terms:
         D: "diseases"
+    add_multiple_if_covers_more_children: true
 
 do_via_orth_sentences_options:
     exclude_terms:
@@ -486,13 +443,13 @@ do_via_orth_sentences_options:
             priority: 2
     group_priority:
         ORTHOLOGY_BASED: 1
-    do_prepostfix_sentences_map:
+    prepostfix_sentences_map:
         - aspect: "D"
           group: ORTHOLOGY_BASED
           qualifier: ""
           prefix: "human orthologs of this gene are implicated in"
           postfix: ""
-    do_prepostfix_sentences_map_humans:
+    prepostfix_sentences_map_humans:
         - aspect: "D"
           group: ORTHOLOGY_BASED
           qualifier: ""
@@ -506,9 +463,10 @@ do_via_orth_sentences_options:
     max_num_terms: 3
     trim_min_distance_from_root:
         D: 4
-    do_truncate_others_aggregation_word: several
-    do_truncate_others_terms:
+    truncate_others_aggregation_word: several
+    truncate_others_terms:
         D: "diseases"
+    add_multiple_if_covers_more_children: true
 
 
 expression_sentences_options:
@@ -529,7 +487,7 @@ expression_sentences_options:
             priority: 1
     group_priority:
         EXPERIMENTAL: 1
-    expression_prepostfix_sentences_map:
+    prepostfix_sentences_map:
         - aspect: A
           group: EXPERIMENTAL
           qualifier: "Verified"
@@ -541,10 +499,9 @@ expression_sentences_options:
           prefix: "is enriched in"
           postfix: "based on"
 
-    expression_truncate_others_aggregation_word: several
-    expression_truncate_others_terms:
+    truncate_others_aggregation_word: several
+    truncate_others_terms:
         A: "tissues"
-
     remove_parents_if_children_are_present: false
     remove_children_if_parent_is_present: true
     trim_terms_by_common_ancestors: true
@@ -552,3 +509,5 @@ expression_sentences_options:
     max_num_terms: 5
     trim_min_distance_from_root:
         A: 3
+    add_multiple_if_covers_more_children: false
+    rename_cell: true

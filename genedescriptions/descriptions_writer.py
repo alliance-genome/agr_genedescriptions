@@ -5,7 +5,8 @@ from typing import List
 
 import numpy as np
 import copy
-from genedescriptions.descriptions_generator import DescriptionsStats, GeneDesc, DescriptionsOverallProperties
+
+from genedescriptions.descriptions_and_stats import DescriptionsOverallProperties, DescriptionsStats, GeneDescription
 
 
 class DescriptionsWriter(object):
@@ -15,11 +16,11 @@ class DescriptionsWriter(object):
         self.general_stats = DescriptionsStats()
         self.data = []
 
-    def add_gene_desc(self, gene_description: GeneDesc):
+    def add_gene_desc(self, gene_description: GeneDescription):
         """add a gene description to the writer object
 
         Args:
-            gene_description (GeneDesc): the gene description to be added
+            gene_description (GeneDescription): the gene description to be added
         """
         self.data.append(gene_description)
 
@@ -144,6 +145,8 @@ class DescriptionsWriter(object):
             for gene_desc in json_serializable_self.data:
                 gene_desc.stats = None
             del json_serializable_self.general_stats
+        for gene_desc in json_serializable_self.data:
+            del gene_desc.add_gene_name
         json_serializable_self.data = [vars(gene_desc) for gene_desc in json_serializable_self.data]
         if not include_single_gene_stats:
             for gene_desc in json_serializable_self.data:
