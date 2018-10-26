@@ -1,4 +1,5 @@
 import gzip
+import logging
 import urllib.request
 import shutil
 import os
@@ -28,6 +29,9 @@ class ExpressionClusterType(Enum):
 class ExpressionClusterFeature(Enum):
     TERMS = 2
     STUDIES = 3
+
+
+logger = logging.getLogger("Data Manager")
 
 
 class DataManager(object):

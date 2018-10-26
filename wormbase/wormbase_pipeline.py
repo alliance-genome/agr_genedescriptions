@@ -4,8 +4,9 @@ import argparse
 import datetime
 import logging
 import os
-from typing import List
 
+from typing import List
+from num2words import num2words
 from genedescriptions.commons import DataType, Module, Gene
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.data_manager import DataManager, ExpressionClusterType, ExpressionClusterFeature
@@ -14,7 +15,7 @@ from genedescriptions.descriptions_generator import OntologySentenceGenerator
 from genedescriptions.descriptions_writer import DescriptionsWriter
 from genedescriptions.sentence_generation_functions import generate_ortholog_sentence_wormbase_human, \
     generate_ortholog_sentence_wormbase_non_c_elegans, concatenate_words_with_oxford_comma, \
-    get_best_human_ortholog_for_info_poor
+    get_best_human_ortholog_for_info_poor, get_textpresso_popularity
 from wormbase.wb_data_manager import WBDataManager
 
 
@@ -140,7 +141,7 @@ def set_go_sentences(dm: WBDataManager, conf_parser: GenedescConfigParser, gene_
 
 
 def set_expression_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription,
-                            gene: Gene):
+                            gene: Gene, tpc_token):
     expr_sentence_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.GO, data_manager=dm,
                                                         config=conf_parser, limit_to_group="EXPERIMENTAL")
     expression_module_sentences = expr_sentence_generator.get_module_sentences(
@@ -195,18 +196,21 @@ def set_expression_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser
             if ec_genereg_terms:
                 several_word = ""
                 if len(ec_genereg_terms) > 3:
-                    ec_genereg_terms = ec_genereg_terms[0:4]
+                    t_p = [t_p for t_p in sorted([[term, get_textpresso_popularity(tpc_token, term)] for
+                                                  term in ec_genereg_terms], key=lambda x: (x[1], x[0][1]),
+                                                 reverse=True)]
+                    ec_genereg_terms = [term for term, popularity in t_p[0:4]]
                     several_word = "several genes including "
                 gene_desc.set_or_extend_module_description_and_final_stats(
                     module=Module.EXPRESSION_CLUSTER_GENEREG,
-                    description="is affected by " + several_word +
+                    description="is regulated by " + several_word +
                                 concatenate_words_with_oxford_comma(ec_genereg_terms) + " based on ",
                     additional_postfix_terms_list=ec_genereg_studies,
                     additional_postfix_final_word="studies", use_single_form=True)
             if ec_molreg_terms:
                 gene_desc.set_or_extend_module_description_and_final_stats(
                     module=Module.EXPRESSION_CLUSTER_MOLECULE,
-                    description="is affected by " + str(len(ec_molreg_terms)) + " chemicals based on ",
+                    description="is affected by " + num2words(len(ec_molreg_terms)) + " chemicals based on ",
                     additional_postfix_terms_list=ec_molreg_studies,
                     additional_postfix_final_word="studies", use_single_form=True)
 
@@ -330,7 +334,8 @@ def main():
                                                         human_genes_props=human_genes_props, gene_desc=gene_desc,
                                                         tpc_token=args.textpresso_token)
             set_go_sentences(dm=dm, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene)
-            set_expression_sentence(dm=dm, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene)
+            set_expression_sentence(dm=dm, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene,
+                                    tpc_token=args.textpresso_token)
             set_do_sentence(df=dm, conf_parser=conf_parser, gene=gene, gene_desc=gene_desc)
             if not gene_desc.go_description:
                 set_information_poor_sentence(orth_fullnames=orth_fullnames,

@@ -1,3 +1,4 @@
+import logging
 import unittest
 import os
 
@@ -9,6 +10,7 @@ from wormbase.wb_data_manager import WBDataManager
 class TestRawDataFetcher(unittest.TestCase):
 
     def setUp(self):
+        logging.basicConfig(filename=None, level="DEBUG", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
         this_dir = os.path.split(__file__)[0]
         self.conf_parser = GenedescConfigParser(os.path.join(this_dir, os.path.pardir, "wormbase", "config_wb.yml"))
         species = self.conf_parser.get_wb_organisms_info()

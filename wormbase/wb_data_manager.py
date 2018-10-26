@@ -1,3 +1,4 @@
+import logging
 import os
 import inflect
 
@@ -8,6 +9,9 @@ from ontobio.io.gafparser import GafParser
 from genedescriptions.commons import DataType, Gene, Module
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import ExpressionClusterFeature, DataManager, ExpressionClusterType
+
+
+logger = logging.getLogger("WB Data Manager")
 
 
 class WBDataManager(DataManager):
@@ -127,6 +131,7 @@ class WBDataManager(DataManager):
 
     def load_gene_data_from_file(self) -> None:
         """load gene list from pre-set file location"""
+        logger.info("Loading genes data from file")
         if not self.gene_data or len(self.gene_data.items()) == 0:
             self.gene_data = {}
             file_path = self._get_cached_file(cache_path=self.gene_data_cache_path, file_source_url=self.gene_data_url)
