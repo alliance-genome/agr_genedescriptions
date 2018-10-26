@@ -33,6 +33,3 @@ class Module(Enum):
     PROTEIN_DOMAIN = 15
     GO = 16
     DO_EXP_AND_BIO = 17
-
-
-

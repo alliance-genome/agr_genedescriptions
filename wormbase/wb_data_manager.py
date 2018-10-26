@@ -2,10 +2,11 @@ import os
 import inflect
 
 from collections import defaultdict
-from typing import List, Dict
+from typing import List
 from ontobio import AssociationSetFactory
 from ontobio.io.gafparser import GafParser
-from genedescriptions.commons import DataType, Gene
+from genedescriptions.commons import DataType, Gene, Module
+from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import ExpressionClusterFeature, DataManager, ExpressionClusterType
 
 
@@ -125,11 +126,10 @@ class WBDataManager(DataManager):
                     self.gene_data["WB:" + fields[1]] = Gene("WB:" + fields[1], name, fields[4] == "Dead", False)
 
     def load_associations_from_file(self, associations_type: DataType, associations_url: str,
-                                    associations_cache_path: str, exclusion_list: List[str]) -> None:
+                                    associations_cache_path: str, config: GenedescConfigParser) -> None:
         if associations_type == DataType.GO or associations_type == DataType.EXPR:
             super().load_associations_from_file(associations_type=associations_type, associations_url=associations_url,
-                                                associations_cache_path=associations_cache_path,
-                                                exclusion_list=exclusion_list)
+                                                associations_cache_path=associations_cache_path, config=config)
             if associations_type == DataType.EXPR:
                 associations = []
                 primary_ids = set()
@@ -198,7 +198,9 @@ class WBDataManager(DataManager):
                                                                               ontology=self.do_ontology)
             self.do_associations = self.remove_blacklisted_annotations(association_set=self.do_associations,
                                                                        ontology=self.do_ontology,
-                                                                       terms_blacklist=exclusion_list)
+                                                                       terms_blacklist=config.get_module_property(
+                                                                           module=Module.DO_EXP_AND_BIO,
+                                                                           prop=ConfigModuleProperty.EXCLUDE_TERMS))
 
     def load_orthology_from_file(self):
         orthology_file = self._get_cached_file(cache_path=self.orthology_cache_path,
@@ -337,36 +339,22 @@ class WBDataManager(DataManager):
         return ["the " + term if inflect_engine.singular_noun(term.split(" ")[-1]) is False else
                 term for term in terms_list]
 
-    def load_all_data_from_file(self, go_terms_replacement_regex: Dict[str, str] = None,
-                                go_terms_exclusion_list: List[str] = None,
-                                do_terms_replacement_regex: Dict[str, str] = None,
-                                do_terms_exclusion_list: List[str] = None) -> None:
+    def load_all_data_from_file(self, config: GenedescConfigParser) -> None:
         """load all data types from pre-set file locations
 
         Args:
-            go_terms_replacement_regex (Dict[str, str]): a dictionary containing the regular expression to be applied
-                for renaming terms. Each key must be a regular expression to search for terms and the associated value
-                another regular expression that defines the final result
-            go_terms_exclusion_list (List[str]): the list of GO ontology terms related to the GO annotations to be
-                removed
-            do_terms_replacement_regex (Dict[str, str]): a dictionary containing the regular expression to be applied
-                for renaming DO terms. Each key must be a regular expression to search for terms and the associated
-                value another regular expression that defines the final result
-            do_terms_exclusion_list (List[str]): the list of DO ontology terms related to the DO annotations to be
-                removed
+            config (GenedescConfigParser): configuration object where to read properties
         """
         self.load_gene_data_from_file()
         self.load_ontology_from_file(ontology_type=DataType.GO, ontology_url=self.go_ontology_url,
                                      ontology_cache_path=self.go_ontology_cache_path,
-                                     terms_replacement_regex=go_terms_replacement_regex)
+                                     config=config)
         self.load_associations_from_file(associations_type=DataType.GO, associations_url=self.go_associations_url,
-                                         associations_cache_path=self.go_associations_cache_path,
-                                         exclusion_list=go_terms_exclusion_list)
+                                         associations_cache_path=self.go_associations_cache_path, config=config)
         self.load_ontology_from_file(ontology_type=DataType.DO, ontology_url=self.do_ontology_url,
-                                     ontology_cache_path=self.do_ontology_cache_path,
-                                     terms_replacement_regex=do_terms_replacement_regex)
+                                     ontology_cache_path=self.do_ontology_cache_path, config=config)
         self.load_associations_from_file(associations_type=DataType.DO, associations_url=self.do_associations_url,
                                          associations_cache_path=self.do_associations_cache_path,
-                                         exclusion_list=do_terms_exclusion_list)
+                                         config=config)
         self.load_orthology_from_file()
         self.load_protein_domain_information()

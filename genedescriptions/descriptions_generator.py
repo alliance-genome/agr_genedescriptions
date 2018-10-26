@@ -42,20 +42,24 @@ class SentenceMerger(object):
 class OntologySentenceGenerator(object):
     """generates sentences based on description rules"""
 
-    def __init__(self, gene_id: str, annot_type: DataType, module: Module, data_manager: DataManager,
-                 config: GenedescConfigParser, limit_to_group: str = None, humans: bool = False):
+    def __init__(self, gene_id: str, module: Module, data_manager: DataManager, config: GenedescConfigParser,
+                 limit_to_group: str = None, humans: bool = False):
         """initialize sentence generator object
 
         Args:
             config (GenedescConfigParser): an optional config object from which to read the options
             limit_to_group (str): limit the evidence codes to the specified group
         """
-        if annot_type == DataType.DO:
+        annot_type = None
+        if module == Module.DO_ORTHOLOGY or module == Module.DO_EXPERIMENTAL or module == module.DO_BIOMARKER:
             self.ontology = data_manager.do_ontology
-        elif annot_type == DataType.GO:
+            annot_type = DataType.DO
+        elif module == Module.GO:
             self.ontology = data_manager.go_ontology
-        elif annot_type == DataType.EXPR:
+            annot_type = DataType.GO
+        elif module == Module.EXPRESSION:
             self.ontology = data_manager.expression_ontology
+            annot_type = DataType.EXPR
         self.evidence_groups_priority_list = config.get_evidence_groups_priority_list(module=module)
         self.prepostfix_sentences_map = config.get_prepostfix_sentence_map(module=module, humans=humans)
         self.terms_groups = defaultdict(lambda: defaultdict(set))
@@ -68,7 +72,7 @@ class OntologySentenceGenerator(object):
         self.annot_type = annot_type
         evidence_codes_groups_map = {evcode: group for evcode, group in ev_codes_groups_maps.items() if
                                      limit_to_group is None or limit_to_group in ev_codes_groups_maps[evcode]}
-        prepostfix_special_cases_sent_map = config.get_prepostfix_sentence_map(module=module, special_cases=True,
+        prepostfix_special_cases_sent_map = config.get_prepostfix_sentence_map(module=module, special_cases_only=True,
                                                                                humans=humans)
         if len(annotations) > 0:
             for annotation in annotations:
@@ -103,24 +107,24 @@ class OntologySentenceGenerator(object):
         Returns:
             ModuleSentences: the module sentences
         """
-        dist_root = config.get_module_simple_property(module=self.module, prop=ConfigModuleProperty.DISTANCE_FROM_ROOT)
-        cat_several_words = config.get_module_simple_property(module=self.module,
-                                                              prop=ConfigModuleProperty.CUTOFF_SEVERAL_CATEGORY_WORD)
-        del_overlap = config.get_module_simple_property(module=self.module, prop=ConfigModuleProperty.REMOVE_OVERLAP)
-        remove_parents = config.get_module_simple_property(module=self.module,
-                                                           prop=ConfigModuleProperty.DEL_PARENTS_IF_CHILD)
-        remove_child_terms = config.get_module_simple_property(module=self.module,
-                                                               prop=ConfigModuleProperty.DEL_CHILDREN_IF_PARENT)
-        add_mul_common_anc = config.get_module_simple_property(module=self.module,
-                                                               prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
-        trim_if_more_than = config.get_module_simple_property(module=self.module,
-                                                              prop=ConfigModuleProperty.MAX_NUM_TERMS_BEFORE_TRIMMING)
-        max_terms = config.get_module_simple_property(module=self.module,
-                                                      prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
-        exclude_terms = config.get_module_simple_property(module=self.module, prop=ConfigModuleProperty.EXCLUDE_TERMS)
-        cutoff_final_word = config.get_module_simple_property(module=self.module,
-                                                              prop=ConfigModuleProperty.CUTOFF_SEVERAL_WORD)
-        rename_cell = config.get_module_simple_property(module=self.module, prop=ConfigModuleProperty.RENAME_CELL)
+        dist_root = config.get_module_property(module=self.module, prop=ConfigModuleProperty.DISTANCE_FROM_ROOT)
+        cat_several_words = config.get_module_property(module=self.module,
+                                                       prop=ConfigModuleProperty.CUTOFF_SEVERAL_CATEGORY_WORD)
+        del_overlap = config.get_module_property(module=self.module, prop=ConfigModuleProperty.REMOVE_OVERLAP)
+        remove_parents = config.get_module_property(module=self.module,
+                                                    prop=ConfigModuleProperty.DEL_PARENTS_IF_CHILD)
+        remove_child_terms = config.get_module_property(module=self.module,
+                                                        prop=ConfigModuleProperty.DEL_CHILDREN_IF_PARENT)
+        add_mul_common_anc = config.get_module_property(module=self.module,
+                                                        prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
+        trim_if_more_than = config.get_module_property(module=self.module,
+                                                       prop=ConfigModuleProperty.MAX_NUM_TERMS_BEFORE_TRIMMING)
+        max_terms = config.get_module_property(module=self.module,
+                                               prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
+        exclude_terms = config.get_module_property(module=self.module, prop=ConfigModuleProperty.EXCLUDE_TERMS)
+        cutoff_final_word = config.get_module_property(module=self.module,
+                                                       prop=ConfigModuleProperty.CUTOFF_SEVERAL_WORD)
+        rename_cell = config.get_module_property(module=self.module, prop=ConfigModuleProperty.RENAME_CELL)
         if not dist_root:
             dist_root = {'F': 1, 'P': 1, 'C': 2, 'D': 3, 'A': 3}
         if not cat_several_words:

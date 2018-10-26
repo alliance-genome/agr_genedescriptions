@@ -46,14 +46,12 @@ def load_data(species, organism, conf_parser: GenedescConfigParser):
                                        ontology_cache_path=os.path.join(
                                            conf_parser.get_cache_dir(),
                                            "wormbase_agr_human", "go_ontology.obo"),
-                                       terms_replacement_regex=conf_parser.get_module_simple_property(
-                                           module=Module.GO, prop=ConfigModuleProperty.RENAME_TERMS))
+                                       config=conf_parser)
         df_agr.load_associations_from_file(associations_type=DataType.GO,
                                            associations_url=conf_parser.get_wb_human_orthologs_go_associations(),
                                            associations_cache_path=os.path.join(
                                                conf_parser.get_cache_dir(), "wormbase_agr_human", "go_assoc.daf.gz"),
-                                           exclusion_list=conf_parser.get_module_simple_property(
-                                               module=Module.GO, prop=ConfigModuleProperty.EXCLUDE_TERMS))
+                                           config=conf_parser)
     if "main_sister_species" in species[organism] and species[organism]["main_sister_species"]:
         sister_df = WBDataManager(raw_files_source=conf_parser.get_wb_raw_file_sources(),
                                   release_version=conf_parser.get_wb_release(),
@@ -62,35 +60,16 @@ def load_data(species, organism, conf_parser: GenedescConfigParser):
                                   cache_location=conf_parser.get_cache_dir(), do_relations=None,
                                   go_relations=["subClassOf", "BFO:0000050"])
         logger.info("Loading all data for sister species")
-        sister_df.load_all_data_from_file(
-            go_terms_replacement_regex=conf_parser.get_module_simple_property(
-                module=Module.GO, prop=ConfigModuleProperty.RENAME_TERMS),
-            go_terms_exclusion_list=conf_parser.get_module_simple_property(
-                module=Module.GO, prop=ConfigModuleProperty.EXCLUDE_TERMS),
-            do_terms_replacement_regex=conf_parser.get_module_simple_property(
-                module=Module.DO_EXP_AND_BIO, prop=ConfigModuleProperty.RENAME_TERMS),
-            do_terms_exclusion_list=conf_parser.get_module_simple_property(
-                module=Module.DO_EXP_AND_BIO, prop=ConfigModuleProperty.EXCLUDE_TERMS))
+        sister_df.load_all_data_from_file(config=conf_parser)
     logger.info("Loading all data for main species")
-    df.load_all_data_from_file(
-        go_terms_replacement_regex=conf_parser.get_module_simple_property(
-            module=Module.GO, prop=ConfigModuleProperty.RENAME_TERMS),
-        go_terms_exclusion_list=conf_parser.get_module_simple_property(
-            module=Module.GO, prop=ConfigModuleProperty.EXCLUDE_TERMS),
-        do_terms_replacement_regex=conf_parser.get_module_simple_property(
-            module=Module.DO_EXP_AND_BIO, prop=ConfigModuleProperty.RENAME_TERMS),
-        do_terms_exclusion_list=conf_parser.get_module_simple_property(
-            module=Module.DO_EXP_AND_BIO, prop=ConfigModuleProperty.EXCLUDE_TERMS))
+    df.load_all_data_from_file(config=conf_parser)
     if organism == "c_elegans":
         df.load_ontology_from_file(ontology_type=DataType.EXPR, ontology_url=df.expression_ontology_url,
-                                   ontology_cache_path=df.expression_ontology_cache_path,
-                                   terms_replacement_regex=conf_parser.get_module_simple_property(
-                                       module=Module.EXPRESSION, prop=ConfigModuleProperty.RENAME_TERMS))
+                                   ontology_cache_path=df.expression_ontology_cache_path, config=conf_parser)
         df.load_associations_from_file(associations_type=DataType.EXPR,
                                        associations_url=df.expression_associations_url,
                                        associations_cache_path=df.expression_associations_cache_path,
-                                       exclusion_list=conf_parser.get_module_simple_property(
-                                           module=Module.EXPRESSION, prop=ConfigModuleProperty.EXCLUDE_TERMS))
+                                       config=conf_parser)
     df.load_expression_cluster_data()
     return df, sister_df, df_agr, orth_fullnames, sister_sp_fullname
 
@@ -112,11 +91,10 @@ def set_orthology_sentence(dm: WBDataManager, orth_fullnames: List[str], gene_de
 
 
 def set_go_sentences(dm: WBDataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription, gene: Gene):
-    go_sent_generator_exp = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.GO,
-                                                      module=Module.GO, data_manager=dm,
+    go_sent_generator_exp = OntologySentenceGenerator(gene_id=gene.id, module=Module.GO, data_manager=dm,
                                                       config=conf_parser, limit_to_group="EXPERIMENTAL")
-    go_sent_generator = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.GO,
-                                                  module=Module.GO, data_manager=dm, config=conf_parser)
+    go_sent_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.GO, data_manager=dm,
+                                                  config=conf_parser)
     contributes_to_module_sentences = go_sent_generator.get_module_sentences(
         config=conf_parser, aspect='F', qualifier='contributes_to', merge_groups_with_same_prefix=True,
         keep_only_best_group=True)
@@ -161,8 +139,7 @@ def set_go_sentences(dm: WBDataManager, conf_parser: GenedescConfigParser, gene_
 
 def set_expression_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription,
                             gene: Gene):
-    expr_sentence_generator = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.GO,
-                                                        module=Module.GO, data_manager=dm,
+    expr_sentence_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.GO, data_manager=dm,
                                                         config=conf_parser, limit_to_group="EXPERIMENTAL")
     expression_module_sentences = expr_sentence_generator.get_module_sentences(
         config=conf_parser, aspect='A', qualifier="Verified", merge_groups_with_same_prefix=True,
@@ -210,23 +187,22 @@ def set_expression_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser
 
 
 def set_do_sentence(df: DataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription, gene: Gene):
-    do_sentence_exp_generator = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.DO,
+    do_sentence_exp_generator = OntologySentenceGenerator(gene_id=gene.id,
                                                           module=Module.DO_EXP_AND_BIO, data_manager=df,
                                                           config=conf_parser, limit_to_group="EXPERIMENTAL")
     disease_exp_module_sentences = do_sentence_exp_generator.get_module_sentences(
         config=conf_parser, aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module=Module.DO_EXPERIMENTAL,
                                                                module_sentences=disease_exp_module_sentences)
-    do_sentence_bio_generator = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.DO,
-                                                          module=Module.DO_EXP_AND_BIO, data_manager=df,
-                                                          config=conf_parser, limit_to_group="BIOMARKER")
+    do_sentence_bio_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.DO_EXP_AND_BIO,
+                                                          data_manager=df, config=conf_parser,
+                                                          limit_to_group="BIOMARKER")
     disease_bio_module_sentences = do_sentence_bio_generator.get_module_sentences(
         config=conf_parser, aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module=Module.DO_BIOMARKER,
                                                                module_sentences=disease_bio_module_sentences)
-    do_via_orth_sentence_generator = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.DO,
-                                                               module=Module.DO_ORTHOLOGY, data_manager=df,
-                                                               config=conf_parser)
+    do_via_orth_sentence_generator = OntologySentenceGenerator(
+        gene_id=gene.id, module=Module.DO_ORTHOLOGY, data_manager=df, config=conf_parser)
     disease_via_orth_module_sentences = do_via_orth_sentence_generator.get_module_sentences(
         config=conf_parser, aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module=Module.DO_ORTHOLOGY,
@@ -246,9 +222,8 @@ def set_information_poor_sentence(orth_fullnames: List[str], selected_orthologs,
                                                           human_df_agr, config=conf_parser)
         if best_orth:
             best_orth = "RGD:" + best_orth
-            human_go_sent_generator = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.DO,
-                                                                module=Module.DO_ORTHOLOGY, data_manager=dm,
-                                                                config=conf_parser, humans=True,
+            human_go_sent_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.DO_ORTHOLOGY,
+                                                                data_manager=dm, config=conf_parser, humans=True,
                                                                 limit_to_group="EXPERIMENTAL")
             human_func_module_sentences = human_go_sent_generator.get_module_sentences(
                 config=conf_parser, aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True)
@@ -277,8 +252,7 @@ def set_sister_species_sentence(dm: WBDataManager, conf_parser: GenedescConfigPa
         gene_desc.gene_id, orth_species_full_name=[sister_sp_fullname], sister_species_data_fetcher=sister_df,
         ecode_priority_list=["EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI",
                              "HEP"])[0][0]
-    sister_sentences_generator = OntologySentenceGenerator(gene_id=gene.id, annot_type=DataType.DO,
-                                                           module=Module.DO_ORTHOLOGY, data_manager=dm,
+    sister_sentences_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.DO_ORTHOLOGY, data_manager=dm,
                                                            config=conf_parser,
                                                            humans=sister_sp_fullname == "Homo sapiens",
                                                            limit_to_group="EXPERIMENTAL")

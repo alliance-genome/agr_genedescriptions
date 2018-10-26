@@ -13,7 +13,8 @@ from ontobio.ontol_factory import OntologyFactory
 from ontobio.ontol import Ontology
 from ontobio.assocmodel import AssociationSet
 from ontobio.io.gafparser import GafParser
-from genedescriptions.commons import Gene, DataType
+from genedescriptions.commons import Gene, DataType, Module
+from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.ontology_tools import set_all_depths_in_subgraph
 from genedescriptions.sentence_generation_functions import is_human_ortholog_name_valid, rename_human_ortholog_name
 
@@ -141,32 +142,34 @@ class DataManager(object):
             set_all_depths_in_subgraph(ontology=new_ontology, root_id=root_id, relations=None)
 
     def load_ontology_from_file(self, ontology_type: DataType, ontology_url: str, ontology_cache_path: str,
-                                terms_replacement_regex: Dict[str, str] = None) -> None:
+                                config: GenedescConfigParser) -> None:
         """load go ontology from file
 
         Args:
             ontology_type (DataType): the type of ontology to set
             ontology_url (str): url to the ontology file
             ontology_cache_path (str): path to cache file for the ontology
-            terms_replacement_regex (Dict[str, str])]: a dictionary containing the regular expression to be applied for
-                renaming terms. Each key must be a regular expression to search for terms and the associated value
-                another regular expression that defines the final result
+            config (GenedescConfigParser): configuration object where to read properties
         """
         new_ontology = None
+        module = None
         if ontology_type == DataType.GO:
             self.go_ontology = OntologyFactory().create(self._get_cached_file(file_source_url=ontology_url,
                                                                               cache_path=ontology_cache_path)
                                                         ).subontology(relations=self.go_relations)
             new_ontology = self.go_ontology
+            module = Module.GO
         elif ontology_type == DataType.DO:
             self.do_ontology = OntologyFactory().create(self._get_cached_file(file_source_url=ontology_url,
                                                                               cache_path=ontology_cache_path)
                                                         ).subontology(relations=self.do_relations)
             new_ontology = self.do_ontology
+            module = Module.DO_EXP_AND_BIO
         elif ontology_type == DataType.EXPR:
             self.expression_ontology = OntologyFactory().create(self._get_cached_file(
                 file_source_url=ontology_url, cache_path=ontology_cache_path)).subontology()
             new_ontology = self.expression_ontology
+        terms_replacement_regex = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_TERMS)
         if terms_replacement_regex:
             self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
         if ontology_type == DataType.EXPR:
@@ -179,37 +182,44 @@ class DataManager(object):
         for root_id in new_ontology.get_roots():
             set_all_depths_in_subgraph(ontology=new_ontology, root_id=root_id, relations=None)
 
-    def set_associations(self, associations_type: DataType, associations: AssociationSet,
-                         exclusion_list: List[str] = None) -> None:
+    def set_associations(self, associations_type: DataType, associations: AssociationSet, config: GenedescConfigParser):
         """set the go annotations and remove blacklisted annotations
 
         Args:
             associations_type (DataType): the type of associations to set
             associations (AssociationSet): an association object to set as go annotations
-            exclusion_list (List[str]): the list of ontology terms related to the annotations to be removed
+            config (GenedescConfigParser): configuration object where to read properties
         """
         if associations_type == DataType.GO:
             self.go_associations = self.remove_blacklisted_annotations(association_set=associations,
                                                                        ontology=self.go_ontology,
-                                                                       terms_blacklist=exclusion_list)
+                                                                       terms_blacklist=config.get_module_property(
+                                                                           module=Module.GO,
+                                                                           prop=ConfigModuleProperty.EXCLUDE_TERMS))
         elif associations_type == DataType.DO:
             self.do_associations = self.remove_blacklisted_annotations(association_set=associations,
                                                                        ontology=self.do_ontology,
-                                                                       terms_blacklist=exclusion_list)
+                                                                       terms_blacklist=config.get_module_property(
+                                                                           module=Module.DO_EXP_AND_BIO,
+                                                                           prop=ConfigModuleProperty.EXCLUDE_TERMS))
         elif associations_type == DataType.EXPR:
             self.expression_associations = self.remove_blacklisted_annotations(association_set=associations,
                                                                                ontology=self.do_ontology,
-                                                                               terms_blacklist=exclusion_list)
+                                                                               terms_blacklist=config
+                                                                               .get_module_property(
+                                                                                   module=Module.EXPRESSION,
+                                                                                   prop=ConfigModuleProperty
+                                                                                       .EXCLUDE_TERMS))
 
     def load_associations_from_file(self, associations_type: DataType, associations_url: str,
-                                    associations_cache_path: str, exclusion_list: List[str]) -> None:
+                                    associations_cache_path: str, config: GenedescConfigParser) -> None:
         """load go associations from file
 
         Args:
             associations_type (DataType): the type of associations to set
             associations_url (str): url to the association file
             associations_cache_path (str): path to cache file for the associations
-            exclusion_list (List[str]): the list of ontology terms related to the annotations to be removed
+            config (GenedescConfigParser): configuration object where to read properties
         """
         if associations_type == DataType.GO:
             self.go_associations = AssociationSetFactory().create_from_assocs(assocs=GafParser().parse(
@@ -217,21 +227,26 @@ class DataManager(object):
                 skipheader=True), ontology=self.go_ontology)
             self.go_associations = self.remove_blacklisted_annotations(association_set=self.go_associations,
                                                                        ontology=self.go_ontology,
-                                                                       terms_blacklist=exclusion_list)
+                                                                       terms_blacklist=config.get_module_property(
+                                                                           module=Module.GO,
+                                                                           prop=ConfigModuleProperty.EXCLUDE_TERMS))
         elif associations_type == DataType.DO:
             self.do_associations = AssociationSetFactory().create_from_assocs(assocs=GafParser().parse(
                 file=self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url),
                 skipheader=True), ontology=self.do_ontology)
             self.do_associations = self.remove_blacklisted_annotations(association_set=self.do_associations,
                                                                        ontology=self.do_ontology,
-                                                                       terms_blacklist=exclusion_list)
+                                                                       terms_blacklist=config.get_module_property(
+                                                                           module=Module.DO_EXP_AND_BIO,
+                                                                           prop=ConfigModuleProperty.EXCLUDE_TERMS))
         elif associations_type == DataType.EXPR:
             self.expression_associations = AssociationSetFactory().create_from_assocs(assocs=GafParser().parse(
                 file=self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url),
                 skipheader=True), ontology=self.expression_ontology)
             self.expression_associations = self.remove_blacklisted_annotations(
                 association_set=self.expression_associations, ontology=self.expression_ontology,
-                terms_blacklist=exclusion_list)
+                terms_blacklist=config.get_module_property(module=Module.EXPRESSION,
+                                                           prop=ConfigModuleProperty.EXCLUDE_TERMS))
 
     def get_annotations_for_gene(self, gene_id: str, annot_type: DataType = DataType.GO,
                                  include_obsolete: bool = False, include_negative_results: bool = False,

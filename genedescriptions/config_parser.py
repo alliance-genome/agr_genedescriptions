@@ -26,7 +26,7 @@ class GenedescConfigParser(object):
         with open(file_path) as conf_file:
             self.config = yaml.load(conf_file)
 
-    def get_module_simple_property(self, module: Module, prop: ConfigModuleProperty):
+    def get_module_property(self, module: Module, prop: ConfigModuleProperty):
         module_name = self._get_module_name(module)
         property_name = self._get_module_property_name(prop)
         if module_name in self.config and property_name in self.config[module_name]:
@@ -78,9 +78,9 @@ class GenedescConfigParser(object):
             property_name = "remove_overlapped_terms"
         return property_name
 
-    def get_prepostfix_sentence_map(self, module: Module, special_cases: bool = False, humans: bool = False):
+    def get_prepostfix_sentence_map(self, module: Module, special_cases_only: bool = False, humans: bool = False):
         module_name = self._get_module_name(module)
-        if special_cases:
+        if special_cases_only:
             return {(prepost["aspect"], prepost["group"], prepost["qualifier"]): [
                 (sp_case["id"], sp_case["match_regex"], sp_case["prefix"], sp_case["postfix"])
                 for sp_case in prepost["special_cases"]]
@@ -90,8 +90,8 @@ class GenedescConfigParser(object):
             prepost_map = {(prepost["aspect"], prepost["group"], prepost["qualifier"]): (
                 prepost["prefix"], prepost["postfix"]) for prepost in self.config[module_name][
                 "prepostfix_sentences_map_humans" if humans else "prepostfix_sentences_map"]}
-            special_cases = self.get_prepostfix_sentence_map(module=module, special_cases=True, humans=humans)
-            for key, scs in special_cases.items():
+            special_cases_only = self.get_prepostfix_sentence_map(module=module, special_cases_only=True, humans=humans)
+            for key, scs in special_cases_only.items():
                 for special_case in scs:
                     prepost_map[(key[0], key[1] + str(special_case[0]), key[2])] = (special_case[2], special_case[3])
             return prepost_map
@@ -135,35 +135,3 @@ class GenedescConfigParser(object):
 
     def get_wb_organisms_info(self):
         return self.config["wb_options"]["organisms"]
-
-    def get_sentence_generator_common_properties(self, module: Module, humans: bool = False, start_with: str = None):
-        ev_codes_groups_maps = self.get_evidence_codes_groups_map(module=module)
-        return {"evidence_groups_priority_list": self.get_evidence_groups_priority_list(module=module),
-                "prepostfix_sentences_map": self.get_prepostfix_sentence_map(module=module, humans=humans),
-                "prepostfix_special_cases_sent_map": self.get_prepostfix_sentence_map(module=module, special_cases=True,
-                                                                                      humans=humans),
-                "evidence_codes_groups_map": {evcode: group for evcode, group in ev_codes_groups_maps.items() if
-                                              start_with is None or ev_codes_groups_maps[evcode].startswith(
-                                                  start_with)}}
-
-    def get_sentence_common_properties(self, module: Module):
-        return {"remove_parent_terms": self.get_module_simple_property(module=module,
-                                                                       prop=ConfigModuleProperty.DEL_PARENTS_IF_CHILD),
-                "remove_child_terms": self.get_module_simple_property(module=module,
-                                                                      prop=ConfigModuleProperty.DEL_CHILDREN_IF_PARENT),
-                "merge_num_terms_threshold": self.get_module_simple_property(
-                    module=module, prop=ConfigModuleProperty.MAX_NUM_TERMS_BEFORE_TRIMMING),
-                "merge_max_num_terms": self.get_module_simple_property(
-                    module=module, prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE),
-                "merge_min_distance_from_root": self.get_module_simple_property(
-                    module=module, prop=ConfigModuleProperty.DISTANCE_FROM_ROOT),
-                "truncate_others_generic_word": self.get_module_simple_property(
-                    module=module, prop=ConfigModuleProperty.CUTOFF_SEVERAL_WORD),
-                "truncate_others_aspect_words": self.get_module_simple_property(
-                    module=module, prop=ConfigModuleProperty.CUTOFF_SEVERAL_CATEGORY_WORD),
-                "add_multiple_if_covers_more_children": self.get_module_simple_property(
-                    module=module, prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST),
-                "blacklisted_ancestors": self.get_module_simple_property(
-                    module=module, prop=ConfigModuleProperty.EXCLUDE_TERMS),
-                "rename_cell": self.get_module_simple_property(module=Module.EXPRESSION,
-                                                               prop=ConfigModuleProperty.RENAME_CELL)}
