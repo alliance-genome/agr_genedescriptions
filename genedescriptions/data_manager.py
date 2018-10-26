@@ -22,6 +22,7 @@ from genedescriptions.sentence_generation_functions import is_human_ortholog_nam
 class ExpressionClusterType(Enum):
     ANATOMY = 1
     MOLREG = 2
+    GENEREG = 3
 
 
 class ExpressionClusterFeature(Enum):

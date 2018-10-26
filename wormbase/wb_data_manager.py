@@ -17,7 +17,7 @@ class WBDataManager(DataManager):
                  go_relations: List[str] = None, do_relations: List[str] = None, use_cache: bool = False,
                  sister_sp_fullname: str = "", human_orthologs_go_ontology_url: str = None,
                  human_orthologs_go_associations_url: str = None, expression_cluster_anatomy_prefix: str = None,
-                 expression_cluster_molreg_prefix: str = None):
+                 expression_cluster_molreg_prefix: str = None, expression_cluster_genereg_prefix: str = None):
         """create a new data fetcher for WormBase. Files will be downloaded from WB ftp site. For convenience, file
         locations are automatically generated and stored in class variables ending in _url for remote filed and
         _cache_path for caching
@@ -89,30 +89,41 @@ class WBDataManager(DataManager):
                                                            "anatomy_association." + release_version + ".wb")
         self.expression_associations_url = raw_files_source + '/' + release_version + \
                                            '/ONTOLOGY/anatomy_association.' + release_version + '.wb'
-        if expression_cluster_anatomy_prefix:
-            self.expression_cluster_anatomy_url = "ftp://caltech.wormbase.org/pub/wormbase/ExprClusterSummary/" + \
-                                                  release_version[0:-1] + str(int(release_version[-1]) + 1) + \
-                                                  "/" + expression_cluster_anatomy_prefix + \
-                                                  "ECsummary_anatomy." + release_version + ".txt"
-            self.expression_cluster_anatomy_cache_path = os.path.join(cache_location, "wormbase", release_version,
-                                                                      "ExprClusterSummary",
-                                                                      expression_cluster_anatomy_prefix +
-                                                                      "ECsummary_anatomy." + release_version + ".txt")
-            self.expression_cluster_anatomy_data = defaultdict(list)
+        self.expression_cluster_anatomy_url = self._get_expression_cluster_url(
+            prefix=expression_cluster_anatomy_prefix, ec_type="anatomy", release_version=release_version)
+        self.expression_cluster_anatomy_cache_path = self._get_expression_cluster_cache_path(
+            prefix=expression_cluster_anatomy_prefix, ec_type="anatomy", release_version=release_version,
+            cache_location=cache_location)
+        self.expression_cluster_anatomy_data = defaultdict(list) if self.expression_cluster_anatomy_url else None
+        self.expression_cluster_molreg_url = self._get_expression_cluster_url(
+            prefix=expression_cluster_molreg_prefix, ec_type="molReg", release_version=release_version)
+        self.expression_cluster_molreg_cache_path = self._get_expression_cluster_cache_path(
+            prefix=expression_cluster_molreg_prefix, ec_type="molReg", release_version=release_version,
+            cache_location=cache_location)
+        self.expression_cluster_molreg_data = defaultdict(list) if self.expression_cluster_molreg_url else None
+        self.expression_cluster_genereg_url = self._get_expression_cluster_url(
+            prefix=expression_cluster_genereg_prefix, ec_type="geneReg", release_version=release_version)
+        self.expression_cluster_genereg_cache_path = self._get_expression_cluster_cache_path(
+            prefix=expression_cluster_genereg_prefix, ec_type="geneReg", release_version=release_version,
+            cache_location=cache_location)
+        self.expression_cluster_genereg_data = defaultdict(list) if self.expression_cluster_genereg_url else None
+
+    @staticmethod
+    def _get_expression_cluster_url(prefix, ec_type, release_version):
+        if prefix:
+            return "ftp://caltech.wormbase.org/pub/wormbase/ExprClusterSummary/" + release_version[0:-1] + \
+                   str(int(release_version[-1]) + 1) + "/" + prefix + "ECsummary_" + ec_type + "." + release_version + \
+                   ".txt"
         else:
-            self.expression_cluster_anatomy_data = None
-        if expression_cluster_molreg_prefix:
-            self.expression_cluster_molreg_url = "ftp://caltech.wormbase.org/pub/wormbase/ExprClusterSummary/" + \
-                                                 release_version[0:-1] + str(int(release_version[-1]) + 1) + \
-                                                 "/" + expression_cluster_molreg_prefix + "ECsummary_molReg." + \
-                                                 release_version + ".txt"
-            self.expression_cluster_molreg_cache_path = os.path.join(cache_location, "wormbase", release_version,
-                                                                     "ExprClusterSummary",
-                                                                     expression_cluster_molreg_prefix +
-                                                                     "ECsummary_molReg." + release_version + ".txt")
-            self.expression_cluster_molreg_data = defaultdict(list)
+            return None
+
+    @staticmethod
+    def _get_expression_cluster_cache_path(prefix, ec_type, release_version, cache_location):
+        if prefix:
+            return os.path.join(cache_location, "wormbase", release_version, "ExprClusterSummary", prefix +
+                                "ECsummary_" + ec_type + "." + release_version + ".txt")
         else:
-            self.expression_cluster_molreg_data = None
+            return None
 
     def load_gene_data_from_file(self) -> None:
         """load gene list from pre-set file location"""
@@ -307,6 +318,10 @@ class WBDataManager(DataManager):
             self._load_expression_cluster_file(self.expression_cluster_molreg_cache_path,
                                                self.expression_cluster_molreg_url,
                                                self.expression_cluster_molreg_data)
+        if self.expression_cluster_genereg_data is not None:
+            self._load_expression_cluster_file(self.expression_cluster_genereg_cache_path,
+                                               self.expression_cluster_genereg_url,
+                                               self.expression_cluster_genereg_data)
 
     def get_expression_cluster_feature(self, gene_id, expression_cluster_type: ExpressionClusterType,
                                        feature: ExpressionClusterFeature):
@@ -324,6 +339,8 @@ class WBDataManager(DataManager):
             target = self.expression_cluster_anatomy_data
         elif expression_cluster_type == ExpressionClusterType.MOLREG:
             target = self.expression_cluster_molreg_data
+        elif expression_cluster_type == ExpressionClusterType.GENEREG:
+            target = self.expression_cluster_genereg_data
         idx = 2
         if feature == ExpressionClusterFeature.TERMS:
             idx = 2
