@@ -7,6 +7,8 @@ import os
 
 from typing import List
 from num2words import num2words
+
+from genedescriptions.api_manager import APIManager
 from genedescriptions.commons import DataType, Module, Gene
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.data_manager import DataManager, ExpressionClusterType, ExpressionClusterFeature
@@ -15,7 +17,7 @@ from genedescriptions.descriptions_generator import OntologySentenceGenerator
 from genedescriptions.descriptions_writer import DescriptionsWriter
 from genedescriptions.sentence_generation_functions import generate_ortholog_sentence_wormbase_human, \
     generate_ortholog_sentence_wormbase_non_c_elegans, concatenate_words_with_oxford_comma, \
-    get_best_human_ortholog_for_info_poor, get_textpresso_popularity
+    get_best_human_ortholog_for_info_poor
 from wormbase.wb_data_manager import WBDataManager
 
 
@@ -77,8 +79,8 @@ def load_data(species, organism, conf_parser: GenedescConfigParser):
     return df, sister_df, df_agr, orth_fullnames, sister_sp_fullname
 
 
-def set_orthology_sentence(dm: WBDataManager, orth_fullnames: List[str], gene_desc: GeneDescription, tpc_token: str,
-                           human_genes_props):
+def set_orthology_sentence(dm: WBDataManager, orth_fullnames: List[str], gene_desc: GeneDescription,
+                           human_genes_props, api_manager):
     best_orthologs, selected_orth_name = dm.get_best_orthologs_for_gene(gene_desc.gene_id,
                                                                         orth_species_full_name=orth_fullnames)
     selected_orthologs = []
@@ -88,7 +90,8 @@ def set_orthology_sentence(dm: WBDataManager, orth_fullnames: List[str], gene_de
             sel_orthologs, orth_sent = generate_ortholog_sentence_wormbase_human(best_orthologs, human_genes_props)
             selected_orthologs = [orth for orth in best_orthologs if orth[1] in sel_orthologs]
         else:
-            orth_sent = generate_ortholog_sentence_wormbase_non_c_elegans(best_orthologs, selected_orth_name, tpc_token)
+            orth_sent = generate_ortholog_sentence_wormbase_non_c_elegans(best_orthologs, selected_orth_name,
+                                                                          api_manager=api_manager)
         gene_desc.set_or_extend_module_description_and_final_stats(module=Module.ORTHOLOGY, description=orth_sent)
     return selected_orthologs
 
@@ -141,7 +144,7 @@ def set_go_sentences(dm: WBDataManager, conf_parser: GenedescConfigParser, gene_
 
 
 def set_expression_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription,
-                            gene: Gene, tpc_token):
+                            gene: Gene, api_manager: APIManager):
     expr_sentence_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.GO, data_manager=dm,
                                                         config=conf_parser, limit_to_group="EXPERIMENTAL")
     expression_module_sentences = expr_sentence_generator.get_module_sentences(
@@ -196,10 +199,10 @@ def set_expression_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser
             if ec_genereg_terms:
                 several_word = ""
                 if len(ec_genereg_terms) > 3:
-                    t_p = [t_p for t_p in sorted([[term, get_textpresso_popularity(tpc_token, term)] for
+                    t_p = [t_p for t_p in sorted([[term, api_manager.get_textpresso_popularity(term)] for
                                                   term in ec_genereg_terms], key=lambda x: (x[1], x[0][1]),
                                                  reverse=True)]
-                    ec_genereg_terms = [term for term, popularity in t_p[0:4]]
+                    ec_genereg_terms = [term for term, popularity in t_p[0:3]]
                     several_word = "several genes including "
                 gene_desc.set_or_extend_module_description_and_final_stats(
                     module=Module.EXPRESSION_CLUSTER_GENEREG,
@@ -316,6 +319,7 @@ def main():
     organisms_list = conf_parser.get_wb_organisms_to_process()
     human_genes_props = DataManager.get_human_gene_props()
     ensembl_hgnc_ids_map = DataManager.get_ensembl_hgnc_ids_map()
+    api_manager = APIManager(textpresso_api_token=args.textpresso_token)
     for organism in organisms_list:
         logger.info("Processing organism " + organism)
         species = conf_parser.get_wb_organisms_info()
@@ -328,14 +332,13 @@ def main():
         desc_writer.overall_properties.date = datetime.date.today().strftime("%B %d, %Y")
         for gene in dm.get_gene_data():
             logger.debug("Generating description for gene " + gene.name)
-
             gene_desc = GeneDescription(gene_id=gene.id, gene_name=gene.name, add_gene_name=True)
             selected_orthologs = set_orthology_sentence(dm=dm, orth_fullnames=orth_fullnames,
                                                         human_genes_props=human_genes_props, gene_desc=gene_desc,
-                                                        tpc_token=args.textpresso_token)
+                                                        api_manager=api_manager)
             set_go_sentences(dm=dm, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene)
             set_expression_sentence(dm=dm, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene,
-                                    tpc_token=args.textpresso_token)
+                                    api_manager=api_manager)
             set_do_sentence(df=dm, conf_parser=conf_parser, gene=gene, gene_desc=gene_desc)
             if not gene_desc.go_description:
                 set_information_poor_sentence(orth_fullnames=orth_fullnames,
@@ -351,14 +354,19 @@ def main():
                                             species=species, organism=organism, gene_desc=gene_desc,
                                             conf_parser=conf_parser, gene=gene)
             desc_writer.add_gene_desc(gene_desc)
+        logger.info("All genes processed for " + organism)
         if "json" in args.output_formats:
+            logger.info("Writing descriptions to json")
             desc_writer.write_json(os.path.join(conf_parser.get_out_dir(), organism + ".json"),
                                    pretty=True, include_single_gene_stats=True)
         if "txt" in args.output_formats:
+            logger.info("Writing descriptions to txt")
             desc_writer.write_plain_text(os.path.join(conf_parser.get_out_dir(), organism + ".txt"))
         if "tsv" in args.output_formats:
+            logger.info("Writing descriptions to tsv")
             desc_writer.write_tsv(os.path.join(conf_parser.get_out_dir(), organism + ".tsv"))
         if "ace" in args.output_formats:
+            logger.info("Writing descriptions to ace")
             curators = ["WBPerson324", "WBPerson37462"]
             release_version = conf_parser.get_wb_release()
             desc_writer.write_ace(os.path.join(conf_parser.get_out_dir(), organism + ".ace"), curators, release_version)

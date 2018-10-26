@@ -1,3 +1,4 @@
+import logging
 import unittest
 import os
 
@@ -7,13 +8,19 @@ from genedescriptions.descriptions_generator import OntologySentenceGenerator
 from wormbase.wb_data_manager import WBDataManager
 
 
+logger = logging.getLogger("Gene Descriptions tests")
+
+
 class TestDescriptionsRules(unittest.TestCase):
 
     def setUp(self):
+        logging.basicConfig(filename=None, level="DEBUG", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
+        logger.info("Starting Gene Description generation tests")
         this_dir = os.path.split(__file__)[0]
         self.conf_parser = GenedescConfigParser(os.path.join(this_dir, os.path.pardir, "wormbase", "config_wb.yml"))
 
     def test_generate_sentences(self):
+        logger.info("Testing generating descriptions")
         dm = WBDataManager(raw_files_source=self.conf_parser.get_wb_raw_file_sources(),
                            release_version="WS265", species="c_elegans",
                            project_id=self.conf_parser.get_wb_organisms_info()["c_elegans"]["project_id"],

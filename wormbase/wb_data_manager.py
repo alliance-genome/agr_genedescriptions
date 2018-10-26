@@ -143,6 +143,7 @@ class WBDataManager(DataManager):
 
     def load_associations_from_file(self, associations_type: DataType, associations_url: str,
                                     associations_cache_path: str, config: GenedescConfigParser) -> None:
+        logger.info("Loading associations from file")
         if associations_type == DataType.GO or associations_type == DataType.EXPR:
             super().load_associations_from_file(associations_type=associations_type, associations_url=associations_url,
                                                 associations_cache_path=associations_cache_path, config=config)
@@ -219,6 +220,7 @@ class WBDataManager(DataManager):
                                                                            prop=ConfigModuleProperty.EXCLUDE_TERMS))
 
     def load_orthology_from_file(self):
+        logger.info("Loading orthology from file")
         orthology_file = self._get_cached_file(cache_path=self.orthology_cache_path,
                                                file_source_url=self.orthology_url)
         orthologs = defaultdict(list)
@@ -257,6 +259,7 @@ class WBDataManager(DataManager):
             which they are taken
 
         """
+        logger.info("Getting list of best orthologs for gene")
         best_orthologs = None
         curr_orth_fullname = None
         if len(orth_species_full_name) > 0:
@@ -290,6 +293,7 @@ class WBDataManager(DataManager):
 
     def load_protein_domain_information(self):
         """load protein domain data"""
+        logger.info("Loading protein domain information from file")
         protein_domain_file = self._get_cached_file(cache_path=self.protein_domain_cache_path,
                                                     file_source_url=self.protein_domain_url)
         for line in open(protein_domain_file):
@@ -298,15 +302,19 @@ class WBDataManager(DataManager):
                 self.protein_domains[linearr[0]] = [domain[0:-1].split(" \"") if len(domain[0:-1].split(" \"")) > 1 else
                                                     [domain, ""] for domain in linearr[3:]]
 
-    def _load_expression_cluster_file(self, file_cache_path, file_url, load_into_data):
+    def _load_expression_cluster_file(self, file_cache_path, file_url, load_into_data,
+                                      add_article_to_terms: bool = False):
         expr_clust_file = self._get_cached_file(cache_path=file_cache_path, file_source_url=file_url)
         header = True
         for line in open(expr_clust_file):
             if not header:
                 linearr = line.strip().split("\t")
                 load_into_data[linearr[0]] = linearr[1:]
-                load_into_data[linearr[0]][2] = self.transform_expression_cluster_terms(load_into_data[
-                                                                                            linearr[0]][2].split(","))
+                if add_article_to_terms:
+                    load_into_data[linearr[0]][2] = self.transform_expression_cluster_terms(
+                        load_into_data[linearr[0]][2].split(","))
+                else:
+                    load_into_data[linearr[0]][2] = load_into_data[linearr[0]][2].split(",")
                 if load_into_data[linearr[0]] and load_into_data[linearr[0]][3]:
                     load_into_data[linearr[0]][3] = [word for study in load_into_data[linearr[0]][3].split(",") for
                                                      word in study.split(" ") if word != "study" and word != "analysis"]
@@ -315,18 +323,19 @@ class WBDataManager(DataManager):
 
     def load_expression_cluster_data(self):
         """load all expression cluster data"""
+        logger.info("Loading expression cluster data from file")
         if self.expression_cluster_anatomy_data is not None:
             self._load_expression_cluster_file(self.expression_cluster_anatomy_cache_path,
                                                self.expression_cluster_anatomy_url,
-                                               self.expression_cluster_anatomy_data)
+                                               self.expression_cluster_anatomy_data, add_article_to_terms=True)
         if self.expression_cluster_molreg_data is not None:
             self._load_expression_cluster_file(self.expression_cluster_molreg_cache_path,
                                                self.expression_cluster_molreg_url,
-                                               self.expression_cluster_molreg_data)
+                                               self.expression_cluster_molreg_data, add_article_to_terms=False)
         if self.expression_cluster_genereg_data is not None:
             self._load_expression_cluster_file(self.expression_cluster_genereg_cache_path,
                                                self.expression_cluster_genereg_url,
-                                               self.expression_cluster_genereg_data)
+                                               self.expression_cluster_genereg_data, add_article_to_terms=False)
 
     def get_expression_cluster_feature(self, gene_id, expression_cluster_type: ExpressionClusterType,
                                        feature: ExpressionClusterFeature):

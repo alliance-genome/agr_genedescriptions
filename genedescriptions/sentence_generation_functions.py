@@ -1,15 +1,10 @@
-import json
 import logging
-import os
 import re
-import ssl
-import urllib
-
-from urllib import request
 from collections import defaultdict
 from typing import Set, List, Tuple, Dict, Union
 from ontobio import Ontology
 
+from genedescriptions.api_manager import APIManager
 from genedescriptions.commons import Sentence, DataType, Module
 
 logger = logging.getLogger("Sentence generation functions")
@@ -184,13 +179,13 @@ def generate_orthology_sentence_alliance_human(orthologs: List[List[str]], exclu
 
 
 def generate_ortholog_sentence_wormbase_non_c_elegans(orthologs: List[List[str]], orthologs_sp_fullname: str,
-                                                      textpresso_api_token: str):
+                                                      api_manager: APIManager):
     """build orthology sentence for WormBase non-human hortologs
 
         Args:
             orthologs (List[str]): list of human orthologs, containing gene_id, gene_symbol
             orthologs_sp_fullname (str): full name of species from which to extract orthologs
-            textpresso_api_token (str): token to access Textpresso Central API
+            api_manager (APIManager): api manager to send requests to wormbase and textpresso
         Returns:
             str: the orthology sentence
         """
@@ -202,13 +197,13 @@ def generate_ortholog_sentence_wormbase_non_c_elegans(orthologs: List[List[str]]
             orthologs_sp_fullname = " ".join(fullname_arr)
         if len(orthologs) > 3:
             # sort orthologs by tpc popularity and alphabetically (if tied)
-            orthologs_pop = [o_p for o_p in sorted([[ortholog, get_textpresso_popularity(
-                textpresso_api_token, ortholog[1])] for ortholog in orthologs], key=lambda x: (x[1], x[0][1]),
+            orthologs_pop = [o_p for o_p in sorted([[ortholog, api_manager.get_textpresso_popularity(ortholog[1])] for
+                                                    ortholog in orthologs], key=lambda x: (x[1], x[0][1]),
                                                    reverse=True)]
             classes_orth_pop = defaultdict(list)
             orthologs_pop_wo_class = []
             for o_p in orthologs_pop:
-                gene_class = get_gene_class(o_p[0][0])
+                gene_class = api_manager.get_gene_class(o_p[0][0])
                 if gene_class:
                     classes_orth_pop[gene_class].append(o_p)
                 else:
@@ -260,47 +255,6 @@ def is_human_ortholog_name_valid(ortholog_name: str):
     if "human uncharacterized protein" in ortholog_name.lower():
         return False
     return True
-
-
-def get_gene_class(gene_id: str):
-    """get the gene class of a gene from WormBase API
-
-    Args:
-        gene_id (str): the Wormbase WBGene ID of the gene
-    Returns:
-        str: the class of the gene
-    """
-    logger.debug("Getting gene class for gene " + gene_id)
-    try:
-        gene_class_data = json.loads(urllib.request.urlopen("http://rest.wormbase.org/rest/field/gene/" + gene_id +
-                                                            "/gene_class").read())
-        if "gene_class" in gene_class_data and gene_class_data["gene_class"]["data"] and "tag" in \
-                gene_class_data["gene_class"]["data"] and "label" in gene_class_data["gene_class"]["data"]["tag"]:
-            return gene_class_data["gene_class"]["data"]["tag"]["label"]
-    except:
-        return None
-    return None
-
-
-def get_textpresso_popularity(textpresso_api_token: str, keywords: str):
-    """get the number of papers in the C. elegans literature that mention a certain keyword from Textpresso Central API
-
-    Args:
-        textpresso_api_token (str): a valid token to access Textpresso Central API
-        keywords (str): the keyword to search, or any combination of keywords containing AND and OR operators
-    Returns:
-        int: the popularity of the specified keyword
-    """
-    if not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None):
-        ssl._create_default_https_context = ssl._create_unverified_context
-    api_endpoint = "https://textpressocentral.org:18080/v1/textpresso/api/get_documents_count"
-    data = json.dumps({"token": textpresso_api_token, "query": {
-        "keywords": keywords, "type": "document", "corpora": ["C. elegans"]}})
-    data = data.encode('utf-8')
-    req = urllib.request.Request(api_endpoint, data, headers={'Content-type': 'application/json',
-                                                              'Accept': 'application/json'})
-    res = urllib.request.urlopen(req)
-    return int(json.loads(res.read().decode('utf-8')))
 
 
 def concatenate_words_with_oxford_comma(words: List[str]):
