@@ -316,8 +316,8 @@ class WBDataManager(DataManager):
                 else:
                     load_into_data[linearr[0]][2] = load_into_data[linearr[0]][2].split(",")
                 if load_into_data[linearr[0]] and load_into_data[linearr[0]][3]:
-                    load_into_data[linearr[0]][3] = [word for study in load_into_data[linearr[0]][3].split(",") for
-                                                     word in study.split(" ") if word != "study" and word != "analysis"]
+                    load_into_data[linearr[0]][3] = [word.replace(" study", "").replace(" analysis", "") for word in
+                                                     load_into_data[linearr[0]][3].split(",")]
             else:
                 header = False
 
@@ -387,5 +387,12 @@ class WBDataManager(DataManager):
         self.load_associations_from_file(associations_type=DataType.DO, associations_url=self.do_associations_url,
                                          associations_cache_path=self.do_associations_cache_path,
                                          config=config)
+        self.load_ontology_from_file(ontology_type=DataType.EXPR, ontology_url=self.expression_ontology_url,
+                                     ontology_cache_path=self.expression_ontology_cache_path, config=config)
+        self.load_associations_from_file(associations_type=DataType.EXPR,
+                                         associations_url=self.expression_associations_url,
+                                         associations_cache_path=self.expression_associations_cache_path,
+                                         config=config)
         self.load_orthology_from_file()
+        self.load_expression_cluster_data()
         self.load_protein_domain_information()

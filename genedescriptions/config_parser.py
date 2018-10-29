@@ -39,7 +39,7 @@ class GenedescConfigParser(object):
         module_name = ""
         if module == Module.GO:
             module_name = "go_sentences_options"
-        elif module == Module.DO_EXP_AND_BIO:
+        elif module == Module.DO_EXP_AND_BIO or module == Module.DO_EXPERIMENTAL or module == Module.DO_BIOMARKER:
             module_name = "do_sentences_options"
         elif module == Module.DO_ORTHOLOGY:
             module_name = "do_via_orth_sentences_options"

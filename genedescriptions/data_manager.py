@@ -174,6 +174,7 @@ class DataManager(object):
             self.expression_ontology = OntologyFactory().create(self._get_cached_file(
                 file_source_url=ontology_url, cache_path=ontology_cache_path)).subontology()
             new_ontology = self.expression_ontology
+            module = Module.EXPRESSION
         terms_replacement_regex = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_TERMS)
         if terms_replacement_regex:
             self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)

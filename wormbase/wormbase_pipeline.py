@@ -75,7 +75,6 @@ def load_data(species, organism, conf_parser: GenedescConfigParser):
                                        associations_url=df.expression_associations_url,
                                        associations_cache_path=df.expression_associations_cache_path,
                                        config=conf_parser)
-    df.load_expression_cluster_data()
     return df, sister_df, df_agr, orth_fullnames, sister_sp_fullname
 
 
@@ -145,8 +144,8 @@ def set_go_sentences(dm: WBDataManager, conf_parser: GenedescConfigParser, gene_
 
 def set_expression_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription,
                             gene: Gene, api_manager: APIManager):
-    expr_sentence_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.GO, data_manager=dm,
-                                                        config=conf_parser, limit_to_group="EXPERIMENTAL")
+    expr_sentence_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.EXPRESSION, data_manager=dm,
+                                                        config=conf_parser)
     expression_module_sentences = expr_sentence_generator.get_module_sentences(
         config=conf_parser, aspect='A', qualifier="Verified", merge_groups_with_same_prefix=True,
         keep_only_best_group=False)
@@ -177,7 +176,7 @@ def set_expression_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser
         elif ec_anatomy_terms:
             gene_desc.set_or_extend_module_description_and_final_stats(
                 module=Module.EXPRESSION_CLUSTER_ANATOMY,
-                description="is enriched in " + concatenate_words_with_oxford_comma(ec_anatomy_terms) + " based on ",
+                description="is enriched in " + concatenate_words_with_oxford_comma(ec_anatomy_terms) + " based on",
                 additional_postfix_terms_list=ec_anatomy_studies,
                 additional_postfix_final_word="studies", use_single_form=True)
             exp_enriched_added = True
@@ -207,13 +206,13 @@ def set_expression_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser
                 gene_desc.set_or_extend_module_description_and_final_stats(
                     module=Module.EXPRESSION_CLUSTER_GENEREG,
                     description="is regulated by " + several_word +
-                                concatenate_words_with_oxford_comma(ec_genereg_terms) + " based on ",
+                                concatenate_words_with_oxford_comma(ec_genereg_terms) + " based on",
                     additional_postfix_terms_list=ec_genereg_studies,
                     additional_postfix_final_word="studies", use_single_form=True)
             if ec_molreg_terms:
                 gene_desc.set_or_extend_module_description_and_final_stats(
                     module=Module.EXPRESSION_CLUSTER_MOLECULE,
-                    description="is affected by " + num2words(len(ec_molreg_terms)) + " chemicals based on ",
+                    description="is affected by " + num2words(len(ec_molreg_terms)) + " chemicals based on",
                     additional_postfix_terms_list=ec_molreg_studies,
                     additional_postfix_final_word="studies", use_single_form=True)
 
@@ -289,10 +288,12 @@ def set_sister_species_sentence(dm: WBDataManager, conf_parser: GenedescConfigPa
                                                            humans=sister_sp_fullname == "Homo sapiens",
                                                            limit_to_group="EXPERIMENTAL")
     sister_sp_module_sentences = sister_sentences_generator.get_module_sentences(
-        config=conf_parser, aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True).get_description()
-    gene_desc.set_or_extend_module_description_and_final_stats(
-        module=Module.SISTER_SP, description="in " + species[species[organism]["main_sister_species"]]["name"] +
-                                             ", " + best_ortholog[1] + " " + sister_sp_module_sentences)
+        config=conf_parser, aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+    if sister_sp_module_sentences.contains_sentences():
+        gene_desc.set_or_extend_module_description_and_final_stats(
+            module=Module.SISTER_SP, description="in " + species[species[organism]["main_sister_species"]]["name"] +
+                                                 ", " + best_ortholog[1] + " " +
+                                                 sister_sp_module_sentences.get_description())
 
 
 def main():

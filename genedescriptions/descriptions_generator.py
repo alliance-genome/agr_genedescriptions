@@ -51,7 +51,8 @@ class OntologySentenceGenerator(object):
             limit_to_group (str): limit the evidence codes to the specified group
         """
         annot_type = None
-        if module == Module.DO_ORTHOLOGY or module == Module.DO_EXPERIMENTAL or module == module.DO_BIOMARKER:
+        if module == Module.DO_ORTHOLOGY or module == Module.DO_EXPERIMENTAL or module == module.DO_BIOMARKER or \
+                module == Module.DO_EXP_AND_BIO:
             self.ontology = data_manager.do_ontology
             annot_type = DataType.DO
         elif module == Module.GO:
@@ -66,7 +67,7 @@ class OntologySentenceGenerator(object):
         ev_codes_groups_maps = config.get_evidence_codes_groups_map(module=module)
         annotations = data_manager.get_annotations_for_gene(gene_id=gene_id, annot_type=annot_type,
                                                             priority_list=config.get_annotations_priority(
-                                                                module=Module.DO_EXP_AND_BIO))
+                                                                module=module))
         self.annotations = annotations
         self.module = module
         self.annot_type = annot_type
