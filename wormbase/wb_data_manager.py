@@ -266,9 +266,9 @@ class WBDataManager(DataManager):
             for curr_orth_fullname in orth_species_full_name:
                 if curr_orth_fullname in self.orthologs[gene_id]:
                     orthologs = self.orthologs[gene_id][curr_orth_fullname]
-                    # for human orthologs, take only those predicted by more than 1 method
-                    if len(orth_species_full_name) == 1 and orth_species_full_name[0] == "Homo sapiens":
-                        orthologs = [ortholog for ortholog in orthologs if len(ortholog[2].split(";")) > 1]
+                    # for human orthologs, take only those predicted by more than 1 method - removed
+                    # if len(orth_species_full_name) == 1 and orth_species_full_name[0] == "Homo sapiens":
+                    #     orthologs = [ortholog for ortholog in orthologs if len(ortholog[2].split(";")) > 1]
                     orthologs_keys = []
                     if len(orthologs) > 0:
                         if len(orthologs) > 1:
@@ -281,7 +281,8 @@ class WBDataManager(DataManager):
                                 else:
                                     orthologs_keys.append([ortholog[0], ortholog[1], len(ortholog[2].split(";"))])
                             if sister_species_data_fetcher:
-                                best_orthologs = [sorted(orthologs_keys, key=lambda x: (x[2], x[3]), reverse=True)[0][0:2]]
+                                best_orthologs = [sorted(orthologs_keys, key=lambda x: (x[2], x[3]),
+                                                         reverse=True)[0][0:2]]
                             else:
                                 best_orthologs = [[orth_key[0], orth_key[1]] for orth_key in
                                                   sorted(orthologs_keys, key=lambda x: x[2], reverse=True) if

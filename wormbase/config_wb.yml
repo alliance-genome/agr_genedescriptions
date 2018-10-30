@@ -54,6 +54,7 @@ wb_options:
                 - human
             ec_anatomy_prefix: ce
             ec_genereg_prefix: ce
+            ec_molreg_prefix: ce
         c_japonica:
             full_name: "Caenorhabditis japonica"
             project_id: "PRJNA12591"

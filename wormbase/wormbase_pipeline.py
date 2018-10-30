@@ -205,14 +205,18 @@ def set_expression_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser
                     several_word = "several genes including "
                 gene_desc.set_or_extend_module_description_and_final_stats(
                     module=Module.EXPRESSION_CLUSTER_GENEREG,
-                    description="is regulated by " + several_word +
+                    description="is affected by " + several_word +
                                 concatenate_words_with_oxford_comma(ec_genereg_terms) + " based on",
                     additional_postfix_terms_list=ec_genereg_studies,
                     additional_postfix_final_word="studies", use_single_form=True)
             if ec_molreg_terms:
+                several_word = ""
+                if len(ec_molreg_terms) > 3:
+                    several_word = num2words(len(ec_molreg_terms)) + " chemicals including "
                 gene_desc.set_or_extend_module_description_and_final_stats(
                     module=Module.EXPRESSION_CLUSTER_MOLECULE,
-                    description="is affected by " + num2words(len(ec_molreg_terms)) + " chemicals based on",
+                    description="is affected by " + several_word + concatenate_words_with_oxford_comma(
+                        ec_molreg_terms[0:3]) + " based on",
                     additional_postfix_terms_list=ec_molreg_studies,
                     additional_postfix_final_word="studies", use_single_form=True)
 
