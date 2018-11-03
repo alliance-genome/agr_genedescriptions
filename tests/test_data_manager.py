@@ -17,12 +17,7 @@ class TestRawDataFetcher(unittest.TestCase):
         self.conf_parser = GenedescConfigParser(os.path.join(self.this_dir, os.path.pardir, "tests", "config_test.yml"))
         self.df = DataManager(do_relations=None, go_relations=["subClassOf", "BFO:0000050"])
 
-    def test_load_gene_data_from_file(self):
-        logger.info("Testing loading gene data from file")
-        self.df.load_gene_data_from_file()
-        self.assertGreater(len([gene for gene in self.df.get_gene_data()]), 20000)
-
-    def test_load_go_ontology_from_file(self):
+    def test_load_ontology_from_file(self):
         logger.info("Testing loading go ontology from file")
         self.df.load_ontology_from_file(ontology_type=DataType.GO, ontology_url="file://" + os.path.join(
             self.this_dir, os.path.pardir, "tests", "data", "go.obo"),
