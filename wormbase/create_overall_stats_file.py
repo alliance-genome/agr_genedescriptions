@@ -102,8 +102,7 @@ def main():
                 print(str(partial_num_disease_biomarker_sentences) + " disease sentences based on biomarker data")
                 print(str(partial_num_disease_orthology_sentences) + " disease sentences based on orthology data")
                 print(str(partial_num_protein_domain_sentences) + " protein domain sentences")
-                print(str(partial_num_human_gene_function_sentences) + " human gene ontology molecular function "
-                                                                       "sentences")
+                print(str(partial_num_human_gene_function_sentences) + " human gene GO molecular function sentences")
                 print(str(partial_num_sister_species_sentences) + " elegans process sentences in non-elegans species")
                 print()
 

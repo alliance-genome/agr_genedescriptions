@@ -17,29 +17,35 @@ logger = logging.getLogger("WB Data Manager")
 class WBDataManager(DataManager):
     """data fetcher for WormBase raw files for a single species"""
 
-    def __init__(self, raw_files_source: str, cache_location: str, release_version: str, species: str, project_id: str,
-                 go_relations: List[str] = None, do_relations: List[str] = None, use_cache: bool = False,
-                 sister_sp_fullname: str = "", human_orthologs_go_ontology_url: str = None,
-                 human_orthologs_go_associations_url: str = None, expression_cluster_anatomy_prefix: str = None,
-                 expression_cluster_molreg_prefix: str = None, expression_cluster_genereg_prefix: str = None):
+    def __init__(self, config: GenedescConfigParser, species: str, go_relations: List[str] = None,
+                 do_relations: List[str] = None, use_cache: bool = False):
         """create a new data fetcher for WormBase. Files will be downloaded from WB ftp site. For convenience, file
         locations are automatically generated and stored in class variables ending in _url for remote filed and
         _cache_path for caching
 
         Args:
-            raw_files_source (str): base url where to fetch the raw files
-            cache_location (str): path to cache directory
-            release_version (str): WormBase release version for the input files
             species (str): WormBase species to fetch
-            project_id (str): project id associated with the species
-            human_orthologs_go_ontology_url: ontology for go sentences for human orthologs, to be used in case of
-                information poor genes
-            human_orthologs_go_associations_url: association file url for go sentences for human orthologs, to be used
-                in case of information poor genes
-            expression_cluster_anatomy_prefix (str): prefix for files on WB ftp site related to expression cluster
-                anatomy
-            expression_cluster_molreg_prefix (str): prefix for files on WB ftp site related to molecule regulation
         """
+        raw_files_source = config.get_wb_raw_file_sources()
+        cache_location = config.get_cache_dir()
+        release_version = config.get_wb_release()
+        organisms_info = config.get_wb_organisms_info()
+        project_id = organisms_info[species]["project_id"]
+        self.sister_sp_fullname = ""
+        if "main_sister_species" in organisms_info[species] and "full_name" in \
+                organisms_info[organisms_info[species]["main_sister_species"]]:
+            self.sister_sp_fullname = organisms_info[organisms_info[species]["main_sister_species"]]["full_name"]
+        self.orth_fullnames = ""
+        if "ortholog" in organisms_info[species] and all(["full_name" in organisms_info[ortholog_sp] for ortholog_sp in
+                                                          organisms_info[species]["ortholog"]]):
+            self.orth_fullnames = [organisms_info[ortholog_sp]["full_name"] for ortholog_sp in
+                                   organisms_info[species]["ortholog"]]
+        expression_cluster_anatomy_prefix = organisms_info[species]["ec_anatomy_prefix"] if \
+            "ec_anatomy_prefix" in organisms_info[species] else None
+        expression_cluster_molreg_prefix = organisms_info[species]["ec_molreg_prefix"] if \
+            "ec_molreg_prefix" in organisms_info[species] else None
+        expression_cluster_genereg_prefix = organisms_info[species]["ec_genereg_prefix"] if \
+            "ec_genereg_prefix" in organisms_info[species] else None
         super().__init__(go_relations=go_relations, do_relations=do_relations, use_cache=use_cache)
         self.gene_data_cache_path = os.path.join(cache_location, "wormbase", release_version, "species", species,
                                                  project_id, "annotation", species + '.' + project_id +
@@ -77,7 +83,6 @@ class WBDataManager(DataManager):
                                                  project_id, "annotation", species + '.' + project_id + '.' +
                                                  release_version + ".orthologs.txt.gz")
         self.orthologs = defaultdict(lambda: defaultdict(list))
-        self.sister_sp_fullname = sister_sp_fullname
         self.protein_domain_url = raw_files_source + '/' + release_version + '/species/' + species + '/' + \
                                   project_id + '/annotation/' + species + '.' + project_id + '.' + release_version + \
                                   '.protein_domains.csv.gz'
@@ -149,15 +154,13 @@ class WBDataManager(DataManager):
                                                 associations_cache_path=associations_cache_path, config=config)
             if associations_type == DataType.EXPR:
                 associations = []
-                primary_ids = set()
                 for subj_associations in self.expression_associations.associations_by_subj.values():
                     for association in subj_associations:
                         if len(association["qualifiers"]) == 0 or "Partial" in association["qualifiers"] or "Certain" \
                                 in association["qualifiers"]:
                             association["qualifiers"] = ["Verified"]
                             associations.append(association)
-                            primary_ids.add(association["object"]["id"])
-                        elif association["object"]["id"] not in primary_ids:
+                        else:
                             associations.append(association)
                 self.expression_associations = AssociationSetFactory().create_from_assocs(
                     assocs=associations, ontology=self.expression_ontology)

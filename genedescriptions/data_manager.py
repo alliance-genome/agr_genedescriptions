@@ -159,18 +159,21 @@ class DataManager(object):
         new_ontology = None
         module = None
         if ontology_type == DataType.GO:
+            logger.info("Loading GO ontology data from file")
             self.go_ontology = OntologyFactory().create(self._get_cached_file(file_source_url=ontology_url,
                                                                               cache_path=ontology_cache_path)
                                                         ).subontology(relations=self.go_relations)
             new_ontology = self.go_ontology
             module = Module.GO
         elif ontology_type == DataType.DO:
+            logger.info("Loading DO ontology data from file")
             self.do_ontology = OntologyFactory().create(self._get_cached_file(file_source_url=ontology_url,
                                                                               cache_path=ontology_cache_path)
                                                         ).subontology(relations=self.do_relations)
             new_ontology = self.do_ontology
             module = Module.DO_EXP_AND_BIO
         elif ontology_type == DataType.EXPR:
+            logger.info("Loading Expression ontology data from file")
             self.expression_ontology = OntologyFactory().create(self._get_cached_file(
                 file_source_url=ontology_url, cache_path=ontology_cache_path)).subontology()
             new_ontology = self.expression_ontology
@@ -228,6 +231,7 @@ class DataManager(object):
             config (GenedescConfigParser): configuration object where to read properties
         """
         if associations_type == DataType.GO:
+            logger.info("Loading GO associations from file")
             self.go_associations = AssociationSetFactory().create_from_assocs(assocs=GafParser().parse(
                 file=self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url),
                 skipheader=True), ontology=self.go_ontology)
@@ -237,6 +241,7 @@ class DataManager(object):
                                                                            module=Module.GO,
                                                                            prop=ConfigModuleProperty.EXCLUDE_TERMS))
         elif associations_type == DataType.DO:
+            logger.info("Loading DO associations from file")
             self.do_associations = AssociationSetFactory().create_from_assocs(assocs=GafParser().parse(
                 file=self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url),
                 skipheader=True), ontology=self.do_ontology)
@@ -246,6 +251,7 @@ class DataManager(object):
                                                                            module=Module.DO_EXP_AND_BIO,
                                                                            prop=ConfigModuleProperty.EXCLUDE_TERMS))
         elif associations_type == DataType.EXPR:
+            logger.info("Loading Expression associations from file")
             self.expression_associations = AssociationSetFactory().create_from_assocs(assocs=GafParser().parse(
                 file=self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url),
                 skipheader=True), ontology=self.expression_ontology)

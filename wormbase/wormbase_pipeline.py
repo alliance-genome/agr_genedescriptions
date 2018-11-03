@@ -21,61 +21,39 @@ from genedescriptions.sentence_generation_functions import generate_ortholog_sen
 from wormbase.wb_data_manager import WBDataManager
 
 
-def load_data(species, organism, conf_parser: GenedescConfigParser):
+def load_data(organism, conf_parser: GenedescConfigParser):
     logger = logging.getLogger("WB Gene Description Pipeline - Data loader")
     sister_df = None
     df_agr = None
-    sister_sp_fullname = ""
-    if "main_sister_species" in species[organism] and "full_name" in \
-            species[species[organism]["main_sister_species"]]:
-        sister_sp_fullname = species[species[organism]["main_sister_species"]]["full_name"]
-    orth_fullnames = ""
-    if "ortholog" in species[organism] and all(["full_name" in species[ortholog_sp] for ortholog_sp in
-                                                species[organism]["ortholog"]]):
-        orth_fullnames = [species[ortholog_sp]["full_name"] for ortholog_sp in species[organism]["ortholog"]]
-    ec_anatomy_prefix = species[organism]["ec_anatomy_prefix"] if "ec_anatomy_prefix" in species[organism] else None
-    ec_molreg_prefix = species[organism]["ec_molreg_prefix"] if "ec_molreg_prefix" in species[organism] else None
-    ec_genereg_prefix = species[organism]["ec_genereg_prefix"] if "ec_genereg_prefix" in species[organism] else None
-    df = WBDataManager(raw_files_source=conf_parser.get_wb_raw_file_sources(),
-                       release_version=conf_parser.get_wb_release(),
-                       species=organism, project_id=species[organism]["project_id"],
-                       cache_location=conf_parser.get_cache_dir(), do_relations=None,
-                       go_relations=["subClassOf", "BFO:0000050"], sister_sp_fullname=sister_sp_fullname,
-                       expression_cluster_anatomy_prefix=ec_anatomy_prefix,
-                       expression_cluster_molreg_prefix=ec_molreg_prefix,
-                       expression_cluster_genereg_prefix=ec_genereg_prefix)
+    organisms_info = conf_parser.get_wb_organisms_info()
+    df = WBDataManager(species=organism, do_relations=None, go_relations=["subClassOf", "BFO:0000050"],
+                       config=conf_parser)
     if organism == "c_elegans":
         df_agr = DataManager(go_relations=["subClassOf", "BFO:0000050"], do_relations=None)
         df_agr.load_ontology_from_file(ontology_type=DataType.GO,
                                        ontology_url=conf_parser.get_wb_human_orthologs_go_ontology(),
-                                       ontology_cache_path=os.path.join(
-                                           conf_parser.get_cache_dir(),
-                                           "wormbase_agr_human", "go_ontology.obo"),
+                                       ontology_cache_path=os.path.join(conf_parser.get_cache_dir(),
+                                                                        "wormbase_agr_human", "go_ontology.obo"),
                                        config=conf_parser)
         df_agr.load_associations_from_file(associations_type=DataType.GO,
                                            associations_url=conf_parser.get_wb_human_orthologs_go_associations(),
                                            associations_cache_path=os.path.join(
                                                conf_parser.get_cache_dir(), "wormbase_agr_human", "go_assoc.daf.gz"),
                                            config=conf_parser)
-    if "main_sister_species" in species[organism] and species[organism]["main_sister_species"]:
-        sister_df = WBDataManager(raw_files_source=conf_parser.get_wb_raw_file_sources(),
-                                  release_version=conf_parser.get_wb_release(),
-                                  species=species[organism]["main_sister_species"],
-                                  project_id=species[species[organism]["main_sister_species"]]["project_id"],
-                                  cache_location=conf_parser.get_cache_dir(), do_relations=None,
-                                  go_relations=["subClassOf", "BFO:0000050"])
-        logger.info("Loading all data for sister species")
-        sister_df.load_all_data_from_file(config=conf_parser)
+    if "main_sister_species" in organisms_info[organism] and organisms_info[organism]["main_sister_species"]:
+        sister_df = WBDataManager(species=organisms_info[organism]["main_sister_species"],
+                                  do_relations=None, go_relations=["subClassOf", "BFO:0000050"], config=conf_parser)
+        logger.info("Loading GO data for sister species")
+        sister_df.load_ontology_from_file(ontology_type=DataType.GO, ontology_url=sister_df.go_ontology_url,
+                                          ontology_cache_path=sister_df.go_ontology_cache_path,
+                                          config=conf_parser)
+        sister_df.load_associations_from_file(associations_type=DataType.GO,
+                                              associations_url=sister_df.go_associations_url,
+                                              associations_cache_path=sister_df.go_associations_cache_path,
+                                              config=conf_parser)
     logger.info("Loading all data for main species")
     df.load_all_data_from_file(config=conf_parser)
-    if organism == "c_elegans":
-        df.load_ontology_from_file(ontology_type=DataType.EXPR, ontology_url=df.expression_ontology_url,
-                                   ontology_cache_path=df.expression_ontology_cache_path, config=conf_parser)
-        df.load_associations_from_file(associations_type=DataType.EXPR,
-                                       associations_url=df.expression_associations_url,
-                                       associations_cache_path=df.expression_associations_cache_path,
-                                       config=conf_parser)
-    return df, sister_df, df_agr, orth_fullnames, sister_sp_fullname
+    return df, sister_df, df_agr
 
 
 def set_orthology_sentence(dm: WBDataManager, orth_fullnames: List[str], gene_desc: GeneDescription,
@@ -142,8 +120,7 @@ def set_go_sentences(dm: WBDataManager, conf_parser: GenedescConfigParser, gene_
                                 sentence_generator_exp_only=go_sent_generator_exp)
 
 
-def set_expression_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription,
-                            gene: Gene, api_manager: APIManager):
+def set_tissue_expression_sentence(dm, gene, conf_parser, gene_desc):
     expr_sentence_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.EXPRESSION, data_manager=dm,
                                                         config=conf_parser)
     expression_module_sentences = expr_sentence_generator.get_module_sentences(
@@ -152,73 +129,71 @@ def set_expression_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser
     gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=expression_module_sentences,
                                                                module=Module.EXPRESSION)
     gene_desc.set_initial_stats(module=Module.EXPRESSION, sentence_generator=expr_sentence_generator)
-    # Information poor genes
-    if not gene_desc.description:
-        ec_gene_id = gene_desc.gene_id[3:]
-        ec_anatomy_studies = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
-                                                               expression_cluster_type=ExpressionClusterType.ANATOMY,
-                                                               feature=ExpressionClusterFeature.STUDIES)
-        ec_anatomy_terms = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
-                                                             feature=ExpressionClusterFeature.TERMS,
-                                                             expression_cluster_type=ExpressionClusterType.ANATOMY)
-        exp_enriched_added = False
-        if dm.expression_ontology is not None:
-            expression_enriched_module_sentences = expr_sentence_generator.get_module_sentences(
-                config=conf_parser, aspect='A', qualifier="Enriched", merge_groups_with_same_prefix=True,
-                keep_only_best_group=False)
-            gene_desc.set_or_extend_module_description_and_final_stats(
-                module=Module.EXPRESSION_CLUSTER_GENE,
-                description=expression_enriched_module_sentences.get_description(),
-                additional_postfix_terms_list=ec_anatomy_studies, additional_postfix_final_word="studies",
-                use_single_form=True)
-            if expression_enriched_module_sentences.contains_sentences():
-                exp_enriched_added = True
-        elif ec_anatomy_terms:
-            gene_desc.set_or_extend_module_description_and_final_stats(
-                module=Module.EXPRESSION_CLUSTER_ANATOMY,
-                description="is enriched in " + concatenate_words_with_oxford_comma(ec_anatomy_terms) + " based on",
-                additional_postfix_terms_list=ec_anatomy_studies,
-                additional_postfix_final_word="studies", use_single_form=True)
-            exp_enriched_added = True
-        ec_molreg_terms = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
-                                                            expression_cluster_type=ExpressionClusterType.MOLREG,
-                                                            feature=ExpressionClusterFeature.TERMS)
-        ec_molreg_studies = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
-                                                              feature=ExpressionClusterFeature.STUDIES,
-                                                              expression_cluster_type=ExpressionClusterType.MOLREG)
 
-        ec_genereg_terms = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
-                                                             expression_cluster_type=ExpressionClusterType.GENEREG,
-                                                             feature=ExpressionClusterFeature.TERMS)
-        ec_genereg_studies = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
-                                                               feature=ExpressionClusterFeature.STUDIES,
-                                                               expression_cluster_type=ExpressionClusterType.GENEREG)
 
-        if not exp_enriched_added:
-            if ec_genereg_terms:
-                several_word = ""
-                if len(ec_genereg_terms) > 3:
-                    t_p = [t_p for t_p in sorted([[term, api_manager.get_textpresso_popularity(term)] for
-                                                  term in ec_genereg_terms], key=lambda x: (x[1], x[0][1]),
-                                                 reverse=True)]
-                    ec_genereg_terms = [term for term, popularity in t_p[0:3]]
-                    several_word = "several genes including "
-                gene_desc.set_or_extend_module_description_and_final_stats(
-                    module=Module.EXPRESSION_CLUSTER_GENEREG,
-                    description="is affected by " + several_word +
-                                concatenate_words_with_oxford_comma(ec_genereg_terms) + " based on",
-                    additional_postfix_terms_list=ec_genereg_studies,
-                    additional_postfix_final_word="studies", use_single_form=True)
-            if ec_molreg_terms:
-                several_word = ""
-                if len(ec_molreg_terms) > 3:
-                    several_word = num2words(len(ec_molreg_terms)) + " chemicals including "
-                gene_desc.set_or_extend_module_description_and_final_stats(
-                    module=Module.EXPRESSION_CLUSTER_MOLECULE,
-                    description="is affected by " + several_word + concatenate_words_with_oxford_comma(
-                        ec_molreg_terms[0:3]) + " based on",
-                    additional_postfix_terms_list=ec_molreg_studies,
-                    additional_postfix_final_word="studies", use_single_form=True)
+def set_expression_cluster_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription,
+                                    gene: Gene, api_manager: APIManager):
+
+    expr_sentence_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.EXPRESSION, data_manager=dm,
+                                                        config=conf_parser)
+    ec_gene_id = gene_desc.gene_id[3:]
+    ec_anatomy_studies = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
+                                                           expression_cluster_type=ExpressionClusterType.ANATOMY,
+                                                           feature=ExpressionClusterFeature.STUDIES)
+    ec_anatomy_terms = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
+                                                         feature=ExpressionClusterFeature.TERMS,
+                                                         expression_cluster_type=ExpressionClusterType.ANATOMY)
+    if dm.expression_ontology is not None:
+        expression_enriched_module_sentences = expr_sentence_generator.get_module_sentences(
+            config=conf_parser, aspect='A', qualifier="Enriched", merge_groups_with_same_prefix=True,
+            keep_only_best_group=False)
+        gene_desc.set_or_extend_module_description_and_final_stats(
+            module=Module.EXPRESSION_CLUSTER_ANATOMY,
+            description=expression_enriched_module_sentences.get_description(),
+            additional_postfix_terms_list=ec_anatomy_studies, additional_postfix_final_word="studies",
+            use_single_form=True)
+    elif ec_anatomy_terms:
+        gene_desc.set_or_extend_module_description_and_final_stats(
+            module=Module.EXPRESSION_CLUSTER_ANATOMY,
+            description="is enriched in " + concatenate_words_with_oxford_comma(ec_anatomy_terms) + " based on",
+            additional_postfix_terms_list=ec_anatomy_studies,
+            additional_postfix_final_word="studies", use_single_form=True)
+    ec_molreg_terms = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
+                                                        expression_cluster_type=ExpressionClusterType.MOLREG,
+                                                        feature=ExpressionClusterFeature.TERMS)
+    ec_molreg_studies = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
+                                                          feature=ExpressionClusterFeature.STUDIES,
+                                                          expression_cluster_type=ExpressionClusterType.MOLREG)
+    ec_genereg_terms = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
+                                                         expression_cluster_type=ExpressionClusterType.GENEREG,
+                                                         feature=ExpressionClusterFeature.TERMS)
+    ec_genereg_studies = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
+                                                           feature=ExpressionClusterFeature.STUDIES,
+                                                           expression_cluster_type=ExpressionClusterType.GENEREG)
+    if ec_genereg_terms:
+        several_word = ""
+        if len(ec_genereg_terms) > 3:
+            t_p = [t_p for t_p in sorted([[term, api_manager.get_textpresso_popularity(term)] for
+                                          term in ec_genereg_terms], key=lambda x: (x[1], x[0][1]),
+                                         reverse=True)]
+            ec_genereg_terms = [term for term, popularity in t_p[0:3]]
+            several_word = "several genes including "
+        gene_desc.set_or_extend_module_description_and_final_stats(
+            module=Module.EXPRESSION_CLUSTER_GENE,
+            description="is affected by " + several_word +
+                        concatenate_words_with_oxford_comma(ec_genereg_terms) + " based on",
+            additional_postfix_terms_list=ec_genereg_studies,
+            additional_postfix_final_word="studies", use_single_form=True)
+    if ec_molreg_terms:
+        several_word = ""
+        if len(ec_molreg_terms) > 3:
+            several_word = num2words(len(ec_molreg_terms)) + " chemicals including "
+        gene_desc.set_or_extend_module_description_and_final_stats(
+            module=Module.EXPRESSION_CLUSTER_MOLECULE,
+            description="is affected by " + several_word + concatenate_words_with_oxford_comma(
+                ec_molreg_terms[0:3]) + " based on",
+            additional_postfix_terms_list=ec_molreg_studies,
+            additional_postfix_final_word="studies", use_single_form=True)
 
 
 def set_do_sentence(df: DataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription, gene: Gene):
@@ -256,10 +231,11 @@ def set_information_poor_sentence(orth_fullnames: List[str], selected_orthologs,
                                                           conf_parser.get_annotations_priority(module=Module.GO),
                                                           human_df_agr, config=conf_parser)
         if best_orth:
-            best_orth = "RGD:" + best_orth
-            human_go_sent_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.DO_ORTHOLOGY,
-                                                                data_manager=dm, config=conf_parser, humans=True,
-                                                                limit_to_group="EXPERIMENTAL")
+            if not best_orth.startswith("RGD:"):
+                best_orth = "RGD:" + best_orth
+            human_go_sent_generator = OntologySentenceGenerator(gene_id=best_orth, module=Module.GO,
+                                                                data_manager=human_df_agr, config=conf_parser,
+                                                                humans=False, limit_to_group="EXPERIMENTAL")
             human_func_module_sentences = human_go_sent_generator.get_module_sentences(
                 config=conf_parser, aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True)
             human_func_sent = human_func_module_sentences.get_description()
@@ -275,7 +251,7 @@ def set_information_poor_sentence(orth_fullnames: List[str], selected_orthologs,
             if len(protein_domains) > 1:
                 dom_word = "domains"
             gene_desc.set_or_extend_module_description_and_final_stats(
-                module=Module.INFO_POOR_HUMAN_FUNCTION,
+                module=Module.PROTEIN_DOMAIN,
                 description="is predicted to encode a protein with the following " + dom_word + ": " +
                             concatenate_words_with_oxford_comma([ptdom[1] if ptdom[1] != "" else ptdom[0] for
                                                                  ptdom in protein_domains]))
@@ -287,8 +263,10 @@ def set_sister_species_sentence(dm: WBDataManager, conf_parser: GenedescConfigPa
         gene_desc.gene_id, orth_species_full_name=[sister_sp_fullname], sister_species_data_fetcher=sister_df,
         ecode_priority_list=["EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI",
                              "HEP"])[0][0]
-    sister_sentences_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.GO, data_manager=dm,
-                                                           config=conf_parser,
+    if not best_ortholog[0].startswith("WB:"):
+        best_ortholog[0] = "WB:" + best_ortholog[0]
+    sister_sentences_generator = OntologySentenceGenerator(gene_id=best_ortholog[0], module=Module.GO,
+                                                           data_manager=sister_df, config=conf_parser,
                                                            humans=sister_sp_fullname == "Homo sapiens",
                                                            limit_to_group="EXPERIMENTAL")
     sister_sp_module_sentences = sister_sentences_generator.get_module_sentences(
@@ -328,8 +306,7 @@ def main():
     for organism in organisms_list:
         logger.info("Processing organism " + organism)
         species = conf_parser.get_wb_organisms_info()
-        dm, sister_df, df_agr, orth_fullnames, sister_sp_fullname = load_data(
-            species=species, organism=organism, conf_parser=conf_parser)
+        dm, sister_df, df_agr = load_data(organism=organism, conf_parser=conf_parser)
         desc_writer = DescriptionsWriter()
         desc_writer.overall_properties.species = organism
         desc_writer.overall_properties.release_version = conf_parser.get_wb_release()[0:-1] + str(
@@ -338,24 +315,26 @@ def main():
         for gene in dm.get_gene_data():
             logger.debug("Generating description for gene " + gene.name)
             gene_desc = GeneDescription(gene_id=gene.id, gene_name=gene.name, add_gene_name=True)
-            selected_orthologs = set_orthology_sentence(dm=dm, orth_fullnames=orth_fullnames,
+            selected_orthologs = set_orthology_sentence(dm=dm, orth_fullnames=dm.orth_fullnames,
                                                         human_genes_props=human_genes_props, gene_desc=gene_desc,
                                                         api_manager=api_manager)
             set_go_sentences(dm=dm, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene)
-            set_expression_sentence(dm=dm, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene,
-                                    api_manager=api_manager)
+            set_tissue_expression_sentence(dm=dm, gene=gene, conf_parser=conf_parser, gene_desc=gene_desc)
+            if not gene_desc.description:
+                set_expression_cluster_sentence(dm=dm, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene,
+                                                api_manager=api_manager)
             set_do_sentence(df=dm, conf_parser=conf_parser, gene=gene, gene_desc=gene_desc)
             if not gene_desc.go_description:
-                set_information_poor_sentence(orth_fullnames=orth_fullnames,
+                set_information_poor_sentence(orth_fullnames=dm.orth_fullnames,
                                               selected_orthologs=selected_orthologs,
                                               ensembl_hgnc_ids_map=ensembl_hgnc_ids_map, conf_parser=conf_parser,
                                               human_df_agr=df_agr, gene_desc=gene_desc, dm=dm, gene=gene)
             if "main_sister_species" in species[organism] and species[organism]["main_sister_species"] and \
-                    dm.get_best_orthologs_for_gene(gene.id, orth_species_full_name=[sister_sp_fullname],
+                    dm.get_best_orthologs_for_gene(gene.id, orth_species_full_name=[dm.sister_sp_fullname],
                                                    sister_species_data_fetcher=sister_df,
                                                    ecode_priority_list=["EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP",
                                                                         "HDA", "HMP", "HGI", "HEP"])[0]:
-                set_sister_species_sentence(dm=dm, sister_sp_fullname=sister_sp_fullname, sister_df=sister_df,
+                set_sister_species_sentence(dm=dm, sister_sp_fullname=dm.sister_sp_fullname, sister_df=sister_df,
                                             species=species, organism=organism, gene_desc=gene_desc,
                                             conf_parser=conf_parser, gene=gene)
             desc_writer.add_gene_desc(gene_desc)

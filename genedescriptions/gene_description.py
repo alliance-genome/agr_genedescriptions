@@ -1,6 +1,6 @@
 import inflect
 
-from typing import List, Dict
+from typing import List
 
 from genedescriptions.commons import Module
 from genedescriptions.descriptions_generator import OntologySentenceGenerator, ModuleSentences
@@ -28,7 +28,6 @@ class GeneDescription(object):
         self.gene_expression_cluster_description = None
         self.molecule_expression_cluster_description = None
         self.anatomy_expression_cluster_description = None
-        self.genereg_expression_cluster_description = None
         self.protein_domain_description = None
         self.human_gene_function_description = None
         self.sister_species_description = None
@@ -123,9 +122,6 @@ class GeneDescription(object):
             elif module == Module.EXPRESSION_CLUSTER_MOLECULE:
                 self.molecule_expression_cluster_description = self._get_description(
                     desc, self.molecule_expression_cluster_description)
-            elif module == Module.EXPRESSION_CLUSTER_GENEREG:
-                self.genereg_expression_cluster_description = self._get_description(
-                    desc, self.genereg_expression_cluster_description)
             elif module == Module.DO_EXPERIMENTAL:
                 self.do_experimental_description = self._get_description(desc, self.do_experimental_description)
                 self.stats.set_final_do_ids = self._get_merged_ids(module_sentences.get_ids(experimental_only=False),
@@ -163,7 +159,7 @@ class GeneDescription(object):
                                   additional_qualifier: str = None):
         if not additional_qualifier:
             return [elem for key, sets in sentence_generator.terms_groups[(aspect, main_qualifier)].items() for elem in
-                    sets if (aspect, key, main_qualifier) in sentence_generator.prepostfix_sentences_map],
+                    sets if (aspect, key, main_qualifier) in sentence_generator.prepostfix_sentences_map]
         else:
             return list(set().union(
                 [elem for key, sets in sentence_generator.terms_groups[(aspect, main_qualifier)].items() for elem in

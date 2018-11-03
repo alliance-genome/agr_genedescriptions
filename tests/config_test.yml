@@ -5,20 +5,20 @@ generic:
 
 # options for WormBase gene description generation - used when data_fetcher is set to 'wb_data_fetcher'
 wb_options:
-    release: "WS268"
+    release: "WS267"
     raw_files_source: "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases"
     agr_human_go_associations: "http://download.alliancegenome.org/GO/ANNOT/gene_association_1.7.1.human.gz"
     agr_go_ontology: "http://download.alliancegenome.org/GO/go_1.7.obo"
     organisms_to_process:
         # add the species to be processed to the following list. Entries must have the same text as in 'organisms'
         # option
-        #- c_elegans
-        #- b_malayi
-        #- c_brenneri
-        #- c_briggsae
-        #- c_japonica
-        #- c_remanei
-        #- o_volvulus
+        - c_elegans
+        - b_malayi
+        - c_brenneri
+        - c_briggsae
+        - c_japonica
+        - c_remanei
+        - o_volvulus
         - p_pacificus
         - s_ratti
         - t_muris
@@ -474,9 +474,9 @@ do_via_orth_sentences_options:
 
 expression_sentences_options:
     exclude_terms:
-        - "WBbt:0005758" # hermaphrodite-specific
-        - "WBbt:0007849" # hermaphrodite
-        - "WBbt:0005738" # body region
+        - "WBbt:0005758"
+        - "WBbt:0007849"
+        - "WBbt:0005738"
     rename_terms:
         "^neuron$": "nervous system"
         "(.*)([a-z]+ )neuron$": "\\1\\2neurons"

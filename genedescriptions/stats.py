@@ -91,17 +91,17 @@ class DescriptionsStats(object):
         """calculate overall stats and populate fields"""
         self.total_number_of_genes = len(gene_descriptions)
         self.average_number_initial_go_terms_f = self._get_average_num_items_in_list_of_sets(
-            "set_initial_go_ids_f", "go_function_description", gene_descriptions)
+            "set_initial_go_ids_f", "go_description", gene_descriptions)
         self.average_number_initial_go_terms_p = self._get_average_num_items_in_list_of_sets(
-            "set_initial_go_ids_p", "go_process_description", gene_descriptions)
+            "set_initial_go_ids_p", "go_description", gene_descriptions)
         self.average_number_initial_go_terms_c = self._get_average_num_items_in_list_of_sets(
-            "set_initial_go_ids_c", "go_component_description", gene_descriptions)
+            "set_initial_go_ids_c", "go_description", gene_descriptions)
         self.average_number_final_go_terms_f = self._get_average_num_items_in_list_of_sets(
-            "set_final_go_ids_f", "go_function_description", gene_descriptions)
+            "set_final_go_ids_f", "go_description", gene_descriptions)
         self.average_number_final_go_terms_p = self._get_average_num_items_in_list_of_sets(
-            "set_final_go_ids_p", "go_process_description", gene_descriptions)
+            "set_final_go_ids_p", "go_description", gene_descriptions)
         self.average_number_final_go_terms_c = self._get_average_num_items_in_list_of_sets(
-            "set_final_go_ids_c", "go_component_description", gene_descriptions)
+            "set_final_go_ids_c", "go_description", gene_descriptions)
         self.average_number_initial_do_terms = self._get_average_num_items_in_list_of_sets(
             "set_initial_do_ids", "do_description", gene_descriptions)
         self.average_number_final_do_terms = self._get_average_num_items_in_list_of_sets(
