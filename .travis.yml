@@ -15,7 +15,7 @@ install:
 # command to run tests
 script:
   - python3 -m unittest discover tests/
-  - coverage run --source=tests setup.py test
+  #- coverage run --source=tests setup.py test
 
 after_success:
   - coveralls
