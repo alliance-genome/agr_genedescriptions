@@ -12,13 +12,13 @@ wb_options:
     organisms_to_process:
         # add the species to be processed to the following list. Entries must have the same text as in 'organisms'
         # option
-        #- c_elegans
-        #- b_malayi
-        #- c_brenneri
-        #- c_briggsae
-        #- c_japonica
-        #- c_remanei
-        #- o_volvulus
+        - c_elegans
+        - b_malayi
+        - c_brenneri
+        - c_briggsae
+        - c_japonica
+        - c_remanei
+        - o_volvulus
         - p_pacificus
         - s_ratti
         - t_muris

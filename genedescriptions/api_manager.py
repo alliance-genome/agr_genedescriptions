@@ -49,11 +49,12 @@ class APIManager(object):
         Returns:
             str: the class of the gene
         """
-        logger.debug("Getting gene class for gene " + gene_id)
         if gene_id in self.class_cache:
+            logger.debug("Gene class for gene " + gene_id + " found in cache")
             return self.class_cache[gene_id]
         else:
             try:
+                logger.debug("Getting gene class for gene " + gene_id)
                 gene_class_data = json.loads(urllib.request.urlopen("http://rest.wormbase.org/rest/field/gene/" +
                                                                     gene_id + "/gene_class").read())
                 if "gene_class" in gene_class_data and gene_class_data["gene_class"]["data"] and "tag" in \
