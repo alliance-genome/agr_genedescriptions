@@ -19,6 +19,7 @@ class ConfigModuleProperty(Enum):
     ADD_MULTIPLE_TO_COMMON_ANCEST = 11
     RENAME_CELL = 12
     REMOVE_OVERLAP = 13
+    TRIMMING_ALGORITHM = 14
 
 
 class GenedescConfigParser(object):
@@ -60,8 +61,6 @@ class GenedescConfigParser(object):
             property_name = "remove_children_if_parent_is_present"
         elif prop == ConfigModuleProperty.APPLY_TRIMMING:
             property_name = "trim_terms_by_common_ancestors"
-        elif prop == ConfigModuleProperty.MAX_NUM_TERMS_BEFORE_TRIMMING:
-            property_name = "trim_if_more_than_terms"
         elif prop == ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE:
             property_name = "max_num_terms"
         elif prop == ConfigModuleProperty.DISTANCE_FROM_ROOT:
@@ -76,6 +75,8 @@ class GenedescConfigParser(object):
             property_name = "rename_cell"
         elif prop == ConfigModuleProperty.REMOVE_OVERLAP:
             property_name = "remove_overlapped_terms"
+        elif prop == ConfigModuleProperty.TRIMMING_ALGORITHM:
+            property_name = "trimming_algorithm"
         return property_name
 
     def get_prepostfix_sentence_map(self, module: Module, special_cases_only: bool = False, humans: bool = False):

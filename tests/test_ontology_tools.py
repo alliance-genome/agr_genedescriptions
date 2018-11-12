@@ -1,0 +1,93 @@
+import logging
+import math
+import unittest
+import os
+
+from genedescriptions.commons import Module
+from genedescriptions.config_parser import GenedescConfigParser
+from genedescriptions.data_manager import DataManager, DataType
+from genedescriptions.descriptions_generator import OntologySentenceGenerator
+from genedescriptions.ontology_tools import get_all_common_ancestors, find_set_covering, \
+    set_all_information_content_values
+
+logger = logging.getLogger("Gene Ontology Tools tests")
+
+
+class TestOntologyTools(unittest.TestCase):
+
+    def load_ontology(self):
+        logger.info("Starting Ontology Tools tests")
+        self.this_dir = os.path.split(__file__)[0]
+        self.conf_parser = GenedescConfigParser(os.path.join(self.this_dir, os.path.pardir, "tests", "config_test.yml"))
+        self.df = DataManager(do_relations=None, go_relations=["subClassOf", "BFO:0000050"])
+        logger.info("Loading go ontology from file")
+        logging.basicConfig(filename=None, level="ERROR", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
+        self.df.load_ontology_from_file(ontology_type=DataType.GO, ontology_url="file://" + os.path.join(
+            self.this_dir, os.path.pardir, "tests", "data", "go.obo"),
+                                        ontology_cache_path=os.path.join(self.this_dir, os.path.pardir, "tests",
+                                                                         "cache", "go.obo"), config=self.conf_parser)
+        logger.info("Loading go associations from file")
+        self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
+            self.this_dir, os.path.pardir, "tests", "data", "go_annotations.gaf"),
+                                            associations_cache_path=os.path.join(self.this_dir, os.path.pardir, "tests",
+                                                                                 "cache", "go_annotations.gaf"),
+                                            config=self.conf_parser)
+
+    def test_get_common_ancestors(self):
+        self.load_ontology()
+        generator = OntologySentenceGenerator(gene_id="WB:WBGene00000912", module=Module.GO,
+                                              data_manager=self.df, config=self.conf_parser)
+        node_ids = generator.terms_groups[('P', '')]["EXPERIMENTAL"]
+        common_ancestors = get_all_common_ancestors(node_ids, generator.ontology)
+        self.assertTrue(len(common_ancestors) > 0, "Common ancestors not found")
+
+    def test_information_content(self):
+        self.load_ontology()
+        set_all_information_content_values(ontology=self.df.go_ontology)
+        roots = self.df.go_ontology.get_roots()
+        for root_id in roots:
+            self.assertTrue(self.df.go_ontology.node(root_id)["IC"] == 0, "Root IC not equal to 0")
+        self.assertTrue(self.df.go_ontology.node("GO:1905910")["IC"] ==
+                        -math.log(1/(self.df.go_ontology.node("GO:0008150")["num_leaves"] + 1), 2),
+                        "Wrong IC value for leaf node")
+        max_ic = 0
+        for node in self.df.go_ontology.nodes():
+            node_dict = self.df.go_ontology.node(node)
+            if "IC" in node_dict and node_dict["IC"] > max_ic:
+                max_ic = node_dict["IC"]
+        subsets = get_all_common_ancestors(["GO:1905909", "GO:0061067"], self.df.go_ontology)
+        set_covering = find_set_covering(subsets, [max_ic - self.df.go_ontology.node(subset[0])["IC"] + 1 for subset in
+                                                   subsets], 3)
+        for optimal_ancestor_id in set_covering:
+            self.assertTrue(optimal_ancestor_id in self.df.go_ontology.ancestors("GO:1905909"),
+                            "Optimal node found by set covering not an ancestor of one of the initial leaves")
+            self.assertTrue(optimal_ancestor_id in self.df.go_ontology.ancestors("GO:0061067"),
+                            "Optimal node found by set covering not an ancestor of one of the initial leaves")
+
+
+    def test_find_set_covering(self):
+        subsets = [("1", "1", {"A", "B", "C"}), ("2", "2", {"A", "B"}), ("3", "3", {"C"}), ("4", "4", {"A"}),
+                   ("5", "5", {"B"}), ("6", "6", {"C"})]
+        costs = [20, 4, 3, 2, 2, 2]
+        # test with weights
+        set_covering = find_set_covering(subsets=subsets, costs=costs, max_num_subsets=3)
+        self.assertTrue("2" in set_covering)
+        self.assertTrue("6" in set_covering)
+        self.assertTrue("1" not in set_covering)
+        self.assertTrue("3" not in set_covering)
+        self.assertTrue("4" not in set_covering)
+        self.assertTrue("5" not in set_covering)
+        # test without weights
+        set_covering_noweights = find_set_covering(subsets=subsets, costs=None, max_num_subsets=3)
+        self.assertTrue("1" in set_covering_noweights and len(set_covering_noweights) == 1)
+        # test wrong input
+        costs_wrong = [1, 3]
+        set_covering_wrong = find_set_covering(subsets=subsets, costs=costs_wrong, max_num_subsets=3)
+        self.assertTrue(set_covering_wrong is None, "Cost vector with length different than subsets should return None")
+        costs_wrong = [-1, 1, 3, 1, 5, 1]
+        set_covering_wrong = find_set_covering(subsets=subsets, costs=costs_wrong, max_num_subsets=3)
+        self.assertTrue(set_covering_wrong is None, "Negative costs should return None")
+
+
+
+

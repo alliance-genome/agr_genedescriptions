@@ -95,7 +95,8 @@ class OntologySentenceGenerator(object):
                     self.terms_groups[(aspect, qualifier)][ev_group].add(annotation["object"]["id"])
 
     def get_module_sentences(self,  config: GenedescConfigParser, aspect: str, qualifier: str = '',
-                             keep_only_best_group: bool = False, merge_groups_with_same_prefix: bool = False):
+                             keep_only_best_group: bool = False, merge_groups_with_same_prefix: bool = False,
+                             high_priority_term_ids: List[str] = None):
         """generate description for a specific combination of aspect and qualifier
 
         Args:
@@ -105,10 +106,11 @@ class OntologySentenceGenerator(object):
             keep_only_best_group (bool): whether to get only the evidence group with highest priority and discard
                 the other evidence groups
             merge_groups_with_same_prefix (bool): whether to merge the phrases for evidence groups with the same prefix
+            high_priority_term_ids (List[str]): list of ids for terms that must always appear in the sentence with
+                higher priority than the other terms. Trimming is not applied to these terms
         Returns:
             ModuleSentences: the module sentences
         """
-        dist_root = config.get_module_property(module=self.module, prop=ConfigModuleProperty.DISTANCE_FROM_ROOT)
         cat_several_words = config.get_module_property(module=self.module,
                                                        prop=ConfigModuleProperty.CUTOFF_SEVERAL_CATEGORY_WORD)
         del_overlap = config.get_module_property(module=self.module, prop=ConfigModuleProperty.REMOVE_OVERLAP)
@@ -116,18 +118,12 @@ class OntologySentenceGenerator(object):
                                                     prop=ConfigModuleProperty.DEL_PARENTS_IF_CHILD)
         remove_child_terms = config.get_module_property(module=self.module,
                                                         prop=ConfigModuleProperty.DEL_CHILDREN_IF_PARENT)
-        add_mul_common_anc = config.get_module_property(module=self.module,
-                                                        prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
-        trim_if_more_than = config.get_module_property(module=self.module,
-                                                       prop=ConfigModuleProperty.MAX_NUM_TERMS_BEFORE_TRIMMING)
         max_terms = config.get_module_property(module=self.module,
                                                prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
         exclude_terms = config.get_module_property(module=self.module, prop=ConfigModuleProperty.EXCLUDE_TERMS)
         cutoff_final_word = config.get_module_property(module=self.module,
                                                        prop=ConfigModuleProperty.CUTOFF_SEVERAL_WORD)
         rename_cell = config.get_module_property(module=self.module, prop=ConfigModuleProperty.RENAME_CELL)
-        if not dist_root:
-            dist_root = {'F': 1, 'P': 1, 'C': 2, 'D': 3, 'A': 3}
         if not cat_several_words:
             cat_several_words = {'F': 'functions', 'P': 'processes', 'C': 'components', 'D': 'diseases', 'A': 'tissues'}
         sentences = []
@@ -141,57 +137,81 @@ class OntologySentenceGenerator(object):
                 terms -= terms_already_covered
             if exclude_terms:
                 terms -= set(exclude_terms)
-            add_others = False
             if remove_parents:
                 terms_no_ancestors = terms - set([ancestor for node_id in terms for ancestor in
-                                                  self.ontology.ancestors(node_id)])
+                                                  self.ontology.ancestors(node_id) if not high_priority_term_ids or
+                                                  ancestor not in high_priority_term_ids])
                 if len(terms) > len(terms_no_ancestors):
                     logger.debug("Removed " + str(len(terms) - len(terms_no_ancestors)) + " parents from terms")
                     terms = terms_no_ancestors
-            if 0 < trim_if_more_than <= len(terms):
-                merged_terms_coverset = get_merged_nodes_by_common_ancestor(
-                    node_ids=list(terms), ontology=self.ontology,
-                    min_distance_from_root=dist_root[aspect],
-                    min_number_of_terms=trim_if_more_than, nodeids_blacklist=exclude_terms)
-                if len(merged_terms_coverset.keys()) <= trim_if_more_than:
-                    merged_terms = list(merged_terms_coverset.keys())
-                    terms_already_covered.update([e for subset in merged_terms_coverset.values() for e in subset])
-                else:
-                    merged_terms = find_set_covering([(k, self.ontology.label(k, id_if_null=True), v) for k, v in
-                                                      merged_terms_coverset.items()],
-                                                     max_num_subsets=max_terms)
-                    for merged_term in merged_terms:
-                        terms_already_covered.update(merged_terms_coverset[merged_term])
-                    add_others = True
-                if add_mul_common_anc:
-                    ancestors_covering_multiple_children = {self.ontology.label(ancestor, id_if_null=True) for ancestor
-                                                            in merged_terms if len(merged_terms_coverset[ancestor]) > 1}
-                logger.debug("Reduced number of terms by merging from " + str(len(terms)) + " to " +
-                             str(len(merged_terms)))
-                terms = merged_terms
+            trimmed = False
+            add_others = False
+            if 0 < max_terms <= len(terms):
+                trimmed = True
+                terms, add_others, ancestors_covering_multiple_children = self.get_trimmed_terms_by_common_ancestor(
+                    terms, terms_already_covered, aspect, config, high_priority_term_ids)
             else:
                 terms_already_covered.update(terms)
             if remove_child_terms:
                 terms = [term for term in terms if
-                         len(set(self.ontology.ancestors(term)).intersection(set(terms))) == 0]
+                         len(set(self.ontology.ancestors(term)).intersection(set(terms))) == 0 or (
+                                 high_priority_term_ids and term in high_priority_term_ids)]
             if (aspect, evidence_group, qualifier) in self.prepostfix_sentences_map:
                 sentences.append(
-                    _get_single_sentence(node_ids=terms, ontology=self.ontology, aspect=aspect,
-                                         evidence_group=evidence_group, qualifier=qualifier,
-                                         prepostfix_sentences_map=self.prepostfix_sentences_map,
-                                         terms_merged=True if 0 < trim_if_more_than < len(terms) else False,
-                                         add_others=add_others,
-                                         truncate_others_generic_word=cutoff_final_word,
-                                         truncate_others_aspect_words=cat_several_words,
-                                         ancestors_with_multiple_children=ancestors_covering_multiple_children,
-                                         rename_cell=rename_cell))
+                    _get_single_sentence(
+                        node_ids=terms, ontology=self.ontology, aspect=aspect, evidence_group=evidence_group,
+                        qualifier=qualifier, prepostfix_sentences_map=self.prepostfix_sentences_map,
+                        terms_merged=trimmed, add_others=add_others, truncate_others_generic_word=cutoff_final_word,
+                        truncate_others_aspect_words=cat_several_words,
+                        ancestors_with_multiple_children=ancestors_covering_multiple_children, rename_cell=rename_cell))
                 if keep_only_best_group:
                     return ModuleSentences(sentences)
         if merge_groups_with_same_prefix:
-            sentences = self.merge_sentences_with_same_prefix(sentences=sentences,
-                                                              remove_parent_terms=remove_parents,
-                                                              rename_cell=rename_cell)
+            sentences = self.merge_sentences_with_same_prefix(
+                sentences=sentences, remove_parent_terms=remove_parents, rename_cell=rename_cell)
         return ModuleSentences(sentences)
+
+    def get_trimmed_terms_by_common_ancestor(self, terms: Set[str], terms_already_covered, aspect: str,
+                                             config: GenedescConfigParser, high_priority_terms: List[str] = None):
+        dist_root = config.get_module_property(module=self.module, prop=ConfigModuleProperty.DISTANCE_FROM_ROOT)
+        add_mul_common_anc = config.get_module_property(module=self.module,
+                                                        prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
+        max_terms = config.get_module_property(module=self.module,
+                                               prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
+        exclude_terms = config.get_module_property(module=self.module, prop=ConfigModuleProperty.EXCLUDE_TERMS)
+        trimming_algorithm = config.get_module_property(module=self.module,
+                                                        prop=ConfigModuleProperty.TRIMMING_ALGORITHM)
+        add_others = False
+        ancestors_covering_multiple_children = set()
+        if not dist_root:
+            dist_root = {'F': 1, 'P': 1, 'C': 2, 'D': 3, 'A': 3}
+        terms_high_priority = [term for term in terms if high_priority_terms and term in high_priority_terms]
+        if terms_high_priority is None:
+            terms_high_priority = []
+        terms_already_covered.update(terms_high_priority)
+        terms_low_priority = [term for term in terms if not high_priority_terms or term not in
+                              high_priority_terms]
+        trimming_threshold = max_terms - len(terms_high_priority)
+        if 0 < trimming_threshold < len(terms_low_priority):
+            merged_terms_coverset = None
+            if trimming_algorithm == "naive":
+                add_others, merged_terms_coverset = get_trimmed_nodes_naive_algorithm(
+                    node_ids=list(terms_low_priority), ontology=self.ontology,
+                    min_distance_from_root=dist_root[aspect], nodeids_blacklist=exclude_terms)
+            elif trimming_algorithm == "ic":
+                add_others, merged_terms_coverset = get_trimmed_nodes_ic(
+                    node_ids=list(terms_low_priority), ontology=self.ontology, max_number_of_terms=trimming_threshold)
+            terms_low_priority = [term_id for term_id, covered_nodes in merged_terms_coverset]
+            terms_already_covered.update([e for term_id, covered_nodes in merged_terms_coverset for e in covered_nodes])
+            if add_mul_common_anc:
+                ancestors_covering_multiple_children = {self.ontology.label(term_id, id_if_null=True) for
+                                                        term_id, covered_nodes in merged_terms_coverset if
+                                                        term_id not in terms_low_priority}
+        terms = terms_high_priority
+        terms.extend(terms_low_priority)
+        # cutoff terms - if number of terms with high priority is higher than max_num_terms
+        terms = list(set(terms))[0:max_terms]
+        return terms, add_others, ancestors_covering_multiple_children
 
     def merge_sentences_with_same_prefix(self, sentences: List[Sentence], remove_parent_terms: bool = True,
                                          rename_cell: bool = False):
