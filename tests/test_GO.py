@@ -57,3 +57,25 @@ class TestGOModule(unittest.TestCase):
                                                            keep_only_best_group=True)
         self.assertTrue("several processes" in sentences.get_description())
         self.assertTrue("DNA damage checkpoint" in sentences.get_description())
+        go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00000001", module=Module.GO,
+                                                      data_manager=self.df, config=self.conf_parser)
+        sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
+                                                           qualifier='', merge_groups_with_same_prefix=True,
+                                                           keep_only_best_group=True)
+        self.assertTrue("several processes" not in sentences.get_description())
+        self.assertTrue("dauer larval development, determination of adult lifespan, and insulin receptor "
+                        "signaling pathway" in sentences.get_description())
+
+    def test_information_content_sentence_generation(self):
+        self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "ic"
+        go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00000912", module=Module.GO,
+                                                      data_manager=self.df, config=self.conf_parser)
+        sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
+                                                           qualifier='', merge_groups_with_same_prefix=True,
+                                                           keep_only_best_group=True)
+        go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00003931", module=Module.GO,
+                                                      data_manager=self.df, config=self.conf_parser)
+        sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
+                                                           qualifier='', merge_groups_with_same_prefix=True,
+                                                           keep_only_best_group=True)
+        pass

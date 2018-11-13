@@ -40,6 +40,12 @@ def set_all_information_content_values(ontology: Ontology, relations: List[str] 
     for root_id in roots:
         _set_information_content_in_subgraph(ontology=ontology, root_id=root_id,
                                              maxleaves=ontology.node(root_id)["num_leaves"], relations=relations)
+    # max_ic = 0
+    # for node in ontology.nodes():
+    #     node_dict = ontology.node(node)
+    #     if "IC" in node_dict and node_dict["IC"] > max_ic:
+    #         max_ic = node_dict["IC"]
+    # ontology.max_IC = max_ic
 
 
 def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_root: int = 0,
@@ -163,7 +169,10 @@ def get_trimmed_nodes_ic(node_ids: List[str], ontology: Ontology,
         Set[str]: the set of trimmed terms, together with the set of original terms that each of them covers
     """
     common_ancestors = get_all_common_ancestors(node_ids=node_ids, ontology=ontology)
-    best_terms = find_set_covering(common_ancestors, max_num_subsets=max_number_of_terms)
+    if "IC" not in ontology.node(common_ancestors[0][0]):
+        set_all_information_content_values(ontology=ontology)
+    best_terms = find_set_covering(subsets=common_ancestors, max_num_subsets=max_number_of_terms,
+                                   value=[ontology.node(node[0])["IC"] for node in common_ancestors])
     covered_terms = set([e for best_term_label, covered_terms in best_terms for e in covered_terms])
     return covered_terms != set(node_ids), best_terms
 
@@ -202,36 +211,36 @@ def _set_num_leaves_in_subgraph(ontology: Ontology, root_id: str, relations: Lis
 
 def _set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxleaves: int, relations: List[str] = None):
     node = ontology.node(root_id)
-    node["IC"] = -math.log((float(node["num_leaves"]) / node["num_subsumers"] + 1) / (maxleaves + 1), 2)
+    node["IC"] = -math.log((float(node["num_leaves"]) / node["num_subsumers"] + 1) / (maxleaves + 1))
     for child_id in ontology.children(node=root_id, relations=relations):
         _set_information_content_in_subgraph(ontology=ontology, root_id=child_id, maxleaves=maxleaves,
                                              relations=relations)
 
 
-def find_set_covering(subsets: List[Tuple[str, str, Set[str]]], costs: List[float] = None,
+def find_set_covering(subsets: List[Tuple[str, str, Set[str]]], value: List[float] = None,
                       max_num_subsets: int = None) -> Union[None, List[Tuple[str, Set[str]]]]:
     """greedy algorithm to solve set covering problem
 
     Args:
         subsets (List[Tuple[str, str, Set[str]]]): list of subsets, each of which must contain a tuple with the first
         element being the ID of the subset, the second being the name, and the third the actual set of elements
-        costs (List[float]): list of costs of the subsets
+        value (List[float]): list of costs of the subsets
         max_num_subsets (int): maximum number of subsets in the final list
     Returns:
         Union[None, List[str]]: the list of IDs of the subsets that maximize coverage with respect to the elements in
         the universe
     """
     logger.debug("starting set covering optimization")
-    if costs and (len(costs) != len(subsets) or any(map(lambda x: x <= 0, costs))):
+    if value and len(value) != len(subsets):
         return None
     universe = set([e for subset in subsets for e in subset[2]])
     included_elmts = set()
     included_sets = []
     while len(included_sets) < len(subsets) and included_elmts != universe and \
             (not max_num_subsets or len(included_sets) < max_num_subsets):
-        if costs:
-            effect_sets = sorted([(c / len(s[2] - included_elmts) if len(s[2] - included_elmts) > 0 else max(costs) + 1,
-                                   s[2], s[1], s[0]) for s, c in zip(subsets, costs)], key=lambda x: (x[0], x[2]))
+        if value:
+            effect_sets = sorted([(v * len(s[2] - included_elmts), s[2], s[1], s[0]) for s, v in zip(subsets, value)],
+                                 key=lambda x: (- x[0], x[2]))
         else:
             effect_sets = sorted([(len(s[2] - included_elmts), s[2], s[1], s[0]) for s in subsets],
                                  key=lambda x: (- x[0], x[2]))

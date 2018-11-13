@@ -50,27 +50,30 @@ class TestOntologyTools(unittest.TestCase):
         self.assertTrue(self.df.go_ontology.node("GO:1905910")["IC"] ==
                         -math.log(1/(self.df.go_ontology.node("GO:0008150")["num_leaves"] + 1), 2),
                         "Wrong IC value for leaf node")
-        max_ic = 0
-        for node in self.df.go_ontology.nodes():
-            node_dict = self.df.go_ontology.node(node)
-            if "IC" in node_dict and node_dict["IC"] > max_ic:
-                max_ic = node_dict["IC"]
-        subsets = get_all_common_ancestors(["GO:1905909", "GO:0061067"], self.df.go_ontology)
-        set_covering = find_set_covering(subsets, [max_ic - self.df.go_ontology.node(subset[0])["IC"] + 1 for subset in
-                                                   subsets], 3)
-        for optimal_ancestor_id in set_covering:
-            self.assertTrue(optimal_ancestor_id in self.df.go_ontology.ancestors("GO:1905909"),
-                            "Optimal node found by set covering not an ancestor of one of the initial leaves")
-            self.assertTrue(optimal_ancestor_id in self.df.go_ontology.ancestors("GO:0061067"),
-                            "Optimal node found by set covering not an ancestor of one of the initial leaves")
+        # max_ic = 0
+        # for node in self.df.go_ontology.nodes():
+        #     node_dict = self.df.go_ontology.node(node)
+        #     if "IC" in node_dict and node_dict["IC"] > max_ic:
+        #         max_ic = node_dict["IC"]
 
+        # GO:1905909 = regulation of dauer entry
+        # GO:0061067 = negative regulation of dauer larval development
+        # expected best node: regulation of dauer larval development? depends on algorithm though, so don't test it
+        subsets = get_all_common_ancestors(["GO:1905909", "GO:0061067"], self.df.go_ontology)
+        set_covering = find_set_covering(subsets, [self.df.go_ontology.node(subset[0])["IC"] for subset in
+                                                   subsets], 3)
+        for optimal_ancestor in set_covering:
+            self.assertTrue(optimal_ancestor[0] in self.df.go_ontology.ancestors("GO:1905909"),
+                            "Optimal node found by set covering not an ancestor of one of the initial leaves")
+            self.assertTrue(optimal_ancestor[0] in self.df.go_ontology.ancestors("GO:0061067"),
+                            "Optimal node found by set covering not an ancestor of one of the initial leaves")
 
     def test_find_set_covering(self):
         subsets = [("1", "1", {"A", "B", "C"}), ("2", "2", {"A", "B"}), ("3", "3", {"C"}), ("4", "4", {"A"}),
                    ("5", "5", {"B"}), ("6", "6", {"C"})]
-        costs = [20, 4, 3, 2, 2, 2]
+        values = [2, 12, 5, 20, 20, 20]
         # test with weights
-        set_covering = find_set_covering(subsets=subsets, costs=costs, max_num_subsets=3)
+        set_covering = [best_set[0] for best_set in find_set_covering(subsets=subsets, value=values, max_num_subsets=3)]
         self.assertTrue("2" in set_covering)
         self.assertTrue("6" in set_covering)
         self.assertTrue("1" not in set_covering)
@@ -78,15 +81,13 @@ class TestOntologyTools(unittest.TestCase):
         self.assertTrue("4" not in set_covering)
         self.assertTrue("5" not in set_covering)
         # test without weights
-        set_covering_noweights = find_set_covering(subsets=subsets, costs=None, max_num_subsets=3)
+        set_covering_noweights = [best_set[0] for best_set in
+                                  find_set_covering(subsets=subsets, value=None, max_num_subsets=3)]
         self.assertTrue("1" in set_covering_noweights and len(set_covering_noweights) == 1)
         # test wrong input
         costs_wrong = [1, 3]
-        set_covering_wrong = find_set_covering(subsets=subsets, costs=costs_wrong, max_num_subsets=3)
+        set_covering_wrong = find_set_covering(subsets=subsets, value=costs_wrong, max_num_subsets=3)
         self.assertTrue(set_covering_wrong is None, "Cost vector with length different than subsets should return None")
-        costs_wrong = [-1, 1, 3, 1, 5, 1]
-        set_covering_wrong = find_set_covering(subsets=subsets, costs=costs_wrong, max_num_subsets=3)
-        self.assertTrue(set_covering_wrong is None, "Negative costs should return None")
 
 
 

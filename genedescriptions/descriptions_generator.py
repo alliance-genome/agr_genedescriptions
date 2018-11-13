@@ -146,7 +146,7 @@ class OntologySentenceGenerator(object):
                     terms = terms_no_ancestors
             trimmed = False
             add_others = False
-            if 0 < max_terms <= len(terms):
+            if 0 < max_terms < len(terms):
                 trimmed = True
                 terms, add_others, ancestors_covering_multiple_children = self.get_trimmed_terms_by_common_ancestor(
                     terms, terms_already_covered, aspect, config, high_priority_term_ids)
@@ -201,12 +201,12 @@ class OntologySentenceGenerator(object):
             elif trimming_algorithm == "ic":
                 add_others, merged_terms_coverset = get_trimmed_nodes_ic(
                     node_ids=list(terms_low_priority), ontology=self.ontology, max_number_of_terms=trimming_threshold)
-            terms_low_priority = [term_id for term_id, covered_nodes in merged_terms_coverset]
-            terms_already_covered.update([e for term_id, covered_nodes in merged_terms_coverset for e in covered_nodes])
             if add_mul_common_anc:
                 ancestors_covering_multiple_children = {self.ontology.label(term_id, id_if_null=True) for
                                                         term_id, covered_nodes in merged_terms_coverset if
                                                         term_id not in terms_low_priority}
+            terms_low_priority = [term_id for term_id, covered_nodes in merged_terms_coverset]
+            terms_already_covered.update([e for term_id, covered_nodes in merged_terms_coverset for e in covered_nodes])
         terms = terms_high_priority
         terms.extend(terms_low_priority)
         # cutoff terms - if number of terms with high priority is higher than max_num_terms
