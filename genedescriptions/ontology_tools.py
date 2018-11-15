@@ -184,7 +184,7 @@ def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distan
     ancestors = defaultdict(list)
     for node_id in node_ids:
         for ancestor in ontology.ancestors(node=node_id, reflexive=True):
-            if min_distance_from_root <= 0 or ontology.node(ancestor)["depth"] > min_distance_from_root:
+            if ontology.node(ancestor)["depth"] >= min_distance_from_root:
                 ancestors[ancestor].append(node_id)
     return [(ancestor, ontology.label(ancestor), set(covered_nodes)) for ancestor, covered_nodes in ancestors.items() if
             len(covered_nodes) > 1 or ancestor == covered_nodes[0]]

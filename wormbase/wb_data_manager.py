@@ -183,35 +183,36 @@ class WBDataManager(DataManager):
                     if not header:
                         linearr = line.strip().split("\t")
                         if self.do_ontology.node(linearr[10]) and linearr[16] != "IEA":
-                            gene_id = linearr[2]
+                            gene_ids = [linearr[2]]
                             if linearr[1] == "allele":
-                                gene_id = linearr[4].split(",")[0]
-                            associations.append({"source_line": line,
-                                                 "subject": {
-                                                     "id": gene_id,
-                                                     "label": linearr[3],
-                                                     "type": line[1],
-                                                     "fullname": "",
-                                                     "synonyms": [],
-                                                     "taxon": {"id": linearr[0]}
+                                gene_ids = linearr[4].split(",")
+                            for gene_id in gene_ids:
+                                associations.append({"source_line": line,
+                                                     "subject": {
+                                                         "id": gene_id,
+                                                         "label": linearr[3],
+                                                         "type": line[1],
+                                                         "fullname": "",
+                                                         "synonyms": [],
+                                                         "taxon": {"id": linearr[0]}
 
-                                                 },
-                                                 "object": {
-                                                     "id": linearr[10],
-                                                     "taxon": ""
-                                                 },
-                                                 "qualifiers": linearr[9].split("|"),
-                                                 "aspect": "D",
-                                                 "relation": {"id": None},
-                                                 "negated": False,
-                                                 "evidence": {
-                                                     "type": linearr[16],
-                                                     "has_supporting_reference": linearr[18].split("|"),
-                                                     "with_support_from": [],
-                                                     "provided_by": linearr[20],
-                                                     "date": linearr[19]
-                                                     }
-                                                 })
+                                                     },
+                                                     "object": {
+                                                         "id": linearr[10],
+                                                         "taxon": ""
+                                                     },
+                                                     "qualifiers": linearr[9].split("|"),
+                                                     "aspect": "D",
+                                                     "relation": {"id": None},
+                                                     "negated": False,
+                                                     "evidence": {
+                                                         "type": linearr[16],
+                                                         "has_supporting_reference": linearr[18].split("|"),
+                                                         "with_support_from": [],
+                                                         "provided_by": linearr[20],
+                                                         "date": linearr[19]
+                                                         }
+                                                     })
                     else:
                         header = False
             self.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
