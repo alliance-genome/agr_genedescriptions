@@ -178,7 +178,6 @@ class OntologySentenceGenerator(object):
                                                         prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
         max_terms = config.get_module_property(module=self.module,
                                                prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
-        exclude_terms = config.get_module_property(module=self.module, prop=ConfigModuleProperty.EXCLUDE_TERMS)
         trimming_algorithm = config.get_module_property(module=self.module,
                                                         prop=ConfigModuleProperty.TRIMMING_ALGORITHM)
         add_others = False
@@ -196,11 +195,11 @@ class OntologySentenceGenerator(object):
             merged_terms_coverset = None
             if trimming_algorithm == "naive":
                 add_others, merged_terms_coverset = get_trimmed_nodes_naive_algorithm(
-                    node_ids=list(terms_low_priority), ontology=self.ontology,
-                    min_distance_from_root=dist_root[aspect], nodeids_blacklist=exclude_terms)
+                    node_ids=list(terms_low_priority), ontology=self.ontology, min_distance_from_root=dist_root[aspect])
             elif trimming_algorithm == "ic":
                 add_others, merged_terms_coverset = get_trimmed_nodes_ic(
-                    node_ids=list(terms_low_priority), ontology=self.ontology, max_number_of_terms=trimming_threshold)
+                    node_ids=list(terms_low_priority), ontology=self.ontology, max_number_of_terms=trimming_threshold,
+                    min_distance_from_root=dist_root[aspect])
             if add_mul_common_anc:
                 ancestors_covering_multiple_children = {self.ontology.label(term_id, id_if_null=True) for
                                                         term_id, covered_nodes in merged_terms_coverset if

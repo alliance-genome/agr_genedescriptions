@@ -103,57 +103,16 @@ def generate_ortholog_sentence_wormbase_human(orthologs: List[List[str]], human_
     Returns:
         Tuple[list, str]: the orthologs and the sentence
     """
-    symbol_name_arr = []
-    genes_in_families = []
-    gene_symbols_wo_family = []
+    prefix = "human "
     if len(orthologs) > 3:
-        gene_families = defaultdict(list)
-        gene_symbols_wo_family = set()
-        for ortholog in orthologs:
-            if ortholog[0] in human_genes_props and human_genes_props[ortholog[0]] and \
-                    len(human_genes_props[ortholog[0]]) == 4:
-                gene_families[human_genes_props[ortholog[0]][2]].append(human_genes_props[ortholog[0]])
-            else:
-                gene_symbols_wo_family.add(ortholog[1])
-        if len(list(gene_families.keys())) == 1:
-            gene_symbols_wo_family.update(set([human_p[0] + " (" + human_p[1] + ")" for human_p in
-                                               gene_families[list(gene_families.keys())[0]]]))
-            gene_families = {}
-        else:
-            for family_symbol, human_ps in gene_families.items():
-                if family_symbol == "" or len(human_ps) == 1:
-                    for human_p in human_ps:
-                        gene_symbols_wo_family.add(human_p[0] + " (" + human_p[1] + ")")
-            gene_families = {family_name: human_ps for family_name, human_ps in gene_families.items() if
-                             len(human_ps) > 1 and family_name != ""}
-        gene_family_names = [human_ps[0][2] + " (" + human_ps[0][3] + ")" for human_ps in gene_families.values()]
-        genes_in_families = list(set([hps[0] for gene_list in gene_families.values() for hps in gene_list]))
-        gene_symbols_wo_family = list(gene_symbols_wo_family)
-        if len(gene_family_names) > 3:
-            gene_family_names = gene_family_names[0:3]
-        if len(genes_in_families) > 3:
-            genes_in_families = genes_in_families[0:3]
-        if len(gene_symbols_wo_family) > 3:
-            gene_symbols_wo_family = gene_symbols_wo_family[0:3]
-        family_word = "family"
-        if len(gene_family_names) > 1:
-            family_word = "families"
-        sentences_arr = []
-        if len(gene_symbols_wo_family) > 0:
-            sentences_arr.append("human " + concatenate_words_with_oxford_comma(gene_symbols_wo_family))
-        if len(gene_family_names) > 0:
-            sentences_arr.append("members of the human " + concatenate_words_with_oxford_comma(gene_family_names) +
-                                 " gene " + family_word + " including " + concatenate_words_with_oxford_comma(
-                genes_in_families))
-        orth_sentence = "is an ortholog of " + " and ".join(sentences_arr)
-    else:
-        symbol_name_arr = sorted([human_genes_props[best_orth[0]][0] + " (" + human_genes_props[best_orth[0]][1] +
-                                  ")" if best_orth[0] in human_genes_props and human_genes_props[best_orth[0]] else
-                                  best_orth[1] for best_orth in orthologs])
-        orth_sentence = "is an ortholog of human " + concatenate_words_with_oxford_comma(symbol_name_arr)
-
-    return [gene.split(" ")[0] for gene in [*genes_in_families, *gene_symbols_wo_family, *symbol_name_arr]], \
-           orth_sentence
+        orthologs = orthologs[0:3]
+        prefix = "several human genes including "
+    symbol_name_arr = sorted([human_genes_props[best_orth[0]][1] + " (" + human_genes_props[best_orth[0]][2] +
+                              ")" if best_orth[0] in human_genes_props and human_genes_props[best_orth[0]] else
+                              best_orth[1] for best_orth in orthologs])
+    orth_sentence = "is an ortholog of " + prefix + concatenate_words_with_oxford_comma(symbol_name_arr)
+    return [human_genes_props[best_orth[0]][1] for best_orth in orthologs if best_orth[0] in human_genes_props and
+            human_genes_props[best_orth[0]]], orth_sentence
 
 
 def generate_orthology_sentence_alliance_human(orthologs: List[List[str]], excluded_orthologs: bool = False):

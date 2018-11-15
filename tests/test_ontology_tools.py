@@ -48,7 +48,7 @@ class TestOntologyTools(unittest.TestCase):
         for root_id in roots:
             self.assertTrue(self.df.go_ontology.node(root_id)["IC"] == 0, "Root IC not equal to 0")
         self.assertTrue(self.df.go_ontology.node("GO:1905910")["IC"] ==
-                        -math.log(1/(self.df.go_ontology.node("GO:0008150")["num_leaves"] + 1), 2),
+                        -math.log(1/(self.df.go_ontology.node("GO:0008150")["num_leaves"] + 1)),
                         "Wrong IC value for leaf node")
         # max_ic = 0
         # for node in self.df.go_ontology.nodes():
@@ -61,7 +61,7 @@ class TestOntologyTools(unittest.TestCase):
         # expected best node: regulation of dauer larval development? depends on algorithm though, so don't test it
         subsets = get_all_common_ancestors(["GO:1905909", "GO:0061067"], self.df.go_ontology)
         set_covering = find_set_covering(subsets, [self.df.go_ontology.node(subset[0])["IC"] for subset in
-                                                   subsets], 3)
+                                                   subsets], 3, ontology=self.df.go_ontology)
         for optimal_ancestor in set_covering:
             self.assertTrue(optimal_ancestor[0] in self.df.go_ontology.ancestors("GO:1905909"),
                             "Optimal node found by set covering not an ancestor of one of the initial leaves")

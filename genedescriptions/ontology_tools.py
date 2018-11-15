@@ -31,21 +31,22 @@ def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List
                                    comparison_func=comparison_func, current_depth=current_depth + 1)
 
 
-def set_all_information_content_values(ontology: Ontology, relations: List[str] = None):
+def set_all_information_content_values(ontology: Ontology, relations: List[str] = None,
+                                       min_distance_from_root: int = 0):
     roots = ontology.get_roots(relations=relations)
     for root_id in roots:
-        _set_num_subsumers_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
+        if "num_subsumers" not in ontology.node(root_id):
+            _set_num_subsumers_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
     for root_id in roots:
-        _set_num_leaves_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
+        if "num_leaves" not in ontology.node(root_id):
+            _set_num_leaves_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
+    for root_id in roots:
+        if "depth" not in ontology.node(root_id):
+            set_all_depths_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
     for root_id in roots:
         _set_information_content_in_subgraph(ontology=ontology, root_id=root_id,
-                                             maxleaves=ontology.node(root_id)["num_leaves"], relations=relations)
-    # max_ic = 0
-    # for node in ontology.nodes():
-    #     node_dict = ontology.node(node)
-    #     if "IC" in node_dict and node_dict["IC"] > max_ic:
-    #         max_ic = node_dict["IC"]
-    # ontology.max_IC = max_ic
+                                             maxleaves=ontology.node(root_id)["num_leaves"], relations=relations,
+                                             min_distance_from_root=min_distance_from_root)
 
 
 def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_root: int = 0,
@@ -156,8 +157,8 @@ def get_trimmed_nodes_naive_algorithm(node_ids: List[str], ontology: Ontology, m
         return covered_terms != set(node_ids), best_terms
 
 
-def get_trimmed_nodes_ic(node_ids: List[str], ontology: Ontology,
-                         max_number_of_terms: int = 3) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
+def get_trimmed_nodes_ic(node_ids: List[str], ontology: Ontology, max_number_of_terms: int = 3,
+                         min_distance_from_root: int = 0) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
     """trim the list of terms by selecting the best combination of terms from the initial list or their common
     ancestors based on information content
 
@@ -165,23 +166,26 @@ def get_trimmed_nodes_ic(node_ids: List[str], ontology: Ontology,
         node_ids (List[str]): the list of nodes to merge by common ancestor
         max_number_of_terms (int): minimum number of terms above which the merge operation is performed
         ontology (Ontology): the ontology
+        min_distance_from_root (int): consider only nodes at a minimum distance from root as potential candidate for
+            trimming
     Returns:
         Set[str]: the set of trimmed terms, together with the set of original terms that each of them covers
     """
     common_ancestors = get_all_common_ancestors(node_ids=node_ids, ontology=ontology)
     if "IC" not in ontology.node(common_ancestors[0][0]):
-        set_all_information_content_values(ontology=ontology)
+        set_all_information_content_values(ontology=ontology, min_distance_from_root=min_distance_from_root)
     best_terms = find_set_covering(subsets=common_ancestors, max_num_subsets=max_number_of_terms,
-                                   value=[ontology.node(node[0])["IC"] for node in common_ancestors])
+                                   value=[ontology.node(node[0])["IC"] for node in common_ancestors], ontology=ontology)
     covered_terms = set([e for best_term_label, covered_terms in best_terms for e in covered_terms])
     return covered_terms != set(node_ids), best_terms
 
 
-def get_all_common_ancestors(node_ids: List[str], ontology: Ontology):
+def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 0):
     ancestors = defaultdict(list)
     for node_id in node_ids:
         for ancestor in ontology.ancestors(node=node_id, reflexive=True):
-            ancestors[ancestor].append(node_id)
+            if min_distance_from_root <= 0 or ontology.node(ancestor)["depth"] > min_distance_from_root:
+                ancestors[ancestor].append(node_id)
     return [(ancestor, ontology.label(ancestor), set(covered_nodes)) for ancestor, covered_nodes in ancestors.items() if
             len(covered_nodes) > 1 or ancestor == covered_nodes[0]]
 
@@ -209,16 +213,20 @@ def _set_num_leaves_in_subgraph(ontology: Ontology, root_id: str, relations: Lis
     ontology.node(root_id)["num_leaves"] = num_leaves
 
 
-def _set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxleaves: int, relations: List[str] = None):
+def _set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxleaves: int, relations: List[str] = None,
+                                         min_distance_from_root: int = 0):
     node = ontology.node(root_id)
-    node["IC"] = -math.log((float(node["num_leaves"]) / node["num_subsumers"] + 1) / (maxleaves + 1))
+    if node["depth"] >= min_distance_from_root:
+        node["IC"] = -math.log((float(node["num_leaves"]) / node["num_subsumers"] + 1) / (maxleaves + 1))
+    else:
+        node["IC"] = 0
     for child_id in ontology.children(node=root_id, relations=relations):
         _set_information_content_in_subgraph(ontology=ontology, root_id=child_id, maxleaves=maxleaves,
-                                             relations=relations)
+                                             relations=relations, min_distance_from_root=min_distance_from_root)
 
 
-def find_set_covering(subsets: List[Tuple[str, str, Set[str]]], value: List[float] = None,
-                      max_num_subsets: int = None) -> Union[None, List[Tuple[str, Set[str]]]]:
+def find_set_covering(subsets: List[Tuple[str, str, Set[str]]], value: List[float] = None, max_num_subsets: int = None,
+                      ontology: Ontology = None) -> Union[None, List[Tuple[str, Set[str]]]]:
     """greedy algorithm to solve set covering problem
 
     Args:
@@ -226,24 +234,32 @@ def find_set_covering(subsets: List[Tuple[str, str, Set[str]]], value: List[floa
         element being the ID of the subset, the second being the name, and the third the actual set of elements
         value (List[float]): list of costs of the subsets
         max_num_subsets (int): maximum number of subsets in the final list
+        ontology (Ontology): ontology to use to remove possible parent-child relationships in the result set
     Returns:
         Union[None, List[str]]: the list of IDs of the subsets that maximize coverage with respect to the elements in
         the universe
     """
     logger.debug("starting set covering optimization")
-    if value and len(value) != len(subsets):
+    elem_to_process = {subset[0] for subset in subsets}
+    if value and len(value) != len(elem_to_process):
         return None
     universe = set([e for subset in subsets for e in subset[2]])
     included_elmts = set()
     included_sets = []
-    while len(included_sets) < len(subsets) and included_elmts != universe and \
+    while len(elem_to_process) > 0 and included_elmts != universe and \
             (not max_num_subsets or len(included_sets) < max_num_subsets):
         if value:
-            effect_sets = sorted([(v * len(s[2] - included_elmts), s[2], s[1], s[0]) for s, v in zip(subsets, value)],
+            effect_sets = sorted([(v * len(s[2] - included_elmts), s[2], s[1], s[0]) for s, v in
+                                  zip(subsets, value) if s[0] in elem_to_process],
                                  key=lambda x: (- x[0], x[2]))
         else:
-            effect_sets = sorted([(len(s[2] - included_elmts), s[2], s[1], s[0]) for s in subsets],
-                                 key=lambda x: (- x[0], x[2]))
+            effect_sets = sorted([(len(s[2] - included_elmts), s[2], s[1], s[0]) for s in subsets if s[0] in
+                                  elem_to_process], key=lambda x: (- x[0], x[2]))
+        elem_to_process.remove(effect_sets[0][3])
+        if ontology:
+            for elem in included_sets:
+                if effect_sets[0][3] in ontology.ancestors(elem[0]):
+                    included_sets.remove(elem)
         included_elmts |= effect_sets[0][1]
         included_sets.append((effect_sets[0][3], effect_sets[0][1]))
     logger.debug("finished set covering optimization")

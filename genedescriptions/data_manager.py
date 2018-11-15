@@ -322,22 +322,15 @@ class DataManager(object):
         pass
 
     @staticmethod
-    def get_human_gene_props(use_ensembl_id: bool = True):
+    def get_human_gene_props():
         """ retrieve data for human genes, including Ensembl ID, symbol, name, and family symbol and name
 
-        Args:
-            use_ensembl_id (bool): use ensembl id as key instead of hgnc id
         Returns:
             Dict[str, List[str]]: a dictionary of all human genes properties, indexed by Ensembl ID
 
         """
         human_genes_props = defaultdict(list)
-        human_content_w_ensmbl = urllib.request.urlopen("https://www.genenames.org/cgi-bin/download?col=gd_hgnc_id&col="
-                                                        "gd_pub_ensembl_id&status=Approved&status=Entry+Withdrawn&statu"
-                                                        "s_opt=2&where=&order_by=gd_app_sym_sort&format=text&limit=&hgn"
-                                                        "c_dbtag=on&submit=submit")
-        human_content_w_fam_sym = urllib.request.urlopen(
-            "https://www.genenames.org/cgi-bin/genefamilies/download-all/tsv")
+        human_content_w_ensmbl = urllib.request.urlopen("https://www.genenames.org/cgi-bin/download/custom?col=gd_hgnc_id&col=gd_pub_ensembl_id&col=gd_app_sym&col=gd_app_name&status=Approved&status=Entry%20Withdrawn&hgnc_dbtag=on&order_by=gd_app_sym_sort&format=text&submit=submit")
 
         header = True
         for line in human_content_w_ensmbl:
@@ -345,25 +338,10 @@ class DataManager(object):
                 linearr = line.decode("utf-8").split("\t")
                 linearr[-1] = linearr[-1].strip()
                 if linearr[1] != "":
-                    human_genes_props[linearr[0][5:]] = [linearr[1]]
+                    human_genes_props[linearr[1]] = [linearr[0], linearr[2], linearr[3]]
             else:
                 header = False
-        header = True
-        for line in human_content_w_fam_sym:
-            if not header:
-                linearr = line.decode("utf-8").split("\t")
-                linearr[-1] = linearr[-1].strip()
-                if is_human_ortholog_name_valid(linearr[2]):
-                    human_genes_props[linearr[0]].extend([linearr[1], rename_human_ortholog_name(linearr[2]),
-                                                          linearr[9], linearr[10]])
-                else:
-                    del human_genes_props[linearr[0]]
-            else:
-                header = False
-        if use_ensembl_id:
-            return {v[0]: v[1:] for k, v in human_genes_props.items()}
-        else:
-            return {k: v[1:] for k, v in human_genes_props.items()}
+        return human_genes_props
 
     @staticmethod
     def get_ensembl_hgnc_ids_map():
