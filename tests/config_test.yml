@@ -356,7 +356,7 @@ go_sentences_options:
     add_multiple_if_covers_more_children: false
     remove_overlapped_terms: true
 
-do_sentences_options:
+do_exp_sentences_options:
     exclude_terms:
         - "DOID:0050736"
         - "DOID:0050737"
@@ -384,22 +384,13 @@ do_sentences_options:
         TAS:
             group: EXPERIMENTAL
             priority: 5
-        IEP:
-            group: BIOMARKER
-            priority: 6
     group_priority:
         EXPERIMENTAL: 1
-        BIOMARKER: 2
     prepostfix_sentences_map:
         - aspect: "D"
           group: EXPERIMENTAL
           qualifier: ""
           prefix: "is used to study"
-          postfix: ""
-        - aspect: "D"
-          group: BIOMARKER
-          qualifier: ""
-          prefix: "is biomarker of"
           postfix: ""
     prepostfix_sentences_map_humans:
         - aspect: "D"
@@ -407,16 +398,41 @@ do_sentences_options:
           qualifier: ""
           prefix: "is implicated in"
           postfix: ""
+    remove_parents_if_children_are_present: true
+    remove_children_if_parent_is_present: false
+    trim_terms_by_common_ancestors: true
+    trimming_algorithm: ic
+    max_num_terms: 3
+    trim_min_distance_from_root:
+        D: 4
+    truncate_others_aggregation_word: several
+    truncate_others_terms:
+        D: "diseases"
+    add_multiple_if_covers_more_children: true
+
+do_biomarker_sentences_options:
+    evidence_codes:
+        IEP:
+            group: BIOMARKER
+            priority: 1
+    group_priority:
+        BIOMARKER: 1
+    prepostfix_sentences_map:
         - aspect: "D"
           group: BIOMARKER
           qualifier: ""
           prefix: "is biomarker of"
           postfix: ""
-
+    prepostfix_sentences_map_humans:
+        - aspect: "D"
+          group: BIOMARKER
+          qualifier: ""
+          prefix: "is biomarker of"
+          postfix: ""
     remove_parents_if_children_are_present: true
     remove_children_if_parent_is_present: false
     trim_terms_by_common_ancestors: true
-    trimming_algorithm: naive
+    trimming_algorithm: ic
     max_num_terms: 3
     trim_min_distance_from_root:
         D: 4
@@ -426,17 +442,6 @@ do_sentences_options:
     add_multiple_if_covers_more_children: true
 
 do_via_orth_sentences_options:
-    exclude_terms:
-        - "DOID:0050736"
-        - "DOID:0050737"
-        - "DOID:0050739"
-        - "DOID:0050177"
-        - "DOID:630"
-        - "DOID:225"
-        - "DOID:7"
-        - "DOID:0080015"
-        - "DOID:0050117"
-        - "DOID:0080014"
     evidence_codes:
         ISS:
             group: ORTHOLOGY_BASED
@@ -462,7 +467,7 @@ do_via_orth_sentences_options:
     remove_parents_if_children_are_present: true
     remove_children_if_parent_is_present: false
     trim_terms_by_common_ancestors: true
-    trimming_algorithm: naive
+    trimming_algorithm: ic
     max_num_terms: 3
     trim_min_distance_from_root:
         D: 4

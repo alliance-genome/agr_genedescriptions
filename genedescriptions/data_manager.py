@@ -171,7 +171,7 @@ class DataManager(object):
                                                                               cache_path=ontology_cache_path)
                                                         ).subontology(relations=self.do_relations)
             new_ontology = self.do_ontology
-            module = Module.DO_EXP_AND_BIO
+            module = Module.DO_EXPERIMENTAL
         elif ontology_type == DataType.EXPR:
             logger.info("Loading Expression ontology data from file")
             self.expression_ontology = OntologyFactory().create(self._get_cached_file(

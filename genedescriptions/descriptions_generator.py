@@ -51,8 +51,7 @@ class OntologySentenceGenerator(object):
             limit_to_group (str): limit the evidence codes to the specified group
         """
         annot_type = None
-        if module == Module.DO_ORTHOLOGY or module == Module.DO_EXPERIMENTAL or module == module.DO_BIOMARKER or \
-                module == Module.DO_EXP_AND_BIO:
+        if module == Module.DO_ORTHOLOGY or module == Module.DO_EXPERIMENTAL or module == module.DO_BIOMARKER:
             self.ontology = data_manager.do_ontology
             annot_type = DataType.DO
         elif module == Module.GO:
@@ -200,6 +199,9 @@ class OntologySentenceGenerator(object):
                 add_others, merged_terms_coverset = get_trimmed_nodes_ic(
                     node_ids=list(terms_low_priority), ontology=self.ontology, max_number_of_terms=trimming_threshold,
                     min_distance_from_root=dist_root[aspect])
+            elif trimming_algorithm == "naive2":
+                add_others, merged_terms_coverset = get_trimmed_nodes_naive_algorithm2(
+                    node_ids=list(terms_low_priority), ontology=self.ontology, min_distance_from_root=dist_root[aspect])
             if add_mul_common_anc:
                 ancestors_covering_multiple_children = {self.ontology.label(term_id, id_if_null=True) for
                                                         term_id, covered_nodes in merged_terms_coverset if
@@ -207,9 +209,10 @@ class OntologySentenceGenerator(object):
             terms_low_priority = [term_id for term_id, covered_nodes in merged_terms_coverset]
             terms_already_covered.update([e for term_id, covered_nodes in merged_terms_coverset for e in covered_nodes])
         terms = terms_high_priority
+        terms_low_priority = [term for term in terms_low_priority if term not in terms_high_priority]
         terms.extend(terms_low_priority)
         # cutoff terms - if number of terms with high priority is higher than max_num_terms
-        terms = list(set(terms))[0:max_terms]
+        terms = terms[0:max_terms]
         return terms, add_others, ancestors_covering_multiple_children
 
     def merge_sentences_with_same_prefix(self, sentences: List[Sentence], remove_parent_terms: bool = True,

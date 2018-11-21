@@ -23,14 +23,15 @@ class TestOntologyTools(unittest.TestCase):
         logger.info("Loading go ontology from file")
         logging.basicConfig(filename=None, level="ERROR", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
         self.df.load_ontology_from_file(ontology_type=DataType.GO, ontology_url="file://" + os.path.join(
-            self.this_dir, os.path.pardir, "tests", "data", "go.obo"),
+            self.this_dir, os.path.pardir, "tests", "data", "go_gd_test.obo"),
                                         ontology_cache_path=os.path.join(self.this_dir, os.path.pardir, "tests",
-                                                                         "cache", "go.obo"), config=self.conf_parser)
+                                                                         "cache", "go_gd_test.obo"),
+                                        config=self.conf_parser)
         logger.info("Loading go associations from file")
         self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
-            self.this_dir, os.path.pardir, "tests", "data", "go_annotations.gaf"),
+            self.this_dir, os.path.pardir, "tests", "data", "go_annotations_gd_test.gaf"),
                                             associations_cache_path=os.path.join(self.this_dir, os.path.pardir, "tests",
-                                                                                 "cache", "go_annotations.gaf"),
+                                                                                 "cache", "go_annotations_gd_test.gaf"),
                                             config=self.conf_parser)
 
     def test_get_common_ancestors(self):
@@ -50,15 +51,6 @@ class TestOntologyTools(unittest.TestCase):
         self.assertTrue(self.df.go_ontology.node("GO:1905910")["IC"] ==
                         -math.log(1/(self.df.go_ontology.node("GO:0008150")["num_leaves"] + 1)),
                         "Wrong IC value for leaf node")
-        # max_ic = 0
-        # for node in self.df.go_ontology.nodes():
-        #     node_dict = self.df.go_ontology.node(node)
-        #     if "IC" in node_dict and node_dict["IC"] > max_ic:
-        #         max_ic = node_dict["IC"]
-
-        # GO:1905909 = regulation of dauer entry
-        # GO:0061067 = negative regulation of dauer larval development
-        # expected best node: regulation of dauer larval development? depends on algorithm though, so don't test it
         subsets = get_all_common_ancestors(["GO:1905909", "GO:0061067"], self.df.go_ontology)
         set_covering = find_set_covering(subsets, [self.df.go_ontology.node(subset[0])["IC"] for subset in
                                                    subsets], 3, ontology=self.df.go_ontology)

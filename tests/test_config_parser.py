@@ -23,7 +23,7 @@ class TestConfigParser(unittest.TestCase):
                              self.conf_parser.get_module_property(module=Module.GO,
                                                                   prop=ConfigModuleProperty.EXCLUDE_TERMS)]),
                         "GO exclusion term list not loading")
-        self.assertTrue(len(self.conf_parser.get_module_property(module=Module.DO_EXP_AND_BIO,
+        self.assertTrue(len(self.conf_parser.get_module_property(module=Module.DO_EXPERIMENTAL,
                                                                  prop=ConfigModuleProperty.EXCLUDE_TERMS)) > 0,
                         "DO terms exclusion not loading")
 
@@ -31,7 +31,7 @@ class TestConfigParser(unittest.TestCase):
         self.assertTrue(len(self.conf_parser.get_module_property(module=Module.GO,
                                                                  prop=ConfigModuleProperty.RENAME_TERMS)) == 7,
                         "GO term renaming list not loading")
-        self.assertTrue(self.conf_parser.get_module_property(module=Module.DO_EXP_AND_BIO,
+        self.assertTrue(self.conf_parser.get_module_property(module=Module.DO_EXPERIMENTAL,
                                                              prop=ConfigModuleProperty.RENAME_TERMS) is None,
                         "DO term renaming list should be None")
 
