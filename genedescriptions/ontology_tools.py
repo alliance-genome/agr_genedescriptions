@@ -87,8 +87,8 @@ def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_ro
         return {tuple(new_path)}
 
 
-def get_trimmed_nodes_naive_algorithm2(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 3,
-                                       max_num_nodes: int = 3) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
+def get_best_nodes_lca(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 3,
+                       max_num_nodes: int = 3) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
     candidates = {node_id: (node_label, covered_nodes) for node_id, node_label, covered_nodes in
                   get_all_common_ancestors(node_ids=node_ids, ontology=ontology,
                                            min_distance_from_root=min_distance_from_root)}
@@ -132,9 +132,9 @@ def get_trimmed_nodes_naive_algorithm2(node_ids: List[str], ontology: Ontology, 
         return covered_terms != set(node_ids), best_terms
 
 
-def get_trimmed_nodes_naive_algorithm(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 3,
-                                      max_num_nodes: int = 3,
-                                      nodeids_blacklist: List[str] = None) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
+def get_best_nodes_naive(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 3,
+                         max_num_nodes: int = 3,
+                         nodeids_blacklist: List[str] = None) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
     """remove terms with common ancestor and keep the ancestor term instead
 
     Args:
@@ -202,8 +202,8 @@ def get_trimmed_nodes_naive_algorithm(node_ids: List[str], ontology: Ontology, m
         return covered_terms != set(node_ids), best_terms
 
 
-def get_trimmed_nodes_ic(node_ids: List[str], ontology: Ontology, max_number_of_terms: int = 3,
-                         min_distance_from_root: int = 0) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
+def get_best_nodes_ic(node_ids: List[str], ontology: Ontology, max_number_of_terms: int = 3,
+                      min_distance_from_root: int = 0) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
     """trim the list of terms by selecting the best combination of terms from the initial list or their common
     ancestors based on information content
 

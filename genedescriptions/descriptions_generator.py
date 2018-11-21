@@ -193,14 +193,14 @@ class OntologySentenceGenerator(object):
         if 0 < trimming_threshold < len(terms_low_priority):
             merged_terms_coverset = None
             if trimming_algorithm == "naive":
-                add_others, merged_terms_coverset = get_trimmed_nodes_naive_algorithm(
+                add_others, merged_terms_coverset = get_best_nodes_naive(
                     node_ids=list(terms_low_priority), ontology=self.ontology, min_distance_from_root=dist_root[aspect])
             elif trimming_algorithm == "ic":
-                add_others, merged_terms_coverset = get_trimmed_nodes_ic(
+                add_others, merged_terms_coverset = get_best_nodes_ic(
                     node_ids=list(terms_low_priority), ontology=self.ontology, max_number_of_terms=trimming_threshold,
                     min_distance_from_root=dist_root[aspect])
             elif trimming_algorithm == "naive2":
-                add_others, merged_terms_coverset = get_trimmed_nodes_naive_algorithm2(
+                add_others, merged_terms_coverset = get_best_nodes_lca(
                     node_ids=list(terms_low_priority), ontology=self.ontology, min_distance_from_root=dist_root[aspect])
             if add_mul_common_anc:
                 ancestors_covering_multiple_children = {self.ontology.label(term_id, id_if_null=True) for
