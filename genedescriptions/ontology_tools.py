@@ -87,6 +87,51 @@ def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_ro
         return {tuple(new_path)}
 
 
+def get_trimmed_nodes_naive_algorithm2(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 3,
+                                       max_num_nodes: int = 3) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
+    candidates = {node_id: (node_label, covered_nodes) for node_id, node_label, covered_nodes in
+                  get_all_common_ancestors(node_ids=node_ids, ontology=ontology,
+                                           min_distance_from_root=min_distance_from_root)}
+    cands_ids_to_process = set(candidates.keys())
+    selected_cands_ids = []
+    node_to_cands_map = defaultdict(list)
+    for cand in cands_ids_to_process:
+        for node in candidates[cand][1]:
+            node_to_cands_map[node].append(cand)
+    while len(cands_ids_to_process) > 0:
+        cand_id = cands_ids_to_process.pop()
+        comparable_cands = [(cid, cval[1]) for cid, cval in candidates.items() if cid != cand_id and all(
+            [child_id in cval[1] for child_id in candidates[cand_id][1]])]
+        if len(comparable_cands) > 0:
+            max_len = max(map(lambda x: len(x[1]), comparable_cands))
+            best_cands = [candidate for candidate in comparable_cands if len(candidate[1]) == max_len]
+            if len(best_cands) > 1:
+                weighted_best_cands = sorted([(ontology.node(cand[0])["depth"], cand) for cand in best_cands],
+                                             key=lambda x: x[0], reverse=True)
+                max_weight = max(map(lambda x: x[0], weighted_best_cands))
+                best_cands = [wcand[1] for wcand in weighted_best_cands if wcand[0] == max_weight]
+            else:
+                max_weight = ontology.node(best_cands[0][0])["depth"]
+            if len(candidates[cand_id][1]) > len(best_cands[0][1]) or \
+                    (len(candidates[cand_id][1]) > len(best_cands[0][1]) and
+                     ontology.node(cand_id)["depth"] > max_weight):
+                best_cands = [(cand_id, candidates[cand_id][1])]
+            for best_cand in best_cands:
+                selected_cands_ids.append(best_cand[0])
+                for node_id in candidates[best_cand[0]][1]:
+                    cands_ids_to_process -= set(node_to_cands_map[node_id])
+        else:
+            selected_cands_ids.append(cand_id)
+    if len(selected_cands_ids) <= max_num_nodes:
+        return False, [(node_id, candidates[node_id][1]) for node_id in selected_cands_ids]
+
+    else:
+        best_terms = find_set_covering([(node_id, ontology.label(node_id, id_if_null=True), candidates[node_id][1]) for
+                                        node_id in selected_cands_ids], max_num_subsets=max_num_nodes)
+        covered_terms = set([e for best_term_label, covered_terms in best_terms for e in covered_terms])
+        return covered_terms != set(node_ids), best_terms
+
+
 def get_trimmed_nodes_naive_algorithm(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 3,
                                       max_num_nodes: int = 3,
                                       nodeids_blacklist: List[str] = None) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
