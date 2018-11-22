@@ -147,81 +147,114 @@ class WBDataManager(DataManager):
                     self.gene_data["WB:" + fields[1]] = Gene("WB:" + fields[1], name, fields[4] == "Dead", False)
 
     def load_associations_from_file(self, associations_type: DataType, associations_url: str,
-                                    associations_cache_path: str, config: GenedescConfigParser) -> None:
+                                    associations_cache_path: str, config: GenedescConfigParser,
+                                    association_additional_url: str = None,
+                                    association_additional_cache_path: str = None) -> None:
         logger.info("Loading associations from file")
-        if associations_type == DataType.GO or associations_type == DataType.EXPR:
+        if associations_type == DataType.GO:
             super().load_associations_from_file(associations_type=associations_type, associations_url=associations_url,
                                                 associations_cache_path=associations_cache_path, config=config)
-            if associations_type == DataType.EXPR:
-                associations = []
-                for subj_associations in self.expression_associations.associations_by_subj.values():
-                    for association in subj_associations:
-                        if len(association["qualifiers"]) == 0 or "Partial" in association["qualifiers"] or "Certain" \
-                                in association["qualifiers"]:
-                            association["qualifiers"] = ["Verified"]
-                            associations.append(association)
-                        else:
-                            associations.append(association)
-                self.expression_associations = AssociationSetFactory().create_from_assocs(
-                    assocs=associations, ontology=self.expression_ontology)
-        elif associations_type == DataType.DO:
-            self.do_associations = AssociationSetFactory().create_from_assocs(
-                assocs=GafParser().parse(file=self._get_cached_file(cache_path=self.do_associations_cache_path,
-                                                                    file_source_url=self.do_associations_url),
-                                         skipheader=True),
-                ontology=self.do_ontology)
+        elif associations_type == DataType.EXPR:
             associations = []
-            for subj_associations in self.do_associations.associations_by_subj.values():
-                for association in subj_associations:
-                    if association["evidence"]["type"] == "IEA":
-                        associations.append(association)
-            file_path = self._get_cached_file(cache_path=self.do_associations_new_cache_path,
-                                              file_source_url=self.do_associations_new_url)
-            header = True
+            file_path = self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url)
             for line in open(file_path):
                 if not line.strip().startswith("!"):
-                    if not header:
-                        linearr = line.strip().split("\t")
-                        if self.do_ontology.node(linearr[10]) and linearr[16] != "IEA":
-                            gene_ids = [linearr[2]]
-                            if linearr[1] == "allele":
-                                gene_ids = linearr[4].split(",")
-                            for gene_id in gene_ids:
-                                associations.append({"source_line": line,
-                                                     "subject": {
-                                                         "id": gene_id,
-                                                         "label": linearr[3],
-                                                         "type": line[1],
-                                                         "fullname": "",
-                                                         "synonyms": [],
-                                                         "taxon": {"id": linearr[0]}
+                    linearr = line.strip().split("\t")
+                    if self.expression_ontology.node(linearr[4]):
+                        gene_id = linearr[0] + ":" + linearr[1]
+                        qualifiers = linearr[3].split("|")
+                        if len(qualifiers) == 0 or "Partial" in qualifiers or "Certain" in qualifiers:
+                            qualifiers = ["Verified"]
+                        associations.append({"source_line": line,
+                                             "subject": {
+                                                 "id": gene_id,
+                                                 "label": linearr[2],
+                                                 "type": linearr[11],
+                                                 "fullname": "",
+                                                 "synonyms": [],
+                                                 "taxon": {"id": linearr[12]}
 
-                                                     },
-                                                     "object": {
-                                                         "id": linearr[10],
-                                                         "taxon": ""
-                                                     },
-                                                     "qualifiers": linearr[9].split("|"),
-                                                     "aspect": "D",
-                                                     "relation": {"id": None},
-                                                     "negated": False,
-                                                     "evidence": {
-                                                         "type": linearr[16],
-                                                         "has_supporting_reference": linearr[18].split("|"),
-                                                         "with_support_from": [],
-                                                         "provided_by": linearr[20],
-                                                         "date": linearr[19]
-                                                         }
-                                                     })
-                    else:
-                        header = False
-            self.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
-                                                                              ontology=self.do_ontology)
-            self.do_associations = self.remove_blacklisted_annotations(association_set=self.do_associations,
-                                                                       ontology=self.do_ontology,
-                                                                       terms_blacklist=config.get_module_property(
-                                                                           module=Module.DO_EXPERIMENTAL,
-                                                                           prop=ConfigModuleProperty.EXCLUDE_TERMS))
+                                             },
+                                             "object": {
+                                                 "id": linearr[4],
+                                                 "taxon": ""
+                                             },
+                                             "qualifiers": qualifiers,
+                                             "aspect": linearr[8],
+                                             "relation": {"id": None},
+                                             "negated": False,
+                                             "evidence": {
+                                                 "type": linearr[6],
+                                                 "has_supporting_reference": linearr[5].split("|"),
+                                                 "with_support_from": [],
+                                                 "provided_by": linearr[14],
+                                                 "date": linearr[13]
+                                             }
+                                             })
+            self.expression_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
+                                                                                      ontology=self.expression_ontology)
+            self.expression_associations = self.remove_blacklisted_annotations(
+                association_set=self.expression_associations, ontology=self.expression_ontology,
+                terms_blacklist=config.get_module_property(module=Module.EXPRESSION,
+                                                           prop=ConfigModuleProperty.EXCLUDE_TERMS))
+        elif associations_type == DataType.DO:
+            self.do_associations = AssociationSetFactory().create_from_assocs(
+                assocs=GafParser().parse(file=self._get_cached_file(cache_path=associations_cache_path,
+                                                                    file_source_url=associations_url),
+                                         skipheader=True),
+                ontology=self.do_ontology)
+            if association_additional_cache_path and association_additional_url:
+                associations = []
+                for subj_associations in self.do_associations.associations_by_subj.values():
+                    for association in subj_associations:
+                        if association["evidence"]["type"] == "IEA":
+                            associations.append(association)
+                file_path = self._get_cached_file(cache_path=association_additional_cache_path,
+                                                  file_source_url=association_additional_url)
+                header = True
+                for line in open(file_path):
+                    if not line.strip().startswith("!"):
+                        if not header:
+                            linearr = line.strip().split("\t")
+                            if self.do_ontology.node(linearr[10]) and linearr[16] != "IEA":
+                                gene_ids = [linearr[2]]
+                                if linearr[1] == "allele":
+                                    gene_ids = linearr[4].split(",")
+                                for gene_id in gene_ids:
+                                    associations.append({"source_line": line,
+                                                         "subject": {
+                                                             "id": gene_id,
+                                                             "label": linearr[3],
+                                                             "type": line[1],
+                                                             "fullname": "",
+                                                             "synonyms": [],
+                                                             "taxon": {"id": linearr[0]}
+
+                                                         },
+                                                         "object": {
+                                                             "id": linearr[10],
+                                                             "taxon": ""
+                                                         },
+                                                         "qualifiers": linearr[9].split("|"),
+                                                         "aspect": "D",
+                                                         "relation": {"id": None},
+                                                         "negated": False,
+                                                         "evidence": {
+                                                             "type": linearr[16],
+                                                             "has_supporting_reference": linearr[18].split("|"),
+                                                             "with_support_from": [],
+                                                             "provided_by": linearr[20],
+                                                             "date": linearr[19]
+                                                             }
+                                                         })
+                        else:
+                            header = False
+                self.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
+                                                                                  ontology=self.do_ontology)
+            self.do_associations = self.remove_blacklisted_annotations(
+                association_set=self.do_associations, ontology=self.do_ontology,
+                terms_blacklist=config.get_module_property(module=Module.DO_EXPERIMENTAL,
+                                                           prop=ConfigModuleProperty.EXCLUDE_TERMS))
 
     def load_orthology_from_file(self):
         logger.info("Loading orthology from file")
@@ -391,7 +424,8 @@ class WBDataManager(DataManager):
                                      ontology_cache_path=self.do_ontology_cache_path, config=config)
         self.load_associations_from_file(associations_type=DataType.DO, associations_url=self.do_associations_url,
                                          associations_cache_path=self.do_associations_cache_path,
-                                         config=config)
+                                         association_additional_cache_path=self.do_associations_new_cache_path,
+                                         association_additional_url=self.do_associations_new_url, config=config)
         self.load_ontology_from_file(ontology_type=DataType.EXPR, ontology_url=self.expression_ontology_url,
                                      ontology_cache_path=self.expression_ontology_cache_path, config=config)
         self.load_associations_from_file(associations_type=DataType.EXPR,

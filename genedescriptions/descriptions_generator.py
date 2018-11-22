@@ -155,7 +155,7 @@ class OntologySentenceGenerator(object):
                 terms = [term for term in terms if
                          len(set(self.ontology.ancestors(term)).intersection(set(terms))) == 0 or (
                                  high_priority_term_ids and term in high_priority_term_ids)]
-            if (aspect, evidence_group, qualifier) in self.prepostfix_sentences_map:
+            if (aspect, evidence_group, qualifier) in self.prepostfix_sentences_map and len(terms) > 0:
                 sentences.append(
                     _get_single_sentence(
                         node_ids=terms, ontology=self.ontology, aspect=aspect, evidence_group=evidence_group,

@@ -36,6 +36,8 @@ class DescriptionsWriter(object):
             indent = 4
         if include_single_gene_stats:
             self.general_stats.calculate_stats(gene_descriptions=self.data)
+            for gene_desc in self.data:
+                gene_desc.stats.calculate_stats()
         json_serializable_self = copy.deepcopy(self)
         json_serializable_self.overall_properties = vars(json_serializable_self.overall_properties)
         if include_single_gene_stats:
