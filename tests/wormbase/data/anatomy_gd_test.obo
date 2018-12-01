@@ -1,0 +1,4263 @@
+format-version: 1.2
+ontology: go_gd_tests
+
+[Term]
+id: WBbt:0000100
+name: C. elegans Cell and Anatomy
+namespace: worm_anatomy
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003666
+name: NSM
+namespace: worm_anatomy
+alt_id: WBbt:0003746
+def: "Neuron class of two pharyngeal neurosecretory-motor neurons." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/NSMframeset.html>
+synonym: "neurosecretory-motor neuron" RELATED []
+is_a: WBbt:0005439 ! pharyngeal neuron
+is_a: WBbt:0006837 ! serotonergic neuron
+relationship: BFO:0000050 WBbt:0003711 ! part_of metacorpus
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003668
+name: pharyngeal interneuron
+namespace: worm_anatomy
+def: "interneuron of the pharyngeal nervous system." []
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0005439 ! pharyngeal neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003670
+name: gland cell
+namespace: worm_anatomy
+def: "A variety of very different cell types which share cytoplasmic features (such as large membrane-bound granules) that suggest a role in secretion, thus termed gland cells." []
+is_a: WBbt:0004017 ! Cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003672
+name: epithelial cell
+namespace: worm_anatomy
+def: "cell of epithelium, the layer of cells that cover the external surface of an organism as well as forming an inner lining between the tissues and organs of that organism and the external environment. In C. elegans epithelial cells include epithelium of the alimentary tract, intestinal cells, hypodermis, interfacial cells and somatic gonad cells." []
+synonym: "epithelium" RELATED []
+is_a: WBbt:0004017 ! Cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003673
+name: marginal cell
+namespace: worm_anatomy
+def: "a type of pharyngeal cell that connects basement membrane to the apices of triangle-shaped pharyngeal lumen." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/alimentary/alimentary1.htm#pharyngealmc>
+is_a: WBbt:0005460 ! pharyngeal cell
+is_a: WBbt:0005754 ! interfacial epithelial cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003675
+name: muscle cell
+namespace: worm_anatomy
+def: "contractile cell that makes up muscle tissue." []
+is_a: WBbt:0004017 ! Cell
+relationship: BFO:0000050 WBbt:0005737 ! part_of muscular system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003677
+name: pharyngeal motor neuron
+namespace: worm_anatomy
+is_a: WBbt:0005409 ! motor neuron
+is_a: WBbt:0005439 ! pharyngeal neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003679
+name: neuron
+namespace: worm_anatomy
+alt_id: WBbt:0005512
+alt_id: WBbt:0005516
+def: "Major cell type of nervous tissue, specialized for transmission of information in the form of patterns of impulses." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/Neuronframeset.html>
+synonym: "neurone" RELATED []
+is_a: WBbt:0004017 ! Cell
+relationship: BFO:0000050 WBbt:0005735 ! part_of nervous system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003681
+name: pharynx
+namespace: worm_anatomy
+def: "the feeding organ, a neuro-muscular pump in the head of the animal, used to ingest food, bacteria suspended in liquid, filter them out, grind them up and transport posteriorly into the instestine." []
+comment: LINKOUT::WORMATLAS::<http://wormatlas.org/ver1/handbook/alimentary/alimentary1.htm#generalinfopharynx>
+synonym: "esophagus" RELATED []
+xref: WBPaper:00038216
+is_a: WBbt:0003760 ! organ
+relationship: BFO:0000050 WBbt:0005743 ! part_of digestive tract
+relationship: BFO:0000050 WBbt:0005748 ! part_of alimentary system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003711
+name: metacorpus
+
+[Term]
+id: WBbt:0003713
+name: procorpus
+
+[Term]
+id: WBbt:0003721
+name: pm7
+namespace: worm_anatomy
+def: "seventh pharyngeal muscle cell layer" []
+synonym: "m7" RELATED []
+is_a: WBbt:0005451 ! pharyngeal muscle cell
+relationship: BFO:0000050 WBbt:0003732 ! part_of terminal bulb
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003724
+name: pm6
+namespace: worm_anatomy
+def: "sixth pharyngeal muscle cell layer" []
+synonym: "m6" RELATED []
+is_a: WBbt:0005451 ! pharyngeal muscle cell
+relationship: BFO:0000050 WBbt:0003732 ! part_of terminal bulb
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003732
+name: terminal bulb
+
+[Term]
+id: WBbt:0003737
+name: pm5
+namespace: worm_anatomy
+def: "fifth pharyngeal muscle cell layer" []
+synonym: "m5" RELATED []
+is_a: WBbt:0005451 ! pharyngeal muscle cell
+is_a: WBbt:0008074 ! syncytium
+relationship: BFO:0000050 WBbt:0003732 ! part_of terminal bulb
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003739
+name: pm4
+namespace: worm_anatomy
+def: "fourth pharyngeal muscle cell layer" []
+synonym: "m4" RELATED []
+is_a: WBbt:0005451 ! pharyngeal muscle cell
+is_a: WBbt:0008074 ! syncytium
+relationship: BFO:0000050 WBbt:0003711 ! part_of metacorpus
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003740
+name: pm3
+namespace: worm_anatomy
+def: "third pharyngeal muscle cell layer" []
+synonym: "m3" RELATED []
+is_a: WBbt:0005451 ! pharyngeal muscle cell
+is_a: WBbt:0008074 ! syncytium
+relationship: BFO:0000050 WBbt:0003713 ! part_of procorpus
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003760
+name: organ
+namespace: worm_anatomy
+def: "a collection of cells or cell groups that collectively perform a function" []
+is_a: WBbt:0005766 ! Anatomy
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003826
+name: AWCR
+namespace: worm_anatomy
+def: "Amphid wing cells, neurons having ciliated sheet-like sensory endings closely associated with amphid sheath" []
+synonym: "lineage name: ABprpaaaaap" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0005672 ! AWC
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005392 ! part_of amphid right sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003827
+name: AWCL
+namespace: worm_anatomy
+def: "Amphid wing cells, neurons having ciliated sheet-like sensory endings closely associated with amphid sheath" []
+synonym: "lineage name: ABplpaaaaap" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0005672 ! AWC
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005395 ! part_of amphid left sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003828
+name: AWBR
+namespace: worm_anatomy
+def: "Amphid wing cells, neurons having ciliated sheet-like sensory endings closely associated with amphid sheath" []
+synonym: "lineage name: ABpraaappap" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0005671 ! AWB
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005392 ! part_of amphid right sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003829
+name: AWBL
+namespace: worm_anatomy
+def: "Amphid wing cells, neurons having ciliated sheet-like sensory endings closely associated with amphid sheath" []
+synonym: "lineage name: ABalpppppap" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0005671 ! AWB
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005395 ! part_of amphid left sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003832
+name: AVM
+namespace: worm_anatomy
+def: "Neuron class of one sensory neuron, anterior ventral microtubule cell, touch receptor." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/AVMframeset.html>
+synonym: "lineage name: QR.paa" RELATED []
+is_a: WBbt:0005237 ! touch receptor neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003846
+name: AVJR
+namespace: worm_anatomy
+def: "Neuron, synapses like AVHL/R" []
+synonym: "lineage name: ABalapppppa" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006822 ! AVJ
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003847
+name: AVJL
+namespace: worm_anatomy
+def: "Neuron, synapses like AVHL/R" []
+synonym: "lineage name: ABalapapppa" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006822 ! AVJ
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003850
+name: AVG
+namespace: worm_anatomy
+def: "Neuron class of one ventral cord interneuron, few synapses." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/AVGframeset.html>
+synonym: "lineage name: ABprpapppap" RELATED []
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0005403 ! retrovesicular ganglion neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003863
+name: AVER
+namespace: worm_anatomy
+def: "Ventral cord interneuron, like AVD but outputs restricted to anterior cord." []
+synonym: "lineage name: ABpraaaaaaa" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006819 ! AVE
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003864
+name: AVEL
+namespace: worm_anatomy
+def: "Ventral cord interneuron, like AVD but outputs restricted to anterior cord." []
+synonym: "lineage name: ABalpppaaaa" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006819 ! AVE
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003865
+name: AVDR
+namespace: worm_anatomy
+def: "Ventral cord interneuron, synapses onto VA, DA, AS motorneurons; formerly called delta." []
+synonym: "lineage name: ABalaaapprl" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006818 ! AVD
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003866
+name: AVDL
+namespace: worm_anatomy
+def: "Ventral cord interneuron, synapses onto VA, DA, AS motorneurons; formerly called delta." []
+synonym: "lineage name: ABalaaapalr" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006818 ! AVD
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003867
+name: AVBR
+namespace: worm_anatomy
+def: "Ventral cord interneuron, synapses onto VB and DB motor neurons; formerly called beta." []
+synonym: "lineage name: ABprpaapaap" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0005841 ! AVB
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003868
+name: AVBL
+namespace: worm_anatomy
+def: "Ventral cord interneuron, synapses onto VB and DB motor neurons; formerly called beta." []
+synonym: "lineage name: ABplpaapaap" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0005841 ! AVB
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003869
+name: AVAR
+namespace: worm_anatomy
+def: "Ventral cord interneuron, synapses onto VA, DA, and AS motor neurons; formerly called alpha" []
+synonym: "lineage name: ABalaappapa" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0005842 ! AVA
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003870
+name: AVAL
+namespace: worm_anatomy
+def: "Ventral cord interneuron, synapses onto VA, DA, and AS motor neurons; formerly called alpha" []
+synonym: "lineage name: ABalppaaapa" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0005842 ! AVA
+is_a: WBbt:0006751 ! head neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003885
+name: ASJR
+namespace: worm_anatomy
+def: "one member of Amphid neurons, single ciliated endings, probably chemo-sensory; project into ring via commissure from ventral ganglion, make diverse synaptic connections in ring neuropil" []
+synonym: "lineage name: ABpraaappppa" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0005667 ! ASJ
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005392 ! part_of amphid right sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003886
+name: ASJL
+namespace: worm_anatomy
+def: "one member of Amphid neurons, single ciliated endings, probably chemo-sensory; project into ring via commissure from ventral ganglion, make diverse synaptic connections in ring neuropil" []
+synonym: "lineage name: ABalpppppppa" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0005667 ! ASJ
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005395 ! part_of amphid left sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003903
+name: ASER
+namespace: worm_anatomy
+def: "one member of Amphid neurons, single ciliated endings, probably chemo-sensory; project into ring via commissure from ventral ganglion, make diverse synaptic connections in ring neuropil" []
+synonym: "lineage name: ABpraaapppaa" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0005663 ! ASE
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005392 ! part_of amphid right sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003905
+name: AS11
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates dorsal muscles, no ventral counterpart" []
+synonym: "lineage name: P11.apa" RELATED []
+is_a: WBbt:0005334 ! AS neuron
+is_a: WBbt:0005447 ! preanal ganglion neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003906
+name: AS10
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates dorsal muscles, no ventral counterpart" []
+synonym: "lineage name: P10.apa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005334 ! AS neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003907
+name: AS9
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates dorsal muscles, no ventral counterpart" []
+synonym: "lineage name: P9.apa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005334 ! AS neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003908
+name: AS8
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates dorsal muscles, no ventral counterpart" []
+synonym: "lineage name: P8.apa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005334 ! AS neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003909
+name: AS7
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates dorsal muscles, no ventral counterpart" []
+synonym: "lineage name: P7.apa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005334 ! AS neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003910
+name: AS6
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates dorsal muscles, no ventral counterpart" []
+synonym: "lineage name: P6.apa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005334 ! AS neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003911
+name: AS5
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates dorsal muscles, no ventral counterpart" []
+synonym: "lineage name: P5.apa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005334 ! AS neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003912
+name: AS4
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates dorsal muscles, no ventral counterpart" []
+synonym: "lineage name: P4.apa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005334 ! AS neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003923
+name: AS3
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates dorsal muscles, no ventral counterpart" []
+synonym: "lineage name: P3.apa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005334 ! AS neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003924
+name: AS2
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates dorsal muscles, no ventral counterpart" []
+synonym: "lineage name: P2.apa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005334 ! AS neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003925
+name: AS1
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates dorsal muscles, no ventral counterpart" []
+synonym: "lineage name: P1.apa" RELATED []
+is_a: WBbt:0005334 ! AS neuron
+is_a: WBbt:0005403 ! retrovesicular ganglion neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003926
+name: RIML
+namespace: worm_anatomy
+def: "Ring motor neuron" []
+synonym: "lineage name: ABplppaapap" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0005835 ! RIM
+is_a: WBbt:0006751 ! head neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003927
+name: AQR
+namespace: worm_anatomy
+def: "Neuron class of one sensory neuron, basal body; not part of a sensillum, projects into ring." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/AQRframeset.html>
+synonym: "lineage name: QR.ap" RELATED []
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006816 ! ciliated neuron
+is_a: WBbt:0006974 ! nerve ring neuron
+is_a: WBbt:0008432 ! oxygen sensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003928
+name: RIH
+namespace: worm_anatomy
+def: "Neuron class of one ring interneuron." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/RIHframeset.html>
+synonym: "lineage name: ABprpappaaa" RELATED []
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006837 ! serotonergic neuron
+is_a: WBbt:0006974 ! nerve ring neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003929
+name: AMsoR
+namespace: worm_anatomy
+def: "Amphid socket cell, right" []
+synonym: "lineage name: ABprpaapapa" RELATED []
+is_a: WBbt:0008379 ! amphid socket cell
+relationship: BFO:0000050 WBbt:0005372 ! part_of anterior ganglion (ant)
+relationship: BFO:0000050 WBbt:0005392 ! part_of amphid right sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003931
+name: AMsoL
+namespace: worm_anatomy
+def: "Amphid socket cell, left" []
+synonym: "lineage name: ABplpaapapa" RELATED []
+is_a: WBbt:0008379 ! amphid socket cell
+relationship: BFO:0000050 WBbt:0005372 ! part_of anterior ganglion (ant)
+relationship: BFO:0000050 WBbt:0005395 ! part_of amphid left sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003938
+name: RID
+namespace: worm_anatomy
+def: "Neuron class of one ring motoneuron, projects along dorsal cord, innervates dorsal body muscle." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/RIDframeset.html>
+synonym: "lineage name: ABalappaapa" RELATED []
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0005409 ! motor neuron
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005214 ! part_of dorsal ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003942
+name: RIBR
+namespace: worm_anatomy
+def: "Ring interneuron" []
+synonym: "lineage name: ABprpaappap" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0005834 ! RIB
+is_a: WBbt:0006751 ! head neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003953
+name: ALMR
+namespace: worm_anatomy
+def: "Anterior lateral microtubule cell, touch receptor" []
+synonym: "lineage name: ABarpppappa" RELATED []
+is_a: WBbt:0005406 ! ALM
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003954
+name: ALML
+namespace: worm_anatomy
+def: "Anterior lateral microtubule cell, touch receptor" []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/ALMframeset.html>
+synonym: "lineage name: ABarppaappa" RELATED []
+is_a: WBbt:0005406 ! ALM
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003956
+name: RIBL
+namespace: worm_anatomy
+def: "Ring interneuron" []
+synonym: "lineage name: ABplpaappap" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0005834 ! RIB
+is_a: WBbt:0006751 ! head neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003961
+name: AIYR
+namespace: worm_anatomy
+def: "Amphid interneuron" []
+synonym: "lineage name: ABprpapaaap" RELATED []
+is_a: WBbt:0005413 ! AIY
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005264 ! part_of ventral ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003963
+name: AIYL
+namespace: worm_anatomy
+def: "Amphid interneuron" []
+synonym: "lineage name: ABplpapaaap" RELATED []
+is_a: WBbt:0005413 ! AIY
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005264 ! part_of ventral ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003984
+name: AIBR
+namespace: worm_anatomy
+def: "Amphid interneuron" []
+synonym: "lineage name: ABpraapappa" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006813 ! AIB
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003985
+name: AIBL
+namespace: worm_anatomy
+def: "Amphid interneuron" []
+synonym: "lineage name: ABplaapappa" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006813 ! AIB
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003987
+name: AIAR
+namespace: worm_anatomy
+def: "Amphid interneuron" []
+synonym: "lineage name: ABprppaappa" RELATED []
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006812 ! AIA
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0003989
+name: AIAL
+namespace: worm_anatomy
+def: "Amphid interneuron" []
+synonym: "lineage name: ABplppaappa" RELATED []
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006812 ! AIA
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004007
+name: ADER
+namespace: worm_anatomy
+def: "Anterior deirid, sensory neuron, dopaminergic" []
+synonym: "lineage name: ABprapaaaapa" RELATED []
+is_a: WBbt:0005415 ! ADE
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004009
+name: ADEL
+namespace: worm_anatomy
+def: "Anterior deirid, sensory neuron, dopaminergic" []
+synonym: "lineage name: ABplapaaaapa" RELATED []
+is_a: WBbt:0005415 ! ADE
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004017
+name: Cell
+namespace: worm_anatomy
+alt_id: WBbt:0003730
+def: "a cellular object that consists of subcellular components, expresses genes or functions." []
+synonym: "Cell type" RELATED []
+is_a: WBbt:0000100 ! C. elegans Cell and Anatomy
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004074
+name: PVQR
+namespace: worm_anatomy
+def: "Interneuron, projects along ventral cord to ring" []
+synonym: "lineage name: ABprapppaaa" RELATED []
+is_a: WBbt:0005600 ! lumbar right ganglion neuron
+is_a: WBbt:0006976 ! PVQ
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004076
+name: PVQL
+namespace: worm_anatomy
+def: "Interneuron, projects along ventral cord to ring" []
+synonym: "lineage name: ABplapppaaa" RELATED []
+is_a: WBbt:0005097 ! lumbar left ganglion neuron
+is_a: WBbt:0006976 ! PVQ
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004086
+name: PVM
+namespace: worm_anatomy
+def: "Neuron class of one neuron, posterior ventral microtuble cell, touch receptor." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/PVMframeset.html>
+synonym: "lineage name: QL.paa" RELATED []
+is_a: WBbt:0005237 ! touch receptor neuron
+is_a: WBbt:0005464 ! posterior lateral left ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004092
+name: PVCR
+namespace: worm_anatomy
+def: "Ventral cord interneuron, cell body in lumbar ganglion, synapses onto VB and DB motor neurons, formerly called delta." []
+synonym: "lineage name: ABprpppaapaa" RELATED []
+is_a: WBbt:0005600 ! lumbar right ganglion neuron
+is_a: WBbt:0005840 ! PVC
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004094
+name: PVCL
+namespace: worm_anatomy
+def: "Ventral cord interneuron, cell body in lumbar ganglion, synapses onto VB and DB motor neurons, formerly called delta." []
+synonym: "lineage name: ABplpppaapaa" RELATED []
+is_a: WBbt:0005097 ! lumbar left ganglion neuron
+is_a: WBbt:0005840 ! PVC
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004096
+name: PQR
+namespace: worm_anatomy
+def: "Neuron class of one sensory neuron, basal body, not part of a sensillum, projects into preanal gangion." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/PQRframeset.html>
+synonym: "lineage name: QL.ap" RELATED []
+is_a: WBbt:0005097 ! lumbar left ganglion neuron
+is_a: WBbt:0005600 ! lumbar right ganglion neuron
+is_a: WBbt:0006816 ! ciliated neuron
+is_a: WBbt:0008432 ! oxygen sensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004103
+name: PLMR
+namespace: worm_anatomy
+def: "Posterior lateral microtubule cell, touch receptor" []
+synonym: "lineage name: ABprapappppaa" RELATED []
+is_a: WBbt:0005490 ! PLM
+is_a: WBbt:0005600 ! lumbar right ganglion neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004104
+name: PLML
+namespace: worm_anatomy
+def: "Posterior lateral microtubule cell, touch receptor" []
+synonym: "lineage name: ABplapappppaa" RELATED []
+is_a: WBbt:0005097 ! lumbar left ganglion neuron
+is_a: WBbt:0005490 ! PLM
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004292
+name: anal depressor muscle
+namespace: worm_anatomy
+alt_id: WBbt:0005802
+def: "a single, H-shaped cell which lies just above the anus and connects the roof of the anal canal to the dorsal bodywall; its contractions act to increase the size of the anal opening by lifting the roof of the rectum and hence facilitate expulsion of intestinal contents." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/mesodermal.htm/musclepartIII.htm#Adp>
+synonym: "dilator muscle" RELATED []
+synonym: "lineage name: ABplpppppap" RELATED []
+synonym: "mu anal" RELATED []
+is_a: WBbt:0008600 ! enteric muscle
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004377
+name: hyp11
+namespace: worm_anatomy
+def: "Tail dorsal hypodermis" []
+synonym: "lineage name: Cpappv" RELATED []
+is_a: WBbt:0007846 ! hypodermal cell
+relationship: BFO:0000050 WBbt:0006978 ! part_of tail hypodermis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004378
+name: hyp10
+namespace: worm_anatomy
+alt_id: WBbt:0004379
+def: "Tail ventral hypodermis" []
+synonym: "lineage name: ABplppppppp" RELATED []
+synonym: "lineage name: ABprppppppp" RELATED []
+is_a: WBbt:0007846 ! hypodermal cell
+is_a: WBbt:0008074 ! syncytium
+relationship: BFO:0000050 WBbt:0006978 ! part_of tail hypodermis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004380
+name: hyp9
+namespace: worm_anatomy
+def: "Tail ventral hypodermis, 9th hypodermis cell" []
+is_a: WBbt:0007846 ! hypodermal cell
+relationship: BFO:0000050 WBbt:0006978 ! part_of tail hypodermis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004381
+name: hyp8
+namespace: worm_anatomy
+def: "Tail ventral hypodermis, 8th hypodermis cell" []
+is_a: WBbt:0007846 ! hypodermal cell
+relationship: BFO:0000050 WBbt:0006978 ! part_of tail hypodermis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004386
+name: PDA
+namespace: worm_anatomy
+def: "Neuron class of one motor neuron, process in dorsal cord, same as Y cell in hermaphrodite, Y.a in male." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/PDAframeset.html>
+is_a: WBbt:0005409 ! motor neuron
+is_a: WBbt:0005447 ! preanal ganglion neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004421
+name: Psub4
+namespace: worm_anatomy
+def: "Embryonic founder cell of germ line" []
+synonym: "lineage name: P0.pppp" RELATED []
+synonym: "P4" RELATED []
+synonym: "P4'" RELATED []
+is_a: WBbt:0008448 ! germline blastomere
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004444
+name: OLLR
+namespace: worm_anatomy
+def: "Lateral outer labial neurons" []
+synonym: "lineage name: ABpraaapapaa" RELATED []
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006847 ! OLL
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+relationship: BFO:0000050 WBbt:0005509 ! part_of OL lateral right sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004445
+name: OLLL
+namespace: worm_anatomy
+def: "Lateral outer labial neurons" []
+synonym: "lineage name: ABalppppapaa" RELATED []
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006847 ! OLL
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+relationship: BFO:0000050 WBbt:0005510 ! part_of OL lateral left sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004467
+name: M4 neuron
+namespace: worm_anatomy
+alt_id: WBbt:0003751
+def: "Neuron class of one pharyngeal motorneuron." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/M4frameset.html>
+synonym: "lineage name: MSpaaaaaa" RELATED []
+synonym: "M4 neuron" RELATED []
+synonym: "MSpaaaaaa" RELATED []
+is_a: WBbt:0003677 ! pharyngeal motor neuron
+is_a: WBbt:0006840 ! cholinergic neuron
+relationship: BFO:0000050 WBbt:0003711 ! part_of metacorpus
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004489
+name: M cell
+namespace: worm_anatomy
+alt_id: WBbt:0007204
+def: "Postembryonic mesoblast of pedigree MSapaapp." []
+synonym: "lineage name: MSapaapp" RELATED []
+synonym: "MSapaapp" EXACT []
+is_a: WBbt:0006783 ! blast cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004537
+name: IL2VR
+namespace: worm_anatomy
+def: "Inner labial neuron" []
+synonym: "lineage name: ABarapppppp" RELATED []
+is_a: WBbt:0005118 ! IL2 neuron
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005120 ! part_of IL sensillum ventral right
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004538
+name: IL2VL
+namespace: worm_anatomy
+def: "Inner labial neuron" []
+synonym: "lineage name: ABalppapppp" RELATED []
+is_a: WBbt:0005118 ! IL2 neuron
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005121 ! part_of IL sensillum ventral left
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004539
+name: IL2R
+namespace: worm_anatomy
+def: "Inner labial neuron" []
+synonym: "lineage name: ABalaappppp" RELATED []
+is_a: WBbt:0005118 ! IL2 neuron
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005122 ! part_of IL sensillum right
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004541
+name: IL2L
+namespace: worm_anatomy
+def: "Inner labial neuron" []
+synonym: "lineage name: ABalapaappp" RELATED []
+is_a: WBbt:0005118 ! IL2 neuron
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005123 ! part_of IL sensillum left
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004543
+name: IL2DR
+namespace: worm_anatomy
+def: "Inner labial neuron" []
+synonym: "lineage name: ABalappppap" RELATED []
+is_a: WBbt:0005118 ! IL2 neuron
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005124 ! part_of IL sensillum dorsal right
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004545
+name: IL2DL
+namespace: worm_anatomy
+def: "Inner labial neuron" []
+synonym: "lineage name: ABalapappap" RELATED []
+is_a: WBbt:0005118 ! IL2 neuron
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005126 ! part_of IL sensillum dorsal left
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004574
+name: Z4
+namespace: worm_anatomy
+def: "Somatic gonad precursor cell" []
+synonym: "lineage name: MSappaap" RELATED []
+is_a: WBbt:0007028 ! embryonic cell
+is_a: WBbt:0007854 ! somatic gonad precursor
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004575
+name: Z3
+namespace: worm_anatomy
+def: "Germ line precursor cell" []
+synonym: "lineage name: P4.a" RELATED []
+is_a: WBbt:0006849 ! germline precursor cell
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004576
+name: Z2
+namespace: worm_anatomy
+def: "Germ line precursor cell" []
+synonym: "lineage name: P4.p" RELATED []
+is_a: WBbt:0006849 ! germline precursor cell
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004577
+name: Z1
+namespace: worm_anatomy
+def: "Somatic gonad precursor cell" []
+synonym: "lineage name: MSpppaap" RELATED []
+is_a: WBbt:0007028 ! embryonic cell
+is_a: WBbt:0007854 ! somatic gonad precursor
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004613
+name: VC5
+namespace: worm_anatomy
+def: "Hermaphrodite specific ventral cord motor neuron innervates vulval muscles and ventral body muscles" []
+synonym: "lineage name: P7.aap" RELATED []
+is_a: WBbt:0005304 ! VC neuron
+is_a: WBbt:0006837 ! serotonergic neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004617
+name: VC4
+namespace: worm_anatomy
+def: "Hermaphrodite specific ventral cord motor neuron innervates vulval muscles and ventral body muscles" []
+synonym: "lineage name: P6.aap" RELATED []
+is_a: WBbt:0005304 ! VC neuron
+is_a: WBbt:0006837 ! serotonergic neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004623
+name: VB11
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P10.aaap" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005336 ! VB neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004625
+name: VB10
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P9.aaap" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005336 ! VB neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004627
+name: VB9
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P8.aaap" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005336 ! VB neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004629
+name: VB8
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P7.aaap" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005336 ! VB neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004631
+name: VB7
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P6.aaap" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005336 ! VB neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004633
+name: VB6
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P5.aaap" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005336 ! VB neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004637
+name: VB5
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P4.aaap" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005336 ! VB neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004638
+name: VB4
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P3.aaap" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005336 ! VB neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004639
+name: VB3
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P2.aaap" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005336 ! VB neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004641
+name: VB2
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: W.aap" RELATED []
+is_a: WBbt:0005336 ! VB neuron
+is_a: WBbt:0005403 ! retrovesicular ganglion neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004643
+name: VB1
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles, also interneuron in ring" []
+synonym: "lineage name: P1.aaap" RELATED []
+is_a: WBbt:0005336 ! VB neuron
+is_a: WBbt:0005403 ! retrovesicular ganglion neuron
+is_a: WBbt:0006974 ! nerve ring neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004645
+name: VA12
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles, but also interneuron in preanal ganglion" []
+synonym: "lineage name: P12.aaaa" RELATED []
+is_a: WBbt:0005339 ! VA neuron
+is_a: WBbt:0005447 ! preanal ganglion neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004647
+name: VA11
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P11.aaaa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005339 ! VA neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004649
+name: VA10
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P10.aaaa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005339 ! VA neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004651
+name: VA9
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P9.aaaa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005339 ! VA neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004653
+name: VA8
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P8.aaaa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005339 ! VA neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004697
+name: hmc
+namespace: worm_anatomy
+alt_id: WBbt:0005783
+def: "Head mesodermal cell, function unknown" []
+synonym: "head mesoderm cell" RELATED []
+synonym: "lineage name: MSappaaa" RELATED []
+is_a: WBbt:0004017 ! Cell
+relationship: BFO:0000050 WBbt:0005737 ! part_of muscular system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004740
+name: I5 neuron
+namespace: worm_anatomy
+alt_id: WBbt:0003642
+def: "Neuron class of one pharyngeal interneuron, posterior sensory." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/I5frameset.html>
+synonym: "I5" RELATED []
+synonym: "lineage name: ABarapapapp" RELATED []
+is_a: WBbt:0003668 ! pharyngeal interneuron
+relationship: BFO:0000050 WBbt:0003732 ! part_of terminal bulb
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004757
+name: HSNR
+namespace: worm_anatomy
+def: "Herm. specific motor neurons (die in male embryo), innervate vulval muscles, serotonergic" []
+synonym: "lineage name: ABprapppappa" RELATED []
+is_a: WBbt:0006830 ! HSN
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004758
+name: HSNL
+namespace: worm_anatomy
+def: "Herm. specific motor neurons (die in male embryo), innervate vulval muscles, serotonergic" []
+synonym: "lineage name: ABplapppappa" RELATED []
+is_a: WBbt:0006830 ! HSN
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004761
+name: HOB
+namespace: worm_anatomy
+def: "Neuron class of one male-specific sensory neuron associated with hook sensillum, receptor anterior to cloaca in male." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/HOBframeset.html>
+synonym: "lineage name: P10.ppap" RELATED []
+is_a: WBbt:0005177 ! HO neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004776
+name: rect_VR
+namespace: worm_anatomy
+def: "Rectal epithelial cells, adjacent to intestino-rectal valve, have microvilli" []
+synonym: "lineage name: ABprppppaap" RELATED []
+is_a: WBbt:0005799 ! rectal gland cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004785
+name: GLRDR
+namespace: worm_anatomy
+def: "Set of six cells that form a thin cylindrical sheet between pharynx and ring neuropile; no chemical synapses, but gap junctions with muscle arms and RME motor neurons" []
+synonym: "lineage name: MSaaaaaar" RELATED []
+is_a: WBbt:0005176 ! GLR
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004786
+name: GLRDL
+namespace: worm_anatomy
+def: "Set of six cells that form a thin cylindrical sheet between pharynx and ring neuropile; no chemical synapses, but gap junctions with muscle arms and RME motor neurons" []
+synonym: "lineage name: MSaaaaaal" RELATED []
+is_a: WBbt:0005176 ! GLR
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004787
+name: rect_VL
+namespace: worm_anatomy
+def: "Rectal epithelial cells, adjacent to intestino-rectal valve, have microvilli" []
+synonym: "lineage name: ABplppppaap" RELATED []
+is_a: WBbt:0005799 ! rectal gland cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004788
+name: rect_D
+namespace: worm_anatomy
+def: "Rectal epithelial cells, adjacent to intestino-rectal valve, have microvilli" []
+synonym: "lineage name: ABplpappppp" RELATED []
+is_a: WBbt:0005799 ! rectal gland cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004821
+name: DVC
+namespace: worm_anatomy
+def: "Neuron class of one ring interneuron, cell body in dorsorectal ganglion." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/DVCframeset.html>
+synonym: "lineage name: Caapaa" RELATED []
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0005801 ! dorsal-rectal ganglion neuron
+is_a: WBbt:0006974 ! nerve ring neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004823
+name: DVA
+namespace: worm_anatomy
+def: "Neuron class of one ring interneuron, cell body in dorsorectal ganglion, has a large vesicle-filled process in ring." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/DVAframeset.html>
+synonym: "lineage name: ABprppppapp" RELATED []
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0005801 ! dorsal-rectal ganglion neuron
+is_a: WBbt:0006974 ! nerve ring neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004840
+name: DB7
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABprppaappp" RELATED []
+is_a: WBbt:0005274 ! DB neuron
+is_a: WBbt:0005300 ! ventral cord neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004841
+name: DB6
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABplppaappp" RELATED []
+is_a: WBbt:0005274 ! DB neuron
+is_a: WBbt:0005300 ! ventral cord neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004842
+name: DB5
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABplpapappp" RELATED []
+is_a: WBbt:0005274 ! DB neuron
+is_a: WBbt:0005300 ! ventral cord neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004843
+name: DB4
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABprpappapp" RELATED []
+is_a: WBbt:0005274 ! DB neuron
+is_a: WBbt:0005300 ! ventral cord neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004844
+name: DB3
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABprpaaaapp" RELATED []
+is_a: WBbt:0005274 ! DB neuron
+is_a: WBbt:0005300 ! ventral cord neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004845
+name: DB2
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABarappappa" RELATED []
+is_a: WBbt:0005274 ! DB neuron
+is_a: WBbt:0005403 ! retrovesicular ganglion neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004846
+name: DB1
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABplpaaaapp" RELATED []
+is_a: WBbt:0005274 ! DB neuron
+is_a: WBbt:0005403 ! retrovesicular ganglion neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004849
+name: vm1
+namespace: worm_anatomy
+def: "Vulval muscle 1" []
+synonym: "lineage name: M.vrpaapaa" RELATED []
+is_a: WBbt:0006917 ! vulval muscle, type 1
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004850
+name: vm1
+namespace: worm_anatomy
+def: "Vulval muscle 1" []
+synonym: "lineage name: M.vrpaaapp" RELATED []
+is_a: WBbt:0006917 ! vulval muscle, type 1
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004853
+name: vm1
+namespace: worm_anatomy
+def: "Vulval muscle 1" []
+synonym: "lineage name: M.vlpaapaa" RELATED []
+is_a: WBbt:0006917 ! vulval muscle, type 1
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004854
+name: vm1
+namespace: worm_anatomy
+def: "Vulval muscle 1" []
+synonym: "lineage name: M.vlpaaapp" RELATED []
+is_a: WBbt:0006917 ! vulval muscle, type 1
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004857
+name: DA9
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABplpppaaaa" RELATED []
+is_a: WBbt:0005278 ! DA neuron
+is_a: WBbt:0005447 ! preanal ganglion neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004858
+name: DA8
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABprpapappp" RELATED []
+is_a: WBbt:0005278 ! DA neuron
+is_a: WBbt:0005447 ! preanal ganglion neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004859
+name: DA7
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABprpppaaap" RELATED []
+is_a: WBbt:0005278 ! DA neuron
+is_a: WBbt:0005300 ! ventral cord neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004860
+name: VA7
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P7.aaaa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005339 ! VA neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004861
+name: DA6
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABplpppaaap" RELATED []
+is_a: WBbt:0005278 ! DA neuron
+is_a: WBbt:0005300 ! ventral cord neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004862
+name: VA6
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P6.aaaa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005339 ! VA neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004863
+name: DA5
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABprppapapp" RELATED []
+is_a: WBbt:0005278 ! DA neuron
+is_a: WBbt:0005300 ! ventral cord neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004864
+name: VA5
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P5.aaaa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005339 ! VA neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004865
+name: DA4
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABplppapapp" RELATED []
+is_a: WBbt:0005278 ! DA neuron
+is_a: WBbt:0005300 ! ventral cord neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004866
+name: VA4
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P4.aaaa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005339 ! VA neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004867
+name: DA3
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABprppapapa" RELATED []
+is_a: WBbt:0005278 ! DA neuron
+is_a: WBbt:0005300 ! ventral cord neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004868
+name: VA3
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P3.aaaa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005339 ! VA neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004869
+name: DA2
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABplppapapa" RELATED []
+is_a: WBbt:0005278 ! DA neuron
+is_a: WBbt:0005300 ! ventral cord neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004870
+name: VA2
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: P2.aaaa" RELATED []
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005339 ! VA neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004871
+name: DA1
+namespace: worm_anatomy
+def: "Ventral cord motor neurons, innervate dorsal muscles" []
+synonym: "lineage name: ABprppapaap" RELATED []
+is_a: WBbt:0005278 ! DA neuron
+is_a: WBbt:0005403 ! retrovesicular ganglion neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004872
+name: VA1
+namespace: worm_anatomy
+def: "Ventral cord motor neuron, innervates ventral body muscles" []
+synonym: "lineage name: W.pa" RELATED []
+is_a: WBbt:0005339 ! VA neuron
+is_a: WBbt:0005403 ! retrovesicular ganglion neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004926
+name: URXR
+namespace: worm_anatomy
+def: "Ring interneuron" []
+synonym: "lineage name: ABarpapaappp" RELATED []
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006846 ! URX
+relationship: BFO:0000050 WBbt:0005214 ! part_of dorsal ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004928
+name: URXL
+namespace: worm_anatomy
+def: "Ring interneuron" []
+synonym: "lineage name: ABplaaaaappp" RELATED []
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006846 ! URX
+relationship: BFO:0000050 WBbt:0005214 ! part_of dorsal ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004930
+name: URBR
+namespace: worm_anatomy
+def: "Neuron, presynaptic in ring, ending in head" []
+synonym: "lineage name: ABpraapaapa" RELATED []
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006845 ! URB
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004931
+name: CEPVR
+namespace: worm_anatomy
+def: "Cephalic neurons, contain dopamine" []
+synonym: "lineage name: ABprpaappppa" RELATED []
+is_a: WBbt:0005244 ! CEP
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+relationship: BFO:0000050 WBbt:0006923 ! part_of cephalic sensillum ventral right
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004932
+name: URBL
+namespace: worm_anatomy
+def: "Neuron, presynaptic in ring, ending in head" []
+synonym: "lineage name: ABplaapaapa" RELATED []
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006845 ! URB
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004933
+name: CEPVL
+namespace: worm_anatomy
+def: "Cephalic neurons, contain dopamine" []
+synonym: "lineage name: ABplpaappppa" RELATED []
+is_a: WBbt:0005244 ! CEP
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+relationship: BFO:0000050 WBbt:0006924 ! part_of cephalic sensillum ventral left
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004934
+name: URAVR
+namespace: worm_anatomy
+def: "Ring motor neuron" []
+synonym: "lineage name: ABprpaaapaa" RELATED []
+is_a: WBbt:0005225 ! URA
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004935
+name: URAVL
+namespace: worm_anatomy
+def: "Ring motor neuron" []
+synonym: "lineage name: ABplpaaapaa" RELATED []
+is_a: WBbt:0005225 ! URA
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004936
+name: URADR
+namespace: worm_anatomy
+def: "Ring motor neuron" []
+synonym: "lineage name: ABarpapaaaa" RELATED []
+is_a: WBbt:0005225 ! URA
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004937
+name: CEPDR
+namespace: worm_anatomy
+def: "Cephalic neurons, contain dopamine" []
+synonym: "lineage name: ABarpapaappa" RELATED []
+is_a: WBbt:0005244 ! CEP
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005214 ! part_of dorsal ganglion
+relationship: BFO:0000050 WBbt:0006922 ! part_of cephalic sensillum dorsal right
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004938
+name: CEPDL
+namespace: worm_anatomy
+def: "Cephalic neurons, contain dopamine" []
+synonym: "lineage name: ABplaaaaappa" RELATED []
+is_a: WBbt:0005244 ! CEP
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005214 ! part_of dorsal ganglion
+relationship: BFO:0000050 WBbt:0006921 ! part_of cephalic sensillum dorsal left
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004940
+name: URADL
+namespace: worm_anatomy
+def: "Ring motor neuron" []
+synonym: "lineage name: ABplaaaaaaa" RELATED []
+is_a: WBbt:0005225 ! URA
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004947
+name: CANR
+namespace: worm_anatomy
+def: "Process runs along excretory canal, no synapses, essential for survival" []
+synonym: "lineage name: ABalappappa" RELATED []
+is_a: WBbt:0006827 ! CAN
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004949
+name: CANL
+namespace: worm_anatomy
+def: "Process runs along excretory canal, no synapses, essential for survival" []
+synonym: "lineage name: ABalapaaapa" RELATED []
+is_a: WBbt:0006827 ! CAN
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004969
+name: SMDVR
+namespace: worm_anatomy
+def: "Ring motor neuron/interneuron, has a posteriorly direct ed process that runs sublaterally" []
+synonym: "lineage name: ABarappppaa" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0005353 ! SMD
+is_a: WBbt:0006751 ! head neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004970
+name: SMDVL
+namespace: worm_anatomy
+def: "Ring motor neuron/interneuron, has a posteriorly direct ed process that runs sublaterally" []
+synonym: "lineage name: ABalppappaa" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0005353 ! SMD
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004971
+name: SMDDR
+namespace: worm_anatomy
+def: "Ring motor neuron/interneuron, has a posteriorly direct ed process that runs sublaterally" []
+synonym: "lineage name: ABprpapaaaa" RELATED []
+is_a: WBbt:0005353 ! SMD
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004972
+name: SMDDL
+namespace: worm_anatomy
+def: "Ring motor neuron/interneuron, has a posteriorly direct ed process that runs sublaterally" []
+synonym: "lineage name: ABplpapaaaa" RELATED []
+is_a: WBbt:0005353 ! SMD
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004973
+name: SMBVR
+namespace: worm_anatomy
+def: "Ring motor neuron/interneuron, has a posteriorly direct ed process that runs sublaterally" []
+synonym: "lineage name: ABarappappp" RELATED []
+is_a: WBbt:0005355 ! SMB
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004974
+name: SMBVL
+namespace: worm_anatomy
+def: "Ring motor neuron/interneuron, has a posteriorly direct ed process that runs sublaterally" []
+synonym: "lineage name: ABalpapappp" RELATED []
+is_a: WBbt:0005355 ! SMB
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004975
+name: SMBDR
+namespace: worm_anatomy
+def: "Ring motor neuron/interneuron, has a posteriorly direct ed process that runs sublaterally" []
+synonym: "lineage name: ABarappapapp" RELATED []
+is_a: WBbt:0005355 ! SMB
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004976
+name: SMBDL
+namespace: worm_anatomy
+def: "Ring motor neuron/interneuron, has a posteriorly direct ed process that runs sublaterally" []
+synonym: "lineage name: ABalpapapapp" RELATED []
+is_a: WBbt:0005355 ! SMB
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004977
+name: SIBVR
+namespace: worm_anatomy
+def: "Receives a few synapses in the ring, has a posteriorly directed process that runs sublaterally" []
+synonym: "lineage name: ABprpapaapp" RELATED []
+is_a: WBbt:0005359 ! SIB
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004978
+name: SIBVL
+namespace: worm_anatomy
+def: "Receives a few synapses in the ring, has a posteriorly directed process that runs sublaterally" []
+synonym: "lineage name: ABplpapaapp" RELATED []
+is_a: WBbt:0005359 ! SIB
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004979
+name: SIBDR
+namespace: worm_anatomy
+def: "Receives a few synapses in the ring, has a posteriorly directed process that runs sublaterally" []
+synonym: "lineage name: ABprppaaaaa" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0005359 ! SIB
+is_a: WBbt:0006751 ! head neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004981
+name: SIBDL
+namespace: worm_anatomy
+def: "Receives a few synapses in the ring, has a posteriorly directed process that runs sublaterally" []
+synonym: "lineage name: ABplppaaaaa" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0005359 ! SIB
+is_a: WBbt:0006751 ! head neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004983
+name: SIAVR
+namespace: worm_anatomy
+def: "Receives a few synapses in the ring, has a posteriorly directed process that runs sublaterally" []
+synonym: "lineage name: ABprpapappa" RELATED []
+is_a: WBbt:0005361 ! SIA
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004985
+name: SIAVL
+namespace: worm_anatomy
+def: "Receives a few synapses in the ring, has a posteriorly directed process that runs sublaterally" []
+synonym: "lineage name: ABplpapappa" RELATED []
+is_a: WBbt:0005361 ! SIA
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004987
+name: SIADR
+namespace: worm_anatomy
+def: "Receives a few synapses in the ring, has a posteriorly directed process that runs sublaterally" []
+synonym: "lineage name: ABprpapaapa" RELATED []
+is_a: WBbt:0005361 ! SIA
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004989
+name: SIADL
+namespace: worm_anatomy
+def: "Receives a few synapses in the ring, has a posteriorly directed process that runs sublaterally" []
+synonym: "lineage name: ABplpapaapa" RELATED []
+is_a: WBbt:0005361 ! SIA
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004991
+name: SDQR
+namespace: worm_anatomy
+def: "Ant. lateral interneuron, process projects into ring" []
+synonym: "lineage name: QR.pap" RELATED []
+is_a: WBbt:0006844 ! SDQ
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0004993
+name: SDQL
+namespace: worm_anatomy
+def: "Posterior lateral interneuron, process projects into ring" []
+synonym: "lineage name: QL.pap" RELATED []
+is_a: WBbt:0005464 ! posterior lateral left ganglion
+is_a: WBbt:0006844 ! SDQ
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005001
+name: SAAVR
+namespace: worm_anatomy
+def: "Ring interneuron, anteriorly projecting process that runs sublaterally" []
+synonym: "lineage name: ABprpaaaaaa" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0005397 ! SAA
+is_a: WBbt:0006751 ! head neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005003
+name: SAAVL
+namespace: worm_anatomy
+def: "Ring interneuron, anteriorly projecting process that runs sublaterally" []
+synonym: "lineage name: ABplpaaaaaa" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0005397 ! SAA
+is_a: WBbt:0006751 ! head neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005005
+name: SAADR
+namespace: worm_anatomy
+def: "Ring interneuron, anteriorly projecting process that runs sublaterally" []
+synonym: "lineage name: ABarapppapa" RELATED []
+is_a: WBbt:0005397 ! SAA
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005007
+name: SAADL
+namespace: worm_anatomy
+def: "Ring interneuron, anteriorly projecting process that runs sublaterally" []
+synonym: "lineage name: ABalppapapa" RELATED []
+is_a: WBbt:0005397 ! SAA
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005021
+name: RMEV
+namespace: worm_anatomy
+def: "Ring motor neuron" []
+synonym: "lineage name: ABplpappaaa" RELATED []
+is_a: WBbt:0005399 ! RME
+is_a: WBbt:0006751 ! head neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005023
+name: RMER
+namespace: worm_anatomy
+def: "Ring motor neuron" []
+synonym: "lineage name: ABalaaaarrp" RELATED []
+is_a: WBbt:0005399 ! RME
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005025
+name: RMEL
+namespace: worm_anatomy
+def: "Ring motor neuron" []
+synonym: "lineage name: ABalaaaarlp" RELATED []
+is_a: WBbt:0005399 ! RME
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005027
+name: RMED
+namespace: worm_anatomy
+def: "Ring motor neuron" []
+synonym: "lineage name: ABalapppaap" RELATED []
+is_a: WBbt:0005399 ! RME
+is_a: WBbt:0006751 ! head neuron
+relationship: BFO:0000050 WBbt:0005371 ! part_of anterior ganglion (post)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005029
+name: RMDVR
+namespace: worm_anatomy
+def: "Ring motor neuron/interneuron, many synapses" []
+synonym: "lineage name: ABarapppaaa" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0005400 ! RMD
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005031
+name: RMDVL
+namespace: worm_anatomy
+def: "Ring motor neuron/interneuron, many synapses" []
+synonym: "lineage name: ABalppapaaa" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0005400 ! RMD
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005033
+name: RMDR
+namespace: worm_anatomy
+def: "Ring motor neuron/interneuron, many synapses" []
+synonym: "lineage name: ABpraaaapad" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0005400 ! RMD
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005037
+name: RMDL
+namespace: worm_anatomy
+def: "Ring motor neuron/interneuron, many synapses" []
+synonym: "lineage name: ABalpppapad" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0005400 ! RMD
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005038
+name: RMDDR
+namespace: worm_anatomy
+def: "Ring motor neuron/interneuron, many synapses" []
+synonym: "lineage name: ABarappapaa" RELATED []
+is_a: WBbt:0005400 ! RMD
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005039
+name: RMDDL
+namespace: worm_anatomy
+def: "Ring motor neuron/interneuron, many synapses" []
+synonym: "lineage name: ABalpapapaa" RELATED []
+is_a: WBbt:0005400 ! RMD
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0007028 ! embryonic cell
+relationship: BFO:0000050 WBbt:0005266 ! part_of ventral ganglion (ant)
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005041
+name: RIVR
+namespace: worm_anatomy
+def: "Ring interneuron" []
+synonym: "lineage name: ABprpaapaaa" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006839 ! RIV
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005043
+name: RIVL
+namespace: worm_anatomy
+def: "Ring interneuron" []
+synonym: "lineage name: ABplpaapaaa" RELATED []
+is_a: WBbt:0005102 ! lateral ganglion left neuron
+is_a: WBbt:0006751 ! head neuron
+is_a: WBbt:0006839 ! RIV
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005053
+name: RIMR
+namespace: worm_anatomy
+def: "Ring motor neuron" []
+synonym: "lineage name: ABprppaapap" RELATED []
+is_a: WBbt:0005100 ! lateral ganglion right neuron
+is_a: WBbt:0005835 ! RIM
+is_a: WBbt:0006751 ! head neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005062
+name: linker cell
+namespace: worm_anatomy
+def: "male gonad cell, leads gonad during morphogenesis and initiates union with cloaca" []
+synonym: "gon_male_link" RELATED []
+synonym: "lineage name: Z1.paa/Z4.aaa" RELATED []
+is_a: WBbt:0008209 ! male gonadal cell
+relationship: BFO:0000050 WBbt:0006794 ! part_of male gonad
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005097
+name: lumbar left ganglion neuron
+namespace: worm_anatomy
+def: "neuron of lumbar ganglion, left." []
+is_a: WBbt:0006802 ! lumbar neuron
+relationship: BFO:0000050 WBbt:0005098 ! part_of lumbar ganglion left
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005098
+name: lumbar ganglion left
+
+[Term]
+id: WBbt:0005100
+name: lateral ganglion right neuron
+namespace: worm_anatomy
+def: "neuron type, cell body located in right lateral ganglion." []
+is_a: WBbt:0003679 ! neuron
+relationship: BFO:0000050 WBbt:0005101 ! part_of lateral ganglion right
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005101
+name: lateral ganglion right
+
+[Term]
+id: WBbt:0005102
+name: lateral ganglion left neuron
+namespace: worm_anatomy
+def: "neuron type, cell body located in left lateral ganglion." []
+is_a: WBbt:0003679 ! neuron
+relationship: BFO:0000050 WBbt:0005103 ! part_of lateral ganglion left
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005103
+name: lateral ganglion left
+
+[Term]
+id: WBbt:0005113
+name: interneuron
+namespace: worm_anatomy
+is_a: WBbt:0003679 ! neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005116
+name: inner labial sensillum
+
+[Term]
+id: WBbt:0005117
+name: inner labial neuron
+namespace: worm_anatomy
+def: "neuron type, member of a set of 12 neurons of the inner labial sensilla." []
+synonym: "IL neuron" RELATED []
+is_a: WBbt:0006816 ! ciliated neuron
+relationship: BFO:0000050 WBbt:0005116 ! part_of inner labial sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005118
+name: IL2 neuron
+namespace: worm_anatomy
+def: "Neuron class of six ciliated neurons, each of which is one of the two component neurons of the six inner labial sensilla." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/IL2frameset.html>
+is_a: WBbt:0005117 ! inner labial neuron
+is_a: WBbt:0005837 ! chemosensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005120
+name: IL sensillum ventral right
+
+[Term]
+id: WBbt:0005121
+name: IL sensillum ventral left
+
+[Term]
+id: WBbt:0005122
+name: IL sensillum right
+
+[Term]
+id: WBbt:0005123
+name: IL sensillum left
+
+[Term]
+id: WBbt:0005124
+name: IL sensillum dorsal right
+
+[Term]
+id: WBbt:0005126
+name: IL sensillum dorsal left
+
+[Term]
+id: WBbt:0005135
+name: head ganglion
+namespace: worm_anatomy
+def: "ganglion in the head." []
+is_a: WBbt:0005189 ! ganglion
+relationship: BFO:0000050 WBbt:0005739 ! part_of head
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005175
+name: gonad
+namespace: worm_anatomy
+def: "organ producing either sperm or ova." []
+is_a: WBbt:0003760 ! organ
+relationship: BFO:0000050 WBbt:0005744 ! part_of reproductive tract
+relationship: BFO:0000050 WBbt:0005747 ! part_of reproductive system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005176
+name: GLR
+namespace: worm_anatomy
+alt_id: WBbt:0005387
+alt_id: WBbt:0005782
+def: "set of six cells that form a thin cylindrical sheet between pharynx and ring neuropile; no chemical synapses, but gap junctions with muscle arms and RME motor neurons, might be glial cells" []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/mesodermal.htm/glr.htm>
+synonym: "anomalous_pharynx_cells (TreeNode)" RELATED []
+synonym: "GLR scaffold cell" RELATED []
+is_a: WBbt:0005762 ! accessory cell
+relationship: BFO:0000050 WBbt:0005737 ! part_of muscular system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005177
+name: HO neuron
+namespace: worm_anatomy
+def: "Hook sensory neurons." []
+is_a: WBbt:0005759 ! sensory neuron
+relationship: BFO:0000050 WBbt:0006930 ! part_of hook sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005178
+name: hermaphrodite gonad
+
+[Term]
+id: WBbt:0005189
+name: ganglion
+namespace: worm_anatomy
+def: "A cluster of nerve cells and associated glial cells (nuclear location)." []
+xref: WB:rynl
+is_a: WBbt:0005766 ! Anatomy
+relationship: BFO:0000050 WBbt:0005735 ! part_of nervous system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005190
+name: GABAergic neuron
+namespace: worm_anatomy
+def: "neuron that uses GABA as a vesicular neurotransmitter." []
+is_a: WBbt:0003679 ! neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005212
+name: dorso-rectal ganglion
+namespace: worm_anatomy
+def: "the ganglion that lies above and behind the rectum in the tail, in close continuity with the anal hypodermal ridge. It contains 3 neuron cell bodies (DVA, DVB and DVC) that send their neuronal processes into the ventral nerve cord via dorso-rectal commissures that encircle the anus. The ganglion contains no local neuropil in the hermaphrodite. In the adult male tail, this ganglion gains additional neurons and some local neuropil. " []
+is_a: WBbt:0006977 ! tail ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005214
+name: dorsal ganglion
+
+[Term]
+id: WBbt:0005225
+name: URA
+namespace: worm_anatomy
+def: "Neuron class of four ring motoneuron, non-ciliated endings in head, associated with OLQ in embryo." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/URAframeset.html>
+is_a: WBbt:0006974 ! nerve ring neuron
+is_a: WBbt:0008610 ! head motor neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005237
+name: touch receptor neuron
+namespace: worm_anatomy
+alt_id: WBbt:0005235
+alt_id: WBbt:0005239
+def: "neurons that sense body touch, have specialized microtubules in processes." []
+synonym: "microtubule cell" RELATED []
+synonym: "touch cell" RELATED []
+synonym: "touch receptor" RELATED []
+is_a: WBbt:0008431 ! mechanosensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005244
+name: CEP
+namespace: worm_anatomy
+def: "Neuron class of four neurons associated with cephalic sensilla." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/CEPframeset.html>
+is_a: WBbt:0006746 ! dopaminergic neuron
+is_a: WBbt:0006816 ! ciliated neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005246
+name: CEM
+namespace: worm_anatomy
+def: "Neuron class of four male-specific neurons associated with cephalic sensilla." []
+is_a: WBbt:0005757 ! male-specific
+is_a: WBbt:0005759 ! sensory neuron
+is_a: WBbt:0006751 ! head neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005264
+name: ventral ganglion (post)
+
+[Term]
+id: WBbt:0005266
+name: ventral ganglion (ant)
+
+[Term]
+id: WBbt:0005270
+name: DD neuron
+namespace: worm_anatomy
+def: "Neuron class of six motoneurons, with cell bodies in the ventral cord, which innervate dorsal muscles. Each cell has a short, posteriorly directed and a longer, anteriorly directed process emanating from its cell body. The anterior process has a branch, which leaves the ventral cord as a commissure and runs round to the dorsal cord." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/DDframeset.html>
+is_a: WBbt:0005190 ! GABAergic neuron
+is_a: WBbt:0005409 ! motor neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005274
+name: DB neuron
+namespace: worm_anatomy
+def: "Neuron class of seven motoneurons that innervate dorsal muscles and have cell bodies in the ventral cord." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/DBframeset.html>
+is_a: WBbt:0005409 ! motor neuron
+is_a: WBbt:0006840 ! cholinergic neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005278
+name: DA neuron
+namespace: worm_anatomy
+def: "Neuron class of nine ventral cord motor neuron, innervates dorsal muscle." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/DAframeset.html>
+is_a: WBbt:0005409 ! motor neuron
+is_a: WBbt:0006840 ! cholinergic neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005300
+name: ventral cord neuron
+namespace: worm_anatomy
+def: "neuron with cell body associated with the ventral nerve cord." []
+synonym: "ventral cord motoneuron" RELATED []
+is_a: WBbt:0006752 ! somatic neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005303
+name: VD neuron
+namespace: worm_anatomy
+def: "Neuron class of thirteen motoneurons, with cell bodies in the ventral cord, which innervate ventral muscles. Each cell has an anteriorly directed process emanating from its cell body." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/VDframeset.html>
+is_a: WBbt:0005190 ! GABAergic neuron
+is_a: WBbt:0005409 ! motor neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005304
+name: VC neuron
+namespace: worm_anatomy
+def: "Neuron class of six motoneurons in the ventral cord, which innervate ventral body muscles and the vm2 muscles of the vulva." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/VCframeset.html>
+is_a: WBbt:0005300 ! ventral cord neuron
+is_a: WBbt:0005409 ! motor neuron
+is_a: WBbt:0005758 ! hermaphrodite-specific
+is_a: WBbt:0006840 ! cholinergic neuron
+relationship: BFO:0000050 WBbt:0008587 ! part_of egg-laying apparatus
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005312
+name: copulatory spicule
+
+[Term]
+id: WBbt:0005319
+name: spermatheca
+namespace: worm_anatomy
+def: "an accordion-like tube that contains sperm and is the site of oocyte fertilization." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/reproductivesystem/reproductivesystem1.htm#Thespermatheca>
+is_a: WBbt:0005758 ! hermaphrodite-specific
+relationship: BFO:0000050 WBbt:0005178 ! part_of hermaphrodite gonad
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005332
+name: body ganglion
+namespace: worm_anatomy
+def: "ganglion in the trunk of the body." []
+is_a: WBbt:0005189 ! ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005334
+name: AS neuron
+namespace: worm_anatomy
+def: "Neuron class of eleven motoneurons, with cell bodies in the ventral cord, which innervate dorsal muscles." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/asframeset.html>
+is_a: WBbt:0005409 ! motor neuron
+is_a: WBbt:0006840 ! cholinergic neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005336
+name: VB neuron
+namespace: worm_anatomy
+def: "Neuron class of eleven motoneurons, distributed along the ventral cord, which innervate ventral body muscles." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/VBframeset.html>
+is_a: WBbt:0005409 ! motor neuron
+is_a: WBbt:0006840 ! cholinergic neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005339
+name: VA neuron
+namespace: worm_anatomy
+def: "Neuron class of twelve motoneurons, distributed along the ventral cord, which innervate ventral body muscles." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/VAframeset.html>
+is_a: WBbt:0005409 ! motor neuron
+is_a: WBbt:0006840 ! cholinergic neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005353
+name: SMD
+namespace: worm_anatomy
+def: "Neuron class of four motoneurons, which innervate muscles in the head via NMJs in the nerve ring and also send processes posteriorly down the sub-lateral cords." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/SMDframeset.html>
+is_a: WBbt:0006840 ! cholinergic neuron
+is_a: WBbt:0006974 ! nerve ring neuron
+is_a: WBbt:0008610 ! head motor neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005355
+name: SMB
+namespace: worm_anatomy
+def: "Neuron class of four motoneurons, which innervate muscles in the head via NMJs in the nerve ring and also send processes posteriorly down the sub-lateral cords." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/SMBframeset.html>
+is_a: WBbt:0006840 ! cholinergic neuron
+is_a: WBbt:0006974 ! nerve ring neuron
+is_a: WBbt:0008610 ! head motor neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005359
+name: SIB
+namespace: worm_anatomy
+def: "Neuron class of four interneurons, which send processes posteriorly down the sub-lateral cords. SIBV has cell bodies, in the ventral ganglion, which send processes that run right round the nerve ring and return to the neuropile of the ventral ganglion." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/SIBframeset.html>
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0006840 ! cholinergic neuron
+is_a: WBbt:0006974 ! nerve ring neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005361
+name: SIA
+namespace: worm_anatomy
+def: "Neuron class of four interneurons, which send processes posteriorly down the sub-lateral cords." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/SIAframeset.html>
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0006840 ! cholinergic neuron
+is_a: WBbt:0006974 ! nerve ring neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005371
+name: anterior ganglion (post)
+
+[Term]
+id: WBbt:0005372
+name: anterior ganglion (ant)
+
+[Term]
+id: WBbt:0005391
+name: amphid sensillum
+
+[Term]
+id: WBbt:0005392
+name: amphid right sensillum
+
+[Term]
+id: WBbt:0005394
+name: amphid neuron
+namespace: worm_anatomy
+alt_id: WBbt:0005390
+def: "neuron of the amphid sensillum" []
+synonym: "amphid sensory neuron" RELATED []
+is_a: WBbt:0006816 ! ciliated neuron
+relationship: BFO:0000050 WBbt:0005391 ! part_of amphid sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005395
+name: amphid left sensillum
+
+[Term]
+id: WBbt:0005396
+name: SAB
+namespace: worm_anatomy
+def: "Neuron class of three interneurons, which send processes anteriorly up the sub-lateral cords in the head." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/SABframeset.html>
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0006840 ! cholinergic neuron
+is_a: WBbt:0006974 ! nerve ring neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005397
+name: SAA
+namespace: worm_anatomy
+def: "Neuron class of four interneurons that send processes anteriorly up the sub-lateral cords in the head." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/SAAframeset.html>
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0006840 ! cholinergic neuron
+is_a: WBbt:0006974 ! nerve ring neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005399
+name: RME
+namespace: worm_anatomy
+def: "Neuron class of four motoneurons, with NMJs in the nerve ring, which innervate head muscles." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/RMEframeset.html>
+is_a: WBbt:0005190 ! GABAergic neuron
+is_a: WBbt:0006974 ! nerve ring neuron
+is_a: WBbt:0008610 ! head motor neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005400
+name: RMD
+namespace: worm_anatomy
+def: "Neuron class of six major motoneurons, which innervate muscles in the head via NMJs in the nerve ring." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/RMDframeset.html>
+is_a: WBbt:0006974 ! nerve ring neuron
+is_a: WBbt:0008610 ! head motor neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005403
+name: retrovesicular ganglion neuron
+namespace: worm_anatomy
+alt_id: WBbt:0005398
+alt_id: WBbt:0005404
+def: "neuron whose cell body is in the retrovesicular ganglion." []
+synonym: "retrovesicular ganglion" RELATED []
+synonym: "RVG neuron" RELATED []
+is_a: WBbt:0003679 ! neuron
+relationship: BFO:0000050 WBbt:0005656 ! part_of retrovesicular ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005406
+name: ALM
+namespace: worm_anatomy
+def: "Neuron class of two anterior sensory neurons that transduce touch stimuli." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/ALMframeset.html>
+is_a: WBbt:0005237 ! touch receptor neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005409
+name: motor neuron
+namespace: worm_anatomy
+def: "neuron making synapse on an effector (muscle, gland)." []
+synonym: "motoneuron" RELATED []
+is_a: WBbt:0003679 ! neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005413
+name: AIY
+namespace: worm_anatomy
+def: "Neuron class of two interneurons, is one of the main classes of integrating neuron for the receptors of the amphid sensilla." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/AIYframeset.html>
+is_a: WBbt:0005113 ! interneuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005415
+name: ADE
+namespace: worm_anatomy
+def: "Neuron class of two sensory neurons of anterior deirids, sensory receptors in lateral alae, contain dopamine." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/ADEframeset.html>
+is_a: WBbt:0006746 ! dopaminergic neuron
+is_a: WBbt:0006928 ! deirid neuron
+relationship: BFO:0000050 WBbt:0006927 ! part_of anterior deirid sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005425
+name: phasmid sensillum
+
+[Term]
+id: WBbt:0005439
+name: pharyngeal neuron
+namespace: worm_anatomy
+def: "neuron of the pharyngeal nervous system." []
+is_a: WBbt:0003679 ! neuron
+is_a: WBbt:0005460 ! pharyngeal cell
+relationship: BFO:0000050 WBbt:0005440 ! part_of pharyngeal nervous system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005440
+name: pharyngeal nervous system
+
+[Term]
+id: WBbt:0005447
+name: preanal ganglion neuron
+namespace: worm_anatomy
+def: "neuron with cell body in the preanal ganglion." []
+synonym: "preanal ganglion neurons" RELATED []
+xref: WB:rynl
+is_a: WBbt:0003679 ! neuron
+relationship: BFO:0000050 WBbt:0005448 ! part_of preanal ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005448
+name: preanal ganglion
+namespace: worm_anatomy
+def: "ganglion anterior to the anus." []
+is_a: WBbt:0005332 ! body ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005451
+name: pharyngeal muscle cell
+namespace: worm_anatomy
+def: "type of cells that make up muscle layers in the pharynx." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/alimentary/alimentary1.htm#pharyngealmuscle>
+is_a: WBbt:0005460 ! pharyngeal cell
+is_a: WBbt:0005820 ! alimentary muscle
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005460
+name: pharyngeal cell
+namespace: worm_anatomy
+is_a: WBbt:0004017 ! Cell
+relationship: BFO:0000050 WBbt:0003681 ! part_of pharynx
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005464
+name: posterior lateral left ganglion
+namespace: worm_anatomy
+def: "posterior lateral ganglion, left side." []
+is_a: WBbt:0005465 ! posterior lateral ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005465
+name: posterior lateral ganglion
+namespace: worm_anatomy
+def: "ganglion on the lateral side, in postior portion of the body, associated with posterior deirid." []
+synonym: "posterior lateral ganglia" RELATED []
+xref: WB:rynl
+is_a: WBbt:0005332 ! body ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005490
+name: PLM
+namespace: worm_anatomy
+def: "Neuron class of two posterior sensory neurons that transduce touch stimuli." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/PLMframeset.html>
+is_a: WBbt:0005237 ! touch receptor neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005501
+name: outer labial sensillum
+
+[Term]
+id: WBbt:0005509
+name: OL lateral right sensillum
+
+[Term]
+id: WBbt:0005510
+name: OL lateral left sensillum
+
+[Term]
+id: WBbt:0005600
+name: lumbar right ganglion neuron
+namespace: worm_anatomy
+def: "neuron of lumbar ganglion, right." []
+is_a: WBbt:0006802 ! lumbar neuron
+relationship: BFO:0000050 WBbt:0005601 ! part_of lumbar ganglion right
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005601
+name: lumbar ganglion right
+
+[Term]
+id: WBbt:0005656
+name: retrovesicular ganglion
+namespace: worm_anatomy
+def: "ganglion that lies at the anterior limit of the ventral nerve cord, near the ventral ganglion and nerve ring in the head posterior to the excretory pore. It is open and continuous with the region containing the motoneurons of the ventral cord. In the early L1 this ganglion holds 12 neuron cell bodies plus one neuroblast (Sulston and Horvitz, 1977; White et al., 1986). In the adult animal, the ganglion holds 20 neuron cell bodies.\nReversal 	  		\n\n" []
+is_a: WBbt:0005332 ! body ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005662
+name: AFD
+namespace: worm_anatomy
+def: "Neuron class of two ciliated neurons that are part of the amphid sensillum; the endings of AFD have numerous villi, which poke into the amphid sheath cells." []
+comment: AFD neuron sense CO2 [WBpaper00038260]
+is_a: WBbt:0005394 ! amphid neuron
+is_a: WBbt:0005838 ! thermosensory neuron
+is_a: WBbt:0008430 ! carbon dioxide sensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005663
+name: ASE
+namespace: worm_anatomy
+def: "Neuron class of two ciliated neurons that are part of the amphid sensilla; the endings are in the amphid channel, which is open to the outside" []
+comment: ASE neuron sense CO2 [WBpaper00038260]
+is_a: WBbt:0005394 ! amphid neuron
+is_a: WBbt:0005837 ! chemosensory neuron
+is_a: WBbt:0008430 ! carbon dioxide sensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005667
+name: ASJ
+namespace: worm_anatomy
+def: "Neuron class of two ciliated neurons that are part of the amphid sensilla. The endings are in the amphid channel, which is open to the outside." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/ASJframeset.html>
+is_a: WBbt:0005394 ! amphid neuron
+is_a: WBbt:0005837 ! chemosensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005671
+name: AWB
+namespace: worm_anatomy
+def: "Neuron class of two ciliated neurons with flattened, sheet-like endings that are associated with the sheath cells of the amphid sensilla" []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/AWBframeset.html>
+is_a: WBbt:0005394 ! amphid neuron
+is_a: WBbt:0005839 ! odorsensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005672
+name: AWC
+namespace: worm_anatomy
+def: "Neuron class of two ciliated neurons with large, flattened, sheet-like endings that are associated with the sheath cells of the amphid sensilla." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/AWCframeset.html>
+is_a: WBbt:0005394 ! amphid neuron
+is_a: WBbt:0005839 ! odorsensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005729
+name: Tissue
+namespace: worm_anatomy
+def: "Association of cells with a common embryological origin or pathway and similar structure and function. Usually, cells of a tissue are contiguous at cell membranes and may be of one or more types. Tissues aggregate to form organs." []
+xref: CARO:0000043
+xref: ISBN:0-14-051288-8
+xref: WB:rynl
+is_a: WBbt:0005763 ! Functional system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005730
+name: epithelial system
+
+[Term]
+id: WBbt:0005732
+name: extracellular component
+namespace: worm_anatomy
+def: "Anatomical structures that exist outside of cells; non-cellular." []
+xref: CARO:0000040
+xref: WB:pws
+is_a: WBbt:0005766 ! Anatomy
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005733
+name: hypodermis
+namespace: worm_anatomy
+def: "Epidermal layer." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/hypodermis/hypodermis.htm>
+synonym: "epidermis" RELATED []
+xref: CARO:0000066
+xref: WB:pws
+is_a: WBbt:0005729 ! Tissue
+relationship: BFO:0000050 WBbt:0005730 ! part_of epithelial system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005734
+name: hyp7 syncytium
+namespace: worm_anatomy
+def: "entire syncytium of hyp7" []
+synonym: "hyp7" RELATED []
+xref: WB:pws
+is_a: WBbt:0007846 ! hypodermal cell
+is_a: WBbt:0008074 ! syncytium
+relationship: RO:0002202 WBbt:0008069 ! develops_from hyp7 precursor cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005735
+name: nervous system
+namespace: worm_anatomy
+def: "Complement of nervous tissue (neurones, nerves, receptors and support cells) serving to detect, relay and coordinate information about an animal's internal and external environments and to initiate and integrate its effector responses and activities." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/MoW_built0.92/nervous_system.html>
+xref: WB:rynl
+is_a: WBbt:0005746 ! Organ system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005736
+name: excretory system
+
+[Term]
+id: WBbt:0005737
+name: muscular system
+namespace: worm_anatomy
+def: "the organ system that allows the animal move, includes all muscles." []
+is_a: WBbt:0005746 ! Organ system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005738
+name: body region
+namespace: worm_anatomy
+def: "region of the body by which tissues, cells or cell parts are classified" []
+is_a: WBbt:0005766 ! Anatomy
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005739
+name: head
+namespace: worm_anatomy
+def: "anterior-most body region containing the pharynx." []
+is_a: WBbt:0005738 ! body region
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005740
+name: midbody
+
+[Term]
+id: WBbt:0005741
+name: tail
+namespace: worm_anatomy
+def: "posterior region, from rectum to the end" []
+is_a: WBbt:0005738 ! body region
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005742
+name: body wall
+
+[Term]
+id: WBbt:0005743
+name: digestive tract
+
+[Term]
+id: WBbt:0005744
+name: reproductive tract
+
+[Term]
+id: WBbt:0005746
+name: Organ system
+namespace: worm_anatomy
+def: "intergrated group of organs, performing one or more unified functions." []
+xref: ISBN:0-14-051288-8
+is_a: WBbt:0005763 ! Functional system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005747
+name: reproductive system
+namespace: worm_anatomy
+is_a: WBbt:0005746 ! Organ system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005748
+name: alimentary system
+
+[Term]
+id: WBbt:0005749
+name: coelomic system
+
+[Term]
+id: WBbt:0005750
+name: socket cell
+namespace: worm_anatomy
+def: "An interfacial epithelial cell which forms a distal cap on a sheath cell to bind the sheath of a sensillum to the neighboring hypodermis, via adherens junctions. There is often a narrow opening through the socket from the exterior into the sheath channel, allowing ciliated dendrites to be exposed to the external environment. The socket cell functions similarly to a glial cell." []
+is_a: WBbt:0005754 ! interfacial epithelial cell
+is_a: WBbt:0005762 ! accessory cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005751
+name: coelomocyte
+namespace: worm_anatomy
+def: "A free-floating spherical cell lying in the pseudocoelomic cavity of larvae and adult C. elegans which can endocytose many compounds, possibly for immune surveillance.  There are six coelomocytes in adult hermaphrodites, and they display prominent cytoplasmic inclusions and vacuoles." []
+is_a: WBbt:0004017 ! Cell
+relationship: BFO:0000050 WBbt:0005749 ! part_of coelomic system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005752
+name: Sex specific entity
+namespace: worm_anatomy
+def: "anatomical or cell objects that exist in only one, male or hermaphrodite, sex." []
+is_a: WBbt:0005763 ! Functional system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005753
+name: seam cell
+namespace: worm_anatomy
+def: "a group of hypodermal cells that lie along the apical midline of the hypodermis, at the extreme left and right sides between nose and tail" []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/hypodermis/hypsupportseam.htm>
+synonym: "lateral hypodermis" RELATED []
+is_a: WBbt:0007846 ! hypodermal cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005754
+name: interfacial epithelial cell
+namespace: worm_anatomy
+def: "an epithelial cell that serves either to bridge two neighboring epithelial tissues or to form an opening in the epithelium." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/hypodermis/hypsupportother.htm>
+synonym: "interfacial cell" RELATED []
+synonym: "interfacial epithelium" RELATED []
+synonym: "transitional epithelium" RELATED []
+is_a: WBbt:0003672 ! epithelial cell
+relationship: BFO:0000050 WBbt:0005730 ! part_of epithelial system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005757
+name: male-specific
+namespace: worm_anatomy
+def: "cells or anatomical parts specific to the male sex" []
+is_a: WBbt:0005752 ! Sex specific entity
+is_a: WBbt:0007850 ! male
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005758
+name: hermaphrodite-specific
+namespace: worm_anatomy
+def: "cells or anatomical parts specific to the hermaphrodite sex" []
+is_a: WBbt:0005752 ! Sex specific entity
+is_a: WBbt:0007849 ! hermaphrodite
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005759
+name: sensory neuron
+namespace: worm_anatomy
+def: "neuron that senses external stimuli and transduce them to signals internal to the organism." []
+comment: WormAtlas NeuroTABLE 1 classification used.
+is_a: WBbt:0003679 ! neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005760
+name: somatic nervous system
+
+[Term]
+id: WBbt:0005762
+name: accessory cell
+namespace: worm_anatomy
+def: "cells that support sensory neurons, similar to glial cells in vertebrates. A category which collectively refers to socket cells, sheath cells, and structural cells, or their processes.  All of these cells extend long processes which serve a supporting role, rather like glia, to form a protective environment around sensory neuron endings.  In addition, some of these cells extend broad thin processes from their somata which wrap around neuronal ganglia, again in a glia-like fashion" []
+synonym: "support cell" RELATED []
+xref: WBPaper:00038216
+is_a: WBbt:0004017 ! Cell
+relationship: BFO:0000050 WBbt:0005735 ! part_of nervous system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005763
+name: Functional system
+namespace: worm_anatomy
+def: "concerns with functional aspects of cells and anatomical parts" []
+is_a: WBbt:0000100 ! C. elegans Cell and Anatomy
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005766
+name: Anatomy
+namespace: worm_anatomy
+alt_id: WBbt:0005764
+def: "entity of anatomical origin that is either entirely acellular or is a collection of cells and acellular parts." []
+synonym: "Space" RELATED []
+is_a: WBbt:0000100 ! C. elegans Cell and Anatomy
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005767
+name: pharyngeal-intestinal valve
+namespace: worm_anatomy
+alt_id: WBbt:0005435
+def: "A group of six equivalent cells forms a tightly constructed 'valve' that links the posterior bulb of the pharynx to the anterior four cells of the intestine. These six cells comprise a small epithelial channel with a cuticular lining in continuity with the pharyngeal cuticle and link the lumen of the pharynx to the large lumen of the anterior intestine." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/alimentary/alimentary1.htm#vip>
+synonym: "cardia" RELATED []
+synonym: "esophago-intestinal valve" RELATED []
+synonym: "pharyngeal valve" RELATED []
+synonym: "pharyngo-intestinal valve" RELATED []
+xref: WBPaper:00038216
+is_a: WBbt:0005766 ! Anatomy
+relationship: BFO:0000050 WBbt:0005748 ! part_of alimentary system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005772
+name: intestine
+namespace: worm_anatomy
+def: "A chain of very large cuboidal cells forming a wide central lumen in which food arrives from the posterior pharynx, is digested, and from which waste products proceed to the rectum.  Intestinal rings form in groups of two and four cells surrounding the common lumen; thus the epithelium is only one cell deep at any point, with neighboring cells firmly secured to their neighbors by apical adherens junctions.  These cells have very large nuclei and many large vacuoles, yolk granules, and other inclusions; the latter increase in number and electron density as the animal ages." []
+comment: LINKOUT::WORMATLAS::<http://wormatlas.org/ver1/handbook/alimentary/alimentary2.htm>
+synonym: "gut" RELATED []
+synonym: "mesenteron" RELATED []
+xref: WBPaper:00038216
+is_a: WBbt:0003760 ! organ
+relationship: BFO:0000050 WBbt:0005743 ! part_of digestive tract
+relationship: BFO:0000050 WBbt:0005748 ! part_of alimentary system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005773
+name: rectum
+
+[Term]
+id: WBbt:0005775
+name: excretory canal
+namespace: worm_anatomy
+def: "Four processes  (canals) of the excretory canal cell each contain a central collecting lumen which feeds to a central lumenal canal in the cell body;  the central canal forms a specialized membrane to release fluids into the excretory duct.  These five canals form a continuous H-shaped channel which extends almost the full length of the body, generally in contact with the lateral hypodermis and the pseudocoelom." []
+synonym: "canal" RELATED []
+xref: WBPaper:00038216
+is_a: WBbt:0005732 ! extracellular component
+relationship: BFO:0000050 WBbt:0005812 ! part_of excretory cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005776
+name: excretory gland cell
+namespace: worm_anatomy
+def: "gland cell of the secretory-excretory system, sends processes to ring, opens into excretory duct." []
+synonym: "exc gl" RELATED []
+is_a: WBbt:0003670 ! gland cell
+is_a: WBbt:0008074 ! syncytium
+relationship: BFO:0000050 WBbt:0005736 ! part_of excretory system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005779
+name: striated muscle
+namespace: worm_anatomy
+is_a: WBbt:0003675 ! muscle cell
+relationship: BFO:0000050 WBbt:0005813 ! part_of body wall musculature
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005780
+name: non-striated muscle
+namespace: worm_anatomy
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/mesodermal.htm/musclepartIII.htm>
+is_a: WBbt:0003675 ! muscle cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005781
+name: smooth muscle
+namespace: worm_anatomy
+is_a: WBbt:0005780 ! non-striated muscle
+is_a: WBbt:0007810 ! body muscle cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005784
+name: germ line
+namespace: worm_anatomy
+def: "cell line which early in development becomes differentiated from the remaining somatic cell line, and alone has the potential to undergo meiosis and form gametes." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/reproductivesystem/reproductivesystem2.htm>
+synonym: "germline" RELATED []
+is_a: WBbt:0004017 ! Cell
+is_a: WBbt:0005729 ! Tissue
+relationship: BFO:0000050 WBbt:0005747 ! part_of reproductive system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005785
+name: somatic gonad
+
+[Term]
+id: WBbt:0005786
+name: muscle of the reproductive system
+namespace: worm_anatomy
+is_a: WBbt:0003675 ! muscle cell
+relationship: BFO:0000050 WBbt:0005747 ! part_of reproductive system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005788
+name: pharyngeal gland cell
+namespace: worm_anatomy
+def: "secretory gland cell of the pharynx" []
+is_a: WBbt:0003670 ! gland cell
+is_a: WBbt:0005460 ! pharyngeal cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005790
+name: pharyngeal lumen
+namespace: worm_anatomy
+def: "the space in the center of pharynx which allows the passage of food." []
+is_a: WBbt:0005732 ! extracellular component
+relationship: BFO:0000050 WBbt:0003681 ! part_of pharynx
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005793
+name: arcade cell
+namespace: worm_anatomy
+def: "Interfacial (hypodermal) cells which connect the hypodermal epithelium of the lips to the pharyngeal epithelium, firmly binding the inner tissue (the pharynx) to the outer bodywall (the hypodermis)." []
+is_a: WBbt:0005754 ! interfacial epithelial cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005796
+name: intestinal muscle
+namespace: worm_anatomy
+def: "intestinal muscle cell, attach to intestine and body wall anterior to anus" []
+synonym: "stomato-intestinal muscle" RELATED []
+is_a: WBbt:0007810 ! body muscle cell
+is_a: WBbt:0008600 ! enteric muscle
+relationship: BFO:0000050 WBbt:0005772 ! part_of intestine
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005798
+name: anal sphincter muscle
+namespace: worm_anatomy
+alt_id: WBbt:0004884
+def: "a saddle-shaped muscle cell that encircles the intestinal-rectal valve" []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/mesodermal.htm/musclepartIII.htm#Asphs>
+synonym: "lineage name: ABprpppppap" RELATED []
+synonym: "mu sph" RELATED []
+is_a: WBbt:0005781 ! smooth muscle
+is_a: WBbt:0008600 ! enteric muscle
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005799
+name: rectal gland cell
+namespace: worm_anatomy
+is_a: WBbt:0003670 ! gland cell
+relationship: BFO:0000050 WBbt:0005773 ! part_of rectum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005800
+name: rectal epithelium
+namespace: worm_anatomy
+def: "epithelium connecting intestine and anus." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/alimentary/alimentary3.htm#rectepith>
+is_a: WBbt:0005733 ! hypodermis
+relationship: BFO:0000050 WBbt:0005773 ! part_of rectum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005801
+name: dorsal-rectal ganglion neuron
+namespace: worm_anatomy
+alt_id: WBbt:0005211
+def: "neuron whose cell body is in the dorsal-rectal ganglion. " []
+synonym: "dorso-rectal ganglion neuron" RELATED []
+is_a: WBbt:0006759 ! tail neuron
+relationship: BFO:0000050 WBbt:0005212 ! part_of dorso-rectal ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005811
+name: neuronal sheath cell
+namespace: worm_anatomy
+def: "a structural (glial) cell which forms an specialized environment surrounding the sensory ending(s) of one or more neurons; sometimes accompanied by a more distal socket cell.  In early development of the sensory nerves and of the nerve ring some sheath cells (cephalics and labials) may also provide a substrate for axon guidance" []
+synonym: "pocket cell" RELATED []
+xref: WBPaper:00038216
+is_a: WBbt:0005754 ! interfacial epithelial cell
+is_a: WBbt:0005762 ! accessory cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005812
+name: excretory cell
+namespace: worm_anatomy
+alt_id: WBbt:0004542
+def: "H-shaped cell associated with the excretory system, largest cell in C. elegans." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/excretory.htm#exccanalcell>
+synonym: "exc_cell" RELATED []
+synonym: "excretory canal cell" RELATED []
+synonym: "lineage name: ABplpappaap" RELATED []
+is_a: WBbt:0004017 ! Cell
+relationship: BFO:0000050 WBbt:0005736 ! part_of excretory system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005813
+name: body wall musculature
+namespace: worm_anatomy
+def: "Longitudinal bands of muscle cells surrounding animal body, with one band running in each quadrant of the body, regulated contraction and relaxation of these muscles cause locomotion." []
+synonym: "body muscle" RELATED []
+is_a: WBbt:0005737 ! muscular system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005815
+name: diagonal muscle
+namespace: worm_anatomy
+alt_id: WBbt:0006907
+def: "specialized muscle in the male." []
+synonym: "dgl" RELATED []
+synonym: "male tail diagonal muscle" RELATED []
+synonym: "mu_male_diag" RELATED []
+is_a: WBbt:0005757 ! male-specific
+is_a: WBbt:0005780 ! non-striated muscle
+is_a: WBbt:0005786 ! muscle of the reproductive system
+is_a: WBbt:0007810 ! body muscle cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005820
+name: alimentary muscle
+namespace: worm_anatomy
+def: "muscle of the alimentary organ system." []
+is_a: WBbt:0005780 ! non-striated muscle
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005821
+name: vulval muscle
+namespace: worm_anatomy
+def: "muscle associated with hermaphrodite vulva." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/mesodermal.htm/musclepartIII.htm#vm>
+is_a: WBbt:0005758 ! hermaphrodite-specific
+is_a: WBbt:0005780 ! non-striated muscle
+is_a: WBbt:0007810 ! body muscle cell
+relationship: BFO:0000050 WBbt:0008587 ! part_of egg-laying apparatus
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005822
+name: anterior oblique muscle
+namespace: worm_anatomy
+def: "specialized muscle in the male." []
+is_a: WBbt:0006910 ! oblique male muscle
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005824
+name: gubernacular erector muscle
+namespace: worm_anatomy
+is_a: WBbt:0006908 ! gubernacular muscle
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005825
+name: gubernacular retractor muscle
+namespace: worm_anatomy
+is_a: WBbt:0006908 ! gubernacular muscle
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005826
+name: spicule protractor muscle
+namespace: worm_anatomy
+is_a: WBbt:0006911 ! spicule muscle
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005827
+name: spicule retractor muscle
+namespace: worm_anatomy
+is_a: WBbt:0006911 ! spicule muscle
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005828
+name: gonadal sheath cell
+namespace: worm_anatomy
+def: "five pairs of thin gonadal sheath cells form a single layer covering the germ line component of each arm, each pair occupying a stereotyped position along the gonad proximal-distal axis." []
+is_a: WBbt:0005781 ! smooth muscle
+is_a: WBbt:0005786 ! muscle of the reproductive system
+is_a: WBbt:0007815 ! hermaphrodite somatic gonadal cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005829
+name: ventral nerve cord
+namespace: worm_anatomy
+def: "a large process bundle that runs along the vental mid-line extending from the ventral region of the nerve ring." []
+synonym: "ventral cord" RELATED []
+is_a: WBbt:0005766 ! Anatomy
+relationship: BFO:0000050 WBbt:0005760 ! part_of somatic nervous system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005830
+name: lumbar ganglion
+namespace: worm_anatomy
+alt_id: WBbt:0005099
+def: "The left and right lumbar ganglia lie behind the pre-anal ganglion in the tail, in lateral positions. Each contains 12 neuron cell bodies that send most of their neuronal processes into the ventral nerve cord via lumbar commissures and the pre-anal ganglion. There is no local neuropil in these ganglia in the hermaphrodite, instead they form most synapses in the pre-anal ganglion. Most lumbar neurons have sensory functions. In the adult male tail, these two ganglia gain many additional neurons and have some local neuropil. The lumbar neurons lie in close association with the lateral hypodermis, and most are posterior to the anus." []
+synonym: "lumbar lateral ganglia" RELATED []
+synonym: "lumbar lateral ganglion" RELATED []
+xref: WB:rynl
+is_a: WBbt:0006977 ! tail ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005834
+name: RIB
+namespace: worm_anatomy
+def: "Neuron class of two interneurons with cell bodies in the lateral ganglia." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/RIBframeset.html>
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0006974 ! nerve ring neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005835
+name: RIM
+namespace: worm_anatomy
+def: "Neuron class of two interneuron motoneurons that innervate muscles in the head via NMJs in the nerve ring." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/RIMframeset.html>
+is_a: WBbt:0006974 ! nerve ring neuron
+is_a: WBbt:0008610 ! head motor neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005837
+name: chemosensory neuron
+namespace: worm_anatomy
+def: "neuron that senses soluable chemicals" []
+is_a: WBbt:0005759 ! sensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005838
+name: thermosensory neuron
+namespace: worm_anatomy
+def: "neuron that senses temperature" []
+is_a: WBbt:0005759 ! sensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005839
+name: odorsensory neuron
+namespace: worm_anatomy
+def: "neuron that senses volatile odorants" []
+is_a: WBbt:0005759 ! sensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005840
+name: PVC
+namespace: worm_anatomy
+def: "Neuron class of two interneurons with cell bodies situated in the lumbar ganglia." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/PVCframeset.html>
+is_a: WBbt:0007804 ! command interneuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005841
+name: AVB
+namespace: worm_anatomy
+def: "Neuron class of two interneurons with cell bodies situated in the lateral ganglia." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/AVBframeset.html>
+is_a: WBbt:0007804 ! command interneuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0005842
+name: AVA
+namespace: worm_anatomy
+def: "Neuron class of two interneurons with cell bodies situated in the lateral ganglia adjacent to the neuropile of the nerve ring." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/AVAframeset.html>
+is_a: WBbt:0007804 ! command interneuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006746
+name: dopaminergic neuron
+namespace: worm_anatomy
+def: "Neuron that uses dopamine (DA) as a neurotransmitter." []
+is_a: WBbt:0003679 ! neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006748
+name: vulva
+namespace: worm_anatomy
+def: "female genital." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/reproductivesystem/reproductivesystem3a.htm#Thevulva>
+is_a: WBbt:0005758 ! hermaphrodite-specific
+is_a: WBbt:0008422 ! sex organ
+relationship: BFO:0000050 WBbt:0005740 ! part_of midbody
+relationship: BFO:0000050 WBbt:0008587 ! part_of egg-laying apparatus
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006749
+name: nerve ring
+namespace: worm_anatomy
+def: "the most extensive region of neuropil in the animal, consists of a large toroidal bundle of processes." []
+synonym: "circumpharyngeal nerve ring" RELATED []
+is_a: WBbt:0005766 ! Anatomy
+relationship: BFO:0000050 WBbt:0005739 ! part_of head
+relationship: BFO:0000050 WBbt:0005760 ! part_of somatic nervous system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006750
+name: dorsal nerve cord
+namespace: worm_anatomy
+def: "a bundle of nerve processes that runs along the dorsal mid-line of the animal." []
+synonym: "dorsal cord" RELATED []
+is_a: WBbt:0005766 ! Anatomy
+relationship: BFO:0000050 WBbt:0005760 ! part_of somatic nervous system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006751
+name: head neuron
+namespace: worm_anatomy
+def: "neuron with its cell body situated in the head, excluding the pharynx." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/MoW_built0.92/art/intro_figs/figure2ann.jpg>
+is_a: WBbt:0003679 ! neuron
+relationship: BFO:0000050 WBbt:0005739 ! part_of head
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006752
+name: somatic neuron
+namespace: worm_anatomy
+def: "neuron of the somatic nervous system." []
+synonym: "body neuron" RELATED []
+xref: WB:rynl
+is_a: WBbt:0003679 ! neuron
+relationship: BFO:0000050 WBbt:0005760 ! part_of somatic nervous system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006753
+name: phasmid neuron
+namespace: worm_anatomy
+def: "neuron of phasmid sensillum" []
+is_a: WBbt:0006816 ! ciliated neuron
+relationship: BFO:0000050 WBbt:0005425 ! part_of phasmid sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006754
+name: amphid sheath cell
+namespace: worm_anatomy
+def: "sheath cell of amphid sensillum." []
+is_a: WBbt:0005811 ! neuronal sheath cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006759
+name: tail neuron
+namespace: worm_anatomy
+def: "neuron with its cell body situated in the tail, posterior to rectum." []
+is_a: WBbt:0003679 ! neuron
+relationship: BFO:0000050 WBbt:0006977 ! part_of tail ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006761
+name: head muscle
+namespace: worm_anatomy
+def: "body wall muscle in the head, including first eight cells of each muscle quadrants which are innervated by nerve ring neurons." []
+synonym: "head body wall muscle" RELATED []
+is_a: WBbt:0005813 ! body wall musculature
+relationship: BFO:0000050 WBbt:0005739 ! part_of head
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006769
+name: lateral nerve cord
+namespace: worm_anatomy
+def: "nerve cord positioned at the lateral flanks of the animal, consists of processes of the neuron classes BDU, CAN, PVD and ALA." []
+is_a: WBbt:0005766 ! Anatomy
+relationship: BFO:0000050 WBbt:0005760 ! part_of somatic nervous system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006783
+name: blast cell
+namespace: worm_anatomy
+def: "precursor cell destined to divide some time after hatching." []
+is_a: WBbt:0004017 ! Cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006794
+name: male gonad
+
+[Term]
+id: WBbt:0006796
+name: germ cell
+namespace: worm_anatomy
+def: "a cell, of either sex, directly concerned in the production of a new organism." []
+is_a: WBbt:0005784 ! germ line
+relationship: RO:0002202 WBbt:0006849 ! develops_from germline precursor cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006801
+name: outer labial neuron
+namespace: worm_anatomy
+def: "neuron type, set of  six neurons in the outer labial sensillum." []
+synonym: "OL neuron" RELATED []
+is_a: WBbt:0006816 ! ciliated neuron
+is_a: WBbt:0008431 ! mechanosensory neuron
+relationship: BFO:0000050 WBbt:0005501 ! part_of outer labial sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006802
+name: lumbar neuron
+namespace: worm_anatomy
+def: "neuron in lumbar ganglion." []
+synonym: "lumbar ganglion neuron" RELATED []
+is_a: WBbt:0006759 ! tail neuron
+relationship: BFO:0000050 WBbt:0005830 ! part_of lumbar ganglion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006804
+name: body wall muscle cell
+namespace: worm_anatomy
+def: "type of 95 cells that make up muscles of the body wall." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/mesodermal.htm/musclepartII.htm#CelllistBWM>
+synonym: "body muscle cell" RELATED []
+synonym: "body wall muscle" RELATED []
+synonym: "bodywall muscle" RELATED []
+synonym: "mu_bod" RELATED []
+is_a: WBbt:0005779 ! striated muscle
+is_a: WBbt:0007810 ! body muscle cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006812
+name: AIA
+namespace: worm_anatomy
+def: "Neuron class of two interneurons with cell bodies situated in the ventral ganglion." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/AIAframeset.html>
+is_a: WBbt:0005113 ! interneuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006813
+name: AIB
+namespace: worm_anatomy
+def: "Neuron class of two interneurons with cell bodies situated in the lateral ganglia." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/AIBframeset.html>
+is_a: WBbt:0005113 ! interneuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006816
+name: ciliated neuron
+namespace: worm_anatomy
+def: "neuron type, neurons that have ciliated nerve endings." []
+is_a: WBbt:0003679 ! neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006818
+name: AVD
+namespace: worm_anatomy
+def: "Neuron class of two interneurons with cell bodies situated in the lateral ganglia." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/AVDframeset.html>
+is_a: WBbt:0007804 ! command interneuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006819
+name: AVE
+namespace: worm_anatomy
+def: "Neuron class of two interneurons with cell bodies situated in the lateral ganglion close to the ring neuropile." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/AVEframeset.html>
+is_a: WBbt:0007804 ! command interneuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006822
+name: AVJ
+namespace: worm_anatomy
+def: "Neuron class of two interneurons with cell bodies in the lateral ganglion." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/AVJframeset.html>
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0006974 ! nerve ring neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006827
+name: CAN
+namespace: worm_anatomy
+def: "Neuron class of two neurons that are closely associated with the excretory canal." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/caframeset.html>
+is_a: WBbt:0003679 ! neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006828
+name: FLP
+namespace: worm_anatomy
+def: "Neuron class of two neurons, which have ciliated endings situated immediately dorsal to the lateral inner labial sensilla in the head but have no associated sheath or socket cells; they have flattened processes in this region of the cilium." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/FLPframeset.html>
+is_a: WBbt:0006816 ! ciliated neuron
+is_a: WBbt:0008431 ! mechanosensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006830
+name: HSN
+namespace: worm_anatomy
+def: "Neuron class of two motoneurons that innervate vulval muscles in the hermaphrodite." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/hsframeset.html>
+synonym: "hermaphrodite specific neuron" RELATED []
+is_a: WBbt:0005409 ! motor neuron
+is_a: WBbt:0006837 ! serotonergic neuron
+is_a: WBbt:0006840 ! cholinergic neuron
+relationship: BFO:0000050 WBbt:0008587 ! part_of egg-laying apparatus
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006831
+name: PVD
+namespace: worm_anatomy
+def: "Neuron class of two interneurons with cell bodies situated laterally in the posterior body." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/PVDframeset.html>
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0008431 ! mechanosensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006837
+name: serotonergic neuron
+namespace: worm_anatomy
+def: "neuron that uses serotonin as a vesicular neurotransmitter." []
+synonym: "5-HT neuron" RELATED []
+is_a: WBbt:0003679 ! neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006839
+name: RIV
+namespace: worm_anatomy
+def: "Neuron class of two interneurons/motoneurons with cell bodies situated sub-dorsally in the lateral ganglion." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/RIVframeset.html>
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0006974 ! nerve ring neuron
+is_a: WBbt:0008610 ! head motor neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006840
+name: cholinergic neuron
+namespace: worm_anatomy
+def: "neuron that uses vesicular acetylcholine as a neurotransmitter." []
+synonym: "ACh neuron" RELATED []
+is_a: WBbt:0003679 ! neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006844
+name: SDQ
+namespace: worm_anatomy
+def: "Neuron class of two interneurons with laterally located cell bodies." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/SDQframeset.html>
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0006840 ! cholinergic neuron
+is_a: WBbt:0006974 ! nerve ring neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006845
+name: URB
+namespace: worm_anatomy
+def: "Neuron class of two interneurons with cell bodies situated laterally, anteriorly to the nerve ring." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/URBframeset.html>
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0006974 ! nerve ring neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006846
+name: URX
+namespace: worm_anatomy
+def: "Neuron class of two neurons with cell bodies that are situated sub-dorsally in the pseudocoelomic cavity just posterior to the ring neuropile." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/URXframeset.html>
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0006974 ! nerve ring neuron
+is_a: WBbt:0008432 ! oxygen sensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006847
+name: OLL
+namespace: worm_anatomy
+def: "Neuron class of two neurons with ciliated endings in the lateral outer labial sensilla." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/OLLframeset.html>
+is_a: WBbt:0006801 ! outer labial neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006849
+name: germline precursor cell
+namespace: worm_anatomy
+def: "member of a set of two cells that generate exclusively sperm and ovum." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/handbook/reproductivesystem/reproductivesystem2.htm#germlinedevelopment>
+synonym: "PGC" RELATED []
+synonym: "primordial germ cell" RELATED []
+is_a: WBbt:0005784 ! germ line
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006908
+name: gubernacular muscle
+namespace: worm_anatomy
+def: "specialized muscle type in male sex organ." []
+synonym: "mu_male_gub" RELATED []
+is_a: WBbt:0005757 ! male-specific
+is_a: WBbt:0005780 ! non-striated muscle
+is_a: WBbt:0007810 ! body muscle cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006910
+name: oblique male muscle
+namespace: worm_anatomy
+def: "specialized muscle type in the male." []
+synonym: "mu_male_obliq" RELATED []
+is_a: WBbt:0005757 ! male-specific
+is_a: WBbt:0005780 ! non-striated muscle
+is_a: WBbt:0007810 ! body muscle cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006911
+name: spicule muscle
+namespace: worm_anatomy
+def: "specialized musle type of the male spicule." []
+synonym: "mu_male_spic" RELATED []
+is_a: WBbt:0005780 ! non-striated muscle
+is_a: WBbt:0007810 ! body muscle cell
+relationship: BFO:0000050 WBbt:0005312 ! part_of copulatory spicule
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006917
+name: vulval muscle, type 1
+namespace: worm_anatomy
+def: "one type of vulval muscle." []
+synonym: "vm1" RELATED []
+is_a: WBbt:0005821 ! vulval muscle
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006921
+name: cephalic sensillum dorsal left
+
+[Term]
+id: WBbt:0006922
+name: cephalic sensillum dorsal right
+
+[Term]
+id: WBbt:0006923
+name: cephalic sensillum ventral right
+
+[Term]
+id: WBbt:0006924
+name: cephalic sensillum ventral left
+
+[Term]
+id: WBbt:0006927
+name: anterior deirid sensillum
+
+[Term]
+id: WBbt:0006928
+name: deirid neuron
+namespace: worm_anatomy
+def: "neuron of anterior and post- deirid sensillum." []
+is_a: WBbt:0006816 ! ciliated neuron
+is_a: WBbt:0008431 ! mechanosensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006929
+name: sensillum
+namespace: worm_anatomy
+def: "sensory organ, consists of sensory neurons and supporting cells." []
+is_a: WBbt:0003760 ! organ
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006930
+name: hook sensillum
+
+[Term]
+id: WBbt:0006931
+name: ray precursor cell
+namespace: worm_anatomy
+def: "Precursor cell of the male sensory ray (R1-R9)." []
+is_a: WBbt:0005757 ! male-specific
+is_a: WBbt:0006783 ! blast cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006941
+name: ray
+namespace: worm_anatomy
+def: "male sensory organ; nine bilateral pairs of finger-like rays (numbered 1 to 9, Left/Right) radiate from the tail and are embedded in a cuticlar fan." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/ver1/maleHandbook/EpithelialMalePartII_Rays.htm>
+synonym: "male sensory ray" RELATED []
+is_a: WBbt:0005757 ! male-specific
+is_a: WBbt:0006929 ! sensillum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006971
+name: ray neuron
+namespace: worm_anatomy
+def: "neuron in the male ray." []
+is_a: WBbt:0005759 ! sensory neuron
+relationship: BFO:0000050 WBbt:0006941 ! part_of ray
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006973
+name: ray neuron type B
+namespace: worm_anatomy
+def: "type B neuron in male sensory ray." []
+synonym: "RnB" RELATED []
+is_a: WBbt:0006971 ! ray neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006974
+name: nerve ring neuron
+namespace: worm_anatomy
+def: "neuron that has neural processes in the nerve ring." []
+is_a: WBbt:0006752 ! somatic neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006976
+name: PVQ
+namespace: worm_anatomy
+def: "Neuron class of two interneurons, cell bodies in lumber ganglia." []
+comment: LINKOUT::WORMATLAS::<http://www.wormatlas.org/neurons/Individual%20Neurons/PVQframeset.html>
+is_a: WBbt:0005113 ! interneuron
+is_a: WBbt:0006974 ! nerve ring neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006977
+name: tail ganglion
+namespace: worm_anatomy
+def: "ganglion in the tail region (posterior to rectum)." []
+is_a: WBbt:0005189 ! ganglion
+relationship: BFO:0000050 WBbt:0005741 ! part_of tail
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0006978
+name: tail hypodermis
+
+[Term]
+id: WBbt:0007028
+name: embryonic cell
+namespace: worm_anatomy
+def: "cell that exists in and is part of an embryo." []
+is_a: WBbt:0004017 ! Cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0007804
+name: command interneuron
+namespace: worm_anatomy
+def: "a type of interneurons whose synaptic output represent a “final common pathway” to motor neurons. The synaptic activities of command interneurons lead directly to the control of locomotion." []
+synonym: "command neuron" RELATED []
+is_a: WBbt:0005113 ! interneuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0007810
+name: body muscle cell
+namespace: worm_anatomy
+def: "any muscle cell that is not pharyngeal." []
+is_a: WBbt:0003675 ! muscle cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0007815
+name: hermaphrodite somatic gonadal cell
+namespace: worm_anatomy
+def: "somatic (not germline) cell of the hermaphrodite gonad." []
+is_a: WBbt:0004017 ! Cell
+relationship: BFO:0000050 WBbt:0005178 ! part_of hermaphrodite gonad
+relationship: BFO:0000050 WBbt:0005785 ! part_of somatic gonad
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0007833
+name: organism
+namespace: worm_anatomy
+def: "Anatomical structure that is an individual member of a species and consists of more than one cell." []
+comment: XREF::CARO:0000012
+is_a: WBbt:0005766 ! Anatomy
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0007846
+name: hypodermal cell
+namespace: worm_anatomy
+def: "primary cell type that forms the hypodermis." []
+is_a: WBbt:0003672 ! epithelial cell
+relationship: BFO:0000050 WBbt:0005733 ! part_of hypodermis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0007848
+name: pharyngeal-intestinal valve cell
+namespace: worm_anatomy
+def: "cell that makes up the pharyngeal-intestinal valve." []
+is_a: WBbt:0003672 ! epithelial cell
+relationship: BFO:0000050 WBbt:0005767 ! part_of pharyngeal-intestinal valve
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0007849
+name: hermaphrodite
+namespace: worm_anatomy
+def: "Multi-cellular organism that can produce both male and female gametes." []
+synonym: "hermaphroditic organism" RELATED []
+xref: CARO:0000029
+is_a: WBbt:0007833 ! organism
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0007850
+name: male
+namespace: worm_anatomy
+def: "Gonochoristic organism that can produce male gametes." []
+synonym: "male organism" RELATED []
+xref: CARO:0000027
+is_a: WBbt:0007833 ! organism
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0007854
+name: somatic gonad precursor
+namespace: worm_anatomy
+def: "any of two cells that generate all somatic tissues of the gonad proper (i.e. ovary or testis ) and genital ducts (e.g. uterus, vas deferens)." []
+synonym: "SGP" RELATED []
+synonym: "somatic gonadal precursor cell" RELATED []
+is_a: WBbt:0006783 ! blast cell
+relationship: BFO:0000050 WBbt:0008366 ! part_of gonadal primordium
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0008069
+name: hyp7 precursor cell
+
+[Term]
+id: WBbt:0008074
+name: syncytium
+namespace: worm_anatomy
+def: "cell that has more than one nucleus." []
+comment: http://en.wikipedia.org/wiki/Syncytium
+synonym: "syncitium" RELATED []
+synonym: "syncycia" RELATED []
+synonym: "syncytial cell" RELATED []
+is_a: WBbt:0004017 ! Cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0008209
+name: male gonadal cell
+namespace: worm_anatomy
+def: "cell of male gonad." []
+synonym: "male somatic gonadal cell" RELATED []
+is_a: WBbt:0004017 ! Cell
+is_a: WBbt:0005757 ! male-specific
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0008262
+name: body wall muscle quadrant
+namespace: worm_anatomy
+def: "logitudinal quadrant of body wall muscle." []
+is_a: WBbt:0005729 ! Tissue
+relationship: BFO:0000050 WBbt:0005742 ! part_of body wall
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0008366
+name: gonadal primordium
+
+[Term]
+id: WBbt:0008379
+name: amphid socket cell
+namespace: worm_anatomy
+def: "epithelial support cell of the amphid sensilla." []
+synonym: "AMso" RELATED []
+is_a: WBbt:0005750 ! socket cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0008408
+name: grinder
+namespace: worm_anatomy
+def: "a structure surrounds the lumen of pharyngeal terminal bulb that is formed by folded cuticles and serves the function of grinding up food, bacteria." []
+is_a: WBbt:0005732 ! extracellular component
+relationship: BFO:0000050 WBbt:0003732 ! part_of terminal bulb
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0008410
+name: phasmid socket cell
+namespace: worm_anatomy
+def: "Hypodermal socket cell of the phasmid sensillum." []
+synonym: "Phso" RELATED []
+is_a: WBbt:0005750 ! socket cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0008418
+name: IL socket cell
+namespace: worm_anatomy
+def: "inner labial socket cell." []
+is_a: WBbt:0005750 ! socket cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0008419
+name: OL socket cell
+namespace: worm_anatomy
+def: "outer labial socket cell." []
+is_a: WBbt:0005750 ! socket cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0008421
+name: PDE socket cell
+namespace: worm_anatomy
+def: "post-deirid socket cell." []
+is_a: WBbt:0005750 ! socket cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0008422
+name: sex organ
+namespace: worm_anatomy
+def: "anatomical part of the body which is involved in sexual reproduction and constitutes the reproductive system." []
+comment: Term definition modified from wikipedia entry.
+synonym: "genitalia" RELATED []
+is_a: WBbt:0003760 ! organ
+relationship: BFO:0000050 WBbt:0005747 ! part_of reproductive system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0008430
+name: carbon dioxide sensory neuron
+namespace: worm_anatomy
+def: "neuron that senses changes of CO2 concentration in the environment." []
+comment: REF: WBPaper00038260
+synonym: "CO2 sensory neuron" RELATED []
+is_a: WBbt:0005759 ! sensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0008431
+name: mechanosensory neuron
+namespace: worm_anatomy
+def: "neuron that senses and responds to mechanical stimuli, such as touch." []
+is_a: WBbt:0005759 ! sensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0008432
+name: oxygen sensory neuron
+namespace: worm_anatomy
+def: "Neuron that senses and responds to oxygen." []
+is_a: WBbt:0005759 ! sensory neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+
+[Term]
+id: WBbt:0008448
+name: germline blastomere
+namespace: worm_anatomy
+def: "Embryonic cell that has the developmental potential to generate a germ cell." []
+is_a: WBbt:0007028 ! embryonic cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+created_by: raymond
+creation_date: 2012-03-05T11:05:10Z
+
+[Term]
+id: WBbt:0008587
+name: egg-laying apparatus
+
+[Term]
+id: WBbt:0008598
+name: Q cell
+namespace: worm_anatomy
+def: "One of a pair of lateral neuroblasts that migrate separately within the body cavity during larval stages to produce a variety of cell types." []
+is_a: WBbt:0006783 ! blast cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+created_by: raymond
+creation_date: 2013-12-02T03:27:57Z
+
+[Term]
+id: WBbt:0008600
+name: enteric muscle
+namespace: worm_anatomy
+def: "Muscle cell of the alimentary canal, excluding the pharynx." []
+is_a: WBbt:0005820 ! alimentary muscle
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+created_by: raymond
+creation_date: 2014-01-23T02:01:20Z
+
+[Term]
+id: WBbt:0008610
+name: head motor neuron
+namespace: worm_anatomy
+def: "Motor neuron that controls the movement of the head and the neck." []
+is_a: WBbt:0005409 ! motor neuron
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/wbbt.owl
+created_by: raymond
+creation_date: 2015-04-03T08:40:21Z
+
+[Typedef]
+id: BFO:0000050
+name: part_of
+is_transitive: true
+
+[Typedef]
+id: RO:0002202
+name: develops_from
+
