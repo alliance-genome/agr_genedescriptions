@@ -81,6 +81,14 @@ class TestOntologyTools(unittest.TestCase):
         set_covering_wrong = find_set_covering(subsets=subsets, value=costs_wrong, max_num_subsets=3)
         self.assertTrue(set_covering_wrong is None, "Cost vector with length different than subsets should return None")
 
+        subsets = [("1", "1", {"7"}), ("2", "2", {"7", "12", "13"}),
+                   ("3", "3", {"16", "17"}), ("4", "4", {"11"}), ("6", "6", {"12", "13"}), ("7", "7", {"7"}),
+                   ("9", "9", {"16", "17"}), ("11", "11", {"11"}), ("12", "12", {"12"}), ("13", "13", {"13"}),
+                   ("16", "16", {"16"}), ("17", "17", {"17"})]
+        values = [1, 1, 0.875061263, 1.301029996, 1.301029996, 1.602059991, 1.301029996, 1.698970004, 1.698970004,
+                  1.698970004, 1.698970004, 1.698970004]
+        set_covering = [best_set[0] for best_set in find_set_covering(subsets=subsets, value=values, max_num_subsets=3)]
+        self.assertTrue(all([num in set_covering for num in ["2", "9", "11"]]))
 
 
 

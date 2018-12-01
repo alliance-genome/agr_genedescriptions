@@ -4,6 +4,8 @@ import copy
 
 from collections import OrderedDict
 from typing import List
+
+from genedescriptions.data_manager import DataManager
 from genedescriptions.gene_description import GeneDescription
 from genedescriptions.stats import DescriptionsOverallProperties, DescriptionsStats
 
@@ -23,21 +25,25 @@ class DescriptionsWriter(object):
         """
         self.data.append(gene_description)
 
-    def write_json(self, file_path: str, pretty: bool = False, include_single_gene_stats: bool = False):
+    def write_json(self, file_path: str, pretty: bool = False, include_single_gene_stats: bool = False,
+                   data_manager: DataManager = None):
         """write the descriptions to a json file
 
         Args:
             file_path (str): the path to the file to write
             pretty (bool): whether to format the json file to make it more human-readable
             include_single_gene_stats (bool): whether to include statistics about the descriptions in the output file
+            data_manager (DataManager): data manager containing the ontologies used to calculate onto stats
         """
         indent = None
         if pretty:
             indent = 4
         if include_single_gene_stats:
+            for gene_desc in self.data:
+                gene_desc.stats.calculate_stats(data_manager=data_manager)
             self.general_stats.calculate_stats(gene_descriptions=self.data)
             for gene_desc in self.data:
-                gene_desc.stats.calculate_stats()
+                gene_desc.stats.delete_extra_info()
         json_serializable_self = copy.deepcopy(self)
         json_serializable_self.overall_properties = vars(json_serializable_self.overall_properties)
         if include_single_gene_stats:

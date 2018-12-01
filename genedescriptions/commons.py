@@ -3,7 +3,7 @@ from enum import Enum
 from namedlist import namedlist
 
 Sentence = namedlist('Sentence', ['prefix', 'terms_ids', 'postfix', 'text', 'aspect', 'evidence_group', 'terms_merged',
-                                  'additional_prefix', 'qualifier', 'ancestors_covering_multiple_terms'])
+                                  'additional_prefix', 'qualifier', 'ancestors_covering_multiple_terms', "trimmed"])
 
 
 Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])

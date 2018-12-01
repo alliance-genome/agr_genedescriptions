@@ -1,4 +1,8 @@
+from typing import List
+
 import numpy as np
+
+from genedescriptions.data_manager import DataManager
 
 
 class SingleDescStats(object):
@@ -23,6 +27,8 @@ class SingleDescStats(object):
         self.set_final_go_ids_p = []
         self.set_final_go_ids_c = []
         self.set_initial_do_ids = []
+        self.set_initial_go_ids = []
+        self.set_initial_expression_ids = []
         self.set_final_do_ids = []
         self.set_best_orthologs = []
         self.num_initial_expression_ids = 0
@@ -37,8 +43,23 @@ class SingleDescStats(object):
         self.num_final_do_ids = 0
         self.num_best_orthologs = 0
         self.num_final_expression_ids = 0
+        self.average_terms_level = 0
+        self.coverage_percentage = 0
+        self.trimmed = False
 
-    def calculate_stats(self):
+    @staticmethod
+    def _get_num_covered_nodes(set_initial_terms, set_final_terms, ontology):
+        num_covered_nodes = 0
+        final_t_ancestors = {final_term: ontology.ancestors(final_term) for final_term in set_final_terms}
+        for initial_term in set_initial_terms:
+            initial_t_ancestors = set(ontology.ancestors(initial_term, reflexive=True))
+            for final_term in set_final_terms:
+                if final_term in initial_t_ancestors or initial_term in final_t_ancestors[final_term]:
+                    num_covered_nodes += 1
+                    break
+        return num_covered_nodes
+
+    def calculate_stats(self, data_manager: DataManager = None):
         self.num_final_experimental_go_ids_f = len(self.set_final_experimental_go_ids_f)
         self.num_final_experimental_go_ids_p = len(self.set_final_experimental_go_ids_p)
         self.num_final_experimental_go_ids_c = len(self.set_final_experimental_go_ids_c)
@@ -49,6 +70,30 @@ class SingleDescStats(object):
         self.num_final_do_ids = len(self.set_final_do_ids)
         self.num_best_orthologs = len(self.set_best_orthologs)
         self.num_final_expression_ids = len(self.set_final_expression_ids)
+        if data_manager:
+            set_final_go_ids = [*self.set_final_go_ids_c, *self.set_final_go_ids_f,
+                                *self.set_final_go_ids_p]
+            go_levels = [data_manager.go_ontology.node(term)["depth"] for term in set_final_go_ids]
+            do_levels = [data_manager.do_ontology.node(term)["depth"] for term in self.set_final_do_ids]
+            expression_levels = [data_manager.expression_ontology.node(term)["depth"] for term in
+                                 self.set_final_expression_ids]
+            terms_levels = [*go_levels, *do_levels, *expression_levels]
+            self.average_terms_level = np.average(terms_levels) if len(terms_levels) > 0 else 0
+            go_num_covered_terms = self._get_num_covered_nodes(
+                set_initial_terms=self.set_initial_go_ids, set_final_terms=set_final_go_ids,
+                ontology=data_manager.go_ontology)
+            do_num_covered_terms = self._get_num_covered_nodes(
+                set_initial_terms=self.set_initial_do_ids, set_final_terms=self.set_final_do_ids,
+                ontology=data_manager.do_ontology)
+            exp_num_covered_terms = self._get_num_covered_nodes(
+                set_initial_terms=self.set_initial_expression_ids, set_final_terms=self.set_final_expression_ids,
+                ontology=data_manager.expression_ontology)
+            num_initial_terms = len(self.set_initial_go_ids) + len(self.set_initial_do_ids) + \
+                                len(self.set_initial_expression_ids)
+            self.coverage_percentage = (go_num_covered_terms + do_num_covered_terms + exp_num_covered_terms) / \
+                                       num_initial_terms if num_initial_terms > 0 else 0
+
+    def delete_extra_info(self):
         del self.set_final_experimental_go_ids_f
         del self.set_final_experimental_go_ids_p
         del self.set_final_experimental_go_ids_c
@@ -56,9 +101,13 @@ class SingleDescStats(object):
         del self.set_final_go_ids_p
         del self.set_final_go_ids_c
         del self.set_initial_do_ids
+        del self.set_initial_go_ids
+        del self.set_initial_expression_ids
         del self.set_final_do_ids
         del self.set_best_orthologs
         del self.set_final_expression_ids
+        #del self.average_terms_level
+        #del self.coverage_percentage
 
 
 class DescriptionsStats(object):
@@ -101,6 +150,10 @@ class DescriptionsStats(object):
         self.number_genes_with_non_null_orthology_description = 0
         self.number_genes_with_null_orthology_description = 0
         self.number_genes_with_more_than_3_best_orthologs = 0
+        self.average_term_coverage = 0
+        self.average_term_level = 0
+        self.average_term_level_trimmed = 0
+        self.average_term_coverage_trimmed = 0
 
     @staticmethod
     def _get_average_num_items_in_list_of_sets(set_var_name, desc_var_name, gene_descriptions):
@@ -109,9 +162,15 @@ class DescriptionsStats(object):
         return np.average(size_arr) if len(size_arr) > 0 else 0
 
     @staticmethod
-    def _get_average(var_name, desc_var_name, gene_descriptions):
+    def _get_average(var_name, desc_var_names: List[str], gene_descriptions):
         clean_num_arr = [getattr(gene_desc.stats, var_name) for gene_desc in gene_descriptions if
-                         getattr(gene_desc, desc_var_name)]
+                         any([getattr(gene_desc, desc_var_name) for desc_var_name in desc_var_names])]
+        return np.average(clean_num_arr) if len(clean_num_arr) > 0 else 0
+
+    @staticmethod
+    def _get_average_for_trimmed_terms(var_name, gene_descriptions):
+        clean_num_arr = [getattr(gene_desc.stats, var_name) for gene_desc in gene_descriptions if
+                         gene_desc.stats.trimmed]
         return np.average(clean_num_arr) if len(clean_num_arr) > 0 else 0
 
     @staticmethod
@@ -122,11 +181,11 @@ class DescriptionsStats(object):
     def calculate_stats(self, gene_descriptions):
         """calculate overall stats and populate fields"""
         self.total_number_of_genes = len(gene_descriptions)
-        self.average_number_initial_go_terms_f = self._get_average("num_initial_go_ids_f", "go_description",
+        self.average_number_initial_go_terms_f = self._get_average("num_initial_go_ids_f", ["go_description"],
                                                                    gene_descriptions)
-        self.average_number_initial_go_terms_p = self._get_average("num_initial_go_ids_p", "go_description",
+        self.average_number_initial_go_terms_p = self._get_average("num_initial_go_ids_p", ["go_description"],
                                                                    gene_descriptions)
-        self.average_number_initial_go_terms_c = self._get_average("num_initial_go_ids_c", "go_description",
+        self.average_number_initial_go_terms_c = self._get_average("num_initial_go_ids_c", ["go_description"],
                                                                    gene_descriptions)
         self.average_number_final_go_terms_f = self._get_average_num_items_in_list_of_sets(
             "set_final_go_ids_f", "go_description", gene_descriptions)
@@ -178,8 +237,8 @@ class DescriptionsStats(object):
             len([gene_desc for gene_desc in gene_descriptions if
                  gene_desc.stats.number_final_do_term_covering_multiple_initial_do_terms > 0])
         self.average_number_go_annotations = self._get_average("total_number_go_annotations",
-                                                               "go_description", gene_descriptions)
-        self.average_number_do_annotations = self._get_average("total_number_do_annotations", "do_description",
+                                                               ["go_description"], gene_descriptions)
+        self.average_number_do_annotations = self._get_average("total_number_do_annotations", ["do_description"],
                                                                gene_descriptions)
         self.number_genes_with_more_than_3_best_orthologs = \
             len([gene_desc for gene_desc in gene_descriptions if len(gene_desc.stats.set_best_orthologs) > 3])
@@ -189,6 +248,15 @@ class DescriptionsStats(object):
                                                                                 "orthology_description", True)
         self.average_number_orthologs = self._get_average_num_items_in_list_of_sets(
             "set_best_orthologs", "orthology_description", gene_descriptions)
+        self.average_term_level = self._get_average("average_terms_level", ["go_description", "do_description",
+                                                                            "tissue_expression_description"],
+                                                    gene_descriptions)
+        self.average_term_level_trimmed = self._get_average_for_trimmed_terms("average_terms_level", gene_descriptions)
+        self.average_term_coverage = self._get_average("coverage_percentage", ["go_description", "do_description",
+                                                                               "tissue_expression_description"],
+                                                       gene_descriptions)
+        self.average_term_coverage_trimmed = self._get_average_for_trimmed_terms("coverage_percentage",
+                                                                                 gene_descriptions)
 
 
 class DescriptionsOverallProperties(object):

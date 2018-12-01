@@ -48,7 +48,7 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
                          truncate_others_generic_word: str = "several",
                          truncate_others_aspect_words: Dict[str, str] = None,
                          ancestors_with_multiple_children: Set[str] = None,
-                         rename_cell: bool = False) -> Union[Sentence, None]:
+                         rename_cell: bool = False, trimmed: bool = False) -> Union[Sentence, None]:
     """build a sentence object
 
     Args:
@@ -89,7 +89,7 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
                                               rename_cell=rename_cell),
                         aspect=aspect, evidence_group=evidence_group, terms_merged=terms_merged,
                         additional_prefix=additional_prefix, qualifier=qualifier,
-                        ancestors_covering_multiple_terms=ancestors_with_multiple_children)
+                        ancestors_covering_multiple_terms=ancestors_with_multiple_children, trimmed=trimmed)
     else:
         return None
 

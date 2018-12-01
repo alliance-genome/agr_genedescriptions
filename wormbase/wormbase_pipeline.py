@@ -342,7 +342,7 @@ def main():
         if "json" in args.output_formats:
             logger.info("Writing descriptions to json")
             desc_writer.write_json(os.path.join(conf_parser.get_out_dir(), organism + ".json"),
-                                   pretty=True, include_single_gene_stats=True)
+                                   pretty=True, include_single_gene_stats=True, data_manager=dm)
         if "txt" in args.output_formats:
             logger.info("Writing descriptions to txt")
             desc_writer.write_plain_text(os.path.join(conf_parser.get_out_dir(), organism + ".txt"))

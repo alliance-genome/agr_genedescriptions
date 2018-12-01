@@ -37,6 +37,7 @@ class SentenceMerger(object):
         self.aspect = ""
         self.qualifier = ""
         self.ancestors_covering_multiple_terms = set()
+        self.any_trimmed = False
 
 
 class OntologySentenceGenerator(object):
@@ -160,7 +161,8 @@ class OntologySentenceGenerator(object):
                     _get_single_sentence(
                         node_ids=terms, ontology=self.ontology, aspect=aspect, evidence_group=evidence_group,
                         qualifier=qualifier, prepostfix_sentences_map=self.prepostfix_sentences_map,
-                        terms_merged=trimmed, add_others=add_others, truncate_others_generic_word=cutoff_final_word,
+                        terms_merged=False, trimmed=trimmed, add_others=add_others,
+                        truncate_others_generic_word=cutoff_final_word,
                         truncate_others_aspect_words=cat_several_words,
                         ancestors_with_multiple_children=ancestors_covering_multiple_children, rename_cell=rename_cell))
                 if keep_only_best_group:
@@ -245,6 +247,7 @@ class OntologySentenceGenerator(object):
                 merged_sentences[prefix].additional_prefix = sentence.additional_prefix
             merged_sentences[prefix].ancestors_covering_multiple_terms.update(
                 sentence.ancestors_covering_multiple_terms)
+            merged_sentences[prefix].any_trimmed = merged_sentences[prefix].any_trimmed or sentence.trimmed
         if remove_parent_terms:
             for prefix, sent_merger in merged_sentences.items():
                 terms_no_ancestors = sent_merger.terms_ids - set([ancestor for node_id in sent_merger.terms_ids for
@@ -264,8 +267,8 @@ class OntologySentenceGenerator(object):
                                                ancestors_with_multiple_children=sent_merger.ancestors_covering_multiple_terms,
                                                rename_cell=rename_cell),
                          aspect=sent_merger.aspect, evidence_group=", ".join(sent_merger.evidence_groups),
-                         terms_merged=True, additional_prefix=sent_merger.additional_prefix,
-                         qualifier=sent_merger.qualifier,
+                         terms_merged=True, trimmed=sent_merger.any_trimmed,
+                         additional_prefix=sent_merger.additional_prefix, qualifier=sent_merger.qualifier,
                          ancestors_covering_multiple_terms=sent_merger.ancestors_covering_multiple_terms)
                 for prefix, sent_merger in merged_sentences.items() if len(sent_merger.terms_ids) > 0]
 

@@ -77,6 +77,7 @@ class GeneDescription(object):
         desc = ""
         if module_sentences:
             desc = module_sentences.get_description()
+            self.stats.trimmed = self.stats.trimmed or any([sent.trimmed for sent in module_sentences.sentences])
         elif description:
             inflect_engine = inflect.engine()
             desc = description
@@ -155,18 +156,24 @@ class GeneDescription(object):
                     "(multiple)")
 
     @staticmethod
-    def _get_module_initial_stats(aspect: str, sentence_generator: OntologySentenceGenerator, main_qualifier: str = "",
-                                  additional_qualifier: str = None):
+    def _get_module_initial_num(aspect: str, sentence_generator: OntologySentenceGenerator, main_qualifier: str = "",
+                                additional_qualifier: str = None):
+        return len(GeneDescription._get_module_initial_set(aspect, sentence_generator, main_qualifier,
+                                                           additional_qualifier))
+
+    @staticmethod
+    def _get_module_initial_set(aspect: str, sentence_generator: OntologySentenceGenerator, main_qualifier: str = "",
+                                additional_qualifier: str = None):
         if not additional_qualifier:
-            return len([elem for key, sets in sentence_generator.terms_groups[(aspect, main_qualifier)].items() for elem
-                        in sets if (aspect, key, main_qualifier) in sentence_generator.prepostfix_sentences_map])
+            return [elem for key, sets in sentence_generator.terms_groups[(aspect, main_qualifier)].items() for elem
+                    in sets if (aspect, key, main_qualifier) in sentence_generator.prepostfix_sentences_map]
         else:
-            return len(list(set().union(
+            return list(set().union(
                 [elem for key, sets in sentence_generator.terms_groups[(aspect, main_qualifier)].items() for elem in
                  sets if (aspect, key, main_qualifier) in sentence_generator.prepostfix_sentences_map],
                 [elem for key, sets in sentence_generator.terms_groups[
                     (aspect, additional_qualifier)].items() for elem in sets if (aspect, key, additional_qualifier) in
-                 sentence_generator.prepostfix_sentences_map])))
+                 sentence_generator.prepostfix_sentences_map]))
 
     def set_initial_stats(self, module: Module, sentence_generator: OntologySentenceGenerator,
                           sentence_generator_exp_only: OntologySentenceGenerator = None):
@@ -181,23 +188,29 @@ class GeneDescription(object):
 
         """
         if module == Module.GO_FUNCTION:
-            self.stats.num_initial_go_ids_f = self._get_module_initial_stats(
+            set_initial_ids_f = self._get_module_initial_set(
                 aspect="F", additional_qualifier="contributes_to", sentence_generator=sentence_generator)
-            self.stats.num_initial_experimental_go_ids_f = self._get_module_initial_stats(
+            self.stats.num_initial_go_ids_f = len(set_initial_ids_f)
+            self.stats.num_initial_experimental_go_ids_f = self._get_module_initial_num(
                 aspect="F", additional_qualifier="contributes_to", sentence_generator=sentence_generator_exp_only)
+            self.stats.set_initial_go_ids.extend(set_initial_ids_f)
         elif module == Module.GO_COMPONENT:
-            self.stats.num_initial_go_ids_c = self._get_module_initial_stats(
+            set_initial_ids_c = self._get_module_initial_set(
                 aspect="C", additional_qualifier="colocalizes_with", sentence_generator=sentence_generator)
-            self.stats.num_initial_experimental_go_ids_c = self._get_module_initial_stats(
+            self.stats.num_initial_go_ids_c = len(set_initial_ids_c)
+            self.stats.num_initial_experimental_go_ids_c = self._get_module_initial_num(
                 aspect="C", additional_qualifier="colocalizes_with", sentence_generator=sentence_generator_exp_only)
+            self.stats.set_initial_go_ids.extend(set_initial_ids_c)
         elif module == Module.GO_PROCESS:
-            self.stats.num_initial_go_ids_p = self._get_module_initial_stats(
-                aspect="P", sentence_generator=sentence_generator)
-            self.stats.num_initial_experimental_go_ids_p = self._get_module_initial_stats(
+            set_initial_ids_p = self._get_module_initial_set(aspect="P", sentence_generator=sentence_generator)
+            self.stats.num_initial_go_ids_p = len(set_initial_ids_p)
+            self.stats.num_initial_experimental_go_ids_p = self._get_module_initial_num(
                 aspect="P", sentence_generator=sentence_generator_exp_only)
+            self.stats.set_initial_go_ids.extend(set_initial_ids_p)
         elif module == Module.EXPRESSION:
-            self.stats.num_initial_expression_ids = self._get_module_initial_stats(
+            self.stats.set_initial_expression_ids = self._get_module_initial_set(
                 aspect="A", main_qualifier="Verified", sentence_generator=sentence_generator)
+            self.stats.num_initial_expression_ids = len(self.stats.set_initial_expression_ids)
         elif module == Module.DO_EXPERIMENTAL:
             self.stats.total_number_do_exp_bio_annotations += len(sentence_generator.annotations)
             self.stats.set_initial_do_ids = self._get_merged_ids(
