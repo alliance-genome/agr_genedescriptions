@@ -343,7 +343,6 @@ go_sentences_options:
         P: "processes"
         C: "cellular components"
         D: "diseases"
-
     remove_parents_if_children_are_present: true
     remove_children_if_parent_is_present: false
     trim_terms_by_common_ancestors: true
@@ -355,6 +354,8 @@ go_sentences_options:
         C: 5
     add_multiple_if_covers_more_children: false
     remove_overlapped_terms: true
+    slim_url: http://current.geneontology.org/ontology/subsets/goslim_agr.obo
+    slim_bonus_perc: 0.5
 
 do_exp_sentences_options:
     exclude_terms:
@@ -409,6 +410,8 @@ do_exp_sentences_options:
     truncate_others_terms:
         D: "diseases"
     add_multiple_if_covers_more_children: true
+    slim_url: ''
+    slim_bonus_perc: 0
 
 do_biomarker_sentences_options:
     evidence_codes:
@@ -519,3 +522,5 @@ expression_sentences_options:
         A: 3
     add_multiple_if_covers_more_children: false
     rename_cell: true
+    slim_url: ''
+    slim_bonus_perc: 0

@@ -70,6 +70,7 @@ class OntologySentenceGenerator(object):
                                                                 module=module))
         self.annotations = annotations
         self.module = module
+        self.data_manager = data_manager
         self.annot_type = annot_type
         evidence_codes_groups_map = {evcode: group for evcode, group in ev_codes_groups_maps.items() if
                                      limit_to_group is None or limit_to_group in ev_codes_groups_maps[evcode]}
@@ -181,6 +182,8 @@ class OntologySentenceGenerator(object):
                                                prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
         trimming_algorithm = config.get_module_property(module=self.module,
                                                         prop=ConfigModuleProperty.TRIMMING_ALGORITHM)
+        slim_set = self.data_manager.get_slim(module=self.module)
+        slim_bonus_perc = config.get_module_property(module=self.module, prop=ConfigModuleProperty.SLIM_BONUS_PERC)
         add_others = False
         ancestors_covering_multiple_children = set()
         if not dist_root:
@@ -200,7 +203,8 @@ class OntologySentenceGenerator(object):
             elif trimming_algorithm == "ic":
                 add_others, merged_terms_coverset = get_best_nodes_ic(
                     node_ids=list(terms_low_priority), ontology=self.ontology, max_number_of_terms=trimming_threshold,
-                    min_distance_from_root=dist_root[aspect])
+                    min_distance_from_root=dist_root[aspect], slim_terms_ic_bonus_perc=slim_bonus_perc,
+                    slim_set=slim_set)
             elif trimming_algorithm == "naive2":
                 add_others, merged_terms_coverset = get_best_nodes_lca(
                     node_ids=list(terms_low_priority), ontology=self.ontology, min_distance_from_root=dist_root[aspect])

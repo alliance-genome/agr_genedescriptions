@@ -54,6 +54,9 @@ class DataManager(object):
         self.expression_associations = None
         self.go_relations = go_relations
         self.do_relations = do_relations
+        self.go_slim = set()
+        self.do_slim = set()
+        self.exp_slim = set()
         self.use_cache = use_cache
 
     def _get_cached_file(self, cache_path: str, file_source_url):
@@ -158,6 +161,7 @@ class DataManager(object):
         """
         new_ontology = None
         module = None
+        slim_cache_path = ""
         if ontology_type == DataType.GO:
             logger.info("Loading GO ontology data from file")
             self.go_ontology = OntologyFactory().create(self._get_cached_file(file_source_url=ontology_url,
@@ -165,6 +169,7 @@ class DataManager(object):
                                                         ).subontology(relations=self.go_relations)
             new_ontology = self.go_ontology
             module = Module.GO
+            slim_cache_path = os.path.join(os.path.dirname(os.path.normpath(ontology_cache_path)), "go_slim.obo")
         elif ontology_type == DataType.DO:
             logger.info("Loading DO ontology data from file")
             self.do_ontology = OntologyFactory().create(self._get_cached_file(file_source_url=ontology_url,
@@ -172,12 +177,14 @@ class DataManager(object):
                                                         ).subontology(relations=self.do_relations)
             new_ontology = self.do_ontology
             module = Module.DO_EXPERIMENTAL
+            slim_cache_path = os.path.join(os.path.dirname(os.path.normpath(ontology_cache_path)), "do_slim.obo")
         elif ontology_type == DataType.EXPR:
             logger.info("Loading Expression ontology data from file")
             self.expression_ontology = OntologyFactory().create(self._get_cached_file(
                 file_source_url=ontology_url, cache_path=ontology_cache_path)).subontology()
             new_ontology = self.expression_ontology
             module = Module.EXPRESSION
+            slim_cache_path = os.path.join(os.path.dirname(os.path.normpath(ontology_cache_path)), "exp_slim.obo")
         terms_replacement_regex = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_TERMS)
         if terms_replacement_regex:
             self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
@@ -190,6 +197,36 @@ class DataManager(object):
                     self.expression_ontology.node(term)["label"] = "the " + self.expression_ontology.node(term)["label"]
         for root_id in new_ontology.get_roots():
             set_all_depths_in_subgraph(ontology=new_ontology, root_id=root_id, relations=None)
+        slim_url = config.get_module_property(module=module, prop=ConfigModuleProperty.SLIM_URL)
+        self.load_slim(module=module, slim_url=slim_url, slim_cache_path=slim_cache_path)
+
+    def load_slim(self, module: Module, slim_url: str, slim_cache_path: str):
+        if slim_url and slim_cache_path:
+            relations = None
+            if module == Module.GO:
+                relations = self.go_relations
+            elif module == Module.DO_EXPERIMENTAL:
+                relations = self.do_relations
+            elif module == Module.EXPRESSION:
+                relations = None
+            slim_onto = OntologyFactory().create(self._get_cached_file(file_source_url=slim_url, cache_path=slim_cache_path)
+                                                 ).subontology(relations=relations)
+            slim_set = set([node for node in slim_onto.nodes() if "type" in slim_onto.node(node) and
+                            slim_onto.node(node)["type"] == "CLASS"])
+            if module == Module.GO:
+                self.go_slim = slim_set
+            elif module == Module.DO_EXPERIMENTAL:
+                self.do_slim = slim_set
+            elif module == Module.EXPRESSION:
+                self.exp_slim = slim_set
+
+    def get_slim(self, module: Module):
+        if module == Module.GO:
+            return self.go_slim
+        elif module == Module.DO_EXPERIMENTAL:
+            return self.do_slim
+        elif module == Module.EXPRESSION:
+            return self.exp_slim
 
     def set_associations(self, associations_type: DataType, associations: AssociationSet, config: GenedescConfigParser):
         """set the go annotations and remove blacklisted annotations

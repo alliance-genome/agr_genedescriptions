@@ -203,7 +203,8 @@ def get_best_nodes_naive(node_ids: List[str], ontology: Ontology, min_distance_f
 
 
 def get_best_nodes_ic(node_ids: List[str], ontology: Ontology, max_number_of_terms: int = 3,
-                      min_distance_from_root: int = 0) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
+                      min_distance_from_root: int = 0, slim_terms_ic_bonus_perc: int = 0,
+                      slim_set: set = None) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
     """trim the list of terms by selecting the best combination of terms from the initial list or their common
     ancestors based on information content
 
@@ -213,14 +214,21 @@ def get_best_nodes_ic(node_ids: List[str], ontology: Ontology, max_number_of_ter
         ontology (Ontology): the ontology
         min_distance_from_root (int): consider only nodes at a minimum distance from root as potential candidate for
             trimming
+        slim_terms_ic_bonus_perc (int): boost the IC value for terms that appear in the slim set by the provided
+            percentage
+        slim_set (set): set of terms that belong to the slim for the provided ontology
     Returns:
         Set[str]: the set of trimmed terms, together with the set of original terms that each of them covers
     """
     common_ancestors = get_all_common_ancestors(node_ids=node_ids, ontology=ontology)
     if "IC" not in ontology.node(common_ancestors[0][0]):
         set_all_information_content_values(ontology=ontology, min_distance_from_root=min_distance_from_root)
+    values = [ontology.node(node[0])["IC"] * (1 + slim_terms_ic_bonus_perc) if slim_set and node[0] in slim_set else
+              ontology.node(node[0])["IC"] for node in common_ancestors]
+    if slim_set and any([node[0] in slim_set for node in common_ancestors]):
+        logger.debug("some candidates are present in the slim set")
     best_terms = find_set_covering(subsets=common_ancestors, max_num_subsets=max_number_of_terms,
-                                   value=[ontology.node(node[0])["IC"] for node in common_ancestors], ontology=ontology)
+                                   value=values, ontology=ontology)
     covered_terms = set([e for best_term_label, covered_terms in best_terms for e in covered_terms])
     return covered_terms != set(node_ids), best_terms
 

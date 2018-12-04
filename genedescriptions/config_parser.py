@@ -20,6 +20,8 @@ class ConfigModuleProperty(Enum):
     RENAME_CELL = 12
     REMOVE_OVERLAP = 13
     TRIMMING_ALGORITHM = 14
+    SLIM_URL = 15
+    SLIM_BONUS_PERC = 16
 
 
 class GenedescConfigParser(object):
@@ -79,6 +81,10 @@ class GenedescConfigParser(object):
             property_name = "remove_overlapped_terms"
         elif prop == ConfigModuleProperty.TRIMMING_ALGORITHM:
             property_name = "trimming_algorithm"
+        elif prop == ConfigModuleProperty.SLIM_URL:
+            property_name = "slim_url"
+        elif prop == ConfigModuleProperty.SLIM_BONUS_PERC:
+            property_name = "slim_bonus_perc"
         return property_name
 
     def get_prepostfix_sentence_map(self, module: Module, special_cases_only: bool = False, humans: bool = False):
