@@ -20,14 +20,14 @@ class TestGOModule(unittest.TestCase):
         self.df = DataManager(do_relations=None, go_relations=["subClassOf", "BFO:0000050"])
         logger.info("Loading go ontology from file")
         self.df.load_ontology_from_file(ontology_type=DataType.GO, ontology_url="file://" + os.path.join(
-            self.this_dir, os.path.pardir, "tests", "data", "go_gd_test.obo"),
-                                        ontology_cache_path=os.path.join(self.this_dir, os.path.pardir, "tests",
-                                                                         "cache", "go_gd_test.obo"), config=self.conf_parser)
+            self.this_dir, "data", "go_gd_test.obo"), ontology_cache_path=os.path.join(self.this_dir, "cache",
+                                                                                       "go_gd_test.obo"),
+                                        config=self.conf_parser)
         logger.info("Loading go associations from file")
         self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
-            self.this_dir, os.path.pardir, "tests", "data", "go_annotations_gd_test.gaf"),
-                                            associations_cache_path=os.path.join(self.this_dir, os.path.pardir, "tests",
-                                                                                 "cache", "go_annotations_gd_test.gaf"),
+            self.this_dir, "data", "gene_association_1.7.wb.partial"),
+                                            associations_cache_path=os.path.join(self.this_dir, "cache",
+                                                                                 "gene_association_1.7.wb.partial"),
                                             config=self.conf_parser)
 
     def test_ontology_exists(self):
