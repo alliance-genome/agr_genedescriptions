@@ -6,7 +6,7 @@ then
     exit 1
 fi
 
-genes='HTT\|Htt\|htt\|CFTR\|Cftr\|cftr\|YTA12\|tefu\|ATM\|ATM1\|Atm\|MCM1\|Srf\|SRF\|srfb\|REB1\|daf-16\|aap-1\|abl-1\|pat-4\|Pten\|PTEN\|Ahr\|AHR\|CDC28\|CDC48\|CDC5\|SGS1\|LAS17\|RAD27\|MLH1\|RAD53\|CCC2\|COQ6\|TRS20\|PXA1\|DPB3'
+genes='HTT\|Htt\|htt\|CFTR\|Cftr\|cftr\|YTA12\|tefu\|ATM\|ATM1\|Atm\|MCM1\|Srf\|SRF\|srfb\|REB1\|daf-16\|aap-1\|abl-1\|pat-4\|Pten\|PTEN\|Ahr\|AHR\|CDC28\|CDC48\|CDC5\|SGS1\|LAS17\|RAD27\|MLH1\|RAD53\|CCC2\|COQ6\|TRS20\|PXA1\|DPB3\|lsd-1'
 
 for assoc_file in $1/*
 do

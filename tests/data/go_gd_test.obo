@@ -7883,6 +7883,16 @@ id: GO:0006476
 name: protein deacetylation
 
 [Term]
+id: GO:0006482
+name: protein demethylation
+namespace: biological_process
+def: "The removal of a methyl group, from a protein amino acid. A methyl group is derived from methane by the removal of a hydrogen atom." []
+synonym: "protein amino acid demethylation" EXACT []
+is_a: GO:0008214 ! protein dealkylation
+is_a: GO:0070988 ! demethylation
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0006486
 name: protein glycosylation
 namespace: biological_process
@@ -10943,6 +10953,25 @@ is_a: GO:0019903 ! protein phosphatase binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0008168
+name: methyltransferase activity
+namespace: molecular_function
+alt_id: GO:0004480
+def: "Catalysis of the transfer of a methyl group to an acceptor molecule." []
+subset: goslim_chembl
+subset: goslim_generic
+subset: goslim_yeast
+synonym: "methylase" BROAD []
+xref: EC:2.1.1
+xref: reactome:R-HSA-379387
+xref: reactome:R-HSA-379464
+xref: reactome:R-HSA-6800149
+xref: reactome:R-HSA-71286
+is_a: GO:0016741 ! transferase activity, transferring one-carbon groups
+relationship: BFO:0000050 GO:0032259 ! part of methylation
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0008186
 name: RNA-dependent ATPase activity
 namespace: molecular_function
@@ -10980,6 +11009,15 @@ def: "The chemical reactions and pathways involving cholesterol, cholest-5-en-3 
 synonym: "cholesterol metabolism" EXACT []
 is_a: GO:0016125 ! sterol metabolic process
 is_a: GO:1902652 ! secondary alcohol metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0008214
+name: protein dealkylation
+namespace: biological_process
+def: "The removal of an alkyl group from a protein amino acid. An alkyl group is any group derived from an alkane by removal of one hydrogen atom." []
+synonym: "protein amino acid dealkylation" EXACT []
+is_a: GO:0006464 ! cellular protein modification process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -16336,6 +16374,15 @@ name: histone ubiquitination
 [Term]
 id: GO:0016575
 name: histone deacetylation
+
+[Term]
+id: GO:0016577
+name: histone demethylation
+namespace: biological_process
+def: "The modification of histones by removal of methyl groups." []
+is_a: GO:0006482 ! protein demethylation
+is_a: GO:0016570 ! histone modification
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0016579
@@ -21957,6 +22004,16 @@ relationship: RO:0002213 GO:0051017 ! positively regulates actin filament bundle
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0032259
+name: methylation
+namespace: biological_process
+def: "The process in which a methyl group is covalently attached to a molecule." []
+subset: goslim_chembl
+xref: Wikipedia:Methylation
+is_a: GO:0008152 ! metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0032268
 name: regulation of cellular protein metabolic process
 namespace: biological_process
@@ -24346,6 +24403,15 @@ name: chloride channel complex
 namespace: cellular_component
 def: "An ion channel complex through which chloride ions pass." []
 is_a: GO:0034702 ! ion channel complex
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0034720
+name: histone H3-K4 demethylation
+namespace: biological_process
+def: "The modification of histone H3 by the removal of a methyl group from lysine at position 4 of the histone." []
+synonym: "H3K4 demethylation (me1 me2 and me3)" RELATED []
+is_a: GO:0070076 ! histone lysine demethylation
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -39879,6 +39945,14 @@ is_a: GO:0019899 ! enzyme binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0070076
+name: histone lysine demethylation
+namespace: biological_process
+def: "The modification of a histone by the removal of a methyl group from a lysine residue." []
+is_a: GO:0016577 ! histone demethylation
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0070085
 name: glycosylation
 namespace: biological_process
@@ -40659,6 +40733,16 @@ creation_date: 2009-09-15T03:00:51Z
 [Term]
 id: GO:0070972
 name: protein localization to endoplasmic reticulum
+
+[Term]
+id: GO:0070988
+name: demethylation
+namespace: biological_process
+def: "The process of removing one or more methyl groups from a molecule." []
+is_a: GO:0008152 ! metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: midori
+creation_date: 2009-10-29T03:12:51Z
 
 [Term]
 id: GO:0070997

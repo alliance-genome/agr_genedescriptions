@@ -31,8 +31,7 @@ def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List
                                    comparison_func=comparison_func, current_depth=current_depth + 1)
 
 
-def set_all_information_content_values(ontology: Ontology, relations: List[str] = None,
-                                       min_distance_from_root: int = 0):
+def set_all_information_content_values(ontology: Ontology, relations: List[str] = None):
     roots = ontology.get_roots(relations=relations)
     for root_id in roots:
         if "num_subsumers" not in ontology.node(root_id):
@@ -45,8 +44,7 @@ def set_all_information_content_values(ontology: Ontology, relations: List[str] 
             set_all_depths_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
     for root_id in roots:
         _set_information_content_in_subgraph(ontology=ontology, root_id=root_id,
-                                             maxleaves=ontology.node(root_id)["num_leaves"], relations=relations,
-                                             min_distance_from_root=min_distance_from_root)
+                                             maxleaves=ontology.node(root_id)["num_leaves"], relations=relations)
 
 
 def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_root: int = 0,
@@ -222,11 +220,15 @@ def get_best_nodes_ic(node_ids: List[str], ontology: Ontology, max_number_of_ter
     """
     common_ancestors = get_all_common_ancestors(node_ids=node_ids, ontology=ontology)
     if "IC" not in ontology.node(common_ancestors[0][0]):
-        set_all_information_content_values(ontology=ontology, min_distance_from_root=min_distance_from_root)
-    values = [ontology.node(node[0])["IC"] * (1 + slim_terms_ic_bonus_perc) if slim_set and node[0] in slim_set else
+        set_all_information_content_values(ontology=ontology)
+    values = [0 if ontology.node(node[0])["depth"] < min_distance_from_root else
+              ontology.node(node[0])["IC"] * (1 + slim_terms_ic_bonus_perc) if slim_set and node[0] in slim_set else
               ontology.node(node[0])["IC"] for node in common_ancestors]
     if slim_set and any([node[0] in slim_set for node in common_ancestors]):
         logger.debug("some candidates are present in the slim set")
+    # remove ancestors with zero IC
+    common_ancestors = [common_ancestor for common_ancestor, value in zip(common_ancestors, values) if value > 0]
+    values = [value for value in values if value > 0]
     best_terms = find_set_covering(subsets=common_ancestors, max_num_subsets=max_number_of_terms,
                                    value=values, ontology=ontology)
     covered_terms = set([e for best_term_label, covered_terms in best_terms for e in covered_terms])
@@ -266,16 +268,12 @@ def _set_num_leaves_in_subgraph(ontology: Ontology, root_id: str, relations: Lis
     ontology.node(root_id)["num_leaves"] = num_leaves
 
 
-def _set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxleaves: int, relations: List[str] = None,
-                                         min_distance_from_root: int = 0):
+def _set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxleaves: int, relations: List[str] = None):
     node = ontology.node(root_id)
-    if node["depth"] >= min_distance_from_root:
-        node["IC"] = -math.log((float(node["num_leaves"]) / node["num_subsumers"] + 1) / (maxleaves + 1))
-    else:
-        node["IC"] = 0
+    node["IC"] = -math.log((float(node["num_leaves"]) / node["num_subsumers"] + 1) / (maxleaves + 1))
     for child_id in ontology.children(node=root_id, relations=relations):
         _set_information_content_in_subgraph(ontology=ontology, root_id=child_id, maxleaves=maxleaves,
-                                             relations=relations, min_distance_from_root=min_distance_from_root)
+                                             relations=relations)
 
 
 def find_set_covering(subsets: List[Tuple[str, str, Set[str]]], value: List[float] = None, max_num_subsets: int = None,

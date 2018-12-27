@@ -5,7 +5,7 @@ generic:
 
 # options for WormBase gene description generation - used when data_fetcher is set to 'wb_data_fetcher'
 wb_options:
-    release: "WS268"
+    release: "WS270"
     raw_files_source: "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases"
     agr_human_go_associations: "http://download.alliancegenome.org/GO/ANNOT/gene_association_1.7.1.human.gz"
     agr_go_ontology: "http://download.alliancegenome.org/GO/go_1.7.obo"
