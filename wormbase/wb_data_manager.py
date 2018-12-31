@@ -120,8 +120,8 @@ class WBDataManager(DataManager):
     @staticmethod
     def _get_expression_cluster_url(prefix, ec_type, release_version):
         if prefix:
-            return "ftp://caltech.wormbase.org/pub/wormbase/ExprClusterSummary/" + release_version[0:-1] + \
-                   str(int(release_version[-1]) + 1) + "/" + prefix + "ECsummary_" + ec_type + "." + release_version + \
+            return "ftp://caltech.wormbase.org/pub/wormbase/ExprClusterSummary/" + release_version[0:2] + \
+                   str(int(release_version[2:]) + 1) + "/" + prefix + "ECsummary_" + ec_type + "." + release_version + \
                    ".txt"
         else:
             return None
