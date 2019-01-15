@@ -143,8 +143,9 @@ class WBDataManager(DataManager):
             with open(file_path) as file:
                 for line in file:
                     fields = line.strip().split(',')
-                    name = fields[2] if fields[2] != '' else fields[3]
-                    self.gene_data["WB:" + fields[1]] = Gene("WB:" + fields[1], name, fields[4] == "Dead", False)
+                    if fields[1].startswith("WBGene"):
+                        name = fields[2] if fields[2] != '' else fields[3]
+                        self.gene_data["WB:" + fields[1]] = Gene("WB:" + fields[1], name, fields[4] == "Dead", False)
 
     def load_associations_from_file(self, associations_type: DataType, associations_url: str,
                                     associations_cache_path: str, config: GenedescConfigParser,
@@ -274,7 +275,8 @@ class WBDataManager(DataManager):
                     header = False
                 else:
                     ortholog_arr = line.strip().split("\t")
-                    orthologs[ortholog_arr[0]].append(ortholog_arr[1:4])
+                    if not ortholog_arr[1].startswith("PRJEB28388"):
+                        orthologs[ortholog_arr[0]].append(ortholog_arr[1:4])
 
     def get_best_orthologs_for_gene(self, gene_id: str, orth_species_full_name: List[str],
                                     sister_species_data_fetcher: DataManager = None,
