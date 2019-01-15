@@ -12,7 +12,7 @@ wb_options:
     organisms_to_process:
         # add the species to be processed to the following list. Entries must have the same text as in 'organisms'
         # option
-        #- c_elegans
+        - c_elegans
         - b_malayi
         - c_brenneri
         - c_briggsae
@@ -421,18 +421,8 @@ do_biomarker_sentences_options:
             priority: 1
     group_priority:
         BIOMARKER: 1
-    prepostfix_sentences_map:
-        - aspect: "D"
-          group: BIOMARKER
-          qualifier: ""
-          prefix: "is biomarker of"
-          postfix: ""
-    prepostfix_sentences_map_humans:
-        - aspect: "D"
-          group: BIOMARKER
-          qualifier: ""
-          prefix: "is biomarker of"
-          postfix: ""
+    prepostfix_sentences_map: []
+    prepostfix_sentences_map_humans: []
     remove_parents_if_children_are_present: true
     remove_children_if_parent_is_present: false
     trim_terms_by_common_ancestors: true
