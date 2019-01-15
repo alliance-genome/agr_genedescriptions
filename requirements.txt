@@ -1,7 +1,7 @@
 urllib3
 namedlist
 inflect
-pyYaml==3.13
+pyyaml>=4.2b1
 numpy
 ontobio
 num2words
