@@ -246,7 +246,7 @@ class DataManager(object):
             self.do_associations = self.remove_blacklisted_annotations(association_set=associations,
                                                                        ontology=self.do_ontology,
                                                                        terms_blacklist=config.get_module_property(
-                                                                           module=Module.DO_EXP_AND_BIO,
+                                                                           module=Module.DO_EXPERIMENTAL,
                                                                            prop=ConfigModuleProperty.EXCLUDE_TERMS))
         elif associations_type == DataType.EXPR:
             self.expression_associations = self.remove_blacklisted_annotations(association_set=associations,
