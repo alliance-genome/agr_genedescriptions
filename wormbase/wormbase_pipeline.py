@@ -15,9 +15,9 @@ from genedescriptions.data_manager import DataManager, ExpressionClusterType, Ex
 from genedescriptions.gene_description import GeneDescription
 from genedescriptions.descriptions_generator import OntologySentenceGenerator
 from genedescriptions.descriptions_writer import DescriptionsWriter
-from genedescriptions.precanned_modules import set_gene_ontology_module, set_disease_module
-from genedescriptions.sentence_generation_functions import generate_ortholog_sentence_wormbase_human, \
-    generate_ortholog_sentence_wormbase_non_c_elegans, concatenate_words_with_oxford_comma, \
+from genedescriptions.precanned_modules import set_gene_ontology_module, set_disease_module, \
+    generate_ortholog_sentence_wormbase_human, generate_ortholog_sentence_wormbase_non_c_elegans
+from genedescriptions.sentence_generation_functions import concatenate_words_with_oxford_comma, \
     get_best_human_ortholog_for_info_poor
 from wormbase.wb_data_manager import WBDataManager
 
