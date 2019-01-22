@@ -84,15 +84,15 @@ def set_disease_module(df: DataManager, conf_parser: GenedescConfigParser, gene_
     gene_desc.set_initial_stats(module=Module.DO_ORTHOLOGY, sentence_generator=do_via_orth_sentence_generator)
 
 
-def generate_orthology_sentence_alliance_human(orthologs: List[List[str]], excluded_orthologs: bool = False):
-    """build orthology sentence for Alliance human orthologs
+def set_alliance_human_orthology_module(orthologs: List[List[str]], gene_desc: GeneDescription,
+                                        excluded_orthologs: bool = False):
+    """set orthology module for Alliance human orthologs
 
     Args:
         orthologs (List[List[str]]): list of human orthologs, containing gene_id, gene_symbol, and gene_name
+        gene_desc (GeneDescription): the gene description object to update
         excluded_orthologs (bool): whether some of the orthologs have been excluded from the final set. If true, the
             final sentence will include a prefix to specify that some orthologs have been omitted
-    Returns:
-        str: the orthology sentence
     """
     if len(orthologs) > 0:
         prefix = "human"
@@ -100,10 +100,9 @@ def generate_orthology_sentence_alliance_human(orthologs: List[List[str]], exclu
         if excluded_orthologs or len(orthologs) > 3:
             orthologs_display = orthologs_display[0:3]
             prefix = "several human genes including"
-        return "orthologous to " + prefix + " " + concatenate_words_with_oxford_comma(
+        sentence = "orthologous to " + prefix + " " + concatenate_words_with_oxford_comma(
             [orth[1] + " (" + orth[2] + ")" if orth[2] else orth[1] for orth in orthologs_display])
-    else:
-        return None
+        gene_desc.set_or_extend_module_description_and_final_stats(module=Module.ORTHOLOGY, description=sentence)
 
 
 def generate_ortholog_sentence_wormbase_human(orthologs: List[List[str]], human_genes_props: Dict[str, List[str]]):
