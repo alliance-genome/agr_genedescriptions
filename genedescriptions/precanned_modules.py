@@ -58,7 +58,8 @@ def set_gene_ontology_module(dm: DataManager, conf_parser: GenedescConfigParser,
                                 sentence_generator_exp_only=go_sent_generator_exp)
 
 
-def set_disease_module(df: DataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription, gene: Gene):
+def set_disease_module(df: DataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription, gene: Gene,
+                       orthologs_key_diseases=None):
     do_sentence_exp_generator = OntologySentenceGenerator(gene_id=gene.id,
                                                           module=Module.DO_EXPERIMENTAL, data_manager=df,
                                                           config=conf_parser, limit_to_group="EXPERIMENTAL")
@@ -76,7 +77,8 @@ def set_disease_module(df: DataManager, conf_parser: GenedescConfigParser, gene_
     do_via_orth_sentence_generator = OntologySentenceGenerator(
         gene_id=gene.id, module=Module.DO_ORTHOLOGY, data_manager=df, config=conf_parser)
     disease_via_orth_module_sentences = do_via_orth_sentence_generator.get_module_sentences(
-        config=conf_parser, aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False)
+        config=conf_parser, aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False,
+        high_priority_term_ids=orthologs_key_diseases)
     gene_desc.set_or_extend_module_description_and_final_stats(module=Module.DO_ORTHOLOGY,
                                                                module_sentences=disease_via_orth_module_sentences)
     gene_desc.set_initial_stats(module=Module.DO_EXPERIMENTAL, sentence_generator=do_sentence_exp_generator)
