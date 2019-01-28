@@ -8,7 +8,7 @@ from genedescriptions.ontology_tools import *
 from genedescriptions.sentence_generation_functions import _get_single_sentence, compose_sentence
 
 
-logger = logging.getLogger("Description Generator")
+logger = logging.getLogger(__name__)
 
 
 class ModuleSentences(object):

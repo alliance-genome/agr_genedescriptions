@@ -7,7 +7,7 @@ from ontobio import Ontology
 from genedescriptions.api_manager import APIManager
 from genedescriptions.commons import Sentence, DataType, Module
 
-logger = logging.getLogger("Sentence generation functions")
+logger = logging.getLogger(__name__)
 
 
 def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str], postfix: str,

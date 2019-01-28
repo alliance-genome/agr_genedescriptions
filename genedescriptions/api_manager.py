@@ -6,7 +6,7 @@ import urllib
 
 from urllib import request
 
-logger = logging.getLogger("API manager")
+logger = logging.getLogger(__name__)
 
 
 class APIManager(object):

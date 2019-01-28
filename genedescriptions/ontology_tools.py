@@ -6,7 +6,7 @@ from typing import List, Dict, Tuple, Union, Set
 from ontobio.ontol import Ontology
 
 
-logger = logging.getLogger("Ontology Tools")
+logger = logging.getLogger(__name__)
 
 
 def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None, comparison_func=max,

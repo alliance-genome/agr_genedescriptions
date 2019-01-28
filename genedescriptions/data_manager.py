@@ -31,7 +31,7 @@ class ExpressionClusterFeature(Enum):
     STUDIES = 3
 
 
-logger = logging.getLogger("Data Manager")
+logger = logging.getLogger(__name__)
 
 
 class DataManager(object):
