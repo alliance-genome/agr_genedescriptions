@@ -98,6 +98,7 @@ class DataManager(object):
         Returns:
             AssociationSet: the filtered annotations
         """
+        logger.info("Removing blacklisted terms and annotations")
         if terms_blacklist:
             associations = []
             for subj_associations in association_set.associations_by_subj.values():
@@ -118,6 +119,7 @@ class DataManager(object):
                 renaming terms. Each key must be a regular expression to search for terms and the associated value
                 another regular expression that defines the final result
         """
+        logger.info("Renaming ontology terms")
         if terms_replacement_regex:
             for regex_to_substitute, regex_target in terms_replacement_regex.items():
                 for node in ontology.search(regex_to_substitute, is_regex=True):
@@ -137,12 +139,15 @@ class DataManager(object):
         """
         new_ontology = None
         if ontology_type == DataType.GO:
+            logger.info("Setting GO ontology")
             self.go_ontology = ontology.subontology(relations=self.go_relations)
             new_ontology = self.go_ontology
         elif ontology_type == DataType.DO:
+            logger.info("Setting DO ontology")
             self.do_ontology = ontology.subontology(relations=self.do_relations)
             new_ontology = self.do_ontology
         elif ontology_type == DataType.EXPR:
+            logger.info("Setting Expression ontology")
             self.expression_ontology = ontology.subontology()
             new_ontology = self.expression_ontology
         self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
@@ -214,10 +219,13 @@ class DataManager(object):
             slim_set = set([node for node in slim_onto.nodes() if "type" in slim_onto.node(node) and
                             slim_onto.node(node)["type"] == "CLASS"])
             if module == Module.GO:
+                logger.info("Setting GO Slim")
                 self.go_slim = slim_set
             elif module == Module.DO_EXPERIMENTAL:
+                logger.info("Setting DO Slim")
                 self.do_slim = slim_set
             elif module == Module.EXPRESSION:
+                logger.info("Setting Expression Slim")
                 self.exp_slim = slim_set
 
     def get_slim(self, module: Module):
@@ -237,18 +245,21 @@ class DataManager(object):
             config (GenedescConfigParser): configuration object where to read properties
         """
         if associations_type == DataType.GO:
+            logger.info("Setting GO associations")
             self.go_associations = self.remove_blacklisted_annotations(association_set=associations,
                                                                        ontology=self.go_ontology,
                                                                        terms_blacklist=config.get_module_property(
                                                                            module=Module.GO,
                                                                            prop=ConfigModuleProperty.EXCLUDE_TERMS))
         elif associations_type == DataType.DO:
+            logger.info("Setting DO associations")
             self.do_associations = self.remove_blacklisted_annotations(association_set=associations,
                                                                        ontology=self.do_ontology,
                                                                        terms_blacklist=config.get_module_property(
                                                                            module=Module.DO_EXPERIMENTAL,
                                                                            prop=ConfigModuleProperty.EXCLUDE_TERMS))
         elif associations_type == DataType.EXPR:
+            logger.info("Setting Expression associations")
             self.expression_associations = self.remove_blacklisted_annotations(association_set=associations,
                                                                                ontology=self.do_ontology,
                                                                                terms_blacklist=config
