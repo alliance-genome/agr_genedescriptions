@@ -32,6 +32,7 @@ def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List
 
 
 def set_all_information_content_values(ontology: Ontology, relations: List[str] = None):
+    logger.info("calculating information content for all terms in ontology")
     roots = ontology.get_roots(relations=relations)
     for root_id in roots:
         if "num_subsumers" not in ontology.node(root_id):
@@ -220,6 +221,7 @@ def get_best_nodes_ic(node_ids: List[str], ontology: Ontology, max_number_of_ter
     """
     common_ancestors = get_all_common_ancestors(node_ids=node_ids, ontology=ontology)
     if "IC" not in ontology.node(common_ancestors[0][0]):
+        logger.warning("ontology terms do not have information content values set")
         set_all_information_content_values(ontology=ontology)
     values = [0 if ontology.node(node[0])["depth"] < min_distance_from_root else
               ontology.node(node[0])["IC"] * (1 + slim_terms_ic_bonus_perc) if slim_set and node[0] in slim_set else
