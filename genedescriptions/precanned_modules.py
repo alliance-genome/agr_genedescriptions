@@ -59,23 +59,24 @@ def set_gene_ontology_module(dm: DataManager, conf_parser: GenedescConfigParser,
 
 
 def set_disease_module(df: DataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription, gene: Gene,
-                       orthologs_key_diseases=None):
+                       orthologs_key_diseases=None, human: bool=False):
     do_sentence_exp_generator = OntologySentenceGenerator(gene_id=gene.id,
                                                           module=Module.DO_EXPERIMENTAL, data_manager=df,
-                                                          config=conf_parser, limit_to_group="EXPERIMENTAL")
+                                                          config=conf_parser, limit_to_group="EXPERIMENTAL",
+                                                          humans=human)
     disease_exp_module_sentences = do_sentence_exp_generator.get_module_sentences(
         config=conf_parser, aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module=Module.DO_EXPERIMENTAL,
                                                                module_sentences=disease_exp_module_sentences)
     do_sentence_bio_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.DO_BIOMARKER,
                                                           data_manager=df, config=conf_parser,
-                                                          limit_to_group="BIOMARKER")
+                                                          limit_to_group="BIOMARKER", humans=human)
     disease_bio_module_sentences = do_sentence_bio_generator.get_module_sentences(
         config=conf_parser, aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module=Module.DO_BIOMARKER,
                                                                module_sentences=disease_bio_module_sentences)
     do_via_orth_sentence_generator = OntologySentenceGenerator(
-        gene_id=gene.id, module=Module.DO_ORTHOLOGY, data_manager=df, config=conf_parser)
+        gene_id=gene.id, module=Module.DO_ORTHOLOGY, data_manager=df, config=conf_parser, humans=human)
     disease_via_orth_module_sentences = do_via_orth_sentence_generator.get_module_sentences(
         config=conf_parser, aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False,
         high_priority_term_ids=orthologs_key_diseases)
