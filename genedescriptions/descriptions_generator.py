@@ -170,7 +170,8 @@ class OntologySentenceGenerator(object):
                     return ModuleSentences(sentences)
         if merge_groups_with_same_prefix:
             sentences = self.merge_sentences_with_same_prefix(
-                sentences=sentences, remove_parent_terms=remove_parents, rename_cell=rename_cell)
+                sentences=sentences, remove_parent_terms=remove_parents, rename_cell=rename_cell,
+                high_priority_term_ids=high_priority_term_ids)
         return ModuleSentences(sentences)
 
     def get_trimmed_terms_by_common_ancestor(self, terms: Set[str], terms_already_covered, aspect: str,
