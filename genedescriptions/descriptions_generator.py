@@ -222,13 +222,15 @@ class OntologySentenceGenerator(object):
         return terms, add_others, ancestors_covering_multiple_children
 
     def merge_sentences_with_same_prefix(self, sentences: List[Sentence], remove_parent_terms: bool = True,
-                                         rename_cell: bool = False):
+                                         rename_cell: bool = False, high_priority_term_ids: List[str] = None):
         """merge sentences with the same prefix
 
         Args:
             sentences (List[Sentence]): a list of sentences
             remove_parent_terms (bool): whether to remove parent terms if present in the merged set of terms
             rename_cell (bool): whether to rename the term 'cell'
+            high_priority_term_ids (List[str]): list of ids for terms that must always appear in the sentence with
+                higher priority than the other terms. Trimming is not applied to these terms
         Returns:
             List[Sentence]: the list of merged sentences, sorted by (merged) evidence group priority
         """
@@ -255,7 +257,9 @@ class OntologySentenceGenerator(object):
         if remove_parent_terms:
             for prefix, sent_merger in merged_sentences.items():
                 terms_no_ancestors = sent_merger.terms_ids - set([ancestor for node_id in sent_merger.terms_ids for
-                                                                  ancestor in self.ontology.ancestors(node_id)])
+                                                                  ancestor in self.ontology.ancestors(node_id) if not
+                                                                  high_priority_term_ids or ancestor not in
+                                                                  high_priority_term_ids])
                 if len(sent_merger.terms_ids) > len(terms_no_ancestors):
                     logger.debug("Removed " + str(len(sent_merger.terms_ids) - len(terms_no_ancestors)) +
                                  " parents from terms while merging sentences with same prefix")
