@@ -238,10 +238,27 @@ def get_best_nodes_ic(node_ids: List[str], ontology: Ontology, max_number_of_ter
 
 
 def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 0):
+    # check if all ids are connected to the same root node
+    common_root = None
+    for node_id in node_ids:
+        onto_node = ontology.node(node_id)
+        if "meta" in onto_node and "basicPropertyValues" in onto_node["meta"]:
+            for basic_prop_val in onto_node["meta"]["basicPropertyValues"]:
+                if basic_prop_val["pred"] == "OIO:hasOBONamespace":
+                    if common_root and common_root != basic_prop_val["val"]:
+                        raise ValueError("Cannot get common ancestors of nodes connected to different roots")
+                    common_root = basic_prop_val["val"]
+    [ontology.node(node_id) for node_id in node_ids]
     ancestors = defaultdict(list)
     for node_id in node_ids:
         for ancestor in ontology.ancestors(node=node_id, reflexive=True):
-            if ontology.node(ancestor)["depth"] >= min_distance_from_root:
+            onto_anc = ontology.node(ancestor)
+            onto_anc_root = None
+            if "meta" in onto_anc and "basicPropertyValues" in onto_anc["meta"]:
+                for basic_prop_val in onto_anc["meta"]["basicPropertyValues"]:
+                    if basic_prop_val["pred"] == "OIO:hasOBONamespace":
+                        onto_anc_root = basic_prop_val["val"]
+            if onto_anc["depth"] >= min_distance_from_root and (not onto_anc_root or onto_anc_root == common_root):
                 ancestors[ancestor].append(node_id)
     return [(ancestor, ontology.label(ancestor), set(covered_nodes)) for ancestor, covered_nodes in ancestors.items() if
             len(covered_nodes) > 1 or ancestor == covered_nodes[0]]
