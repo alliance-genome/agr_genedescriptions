@@ -89,6 +89,8 @@ class GeneDescription(object):
             if self.description and self.description != self.gene_name:
                 self.description = self.description[0:-1] + "; " + desc + "."
             else:
+                if not self.gene_name:
+                    desc = desc[0].upper() + desc[1:]
                 self.description = self.gene_name + " " + desc + "." if self.add_gene_name else desc + "."
             if module == Module.GO_FUNCTION:
                 self.go_function_description = self._get_description(desc, self.go_function_description)
