@@ -40,12 +40,12 @@ class TestDescriptionsGenerator(unittest.TestCase):
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        gene_desc.set_or_extend_module_description_and_final_stats(module=Module.GO, module_sentences=sentences)
+        gene_desc.set_or_extend_module_description_and_final_stats(module=Module.GO_PROCESS, module_sentences=sentences)
         self.assertTrue(gene_desc.description, "Is involved in several processes, including axo-dendritic transport, "
                                                "establishment of mitotic spindle orientation, and positive regulation "
                                                "of extent of heterochromatin assembly")
         gene_desc = GeneDescription(gene_id="FB:FBgn0027655", gene_name="Test gene", add_gene_name=True)
-        gene_desc.set_or_extend_module_description_and_final_stats(module=Module.GO, module_sentences=sentences)
+        gene_desc.set_or_extend_module_description_and_final_stats(module=Module.GO_PROCESS, module_sentences=sentences)
         self.assertTrue(gene_desc.description, "Test gene is involved in several processes, including axo-dendritic "
                                                "transport, establishment of mitotic spindle orientation, and positive "
                                                "regulation of extent of heterochromatin assembly")

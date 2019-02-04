@@ -174,14 +174,14 @@ class GeneDescription(object):
                     self.protein_domain_description[1:]
             # Multimodule fields
             if module == Module.GO_PROCESS or module == Module.GO_FUNCTION or module == Module.GO_COMPONENT:
-                self.go_description = "; ".join([sent for sent in [self.go_function_description,
-                                                                   self.go_process_description,
-                                                                   self.go_component_description] if sent])
+                self.go_description = "; ".join([sent[0].lower() + sent[1:] for sent in
+                                                 [self.go_function_description, self.go_process_description,
+                                                  self.go_component_description] if sent])
                 self.go_description = self.go_description[0].upper() + self.go_description[1:]
             if module == Module.DO_EXPERIMENTAL or module == Module.DO_BIOMARKER or module == Module.DO_ORTHOLOGY:
-                self.do_description = "; ".join([sent for sent in [self.do_experimental_description,
-                                                                   self.do_biomarker_description,
-                                                                   self.do_orthology_description] if sent])
+                self.do_description = "; ".join([sent[0].lower() + sent[1:] for sent in
+                                                 [self.do_experimental_description, self.do_biomarker_description,
+                                                  self.do_orthology_description] if sent])
                 self.do_description = self.do_description[0].upper() + self.do_description[1:]
                 self.stats.number_final_do_term_covering_multiple_initial_do_terms = self.do_description.count(
                     "(multiple)")
