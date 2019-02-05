@@ -2,12 +2,11 @@ import logging
 import unittest
 import os
 
-from genedescriptions.commons import Module, Gene
+from genedescriptions.commons import Module
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.data_manager import DataManager, DataType
 from genedescriptions.descriptions_generator import OntologySentenceGenerator
 from genedescriptions.gene_description import GeneDescription
-from genedescriptions.precanned_modules import set_gene_ontology_module
 
 logger = logging.getLogger("Gene Ontology Module tests")
 

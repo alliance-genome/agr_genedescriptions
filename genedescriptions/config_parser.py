@@ -27,7 +27,7 @@ class ConfigModuleProperty(Enum):
 class GenedescConfigParser(object):
     def __init__(self, file_path):
         with open(file_path) as conf_file:
-            self.config = yaml.load(conf_file)
+            self.config = yaml.safe_load(conf_file)
 
     def get_module_property(self, module: Module, prop: ConfigModuleProperty):
         module_name = self._get_module_name(module)

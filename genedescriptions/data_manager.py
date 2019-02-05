@@ -18,7 +18,6 @@ from ontobio.io.gafparser import GafParser
 from genedescriptions.commons import Gene, DataType, Module
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.ontology_tools import set_all_depths_in_subgraph
-from genedescriptions.sentence_generation_functions import is_human_ortholog_name_valid, rename_human_ortholog_name
 
 
 class ExpressionClusterType(Enum):

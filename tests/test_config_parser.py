@@ -4,7 +4,6 @@ import os
 
 from genedescriptions.commons import Module
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
-from genedescriptions.data_manager import DataManager, DataType
 
 logger = logging.getLogger("Config Parser tests")
 

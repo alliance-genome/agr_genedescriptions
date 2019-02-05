@@ -2,9 +2,7 @@ import json
 import logging
 import os
 import ssl
-import urllib
-
-from urllib import request
+import urllib.request
 
 logger = logging.getLogger(__name__)
 

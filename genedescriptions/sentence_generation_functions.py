@@ -3,8 +3,6 @@ import re
 from collections import defaultdict
 from typing import Set, List, Tuple, Dict, Union
 from ontobio import Ontology
-
-from genedescriptions.api_manager import APIManager
 from genedescriptions.commons import Sentence, DataType, Module
 
 logger = logging.getLogger(__name__)

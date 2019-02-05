@@ -2,10 +2,8 @@ import logging
 import unittest
 import os
 
-from genedescriptions.commons import Module
-from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
-from genedescriptions.data_manager import DataManager, DataType
-from genedescriptions.descriptions_generator import OntologySentenceGenerator
+from genedescriptions.config_parser import GenedescConfigParser
+from genedescriptions.data_manager import DataType
 from wormbase.wb_data_manager import WBDataManager
 
 logger = logging.getLogger("Gene Ontology Module tests")

@@ -2,7 +2,7 @@
 import logging
 import math
 from collections import defaultdict
-from typing import List, Dict, Tuple, Union, Set
+from typing import List, Tuple, Union, Set
 from ontobio.ontol import Ontology
 
 
@@ -248,7 +248,6 @@ def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distan
                     if common_root and common_root != basic_prop_val["val"]:
                         raise ValueError("Cannot get common ancestors of nodes connected to different roots")
                     common_root = basic_prop_val["val"]
-    [ontology.node(node_id) for node_id in node_ids]
     ancestors = defaultdict(list)
     for node_id in node_ids:
         for ancestor in ontology.ancestors(node=node_id, reflexive=True):
