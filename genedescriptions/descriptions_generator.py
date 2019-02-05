@@ -220,6 +220,7 @@ class OntologySentenceGenerator(object):
             # remove children if parent is present in terms for key diseases when they are too many
             terms = [term for term in terms if len(set(self.ontology.ancestors(term)).intersection(set(terms))) == 0]
         if len(terms) > max_terms:
+            logger.debug("Reached maximum number of terms. Cutting off some key diseases")
             add_others = True
         terms_low_priority = [term for term in terms_low_priority if term not in terms_high_priority]
         terms.extend(terms_low_priority)
