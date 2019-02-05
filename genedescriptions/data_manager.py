@@ -10,6 +10,7 @@ from enum import Enum
 from collections import defaultdict
 from typing import List, Iterable, Dict
 from ontobio import AssociationSetFactory
+from ontobio.io.assocparser import AssocParserConfig
 from ontobio.ontol_factory import OntologyFactory
 from ontobio.ontol import Ontology
 from ontobio.assocmodel import AssociationSet
@@ -246,27 +247,19 @@ class DataManager(object):
         """
         if associations_type == DataType.GO:
             logger.info("Setting GO associations")
-            self.go_associations = self.remove_blacklisted_annotations(association_set=associations,
-                                                                       ontology=self.go_ontology,
-                                                                       terms_blacklist=config.get_module_property(
-                                                                           module=Module.GO,
-                                                                           prop=ConfigModuleProperty.EXCLUDE_TERMS))
+            self.go_associations = self.remove_blacklisted_annotations(
+                association_set=associations, ontology=self.go_ontology, terms_blacklist=config.get_module_property(
+                    module=Module.GO, prop=ConfigModuleProperty.EXCLUDE_TERMS))
         elif associations_type == DataType.DO:
             logger.info("Setting DO associations")
-            self.do_associations = self.remove_blacklisted_annotations(association_set=associations,
-                                                                       ontology=self.do_ontology,
-                                                                       terms_blacklist=config.get_module_property(
-                                                                           module=Module.DO_EXPERIMENTAL,
-                                                                           prop=ConfigModuleProperty.EXCLUDE_TERMS))
+            self.do_associations = self.remove_blacklisted_annotations(
+                association_set=associations, ontology=self.do_ontology, terms_blacklist=config.get_module_property(
+                    module=Module.DO_EXPERIMENTAL, prop=ConfigModuleProperty.EXCLUDE_TERMS))
         elif associations_type == DataType.EXPR:
             logger.info("Setting Expression associations")
-            self.expression_associations = self.remove_blacklisted_annotations(association_set=associations,
-                                                                               ontology=self.do_ontology,
-                                                                               terms_blacklist=config
-                                                                               .get_module_property(
-                                                                                   module=Module.EXPRESSION,
-                                                                                   prop=ConfigModuleProperty
-                                                                                       .EXCLUDE_TERMS))
+            self.expression_associations = self.remove_blacklisted_annotations(
+                association_set=associations, ontology=self.do_ontology, terms_blacklist=config.get_module_property(
+                    module=Module.EXPRESSION, prop=ConfigModuleProperty.EXCLUDE_TERMS))
 
     def load_associations_from_file(self, associations_type: DataType, associations_url: str,
                                     associations_cache_path: str, config: GenedescConfigParser) -> None:
@@ -278,31 +271,32 @@ class DataManager(object):
             associations_cache_path (str): path to cache file for the associations
             config (GenedescConfigParser): configuration object where to read properties
         """
+        assoc_config = AssocParserConfig(remove_double_prefixes=True, paint=True)
         if associations_type == DataType.GO:
             logger.info("Loading GO associations from file")
-            self.go_associations = AssociationSetFactory().create_from_assocs(assocs=GafParser().parse(
-                file=self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url),
-                skipheader=True), ontology=self.go_ontology)
-            self.go_associations = self.remove_blacklisted_annotations(association_set=self.go_associations,
-                                                                       ontology=self.go_ontology,
-                                                                       terms_blacklist=config.get_module_property(
-                                                                           module=Module.GO,
-                                                                           prop=ConfigModuleProperty.EXCLUDE_TERMS))
+            self.go_associations = AssociationSetFactory().create_from_assocs(assocs=GafParser(
+                config=assoc_config).parse(file=self._get_cached_file(cache_path=associations_cache_path,
+                                                                      file_source_url=associations_url),
+                                           skipheader=True), ontology=self.go_ontology)
+            self.go_associations = self.remove_blacklisted_annotations(
+                association_set=self.go_associations, ontology=self.go_ontology,
+                terms_blacklist=config.get_module_property(module=Module.GO, prop=ConfigModuleProperty.EXCLUDE_TERMS))
         elif associations_type == DataType.DO:
             logger.info("Loading DO associations from file")
-            self.do_associations = AssociationSetFactory().create_from_assocs(assocs=GafParser().parse(
-                file=self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url),
-                skipheader=True), ontology=self.do_ontology)
-            self.do_associations = self.remove_blacklisted_annotations(association_set=self.do_associations,
-                                                                       ontology=self.do_ontology,
-                                                                       terms_blacklist=config.get_module_property(
-                                                                           module=Module.DO_EXP_AND_BIO,
-                                                                           prop=ConfigModuleProperty.EXCLUDE_TERMS))
+            self.do_associations = AssociationSetFactory().create_from_assocs(
+                assocs=GafParser(config=assoc_config).parse(file=self._get_cached_file(
+                    cache_path=associations_cache_path, file_source_url=associations_url), skipheader=True),
+                ontology=self.do_ontology)
+            self.do_associations = self.remove_blacklisted_annotations(
+                association_set=self.do_associations, ontology=self.do_ontology,
+                terms_blacklist=config.get_module_property(module=Module.DO_EXP_AND_BIO,
+                                                           prop=ConfigModuleProperty.EXCLUDE_TERMS))
         elif associations_type == DataType.EXPR:
             logger.info("Loading Expression associations from file")
-            self.expression_associations = AssociationSetFactory().create_from_assocs(assocs=GafParser().parse(
-                file=self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url),
-                skipheader=True), ontology=self.expression_ontology)
+            self.expression_associations = AssociationSetFactory().create_from_assocs(
+                assocs=GafParser(config=assoc_config).parse(file=self._get_cached_file(
+                    cache_path=associations_cache_path, file_source_url=associations_url), skipheader=True),
+                ontology=self.expression_ontology)
             self.expression_associations = self.remove_blacklisted_annotations(
                 association_set=self.expression_associations, ontology=self.expression_ontology,
                 terms_blacklist=config.get_module_property(module=Module.EXPRESSION,

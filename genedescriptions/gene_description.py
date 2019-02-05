@@ -39,11 +39,18 @@ class GeneDescription(object):
         self.add_gene_name = add_gene_name
 
     @staticmethod
-    def _get_description(desc, desc_destination):
+    def _concatenate_description(desc, desc_destination):
         if desc_destination:
-            return desc_destination + "; " + desc
+            if desc_destination.endswith("."):
+                desc_destination = desc_destination[0:-1]
+            return desc_destination + "; " + desc + "."
         else:
-            return desc
+            return desc[0].upper() + desc[1:] + "."
+
+    @staticmethod
+    def _merge_descriptions(desc_list: List[str]):
+        desc = "; ".join([sent[0].lower() + sent[1:].rstrip(".") for sent in desc_list if sent])
+        return desc[0].upper() + desc[1:] + "."
 
     @staticmethod
     def _get_merged_ids(ids, ids_destination):
@@ -89,100 +96,69 @@ class GeneDescription(object):
             if self.description and self.description != self.gene_name:
                 self.description = self.description[0:-1] + "; " + desc + "."
             else:
-                if not self.gene_name:
+                if not self.add_gene_name or not self.gene_name:
                     desc = desc[0].upper() + desc[1:]
                 self.description = self.gene_name + " " + desc + "." if self.add_gene_name else desc + "."
             if module == Module.GO_FUNCTION:
-                self.go_function_description = self._get_description(desc, self.go_function_description)
-                self.go_function_description = self.go_function_description[0].upper() + self.go_function_description[1:]
+                self.go_function_description = self._concatenate_description(desc, self.go_function_description)
                 self.stats.set_final_go_ids_f = self._get_merged_ids(module_sentences.get_ids(experimental_only=False),
                                                                      self.stats.set_final_go_ids_f)
                 self.stats.set_final_experimental_go_ids_f = self._get_merged_ids(module_sentences.get_ids(
                     experimental_only=True), self.stats.set_final_experimental_go_ids_f)
             elif module == Module.GO_PROCESS:
-                self.go_process_description = self._get_description(desc, self.go_process_description)
-                self.go_process_description = self.go_process_description[0].upper() + self.go_process_description[1:]
+                self.go_process_description = self._concatenate_description(desc, self.go_process_description)
                 self.stats.set_final_go_ids_p = self._get_merged_ids(module_sentences.get_ids(experimental_only=False),
                                                                      self.stats.set_final_go_ids_p)
                 self.stats.set_final_experimental_go_ids_p = self._get_merged_ids(module_sentences.get_ids(
                     experimental_only=True), self.stats.set_final_experimental_go_ids_p)
             elif module == Module.GO_COMPONENT:
-                self.go_component_description = self._get_description(desc, self.go_component_description)
-                self.go_component_description = self.go_component_description[0].upper() + \
-                    self.go_component_description[1:]
+                self.go_component_description = self._concatenate_description(desc, self.go_component_description)
                 self.stats.set_final_go_ids_c = self._get_merged_ids(module_sentences.get_ids(experimental_only=False),
                                                                      self.stats.set_final_go_ids_c)
                 self.stats.set_final_experimental_go_ids_c = self._get_merged_ids(module_sentences.get_ids(
                     experimental_only=True), self.stats.set_final_experimental_go_ids_c)
             elif module == Module.EXPRESSION:
-                self.tissue_expression_description = self._get_description(desc, self.tissue_expression_description)
-                self.tissue_expression_description = self.tissue_expression_description[0].upper() + \
-                    self.tissue_expression_description[1:]
+                self.tissue_expression_description = self._concatenate_description(desc, self.tissue_expression_description)
                 self.stats.set_final_expression_ids = self._get_merged_ids(
                     module_sentences.get_ids(experimental_only=False), self.stats.set_final_expression_ids)
                 self.stats.set_final_experimental_go_ids_c = self._get_merged_ids(module_sentences.get_ids(
                     experimental_only=True), self.stats.set_final_experimental_go_ids_c)
             elif module == Module.EXPRESSION_CLUSTER_GENE:
-                self.gene_expression_cluster_description = self._get_description(
+                self.gene_expression_cluster_description = self._concatenate_description(
                     desc, self.gene_expression_cluster_description)
-                self.gene_expression_cluster_description = self.gene_expression_cluster_description[0].upper() + \
-                    self.gene_expression_cluster_description[1:]
             elif module == Module.EXPRESSION_CLUSTER_ANATOMY:
-                self.anatomy_expression_cluster_description = self._get_description(
+                self.anatomy_expression_cluster_description = self._concatenate_description(
                     desc, self.anatomy_expression_cluster_description)
-                self.anatomy_expression_cluster_description = self.anatomy_expression_cluster_description[0].upper() + \
-                    self.anatomy_expression_cluster_description[1:]
             elif module == Module.EXPRESSION_CLUSTER_MOLECULE:
-                self.molecule_expression_cluster_description = self._get_description(
+                self.molecule_expression_cluster_description = self._concatenate_description(
                     desc, self.molecule_expression_cluster_description)
-                self.molecule_expression_cluster_description = \
-                    self.molecule_expression_cluster_description[0].upper() + \
-                    self.molecule_expression_cluster_description[1:]
             elif module == Module.DO_EXPERIMENTAL:
-                self.do_experimental_description = self._get_description(desc, self.do_experimental_description)
-                self.do_experimental_description = self.do_experimental_description[0].upper() + \
-                    self.do_experimental_description[1:]
+                self.do_experimental_description = self._concatenate_description(desc, self.do_experimental_description)
                 self.stats.set_final_do_ids = self._get_merged_ids(module_sentences.get_ids(experimental_only=False),
                                                                    self.stats.set_final_do_ids)
             elif module == Module.DO_BIOMARKER:
-                self.do_biomarker_description = self._get_description(desc, self.do_biomarker_description)
-                self.do_biomarker_description = self.do_biomarker_description[0].upper() + \
-                    self.do_biomarker_description[1:]
+                self.do_biomarker_description = self._concatenate_description(desc, self.do_biomarker_description)
                 self.stats.set_final_do_ids = self._get_merged_ids(module_sentences.get_ids(experimental_only=False),
                                                                    self.stats.set_final_do_ids)
             elif module == Module.DO_ORTHOLOGY:
-                self.do_orthology_description = self._get_description(desc, self.do_orthology_description)
-                self.do_orthology_description = self.do_orthology_description[0].upper() + \
-                    self.do_orthology_description[1:]
+                self.do_orthology_description = self._concatenate_description(desc, self.do_orthology_description)
                 self.stats.set_final_do_ids = self._get_merged_ids(module_sentences.get_ids(experimental_only=False),
                                                                    self.stats.set_final_do_ids)
             elif module == Module.SISTER_SP:
-                self.sister_species_description = self._get_description(desc, self.sister_species_description)
-                self.sister_species_description = self.sister_species_description[0].upper() + \
-                    self.sister_species_description[1:]
+                self.sister_species_description = self._concatenate_description(desc, self.sister_species_description)
             elif module == Module.ORTHOLOGY:
-                self.orthology_description = self._get_description(desc, self.orthology_description)
-                self.orthology_description = self.orthology_description[0].upper() + \
-                    self.orthology_description[1:]
+                self.orthology_description = self._concatenate_description(desc, self.orthology_description)
             elif module == Module.INFO_POOR_HUMAN_FUNCTION:
-                self.human_gene_function_description = self._get_description(desc, self.human_gene_function_description)
-                self.human_gene_function_description = self.human_gene_function_description[0].upper() + \
-                    self.human_gene_function_description[1:]
+                self.human_gene_function_description = self._concatenate_description(desc, self.human_gene_function_description)
             elif module == Module.PROTEIN_DOMAIN:
-                self.protein_domain_description = self._get_description(desc, self.protein_domain_description)
-                self.protein_domain_description = self.protein_domain_description[0].upper() + \
-                    self.protein_domain_description[1:]
+                self.protein_domain_description = self._concatenate_description(desc, self.protein_domain_description)
             # Multimodule fields
             if module == Module.GO_PROCESS or module == Module.GO_FUNCTION or module == Module.GO_COMPONENT:
-                self.go_description = "; ".join([sent[0].lower() + sent[1:] for sent in
-                                                 [self.go_function_description, self.go_process_description,
-                                                  self.go_component_description] if sent])
-                self.go_description = self.go_description[0].upper() + self.go_description[1:]
+                self.go_description = self._merge_descriptions(
+                    [self.go_function_description, self.go_process_description, self.go_component_description])
             if module == Module.DO_EXPERIMENTAL or module == Module.DO_BIOMARKER or module == Module.DO_ORTHOLOGY:
-                self.do_description = "; ".join([sent[0].lower() + sent[1:] for sent in
-                                                 [self.do_experimental_description, self.do_biomarker_description,
-                                                  self.do_orthology_description] if sent])
-                self.do_description = self.do_description[0].upper() + self.do_description[1:]
+                self.do_description = self._merge_descriptions(
+                    [self.do_experimental_description, self.do_biomarker_description, self.do_orthology_description])
                 self.stats.number_final_do_term_covering_multiple_initial_do_terms = self.do_description.count(
                     "(multiple)")
 
