@@ -216,6 +216,11 @@ class OntologySentenceGenerator(object):
             terms_low_priority = [term_id for term_id, covered_nodes in merged_terms_coverset]
             terms_already_covered.update([e for term_id, covered_nodes in merged_terms_coverset for e in covered_nodes])
         terms = terms_high_priority
+        if len(terms) > max_terms:
+            # remove children if parent is present in terms for key diseases when they are too many
+            terms = [term for term in terms if len(set(self.ontology.ancestors(term)).intersection(set(terms))) == 0]
+        if len(terms) > max_terms:
+            add_others = True
         terms_low_priority = [term for term in terms_low_priority if term not in terms_high_priority]
         terms.extend(terms_low_priority)
         # cutoff terms - if number of terms with high priority is higher than max_num_terms
