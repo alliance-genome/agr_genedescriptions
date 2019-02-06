@@ -266,21 +266,23 @@ def main():
                                             conf_parser=conf_parser, gene=gene)
             desc_writer.add_gene_desc(gene_desc)
         logger.info("All genes processed for " + organism)
+        date_prefix = datetime.date.today().strftime("%Y%m%d")
         if "json" in args.output_formats:
             logger.info("Writing descriptions to json")
-            desc_writer.write_json(os.path.join(conf_parser.get_out_dir(), organism + ".json"),
+            desc_writer.write_json(os.path.join(conf_parser.get_out_dir(), date_prefix + "_" + organism + ".json"),
                                    pretty=True, include_single_gene_stats=True, data_manager=dm)
         if "txt" in args.output_formats:
             logger.info("Writing descriptions to txt")
-            desc_writer.write_plain_text(os.path.join(conf_parser.get_out_dir(), organism + ".txt"))
+            desc_writer.write_plain_text(os.path.join(conf_parser.get_out_dir(), date_prefix + "_" + organism + ".txt"))
         if "tsv" in args.output_formats:
             logger.info("Writing descriptions to tsv")
-            desc_writer.write_tsv(os.path.join(conf_parser.get_out_dir(), organism + ".tsv"))
+            desc_writer.write_tsv(os.path.join(conf_parser.get_out_dir(), date_prefix + "_" + organism + ".tsv"))
         if "ace" in args.output_formats:
             logger.info("Writing descriptions to ace")
             curators = ["WBPerson324", "WBPerson37462"]
             release_version = conf_parser.get_wb_release()
-            desc_writer.write_ace(os.path.join(conf_parser.get_out_dir(), organism + ".ace"), curators, release_version)
+            desc_writer.write_ace(os.path.join(conf_parser.get_out_dir(), date_prefix + "_" + organism + ".ace"),
+                                  curators, release_version)
 
 
 if __name__ == '__main__':
