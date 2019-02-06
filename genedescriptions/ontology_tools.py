@@ -263,6 +263,24 @@ def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distan
             len(covered_nodes) > 1 or ancestor == covered_nodes[0]]
 
 
+def get_best_nodes(terms, trimming_algorithm, max_terms, ontology, slim_bonus_perc: int = None,
+                   min_dist_from_root: int = 0, slim_set = None):
+    merged_terms_coverset = None
+    add_others = False
+    if trimming_algorithm == "naive":
+        add_others, merged_terms_coverset = get_best_nodes_naive(
+            node_ids=list(terms), ontology=ontology, min_distance_from_root=min_dist_from_root)
+    elif trimming_algorithm == "ic":
+        add_others, merged_terms_coverset = get_best_nodes_ic(
+            node_ids=list(terms), ontology=ontology, max_number_of_terms=max_terms,
+            min_distance_from_root=min_dist_from_root, slim_terms_ic_bonus_perc=slim_bonus_perc, slim_set=slim_set)
+    elif trimming_algorithm == "naive2":
+        add_others, merged_terms_coverset = get_best_nodes_lca(
+            node_ids=list(terms), ontology=ontology, min_distance_from_root=min_dist_from_root)
+    terms = [term_id for term_id, covered_nodes in merged_terms_coverset]
+    return terms, add_others, merged_terms_coverset
+
+
 def _set_num_subsumers_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
     parents = ontology.parents(root_id)
     if len(parents) == 1:

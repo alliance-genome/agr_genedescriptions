@@ -193,35 +193,23 @@ class OntologySentenceGenerator(object):
         if terms_high_priority is None:
             terms_high_priority = []
         terms_already_covered.update(terms_high_priority)
-        terms_low_priority = [term for term in terms if not high_priority_terms or term not in
-                              high_priority_terms]
+        if len(terms_high_priority) > max_terms:
+            # remove children if parent is present in terms for key diseases when they are too many
+            terms_high_priority = [term for term in terms_high_priority if
+                                   len(set(self.ontology.ancestors(term)).intersection(set(terms_high_priority))) == 0]
+        if len(terms_high_priority) > max_terms:
+            logger.debug("Reached maximum number of terms. Applying trimming to key diseases")
+            terms, add_others, merged_terms_coverset = get_best_nodes(
+                terms_high_priority, trimming_algorithm, max_terms, self.ontology, slim_bonus_perc, dist_root[aspect],
+                slim_set)
+        terms_low_priority = [term for term in terms if not high_priority_terms or term not in high_priority_terms]
         trimming_threshold = max_terms - len(terms_high_priority)
         if 0 < trimming_threshold < len(terms_low_priority):
-            merged_terms_coverset = None
-            if trimming_algorithm == "naive":
-                add_others, merged_terms_coverset = get_best_nodes_naive(
-                    node_ids=list(terms_low_priority), ontology=self.ontology, min_distance_from_root=dist_root[aspect])
-            elif trimming_algorithm == "ic":
-                add_others, merged_terms_coverset = get_best_nodes_ic(
-                    node_ids=list(terms_low_priority), ontology=self.ontology, max_number_of_terms=trimming_threshold,
-                    min_distance_from_root=dist_root[aspect], slim_terms_ic_bonus_perc=slim_bonus_perc,
-                    slim_set=slim_set)
-            elif trimming_algorithm == "naive2":
-                add_others, merged_terms_coverset = get_best_nodes_lca(
-                    node_ids=list(terms_low_priority), ontology=self.ontology, min_distance_from_root=dist_root[aspect])
-            if add_mul_common_anc:
-                ancestors_covering_multiple_children = {self.ontology.label(term_id, id_if_null=True) for
-                                                        term_id, covered_nodes in merged_terms_coverset if
-                                                        term_id not in terms_low_priority}
-            terms_low_priority = [term_id for term_id, covered_nodes in merged_terms_coverset]
+            terms, add_others, merged_terms_coverset = get_best_nodes(
+                terms_low_priority, trimming_algorithm, trimming_threshold, self.ontology, slim_bonus_perc,
+                dist_root[aspect], slim_set)
             terms_already_covered.update([e for term_id, covered_nodes in merged_terms_coverset for e in covered_nodes])
         terms = terms_high_priority
-        if len(terms) > max_terms:
-            # remove children if parent is present in terms for key diseases when they are too many
-            terms = [term for term in terms if len(set(self.ontology.ancestors(term)).intersection(set(terms))) == 0]
-        if len(terms) > max_terms:
-            logger.debug("Reached maximum number of terms. Cutting off some key diseases")
-            add_others = True
         terms_low_priority = [term for term in terms_low_priority if term not in terms_high_priority]
         terms.extend(terms_low_priority)
         # cutoff terms - if number of terms with high priority is higher than max_num_terms
