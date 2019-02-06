@@ -19,9 +19,10 @@ def main():
     print("\t<IsTruncated>false</IsTruncated>")
 
     for release_version in os.listdir(args.input_dir):
-        for release_type in os.listdir(release_version):
-            for release_date in os.listdir(release_type):
-                for json_file_path in os.listdir(release_date):
+        for release_type in os.listdir(os.path.join(args.input_dir, release_version)):
+            for release_date in os.listdir(os.path.join(args.input_dir, release_version, release_type)):
+                for json_file_path in os.listdir(os.path.join(args.input_dir, release_version, release_type,
+                                                              release_date)):
                     if json_file_path.endswith(".json"):
                         print("\t<Contents>")
                         print("\t\t<Key>gene-descriptions/" + release_version + "/" + release_type + "/" +
