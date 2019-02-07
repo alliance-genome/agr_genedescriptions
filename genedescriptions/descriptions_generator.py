@@ -185,7 +185,8 @@ class OntologySentenceGenerator(object):
                                                         prop=ConfigModuleProperty.TRIMMING_ALGORITHM)
         slim_set = self.data_manager.get_slim(module=self.module)
         slim_bonus_perc = config.get_module_property(module=self.module, prop=ConfigModuleProperty.SLIM_BONUS_PERC)
-        add_others = False
+        add_others_highp = False
+        add_others_lowp = False
         ancestors_covering_multiple_children = set()
         if not dist_root:
             dist_root = {'F': 1, 'P': 1, 'C': 2, 'D': 3, 'A': 3}
@@ -199,13 +200,13 @@ class OntologySentenceGenerator(object):
                                    len(set(self.ontology.ancestors(term)).intersection(set(terms_high_priority))) == 0]
         if len(terms_high_priority) > max_terms:
             logger.debug("Reached maximum number of terms. Applying trimming to key diseases")
-            terms, add_others, merged_terms_coverset = get_best_nodes(
+            terms, add_others_highp, merged_terms_coverset = get_best_nodes(
                 terms_high_priority, trimming_algorithm, max_terms, self.ontology, slim_bonus_perc, dist_root[aspect],
                 slim_set)
         terms_low_priority = [term for term in terms if not high_priority_terms or term not in high_priority_terms]
         trimming_threshold = max_terms - len(terms_high_priority)
         if 0 < trimming_threshold < len(terms_low_priority):
-            terms, add_others, merged_terms_coverset = get_best_nodes(
+            terms, add_others_lowp, merged_terms_coverset = get_best_nodes(
                 terms_low_priority, trimming_algorithm, trimming_threshold, self.ontology, slim_bonus_perc,
                 dist_root[aspect], slim_set)
             terms_already_covered.update([e for term_id, covered_nodes in merged_terms_coverset for e in covered_nodes])
@@ -214,7 +215,7 @@ class OntologySentenceGenerator(object):
         terms.extend(terms_low_priority)
         # cutoff terms - if number of terms with high priority is higher than max_num_terms
         terms = terms[0:max_terms]
-        return terms, add_others, ancestors_covering_multiple_children
+        return terms, add_others_highp or add_others_lowp, ancestors_covering_multiple_children
 
     def merge_sentences_with_same_prefix(self, sentences: List[Sentence], remove_parent_terms: bool = True,
                                          rename_cell: bool = False, high_priority_term_ids: List[str] = None):
