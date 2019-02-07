@@ -121,8 +121,6 @@ class GeneDescription(object):
                 self.tissue_expression_description = self._concatenate_description(desc, self.tissue_expression_description)
                 self.stats.set_final_expression_ids = self._get_merged_ids(
                     module_sentences.get_ids(experimental_only=False), self.stats.set_final_expression_ids)
-                self.stats.set_final_experimental_go_ids_c = self._get_merged_ids(module_sentences.get_ids(
-                    experimental_only=True), self.stats.set_final_experimental_go_ids_c)
             elif module == Module.EXPRESSION_CLUSTER_GENE:
                 self.gene_expression_cluster_description = self._concatenate_description(
                     desc, self.gene_expression_cluster_description)
