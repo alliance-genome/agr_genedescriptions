@@ -196,7 +196,7 @@ class OntologySentenceGenerator(object):
             terms_high_priority, add_others_highp_pc = self.remove_children_if_parents_present(
                 terms_high_priority, self.ontology, terms_already_covered)
         if len(terms_high_priority) > max_terms:
-            logger.debug("Reached maximum number of terms. Applying trimming to key diseases")
+            logger.debug("Reached maximum number of terms. Applying trimming to high priority terms")
             terms_high_priority, add_others_highp = get_best_nodes(
                 terms_high_priority, trimming_algorithm, max_terms, self.ontology, terms_already_covered,
                 ancestors_covering_multiple_children if add_mul_common_anc else None,
