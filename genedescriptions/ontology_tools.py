@@ -263,8 +263,9 @@ def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distan
             len(covered_nodes) > 1 or ancestor == covered_nodes[0]]
 
 
-def get_best_nodes(terms, trimming_algorithm, max_terms, ontology, slim_bonus_perc: int = None,
-                   min_dist_from_root: int = 0, slim_set = None):
+def get_best_nodes(terms, trimming_algorithm, max_terms, ontology, terms_already_covered,
+                   ancestors_covering_multiple_children: Set = None, slim_bonus_perc: int = None,
+                   min_dist_from_root: int = 0, slim_set=None):
     merged_terms_coverset = None
     add_others = False
     if trimming_algorithm == "naive":
@@ -278,7 +279,12 @@ def get_best_nodes(terms, trimming_algorithm, max_terms, ontology, slim_bonus_pe
         add_others, merged_terms_coverset = get_best_nodes_lca(
             node_ids=list(terms), ontology=ontology, min_distance_from_root=min_dist_from_root)
     terms = [term_id for term_id, covered_nodes in merged_terms_coverset]
-    return terms, add_others, merged_terms_coverset
+    if ancestors_covering_multiple_children:
+        ancestors_covering_multiple_children.update({ontology.label(term_id, id_if_null=True) for
+                                                     term_id, covered_nodes in merged_terms_coverset if
+                                                     term_id not in terms})
+    terms_already_covered.update([e for term_id, covered_nodes in merged_terms_coverset for e in covered_nodes])
+    return terms, add_others
 
 
 def _set_num_subsumers_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):

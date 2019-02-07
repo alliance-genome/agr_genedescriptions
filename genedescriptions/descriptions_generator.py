@@ -134,19 +134,17 @@ class OntologySentenceGenerator(object):
                                                        self.terms_groups[(aspect, qualifier)].items()],
                                                       key=lambda x: x[2]):
             ancestors_covering_multiple_children = set()
+            add_others_c = False
+            add_others_p = False
+            trimmed = False
+            add_others = False
             if del_overlap:
                 terms -= terms_already_covered
             if exclude_terms:
                 terms -= set(exclude_terms)
             if remove_parents:
-                terms_no_ancestors = terms - set([ancestor for node_id in terms for ancestor in
-                                                  self.ontology.ancestors(node_id) if not high_priority_term_ids or
-                                                  ancestor not in high_priority_term_ids])
-                if len(terms) > len(terms_no_ancestors):
-                    logger.debug("Removed " + str(len(terms) - len(terms_no_ancestors)) + " parents from terms")
-                    terms = terms_no_ancestors
-            trimmed = False
-            add_others = False
+                terms, add_others_p = self.remove_parents_if_child_present(terms, self.ontology, terms_already_covered,
+                                                                           high_priority_term_ids)
             if 0 < max_terms < len(terms):
                 trimmed = True
                 terms, add_others, ancestors_covering_multiple_children = self.get_trimmed_terms_by_common_ancestor(
@@ -154,9 +152,9 @@ class OntologySentenceGenerator(object):
             else:
                 terms_already_covered.update(terms)
             if remove_child_terms:
-                terms = [term for term in terms if
-                         len(set(self.ontology.ancestors(term)).intersection(set(terms))) == 0 or (
-                                 high_priority_term_ids and term in high_priority_term_ids)]
+                terms, add_others_c = self.remove_children_if_parents_present(
+                    terms, self.ontology, terms_already_covered, high_priority_term_ids)
+            add_others = add_others or add_others_c or add_others_p
             if (aspect, evidence_group, qualifier) in self.prepostfix_sentences_map and len(terms) > 0:
                 sentences.append(
                     _get_single_sentence(
@@ -194,25 +192,24 @@ class OntologySentenceGenerator(object):
         terms_high_priority = [term for term in terms if high_priority_terms and term in high_priority_terms]
         if terms_high_priority is None:
             terms_high_priority = []
-        terms_already_covered.update(terms_high_priority)
         if len(terms_high_priority) > max_terms:
-            # remove children if parent is present in terms for key diseases when they are too many
-            terms_high_priority_nochildren = [term for term in terms_high_priority if len(set(
-                self.ontology.ancestors(term)).intersection(set(terms_high_priority))) == 0]
-            if len(terms_high_priority_nochildren) < len(terms_high_priority):
-                add_others_highp_pc = True
+            terms_high_priority, add_others_highp_pc = self.remove_children_if_parents_present(
+                terms_high_priority, self.ontology, terms_already_covered)
         if len(terms_high_priority) > max_terms:
             logger.debug("Reached maximum number of terms. Applying trimming to key diseases")
-            terms, add_others_highp, merged_terms_coverset = get_best_nodes(
-                terms_high_priority, trimming_algorithm, max_terms, self.ontology, slim_bonus_perc, dist_root[aspect],
-                slim_set)
+            terms_high_priority, add_others_highp = get_best_nodes(
+                terms_high_priority, trimming_algorithm, max_terms, self.ontology, terms_already_covered,
+                ancestors_covering_multiple_children if add_mul_common_anc else None,
+                slim_bonus_perc, dist_root[aspect], slim_set)
+        else:
+            terms_already_covered.update(terms_high_priority)
         terms_low_priority = [term for term in terms if not high_priority_terms or term not in high_priority_terms]
         trimming_threshold = max_terms - len(terms_high_priority)
         if 0 < trimming_threshold < len(terms_low_priority):
-            terms, add_others_lowp, merged_terms_coverset = get_best_nodes(
-                terms_low_priority, trimming_algorithm, trimming_threshold, self.ontology, slim_bonus_perc,
+            terms_low_priority, add_others_lowp = get_best_nodes(
+                terms_low_priority, trimming_algorithm, trimming_threshold, self.ontology, terms_already_covered,
+                ancestors_covering_multiple_children if add_mul_common_anc else None, slim_bonus_perc,
                 dist_root[aspect], slim_set)
-            terms_already_covered.update([e for term_id, covered_nodes in merged_terms_coverset for e in covered_nodes])
         elif trimming_threshold <= 0 < len(terms_low_priority):
             add_others_lowp = True
         terms = terms_high_priority
@@ -221,6 +218,30 @@ class OntologySentenceGenerator(object):
         # cutoff terms - if number of terms with high priority is higher than max_num_terms
         terms = terms[0:max_terms]
         return terms, add_others_highp or add_others_lowp or add_others_highp_pc, ancestors_covering_multiple_children
+
+    @staticmethod
+    def remove_children_if_parents_present(terms, ontology, terms_already_covered: Set,
+                                           high_priority_terms: List[str] = None):
+        terms_nochildren = [term for term in terms if len(set(ontology.ancestors(term)).intersection(set(terms))) == 0
+                            or (high_priority_terms and term in high_priority_terms)]
+        if len(terms_nochildren) < len(terms):
+            terms_already_covered.update(set(terms) - set(terms_nochildren))
+            logger.debug("Removed " + str(len(terms) - len(terms_nochildren)) + " children from terms")
+            return terms_nochildren, True
+        else:
+            return terms, False
+
+    @staticmethod
+    def remove_parents_if_child_present(terms, ontology, terms_already_covered, high_priority_terms: List[str] = None):
+        terms_no_ancestors = terms - set([ancestor for node_id in terms for ancestor in
+                                          ontology.ancestors(node_id) if not high_priority_terms or
+                                          ancestor not in high_priority_terms])
+        if len(terms) > len(terms_no_ancestors):
+            terms_already_covered.update(set(terms) - set(terms_no_ancestors))
+            logger.debug("Removed " + str(len(terms) - len(terms_no_ancestors)) + " parents from terms")
+            return terms_no_ancestors, True
+        else:
+            return terms, False
 
     def merge_sentences_with_same_prefix(self, sentences: List[Sentence], remove_parent_terms: bool = True,
                                          rename_cell: bool = False, high_priority_term_ids: List[str] = None):
