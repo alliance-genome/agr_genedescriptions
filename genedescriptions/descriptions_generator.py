@@ -211,6 +211,9 @@ class OntologySentenceGenerator(object):
                 ancestors_covering_multiple_children if add_mul_common_anc else None,
                 slim_bonus_perc, dist_root[aspect], slim_set, nodeids_blacklist=config.get_module_property(
                     module=Module.DO_EXPERIMENTAL, prop=ConfigModuleProperty.EXCLUDE_TERMS))
+            # when both parent and child common ancestors are selected, keep only the more generic one
+            OntologySentenceGenerator.remove_children_if_parents_present(terms_high_priority, self.ontology,
+                                                                         terms_already_covered)
         else:
             terms_already_covered.update(terms_high_priority)
         terms_low_priority = [term for term in terms if not high_priority_terms or term not in high_priority_terms]
@@ -220,6 +223,8 @@ class OntologySentenceGenerator(object):
                 terms_low_priority, trimming_algorithm, trimming_threshold, self.ontology, terms_already_covered,
                 ancestors_covering_multiple_children if add_mul_common_anc else None, slim_bonus_perc,
                 dist_root[aspect], slim_set)
+            OntologySentenceGenerator.remove_children_if_parents_present(terms_low_priority, self.ontology,
+                                                                         terms_already_covered)
         elif trimming_threshold <= 0 < len(terms_low_priority):
             add_others_lowp = True
         terms = terms_high_priority
