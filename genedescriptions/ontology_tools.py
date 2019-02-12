@@ -86,11 +86,12 @@ def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_ro
         return {tuple(new_path)}
 
 
-def get_best_nodes_lca(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 3,
-                       max_num_nodes: int = 3) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
+def get_best_nodes_lca(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 3, max_num_nodes: int = 3,
+                       nodeids_blacklist: List[str] = None) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
     candidates = {node_id: (node_label, covered_nodes) for node_id, node_label, covered_nodes in
                   get_all_common_ancestors(node_ids=node_ids, ontology=ontology,
-                                           min_distance_from_root=min_distance_from_root)}
+                                           min_distance_from_root=min_distance_from_root,
+                                           nodeids_blacklist=nodeids_blacklist)}
     cands_ids_to_process = set(candidates.keys())
     selected_cands_ids = []
     node_to_cands_map = defaultdict(list)
@@ -202,8 +203,8 @@ def get_best_nodes_naive(node_ids: List[str], ontology: Ontology, min_distance_f
 
 
 def get_best_nodes_ic(node_ids: List[str], ontology: Ontology, max_number_of_terms: int = 3,
-                      min_distance_from_root: int = 0, slim_terms_ic_bonus_perc: int = 0,
-                      slim_set: set = None) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
+                      min_distance_from_root: int = 0, slim_terms_ic_bonus_perc: int = 0, slim_set: set = None,
+                      nodeids_blacklist: List[str] = None) -> Tuple[bool, List[Tuple[str, Set[str]]]]:
     """trim the list of terms by selecting the best combination of terms from the initial list or their common
     ancestors based on information content
 
@@ -216,10 +217,12 @@ def get_best_nodes_ic(node_ids: List[str], ontology: Ontology, max_number_of_ter
         slim_terms_ic_bonus_perc (int): boost the IC value for terms that appear in the slim set by the provided
             percentage
         slim_set (set): set of terms that belong to the slim for the provided ontology
+        nodeids_blacklist (List[str]): a list of node ids to be excluded from common ancestors list
     Returns:
         Set[str]: the set of trimmed terms, together with the set of original terms that each of them covers
     """
-    common_ancestors = get_all_common_ancestors(node_ids=node_ids, ontology=ontology)
+    common_ancestors = get_all_common_ancestors(node_ids=node_ids, ontology=ontology,
+                                                nodeids_blacklist=nodeids_blacklist)
     if "IC" not in ontology.node(common_ancestors[0][0]):
         logger.warning("ontology terms do not have information content values set")
         set_all_information_content_values(ontology=ontology)
@@ -237,7 +240,8 @@ def get_best_nodes_ic(node_ids: List[str], ontology: Ontology, max_number_of_ter
     return covered_terms != set(node_ids), best_terms
 
 
-def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 0):
+def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 0,
+                             nodeids_blacklist: List[str] = None):
     # check if all ids are connected to the same root node
     common_root = None
     for node_id in node_ids:
@@ -257,7 +261,8 @@ def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distan
                 for basic_prop_val in onto_anc["meta"]["basicPropertyValues"]:
                     if basic_prop_val["pred"] == "OIO:hasOBONamespace":
                         onto_anc_root = basic_prop_val["val"]
-            if onto_anc["depth"] >= min_distance_from_root and (not onto_anc_root or onto_anc_root == common_root):
+            if onto_anc["depth"] >= min_distance_from_root and (not onto_anc_root or onto_anc_root == common_root) \
+                and (not nodeids_blacklist or ancestor not in nodeids_blacklist):
                 ancestors[ancestor].append(node_id)
     return [(ancestor, ontology.label(ancestor), set(covered_nodes)) for ancestor, covered_nodes in ancestors.items() if
             len(covered_nodes) > 1 or ancestor == covered_nodes[0]]
@@ -265,19 +270,22 @@ def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distan
 
 def get_best_nodes(terms, trimming_algorithm, max_terms, ontology, terms_already_covered,
                    ancestors_covering_multiple_children: Set = None, slim_bonus_perc: int = None,
-                   min_dist_from_root: int = 0, slim_set=None):
+                   min_dist_from_root: int = 0, slim_set=None, nodeids_blacklist: List[str] = None):
     merged_terms_coverset = None
     add_others = False
     if trimming_algorithm == "naive":
         add_others, merged_terms_coverset = get_best_nodes_naive(
-            node_ids=list(terms), ontology=ontology, min_distance_from_root=min_dist_from_root)
+            node_ids=list(terms), ontology=ontology, min_distance_from_root=min_dist_from_root,
+            nodeids_blacklist=nodeids_blacklist)
     elif trimming_algorithm == "ic":
         add_others, merged_terms_coverset = get_best_nodes_ic(
             node_ids=list(terms), ontology=ontology, max_number_of_terms=max_terms,
-            min_distance_from_root=min_dist_from_root, slim_terms_ic_bonus_perc=slim_bonus_perc, slim_set=slim_set)
+            min_distance_from_root=min_dist_from_root, slim_terms_ic_bonus_perc=slim_bonus_perc, slim_set=slim_set,
+            nodeids_blacklist=nodeids_blacklist)
     elif trimming_algorithm == "naive2":
         add_others, merged_terms_coverset = get_best_nodes_lca(
-            node_ids=list(terms), ontology=ontology, min_distance_from_root=min_dist_from_root)
+            node_ids=list(terms), ontology=ontology, min_distance_from_root=min_dist_from_root,
+            nodeids_blacklist=nodeids_blacklist)
     if ancestors_covering_multiple_children is not None:
         ancestors_covering_multiple_children.update({ontology.label(term_id, id_if_null=True) for
                                                      term_id, covered_nodes in merged_terms_coverset if

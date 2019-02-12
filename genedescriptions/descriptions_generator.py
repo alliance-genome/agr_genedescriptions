@@ -209,7 +209,8 @@ class OntologySentenceGenerator(object):
             terms_high_priority, add_others_highp = get_best_nodes(
                 terms_high_priority, trimming_algorithm, max_terms, self.ontology, terms_already_covered,
                 ancestors_covering_multiple_children if add_mul_common_anc else None,
-                slim_bonus_perc, dist_root[aspect], slim_set)
+                slim_bonus_perc, dist_root[aspect], slim_set, nodeids_blacklist=config.get_module_property(
+                    module=Module.DO_EXPERIMENTAL, prop=ConfigModuleProperty.EXCLUDE_TERMS))
         else:
             terms_already_covered.update(terms_high_priority)
         terms_low_priority = [term for term in terms if not high_priority_terms or term not in high_priority_terms]
