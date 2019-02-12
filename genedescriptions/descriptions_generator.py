@@ -133,25 +133,9 @@ class OntologySentenceGenerator(object):
         for terms, evidence_group, priority in sorted([(t, eg, evidence_group_priority[eg]) for eg, t in
                                                        self.terms_groups[(aspect, qualifier)].items()],
                                                       key=lambda x: x[2]):
-            ancestors_covering_multiple_children = set()
-            trimmed = False
-            add_others = False
-            if del_overlap:
-                terms -= terms_already_covered
-            if exclude_terms:
-                terms -= set(exclude_terms)
-            if remove_parents:
-                terms = self.remove_parents_if_child_present(terms, self.ontology, terms_already_covered,
-                                                             high_priority_term_ids)
-            if 0 < max_terms < len(terms):
-                trimmed = True
-                terms, add_others, ancestors_covering_multiple_children = self.get_trimmed_terms_by_common_ancestor(
-                    terms, terms_already_covered, aspect, config, high_priority_term_ids)
-            else:
-                terms_already_covered.update(terms)
-            if remove_child_terms:
-                terms = self.remove_children_if_parents_present(terms, self.ontology, terms_already_covered,
-                                                                high_priority_term_ids)
+            terms, trimmed, add_others, ancestors_covering_multiple_children = self.reduce_terms(
+                terms, max_terms, aspect, config, del_overlap, terms_already_covered, exclude_terms, remove_parents,
+                remove_child_terms)
             if (aspect, evidence_group, qualifier) in self.prepostfix_sentences_map and len(terms) > 0:
                 sentences.append(
                     _get_single_sentence(
@@ -168,6 +152,35 @@ class OntologySentenceGenerator(object):
                 sentences=sentences, remove_parent_terms=remove_parents, rename_cell=rename_cell,
                 high_priority_term_ids=high_priority_term_ids)
         return ModuleSentences(sentences)
+
+    def reduce_terms(self, terms, max_num_terms, aspect, config: GenedescConfigParser,
+                     del_overlap: bool = False, terms_already_covered: Set[str] = None, exclude_terms: List[str] = None,
+                     remove_parents: bool = False, remove_children: bool = False,
+                     high_priority_term_ids: List[str] = None):
+        if not terms_already_covered:
+            terms_already_covered = set()
+        if not exclude_terms:
+            exclude_terms = []
+        ancestors_covering_multiple_children = set()
+        trimmed = False
+        add_others = False
+        if del_overlap:
+            terms -= terms_already_covered
+        if exclude_terms:
+            terms -= set(exclude_terms)
+        if remove_parents:
+            terms = OntologySentenceGenerator.remove_parents_if_child_present(
+                terms, self.ontology, terms_already_covered, high_priority_term_ids)
+        if 0 < max_num_terms < len(terms):
+            trimmed = True
+            terms, add_others, ancestors_covering_multiple_children = self.get_trimmed_terms_by_common_ancestor(
+                terms, terms_already_covered, aspect, config, high_priority_term_ids)
+        else:
+            terms_already_covered.update(terms)
+        if remove_children:
+            terms = self.remove_children_if_parents_present(terms, self.ontology, terms_already_covered,
+                                                            high_priority_term_ids)
+        return terms, trimmed, add_others, ancestors_covering_multiple_children
 
     def get_trimmed_terms_by_common_ancestor(self, terms: Set[str], terms_already_covered, aspect: str,
                                              config: GenedescConfigParser, high_priority_terms: List[str] = None):
