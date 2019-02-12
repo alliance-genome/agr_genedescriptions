@@ -1,5 +1,7 @@
 import logging
 import os
+import re
+
 import inflect
 
 from collections import defaultdict
@@ -298,6 +300,16 @@ class WBDataManager(DataManager):
                 self.protein_domains[linearr[0]] = [domain[0:-1].split(" \"") if len(domain[0:-1].split(" \"")) > 1 else
                                                     [domain, ""] for domain in linearr[3:]]
 
+    @staticmethod
+    def get_replaced_terms_arr(terms, terms_replacement_regex):
+        new_terms = terms
+        for regex_to_substitute, regex_target in terms_replacement_regex.items():
+            tmp_terms = []
+            for term in new_terms:
+                tmp_terms.append(re.sub(regex_to_substitute, regex_target, term))
+            new_terms = tmp_terms
+        return new_terms
+
     def _load_expression_cluster_file(self, file_cache_path, file_url, load_into_data,
                                       add_article_to_terms: bool = False,
                                       add_to_expression_ontology_annotations: bool = False):
@@ -309,15 +321,17 @@ class WBDataManager(DataManager):
             associations = [association for subj_associations in
                             self.expression_associations.associations_by_subj.values() for association in
                             subj_associations]
+        terms_replacement_regex = self.config.get_module_property(module=Module.EXPRESSION,
+                                                                  prop=ConfigModuleProperty.RENAME_TERMS)
         for line in open(expr_clust_file):
             if not header:
                 linearr = line.strip().split("\t")
                 load_into_data[linearr[0]] = linearr[1:]
+                load_into_data[linearr[0]][2] = WBDataManager.get_replaced_terms_arr(
+                    load_into_data[linearr[0]][2].split(","), terms_replacement_regex)
                 if add_article_to_terms:
-                    load_into_data[linearr[0]][2] = self.transform_expression_cluster_terms(
-                        load_into_data[linearr[0]][2].split(","))
-                else:
-                    load_into_data[linearr[0]][2] = load_into_data[linearr[0]][2].split(",")
+                    load_into_data[linearr[0]][2] = WBDataManager.transform_expression_cluster_terms(
+                        load_into_data[linearr[0]][2])
                 if load_into_data[linearr[0]] and load_into_data[linearr[0]][3]:
                     load_into_data[linearr[0]][3] = [word.replace(" study", "").replace(" analysis", "") for word in
                                                      load_into_data[linearr[0]][3].split(",")]
@@ -327,7 +341,9 @@ class WBDataManager(DataManager):
                             term_ids = self.expression_ontology.resolve_names([term])
                             if term_ids:
                                 terms_ids_map[term] = term_ids[0]
-                        if terms_ids_map[term]:
+                            else:
+                                terms_ids_map[term] = None
+                        if term in terms_ids_map and terms_ids_map[term]:
                             associations.append(DataManager.create_annotation_record(
                                 line, "WB:" + linearr[0], "", "gene", "", terms_ids_map[term], ["Enriched"], "A", "IDA",
                                 "", "", ""))

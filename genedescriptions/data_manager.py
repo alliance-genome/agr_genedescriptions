@@ -149,10 +149,19 @@ class DataManager(object):
         elif ontology_type == DataType.EXPR:
             logger.info("Setting Expression ontology")
             self.expression_ontology = ontology.subontology()
+            DataManager.add_article_to_expression_nodes(self.expression_ontology)
             new_ontology = self.expression_ontology
         self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
         for root_id in new_ontology.get_roots():
             set_all_depths_in_subgraph(ontology=new_ontology, root_id=root_id, relations=None)
+
+    @staticmethod
+    def add_article_to_expression_nodes(ontology):
+        inflect_engine = inflect.engine()
+        for term in ontology.nodes():
+            if "label" in ontology.node(term) and \
+                    inflect_engine.singular_noun(ontology.node(term)["label"].split(" ")[-1]) is False:
+                ontology.node(term)["label"] = "the " + ontology.node(term)["label"]
 
     def load_ontology_from_file(self, ontology_type: DataType, ontology_url: str, ontology_cache_path: str,
                                 config: GenedescConfigParser) -> None:
@@ -194,12 +203,7 @@ class DataManager(object):
         if terms_replacement_regex:
             self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
         if ontology_type == DataType.EXPR:
-            inflect_engine = inflect.engine()
-            for term in self.expression_ontology.nodes():
-                if "label" in self.expression_ontology.node(term) and \
-                        inflect_engine.singular_noun(self.expression_ontology.node(term)["label"].split(" ")[-1]) is \
-                        False:
-                    self.expression_ontology.node(term)["label"] = "the " + self.expression_ontology.node(term)["label"]
+            DataManager.add_article_to_expression_nodes(self.expression_ontology)
         for root_id in new_ontology.get_roots():
             set_all_depths_in_subgraph(ontology=new_ontology, root_id=root_id, relations=None)
         slim_url = config.get_module_property(module=module, prop=ConfigModuleProperty.SLIM_URL)
