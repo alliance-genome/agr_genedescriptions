@@ -402,4 +402,30 @@ class DataManager(object):
                 header = False
         return human_genes_props
 
-
+    @staticmethod
+    def create_annotation_record(source_line, gene_id, gene_symbol, gene_type, taxon_id, object_id, qualifiers, aspect,
+                                 ecode, references, prvdr, date):
+        return {"source_line": source_line,
+                "subject": {
+                    "id": gene_id,
+                    "label": gene_symbol,
+                    "type": gene_type,
+                    "fullname": "",
+                    "synonyms": [],
+                    "taxon": {"id": taxon_id}
+                },
+                "object": {
+                    "id": object_id,
+                    "taxon": ""
+                },
+                "qualifiers": qualifiers,
+                "aspect": aspect,
+                "relation": {"id": None},
+                "negated": False,
+                "evidence": {
+                    "type": ecode,
+                    "has_supporting_reference": references,
+                    "with_support_from": [],
+                    "provided_by": prvdr,
+                    "date": date
+                }}

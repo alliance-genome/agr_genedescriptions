@@ -26,6 +26,7 @@ class WBDataManager(DataManager):
         Args:
             species (str): WormBase species to fetch
         """
+        self.config = config
         raw_files_source = config.get_wb_raw_file_sources()
         cache_location = config.get_cache_dir()
         release_version = config.get_wb_release()
@@ -166,32 +167,9 @@ class WBDataManager(DataManager):
                         qualifiers = linearr[3].split("|")
                         if len(qualifiers) == 0 or "Partial" in qualifiers or "Certain" in qualifiers:
                             qualifiers = ["Verified"]
-                        associations.append({"source_line": line,
-                                             "subject": {
-                                                 "id": gene_id,
-                                                 "label": linearr[2],
-                                                 "type": linearr[11],
-                                                 "fullname": "",
-                                                 "synonyms": [],
-                                                 "taxon": {"id": linearr[12]}
-
-                                             },
-                                             "object": {
-                                                 "id": linearr[4],
-                                                 "taxon": ""
-                                             },
-                                             "qualifiers": qualifiers,
-                                             "aspect": linearr[8],
-                                             "relation": {"id": None},
-                                             "negated": False,
-                                             "evidence": {
-                                                 "type": linearr[6],
-                                                 "has_supporting_reference": linearr[5].split("|"),
-                                                 "with_support_from": [],
-                                                 "provided_by": linearr[14],
-                                                 "date": linearr[13]
-                                             }
-                                             })
+                        associations.append(DataManager.create_annotation_record(
+                            line, gene_id, linearr[2], linearr[11], linearr[12], linearr[4], qualifiers, linearr[8],
+                            linearr[6], linearr[5].split("|"), linearr[14], linearr[13]))
             self.expression_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
                                                                                       ontology=self.expression_ontology)
             self.expression_associations = self.remove_blacklisted_annotations(
@@ -222,32 +200,10 @@ class WBDataManager(DataManager):
                                 if linearr[1] == "allele":
                                     gene_ids = linearr[4].split(",")
                                 for gene_id in gene_ids:
-                                    associations.append({"source_line": line,
-                                                         "subject": {
-                                                             "id": gene_id,
-                                                             "label": linearr[3],
-                                                             "type": line[1],
-                                                             "fullname": "",
-                                                             "synonyms": [],
-                                                             "taxon": {"id": linearr[0]}
-
-                                                         },
-                                                         "object": {
-                                                             "id": linearr[10],
-                                                             "taxon": ""
-                                                         },
-                                                         "qualifiers": linearr[9].split("|"),
-                                                         "aspect": "D",
-                                                         "relation": {"id": None},
-                                                         "negated": False,
-                                                         "evidence": {
-                                                             "type": linearr[16],
-                                                             "has_supporting_reference": linearr[18].split("|"),
-                                                             "with_support_from": [],
-                                                             "provided_by": linearr[20],
-                                                             "date": linearr[19]
-                                                             }
-                                                         })
+                                    associations.append(DataManager.create_annotation_record(
+                                        line, gene_id, linearr[3], linearr[1], linearr[0], linearr[10],
+                                        linearr[9].split("|"), "D", linearr[16], linearr[18].split("|"),
+                                        linearr[20], linearr[19]))
                         else:
                             header = False
                 self.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
@@ -343,9 +299,16 @@ class WBDataManager(DataManager):
                                                     [domain, ""] for domain in linearr[3:]]
 
     def _load_expression_cluster_file(self, file_cache_path, file_url, load_into_data,
-                                      add_article_to_terms: bool = False):
+                                      add_article_to_terms: bool = False,
+                                      add_to_expression_ontology_annotations: bool = False):
         expr_clust_file = self._get_cached_file(cache_path=file_cache_path, file_source_url=file_url)
         header = True
+        associations = []
+        terms_ids_map = {}
+        if add_to_expression_ontology_annotations:
+            associations = [association for subj_associations in
+                            self.expression_associations.associations_by_subj.values() for association in
+                            subj_associations]
         for line in open(expr_clust_file):
             if not header:
                 linearr = line.strip().split("\t")
@@ -358,8 +321,21 @@ class WBDataManager(DataManager):
                 if load_into_data[linearr[0]] and load_into_data[linearr[0]][3]:
                     load_into_data[linearr[0]][3] = [word.replace(" study", "").replace(" analysis", "") for word in
                                                      load_into_data[linearr[0]][3].split(",")]
+                if add_to_expression_ontology_annotations:
+                    for term in load_into_data[linearr[0]][2]:
+                        if term not in terms_ids_map:
+                            term_ids = self.expression_ontology.resolve_names([term])
+                            if term_ids:
+                                terms_ids_map[term] = term_ids[0]
+                        if terms_ids_map[term]:
+                            associations.append(DataManager.create_annotation_record(
+                                line, "WB:" + linearr[0], "", "gene", "", terms_ids_map[term], ["Enriched"], "A", "IDA",
+                                "", "", ""))
             else:
                 header = False
+        if add_to_expression_ontology_annotations:
+            self.set_associations(DataType.EXPR, associations=AssociationSetFactory().create_from_assocs(
+                assocs=associations, ontology=self.expression_ontology), config=self.config)
 
     def load_expression_cluster_data(self):
         """load all expression cluster data"""
@@ -367,7 +343,8 @@ class WBDataManager(DataManager):
         if self.expression_cluster_anatomy_data is not None:
             self._load_expression_cluster_file(self.expression_cluster_anatomy_cache_path,
                                                self.expression_cluster_anatomy_url,
-                                               self.expression_cluster_anatomy_data, add_article_to_terms=True)
+                                               self.expression_cluster_anatomy_data, add_article_to_terms=True,
+                                               add_to_expression_ontology_annotations=True)
         if self.expression_cluster_molreg_data is not None:
             self._load_expression_cluster_file(self.expression_cluster_molreg_cache_path,
                                                self.expression_cluster_molreg_url,
@@ -410,30 +387,26 @@ class WBDataManager(DataManager):
         return ["the " + term if inflect_engine.singular_noun(term.split(" ")[-1]) is False else
                 term for term in terms_list]
 
-    def load_all_data_from_file(self, config: GenedescConfigParser) -> None:
-        """load all data types from pre-set file locations
-
-        Args:
-            config (GenedescConfigParser): configuration object where to read properties
-        """
+    def load_all_data_from_file(self) -> None:
+        """load all data types from pre-set file locations"""
         self.load_gene_data_from_file()
         self.load_ontology_from_file(ontology_type=DataType.GO, ontology_url=self.go_ontology_url,
                                      ontology_cache_path=self.go_ontology_cache_path,
-                                     config=config)
+                                     config=self.config)
         self.load_associations_from_file(associations_type=DataType.GO, associations_url=self.go_associations_url,
-                                         associations_cache_path=self.go_associations_cache_path, config=config)
+                                         associations_cache_path=self.go_associations_cache_path, config=self.config)
         self.load_ontology_from_file(ontology_type=DataType.DO, ontology_url=self.do_ontology_url,
-                                     ontology_cache_path=self.do_ontology_cache_path, config=config)
+                                     ontology_cache_path=self.do_ontology_cache_path, config=self.config)
         self.load_associations_from_file(associations_type=DataType.DO, associations_url=self.do_associations_url,
                                          associations_cache_path=self.do_associations_cache_path,
                                          association_additional_cache_path=self.do_associations_new_cache_path,
-                                         association_additional_url=self.do_associations_new_url, config=config)
+                                         association_additional_url=self.do_associations_new_url, config=self.config)
         self.load_ontology_from_file(ontology_type=DataType.EXPR, ontology_url=self.expression_ontology_url,
-                                     ontology_cache_path=self.expression_ontology_cache_path, config=config)
+                                     ontology_cache_path=self.expression_ontology_cache_path, config=self.config)
         self.load_associations_from_file(associations_type=DataType.EXPR,
                                          associations_url=self.expression_associations_url,
                                          associations_cache_path=self.expression_associations_cache_path,
-                                         config=config)
+                                         config=self.config)
         self.load_orthology_from_file()
         self.load_expression_cluster_data()
         self.load_protein_domain_information()

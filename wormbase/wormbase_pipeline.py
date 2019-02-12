@@ -10,7 +10,7 @@ from num2words import num2words
 
 from genedescriptions.api_manager import APIManager
 from genedescriptions.commons import DataType, Module, Gene
-from genedescriptions.config_parser import GenedescConfigParser
+from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import DataManager, ExpressionClusterType, ExpressionClusterFeature
 from genedescriptions.gene_description import GeneDescription
 from genedescriptions.descriptions_generator import OntologySentenceGenerator
@@ -53,7 +53,7 @@ def load_data(organism, conf_parser: GenedescConfigParser):
                                               associations_cache_path=sister_df.go_associations_cache_path,
                                               config=conf_parser)
     logger.info("Loading all data for main species")
-    df.load_all_data_from_file(config=conf_parser)
+    df.load_all_data_from_file()
     return df, sister_df, df_agr
 
 
