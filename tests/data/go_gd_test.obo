@@ -1760,7 +1760,7 @@ id: GO:0001667
 name: ameboidal-type cell migration
 namespace: biological_process
 def: "Cell migration that is accomplished by extension and retraction of a pseudopodium." []
-comment: Note that this term refer to a mode of migration rather than to any particular cell type.
+comment: Note that this term refers to a mode of migration rather than to any particular cell type.
 synonym: "ameboid cell migration" EXACT []
 synonym: "amoeboid cell migration" EXACT []
 synonym: "amoeboidal cell migration" EXACT []
@@ -3120,7 +3120,7 @@ id: GO:0002931
 name: response to ischemia
 namespace: biological_process
 def: "Any process that results in a change in state or activity of an organism (in terms of movement, secretion, enzyme production, gene expression, etc.) as a result of a inadequate blood supply." []
-comment: Ischemia always results in hypoxia; however, hypoxia can occur without ischemia .
+comment: Ischemia always results in hypoxia; however, hypoxia can occur without ischemia.
 is_a: GO:0006950 ! response to stress
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: hjd
@@ -3489,7 +3489,7 @@ alt_id: GO:0001151
 alt_id: GO:0001199
 alt_id: GO:0001204
 def: "A protein or a member of a complex that interacts selectively and non-covalently with a specific DNA sequence (sometimes referred to as a motif) within the regulatory region of a gene to modulate transcription. Regulatory regions include promoters (proximal and distal) and enhancers. Genes are transcriptional units, and include bacterial operons." []
-comment: Curator guidance: Note that most DNA binding transcription factors do not have enzymatic activity. If a protein has an enzymatic activity (for example, ubiquitin ligase, histone acetyl transferase), consider annotating to GO:0003712 transcription coregulator activity. The presence of specific domains known to be present in transcription factors (HOX, GATA etc) should be used to help decide whether a protein is a DNA binding transcription factor or a coregulator.\nChanged definition see https://github.com/geneontology/go-ontology/issues/15704\nMerged term see https://github.com/geneontology/go-ontology/issues/16534
+comment: Curator guidance: Note that most DNA-binding transcription factors do not have enzymatic activity. The presence of specific domains known to be present in DNA-binding transcription factors (HOX, GATA etc) should be used to help decide whether a protein is a DNA binding transcription factor or a coregulator. If a protein has an enzymatic activity (for example, ubiquitin ligase, histone acetyl transferase) and no known DNA binding domain, consider annotating to GO:0003712 transcription coregulator activity. Special care should be taken with proteins containing Myb/SANT and ARID domains, since only a subset of proteins containing these domains are DNA-binding transcription factors for specific genes. \nChanged definition see https://github.com/geneontology/go-ontology/issues/15704\nMerged term see https://github.com/geneontology/go-ontology/issues/16534
 subset: goslim_agr
 subset: goslim_aspergillus
 subset: goslim_candida
@@ -4261,6 +4261,8 @@ xref: reactome:R-HSA-5218804
 xref: reactome:R-HSA-5607726
 xref: reactome:R-HSA-74615
 xref: reactome:R-HSA-8857583
+xref: reactome:R-HSA-8964242
+xref: reactome:R-HSA-8964252
 xref: reactome:R-HSA-8983872
 xref: reactome:R-HSA-918229
 xref: reactome:R-HSA-933525
@@ -4491,6 +4493,7 @@ xref: reactome:R-HSA-4332363
 xref: reactome:R-HSA-4332388
 xref: reactome:R-HSA-4411383
 xref: reactome:R-HSA-4411402
+xref: reactome:R-HSA-442739
 xref: reactome:R-HSA-442832
 xref: reactome:R-HSA-445072
 xref: reactome:R-HSA-446694
@@ -4695,6 +4698,11 @@ xref: reactome:R-HSA-936991
 xref: reactome:R-HSA-937022
 xref: reactome:R-HSA-9604328
 xref: reactome:R-HSA-9612980
+xref: reactome:R-HSA-9619515
+xref: reactome:R-HSA-9619843
+xref: reactome:R-HSA-9620004
+xref: reactome:R-HSA-9626880
+xref: reactome:R-HSA-9627089
 xref: reactome:R-HSA-975125
 xref: reactome:R-HSA-975134
 xref: reactome:R-HSA-975160
@@ -4918,6 +4926,7 @@ xref: reactome:R-HSA-2404199
 xref: reactome:R-HSA-2424484
 xref: reactome:R-HSA-2424486
 xref: reactome:R-HSA-2424487
+xref: reactome:R-HSA-2428926
 xref: reactome:R-HSA-2454208
 xref: reactome:R-HSA-2454239
 xref: reactome:R-HSA-2586553
@@ -5121,6 +5130,7 @@ xref: reactome:R-HSA-9603420
 xref: reactome:R-HSA-9606159
 xref: reactome:R-HSA-9606162
 xref: reactome:R-HSA-9606163
+xref: reactome:R-HSA-9612085
 xref: reactome:R-HSA-9612996
 xref: reactome:R-HSA-9613023
 xref: reactome:R-HSA-982807
@@ -5274,6 +5284,9 @@ xref: reactome:R-HSA-6811504
 xref: reactome:R-HSA-6814559
 xref: reactome:R-HSA-74948
 xref: reactome:R-HSA-8948139
+xref: reactome:R-HSA-9619430
+xref: reactome:R-HSA-9619449
+xref: reactome:R-HSA-9619467
 is_a: GO:0004721 ! phosphoprotein phosphatase activity
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
@@ -5458,6 +5471,7 @@ xref: reactome:R-HSA-918224
 xref: reactome:R-HSA-936412
 xref: reactome:R-HSA-936942
 xref: reactome:R-HSA-936986
+xref: reactome:R-HSA-9628444
 xref: reactome:R-HSA-975118
 xref: reactome:R-HSA-975147
 xref: reactome:R-HSA-983140
@@ -6533,7 +6547,7 @@ name: endoplasmic reticulum membrane
 namespace: cellular_component
 def: "The lipid bilayer surrounding the endoplasmic reticulum." []
 synonym: "ER membrane" EXACT []
-is_a: GO:0016020 ! membrane
+is_a: GO:0031090 ! organelle membrane
 is_a: GO:0044425 ! membrane part
 is_a: GO:0044432 ! endoplasmic reticulum part
 relationship: BFO:0000050 GO:0042175 ! part of nuclear outer membrane-endoplasmic reticulum membrane network
@@ -11601,7 +11615,7 @@ name: attachment of spindle microtubules to kinetochore
 namespace: biological_process
 alt_id: GO:0051313
 def: "The process in which spindle microtubules become physically associated with the proteins making up the kinetochore complex." []
-comment: This class covers all attachments of spindle microtubules to the kinetochore, including the many incorrect attachments which initially form and are later corrected to stable attachments with the correct orientation for segregation to procede (sister chromatid biorientation).
+comment: This class covers all attachments of spindle microtubules to the kinetochore, including the many incorrect attachments which initially form and are later corrected to stable attachments with the correct orientation for segregation to proceed (sister chromatid biorientation).
 synonym: "amphotelic attachment" RELATED []
 synonym: "attachment of spindle microtubules to chromosome" EXACT []
 synonym: "bipolar attachment" RELATED []
@@ -12284,7 +12298,7 @@ id: GO:0009628
 name: response to abiotic stimulus
 namespace: biological_process
 def: "Any process that results in a change in state or activity of a cell or an organism (in terms of movement, secretion, enzyme production, gene expression, etc.) as a result of an abiotic (not derived from living organisms) stimulus." []
-comment: Note that this term is in the subset of terms that should not be used for direct gene product annotation. Instead, select a child term or, if no appropriate child term exists, please request a new term. Direct annotations to this term may be amended during annotation QC. Changed defintion as requested in https://github.com/geneontology/go-ontology/issues/16572.
+comment: Note that this term is in the subset of terms that should not be used for direct gene product annotation. Instead, select a child term or, if no appropriate child term exists, please request a new term. Direct annotations to this term may be amended during annotation QC. Changed definition as requested in https://github.com/geneontology/go-ontology/issues/16572.
 subset: gocheck_do_not_manually_annotate
 subset: goslim_metagenomics
 subset: goslim_plant
@@ -14585,7 +14599,7 @@ name: postsynaptic density
 namespace: cellular_component
 alt_id: GO:0097481
 alt_id: GO:0097483
-def: "An electron dense network of proteins within and adjacent to the postsynaptic membrane of an asymetric, neuron-neuron synapse. Its major components include neurotransmitter receptors and the proteins that spatially and functionally organize them such as anchoring and scaffolding molecules, signaling enzymes and cytoskeletal components." []
+def: "An electron dense network of proteins within and adjacent to the postsynaptic membrane of an asymmetric, neuron-neuron synapse. Its major components include neurotransmitter receptors and the proteins that spatially and functionally organize them such as anchoring and scaffolding molecules, signaling enzymes and cytoskeletal components." []
 subset: goslim_synapse
 synonym: "neuronal postsynaptic density" EXACT []
 synonym: "post synaptic density" EXACT []
@@ -15946,10 +15960,6 @@ xref: reactome:R-HSA-2529020
 xref: reactome:R-HSA-389762
 xref: reactome:R-HSA-392752
 xref: reactome:R-HSA-442724
-xref: reactome:R-HSA-442726
-xref: reactome:R-HSA-442737
-xref: reactome:R-HSA-442739
-xref: reactome:R-HSA-444253
 xref: reactome:R-HSA-445079
 xref: reactome:R-HSA-5654690
 xref: reactome:R-HSA-5654692
@@ -16716,7 +16726,6 @@ synonym: "phosphatase" RELATED []
 synonym: "phosphoric monoester hydrolase activity" EXACT []
 synonym: "PNPPase activity" NARROW []
 xref: EC:3.1.3
-xref: EC:3.1.3.41
 xref: MetaCyc:4-NITROPHENYLPHOSPHATASE-RXN
 xref: reactome:R-HSA-4419986
 xref: RHEA:21664
@@ -18346,6 +18355,17 @@ namespace: biological_process
 def: "The attachment of a cell or organism to a substrate, another cell, or other organism. Biological adhesion includes intracellular attachment between membrane regions." []
 subset: goslim_pir
 is_a: GO:0008150 ! biological_process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0022611
+name: dormancy process
+namespace: biological_process
+def: "A developmental process in which dormancy (sometimes called a dormant state) is induced, maintained or broken. Dormancy is a suspension of most physiological activity and growth that can be reactivated." []
+comment: In plants and animals, dormancy may be a response to environmental conditions such as seasonality or extreme heat, drought, or cold. In plants, dormancy may involve the formation of dormant buds, and may be preceded by the senescence of plant parts such as leaves in woody plants or most of the shoot system in herbaceous perennials. The exit from dormancy in vascular plants is marked by resumed growth of buds and/or growth of vascular cambium.
+synonym: "multicellular organism dormancy process" NARROW []
+synonym: "spore dormancy process" NARROW []
+is_a: GO:0032502 ! developmental process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -19992,7 +20012,7 @@ id: GO:0030832
 name: regulation of actin filament length
 namespace: biological_process
 def: "Any process that controls the length of actin filaments in a cell." []
-comment: Note that the syntax of the definition of the this term is different from the usual regulation syntax because it describes regulation of a trait rather than regulation of a process.
+comment: Note that the syntax of the definition of this term is different from the usual regulation syntax because it describes regulation of a trait rather than regulation of a process.
 is_a: GO:0032535 ! regulation of cellular component size
 is_a: GO:0032956 ! regulation of actin cytoskeleton organization
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
@@ -27155,6 +27175,32 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0043053
 name: dauer entry
+namespace: biological_process
+def: "Entry into the facultative diapause of the dauer (enduring) larval stage of nematode development." []
+synonym: "nematode entry into dormancy" EXACT []
+is_a: GO:0055115 ! entry into diapause
+relationship: BFO:0000050 GO:0040024 ! part of dauer larval development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0043054
+name: dauer exit
+namespace: biological_process
+def: "Exit from the facultative diapause of the dauer (enduring) larval stage of nematode development." []
+synonym: "exit from nematode dormancy" EXACT []
+is_a: GO:0071981 ! exit from diapause
+relationship: BFO:0000050 GO:0040024 ! part of dauer larval development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0043055
+name: maintenance of dauer
+namespace: biological_process
+def: "Maintenance of a nematode during the facultative diapause of the dauer (enduring) larval stage of nematode development." []
+synonym: "maintenance of dormancy in the nematode" EXACT []
+is_a: GO:0071982 ! maintenance of diapause
+relationship: BFO:0000050 GO:0040024 ! part of dauer larval development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0043060
@@ -32996,7 +33042,7 @@ id: GO:0048167
 name: regulation of synaptic plasticity
 namespace: biological_process
 def: "A process that modulates synaptic plasticity, the ability of synapses to change as circumstances require. They may alter function, such as increasing or decreasing their sensitivity, or they may increase or decrease in actual numbers." []
-comment: Note that the syntax of the definition of the this term is different from the usual regulation syntax because it describes regulation of a trait rather than regulation of a process.
+comment: Note that the syntax of the definition of this term is different from the usual regulation syntax because it describes regulation of a trait rather than regulation of a process.
 is_a: GO:0050804 ! modulation of chemical synaptic transmission
 is_a: GO:0065008 ! regulation of biological quality
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
@@ -34416,7 +34462,7 @@ id: GO:0050764
 name: regulation of phagocytosis
 namespace: biological_process
 def: "Any process that modulates the frequency, rate or extent of phagocytosis, the process in which phagocytes engulf external particulate material." []
-is_a: GO:0030100 ! regulation of endocytosis
+is_a: GO:0060627 ! regulation of vesicle-mediated transport
 intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002211 GO:0006909 ! regulates phagocytosis
 relationship: RO:0002211 GO:0006909 ! regulates phagocytosis
@@ -34431,8 +34477,8 @@ synonym: "down regulation of phagocytosis" EXACT []
 synonym: "down-regulation of phagocytosis" EXACT []
 synonym: "downregulation of phagocytosis" EXACT []
 synonym: "inhibition of phagocytosis" NARROW []
-is_a: GO:0045806 ! negative regulation of endocytosis
 is_a: GO:0050764 ! regulation of phagocytosis
+is_a: GO:0051051 ! negative regulation of transport
 intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002212 GO:0006909 ! negatively regulates phagocytosis
 relationship: RO:0002212 GO:0006909 ! negatively regulates phagocytosis
@@ -38184,6 +38230,15 @@ is_a: GO:0008152 ! metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0055115
+name: entry into diapause
+namespace: biological_process
+def: "The dormancy process that results in entry into diapause. Diapause is a neurohormonally mediated, dynamic state of low metabolic activity. Associated characteristics of this form of dormancy include reduced morphogenesis, increased resistance to environmental extremes, and altered or reduced behavioral activity. Full expression develops in a species-specific manner, usually in response to a number of environmental stimuli that precede unfavorable conditions. Once diapause has begun, metabolic activity is suppressed even if conditions favorable for development prevail. Once initiated, only certain stimuli are capable of releasing the organism from this state, and this characteristic is essential in distinguishing diapause from hibernation." []
+xref: Wikipedia:Diapause
+is_a: GO:0022611 ! dormancy process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0055120
 name: striated muscle dense body
 namespace: cellular_component
@@ -38349,6 +38404,7 @@ id: GO:0060099
 name: regulation of phagocytosis, engulfment
 namespace: biological_process
 def: "Any process that modulates the frequency, rate or extent of the internalization of bacteria, immune complexes and other particulate matter or of an apoptotic cell by phagocytosis." []
+is_a: GO:0030100 ! regulation of endocytosis
 is_a: GO:0050764 ! regulation of phagocytosis
 is_a: GO:1905153 ! regulation of membrane invagination
 intersection_of: GO:0008150 ! biological_process
@@ -38361,6 +38417,7 @@ id: GO:0060101
 name: negative regulation of phagocytosis, engulfment
 namespace: biological_process
 def: "Any process that stops, prevents, or reduces the frequency, rate or extent of the internalization of bacteria, immune complexes and other particulate matter or of an apoptotic cell by phagocytosis." []
+is_a: GO:0045806 ! negative regulation of endocytosis
 is_a: GO:0050765 ! negative regulation of phagocytosis
 is_a: GO:0060099 ! regulation of phagocytosis, engulfment
 is_a: GO:1905154 ! negative regulation of membrane invagination
@@ -39531,7 +39588,7 @@ alt_id: GO:0090622
 alt_id: GO:1904264
 alt_id: GO:1904822
 def: "Catalysis of the transfer of ubiquitin to a substrate protein via the reaction X-ubiquitin + S -> X + S-ubiquitin, where X is either an E2 or E3 enzyme, the X-ubiquitin linkage is a thioester bond, and the S-ubiquitin linkage is an amide bond: an isopeptide bond between the C-terminal glycine of ubiquitin and the epsilon-amino group of lysine residues in the substrate or, in the linear extension of ubiquitin chains, a peptide bond the between the C-terminal glycine and N-terminal methionine of ubiquitin residues." []
-comment: This enzyme catalyses a transferase reaction.
+comment: This enzyme catalyzes a transferase reaction.
 synonym: "APC-Cdc20 complex activity" NARROW []
 synonym: "APC-fizzy related complex activity" NARROW []
 synonym: "E3" RELATED []
@@ -41887,7 +41944,7 @@ name: leukocyte apoptotic process
 id: GO:0071889
 name: 14-3-3 protein binding
 namespace: molecular_function
-def: "Interacting selectively and non-covalently with a 14-3-3 protein. A 14-3-3 protein is any of a large family of approximately 30kDa acidic proteins which exist primarily as homo- and heterodimers within all eukaryotic cells, and have been implicated in the modulation of distinct biological processes by binding to specific phosphorylated sites on diverse target proteins, thereby forcing conformational changes or influencing interactions between their targets and other molecules. Each 14-3-3 protein sequence can be roughly divided into three sections: a divergent amino terminus, the conserved core region and a divergent carboxyl terminus. The conserved middle core region of the 14-3-3s encodes an amphipathic groove that forms the main functional domain, a cradle for interacting with client proteins." []
+def: "Interacting selectively and non-covalently with a 14-3-3 protein. A 14-3-3 protein is any of a large family of approximately 30kDa acidic proteins which exist primarily as homo- and heterodimers within all eukaryotic cells, and have been implicated in the modulation of distinct biological processes by binding to specific phosphorylated sites on diverse target proteins, thereby forcing conformational changes or influencing interactions between their targets and other molecules. Each 14-3-3 protein sequence can be roughly divided into three sections: a divergent amino terminus, the conserved core region and a divergent carboxy-terminus. The conserved middle core region of the 14-3-3s encodes an amphipathic groove that forms the main functional domain, a cradle for interacting with client proteins." []
 is_a: GO:0005515 ! protein binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: midori
@@ -41999,6 +42056,26 @@ is_a: GO:0050660 ! flavin adenine dinucleotide binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: midori
 creation_date: 2010-10-07T12:30:28Z
+
+[Term]
+id: GO:0071981
+name: exit from diapause
+namespace: biological_process
+def: "The dormancy process that results in exit from diapause. Diapause is a neurohormonally mediated, dynamic state of low metabolic activity. Associated characteristics of this form of dormancy include reduced morphogenesis, increased resistance to environmental extremes, and altered or reduced behavioral activity. Full expression develops in a species-specific manner, usually in response to a number of environmental stimuli that precede unfavorable conditions. Once diapause has begun, metabolic activity is suppressed even if conditions favorable for development prevail. Once initiated, only certain stimuli are capable of releasing the organism from this state, and this characteristic is essential in distinguishing diapause from hibernation." []
+is_a: GO:0022611 ! dormancy process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: midori
+creation_date: 2010-10-21T04:45:40Z
+
+[Term]
+id: GO:0071982
+name: maintenance of diapause
+namespace: biological_process
+def: "The dormancy process that results an organism remaining in diapause. Diapause is a neurohormonally mediated, dynamic state of low metabolic activity. Associated characteristics of this form of dormancy include reduced morphogenesis, increased resistance to environmental extremes, and altered or reduced behavioral activity. Full expression develops in a species-specific manner, usually in response to a number of environmental stimuli that precede unfavorable conditions. Once diapause has begun, metabolic activity is suppressed even if conditions favorable for development prevail. Once initiated, only certain stimuli are capable of releasing the organism from this state, and this characteristic is essential in distinguishing diapause from hibernation." []
+is_a: GO:0022611 ! dormancy process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: midori
+creation_date: 2010-10-21T04:46:32Z
 
 [Term]
 id: GO:0071985
@@ -45262,7 +45339,7 @@ id: GO:0120174
 name: stress-induced homeostatically regulated protein degradation pathway
 namespace: biological_process
 def: "A stress-inducible protein catabolic pathway that promotes protein quality control by accelerating the degradation of misfolded ER membrane and cytosolic proteins, as well as native proteins. The pathway starts with the activation, by stress, of the Nma111p/Ynm3p serine protease, which cleaves the stress-induced hydrophilin Roq1p, resulting in the generation of a Roq1p cleavage product that selectively interacts with Ubr1p, an E3 ubiquitin ligase. Interaction with the Ubr1p type-1 substrate binding site reprograms the substrate specificity of this ubiquitin ligase resulting in the selective proteasome-mediated degradation of misfolded and native proteins. The pathway ends with degradation of the protein by the cytoplasmic proteasome. Currently, NMA111, ROQ1, UBR1, RAD6, and CDC48 are considered to be involved in this quality control pathway." []
-comment: Note, although the SHRED pathway may contain some components in common with ER-associated protein degradation (ERAD) pathways (GO:0036503), such as UBR1, RAD6 and CDC48, other ERAD components, such as HRD1 and DOA10 do not appear to be involved, and as such these pathways are currently considered to be distinct. ERAD pathways target misfolded ER lumenal proteins (ERAD-L), ER membrane proteins (ERAD-M) and ER proteins with misfolded cytosolic domains (ERAD-C) by recognizing aberrant proteins, retrotranslocating these substrates to the cytosol, followed by subsequent substrate ubiquitination and proteosome-mediated degradation. In contrast the SHRED pathway, although inducible by stress, targets diverse ER membrane and cytosolic proteins as well as numerous other native proteins in the absence of stress. In the SHRED pathway an Nma111p serine protease-mediated cleavage results in the generation of a Roq1p fragment that then binds to the type-1 active site of Ubr1p, altering its substrate specificity, and leading to the proteasome-mediated degradation of both misfolded and native proteins. SHRED is also considered to be distinct from the endoplasmic reticulum unfolded protein response (GO:0030968), a process by which ER stress activates the ER membrane protein Ire1p, resulting in splicing of the HAC1 mRNA, followed by Hac1p-mediated up-regulation of UPR genes. Induction of SHRED does not require IRE1 or HAC1, and as such is currently consider to be distinct.
+comment: Note, although the SHRED pathway may contain some components in common with ER-associated protein degradation (ERAD) pathways (GO:0036503), such as UBR1, RAD6 and CDC48, other ERAD components, such as HRD1 and DOA10 do not appear to be involved, and as such these pathways are currently considered to be distinct. ERAD pathways target misfolded ER lumenal proteins (ERAD-L), ER membrane proteins (ERAD-M) and ER proteins with misfolded cytosolic domains (ERAD-C) by recognizing aberrant proteins, retrotranslocating these substrates to the cytosol, followed by subsequent substrate ubiquitination and proteosome-mediated degradation. In contrast the SHRED pathway, although inducible by stress, targets diverse ER membrane and cytosolic proteins as well as numerous other native proteins in the absence of stress. In the SHRED pathway an Nma111p serine protease-mediated cleavage results in the generation of a Roq1p fragment that then binds to the type-1 active site of Ubr1p, altering its substrate specificity, and leading to the proteasome-mediated degradation of both misfolded and native proteins. SHRED is also considered to be distinct from the endoplasmic reticulum unfolded protein response (GO:0030968), a process by which ER stress activates the ER membrane protein Ire1p, resulting in splicing of the HAC1 mRNA, followed by Hac1p-mediated up-regulation of UPR genes. Induction of SHRED does not require IRE1 or HAC1, and as such is currently considered to be distinct.
 synonym: "SHRED pathway" RELATED []
 is_a: GO:0010243 ! response to organonitrogen compound
 is_a: GO:0033554 ! cellular response to stress

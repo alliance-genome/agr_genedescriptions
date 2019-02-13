@@ -282,7 +282,7 @@ def get_best_nodes(terms, trimming_algorithm, max_terms, ontology, terms_already
             node_ids=list(terms), ontology=ontology, max_number_of_terms=max_terms,
             min_distance_from_root=min_dist_from_root, slim_terms_ic_bonus_perc=slim_bonus_perc, slim_set=slim_set,
             nodeids_blacklist=nodeids_blacklist)
-    elif trimming_algorithm == "naive2":
+    elif trimming_algorithm == "lca":
         add_others, merged_terms_coverset = get_best_nodes_lca(
             node_ids=list(terms), ontology=ontology, min_distance_from_root=min_dist_from_root,
             nodeids_blacklist=nodeids_blacklist)

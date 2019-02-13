@@ -2,6 +2,7 @@ import logging
 import unittest
 import os
 
+from ontobio import AssociationSetFactory
 from genedescriptions.commons import Module, Gene
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.data_manager import DataManager, DataType
@@ -361,7 +362,7 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
         self.assertTrue(sentences.get_description() != "", "Description is empty")
-        self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "naive2"
+        self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "lca"
         go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00000912", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
@@ -374,5 +375,49 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
         self.assertTrue(sentences.get_description() != "", "Description is empty")
+
+    def test_blacklist_during_trimming(self):
+        associations = [association for subj_associations in self.df.go_associations.associations_by_subj.values() for
+                        association in subj_associations]
+        associations.append(DataManager.create_annotation_record(source_line="", gene_id="WB:WBGene00003931",
+                                                                 gene_symbol="", gene_type="gene", taxon_id="",
+                                                                 object_id="GO:0043055", qualifiers="", aspect="P",
+                                                                 ecode="EXP", references="", prvdr="WB", date=""))
+        associations.append(DataManager.create_annotation_record(source_line="", gene_id="WB:WBGene00003931",
+                                                                 gene_symbol="", gene_type="gene", taxon_id="",
+                                                                 object_id="GO:0061065", qualifiers="", aspect="P",
+                                                                 ecode="EXP", references="", prvdr="WB", date=""))
+        associations.append(DataManager.create_annotation_record(source_line="", gene_id="WB:WBGene00003931",
+                                                                 gene_symbol="", gene_type="gene", taxon_id="",
+                                                                 object_id="GO:0043054", qualifiers="", aspect="P",
+                                                                 ecode="EXP", references="", prvdr="WB", date=""))
+        associations.append(DataManager.create_annotation_record(source_line="", gene_id="WB:WBGene00003931",
+                                                                 gene_symbol="", gene_type="gene", taxon_id="",
+                                                                 object_id="GO:0043053", qualifiers="", aspect="P",
+                                                                 ecode="EXP", references="", prvdr="WB", date=""))
+        self.df.go_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
+                                                                             ontology=self.df.go_ontology)
+        self.conf_parser.config["go_sentences_options"]["exclude_terms"].append("GO:0040024")
+        go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00003931", module=Module.GO,
+                                                      data_manager=self.df, config=self.conf_parser)
+        sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
+                                                           qualifier='', merge_groups_with_same_prefix=True,
+                                                           keep_only_best_group=True)
+        self.assertTrue("dauer larval development" not in sentences.get_description(), "Blacklist not working")
+        self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "ic"
+        go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00003931", module=Module.GO,
+                                                      data_manager=self.df, config=self.conf_parser)
+        sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
+                                                           qualifier='', merge_groups_with_same_prefix=True,
+                                                           keep_only_best_group=True)
+        self.assertTrue("dauer larval development" not in sentences.get_description(), "Blacklist not working")
+        self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "lca"
+        go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00003931", module=Module.GO,
+                                                      data_manager=self.df, config=self.conf_parser)
+        sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
+                                                           qualifier='', merge_groups_with_same_prefix=True,
+                                                           keep_only_best_group=True)
+        self.assertTrue("dauer larval development" not in sentences.get_description(), "Blacklist not working")
+
 
 

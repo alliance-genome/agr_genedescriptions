@@ -425,35 +425,35 @@ do_biomarker_sentences_options:
     - "DOID:0080015"
     - "DOID:0050117"
     - "DOID:0080014"
-    evidence_codes:
-      IEP:
-        group: BIOMARKER
-        priority: 1
-    group_priority:
-      BIOMARKER: 1
-    prepostfix_sentences_map:
-      - aspect: "D"
-        group: BIOMARKER
-        qualifier: ""
-        prefix: "is biomarker of"
-        postfix: ""
-    prepostfix_sentences_map_humans:
-      - aspect: "D"
-        group: BIOMARKER
-        qualifier: ""
-        prefix: "is biomarker of"
-        postfix: ""
-    remove_parents_if_children_are_present: true
-    remove_children_if_parent_is_present: false
-    trim_terms_by_common_ancestors: true
-    trimming_algorithm: ic
-    max_num_terms: 3
-    trim_min_distance_from_root:
-      D: 4
-    truncate_others_aggregation_word: several
-    truncate_others_terms:
-      D: "diseases"
-    add_multiple_if_covers_more_children: true
+  evidence_codes:
+    IEP:
+      group: BIOMARKER
+      priority: 1
+  group_priority:
+    BIOMARKER: 1
+  prepostfix_sentences_map:
+    - aspect: "D"
+      group: BIOMARKER
+      qualifier: ""
+      prefix: "is biomarker of"
+      postfix: ""
+  prepostfix_sentences_map_humans:
+    - aspect: "D"
+      group: BIOMARKER
+      qualifier: ""
+      prefix: "is biomarker of"
+      postfix: ""
+  remove_parents_if_children_are_present: true
+  remove_children_if_parent_is_present: false
+  trim_terms_by_common_ancestors: true
+  trimming_algorithm: ic
+  max_num_terms: 3
+  trim_min_distance_from_root:
+    D: 4
+  truncate_others_aggregation_word: several
+  truncate_others_terms:
+    D: "diseases"
+  add_multiple_if_covers_more_children: true
 
 do_via_orth_sentences_options:
   exclude_terms:
@@ -467,39 +467,39 @@ do_via_orth_sentences_options:
     - "DOID:0080015"
     - "DOID:0050117"
     - "DOID:0080014"
-    evidence_codes:
-      ISS:
-        group: ORTHOLOGY_BASED
-        priority: 1
-      IEA:
-        group: ORTHOLOGY_BASED
-        priority: 2
-    group_priority:
-      ORTHOLOGY_BASED: 1
-    prepostfix_sentences_map:
-      - aspect: "D"
-        group: ORTHOLOGY_BASED
-        qualifier: ""
-        prefix: "human orthologs of this gene are implicated in"
-        postfix: ""
-    prepostfix_sentences_map_humans:
-      - aspect: "D"
-        group: ORTHOLOGY_BASED
-        qualifier: ""
-        prefix: "orthologs of this gene are implicated in"
-        postfix: ""
+  evidence_codes:
+    ISS:
+      group: ORTHOLOGY_BASED
+      priority: 1
+    IEA:
+      group: ORTHOLOGY_BASED
+      priority: 2
+  group_priority:
+    ORTHOLOGY_BASED: 1
+  prepostfix_sentences_map:
+    - aspect: "D"
+      group: ORTHOLOGY_BASED
+      qualifier: ""
+      prefix: "human orthologs of this gene are implicated in"
+      postfix: ""
+  prepostfix_sentences_map_humans:
+    - aspect: "D"
+      group: ORTHOLOGY_BASED
+      qualifier: ""
+      prefix: "orthologs of this gene are implicated in"
+      postfix: ""
 
-    remove_parents_if_children_are_present: true
-    remove_children_if_parent_is_present: false
-    trim_terms_by_common_ancestors: true
-    trimming_algorithm: ic
-    max_num_terms: 3
-    trim_min_distance_from_root:
-      D: 4
-    truncate_others_aggregation_word: several
-    truncate_others_terms:
-      D: "diseases"
-    add_multiple_if_covers_more_children: true
+  remove_parents_if_children_are_present: true
+  remove_children_if_parent_is_present: false
+  trim_terms_by_common_ancestors: true
+  trimming_algorithm: ic
+  max_num_terms: 3
+  trim_min_distance_from_root:
+    D: 4
+  truncate_others_aggregation_word: several
+  truncate_others_terms:
+    D: "diseases"
+  add_multiple_if_covers_more_children: true
 
 
 expression_sentences_options:

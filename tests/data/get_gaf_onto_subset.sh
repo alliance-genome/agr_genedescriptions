@@ -41,6 +41,11 @@ echo "${HEADER}" > ontofox_script.txt
 
 grep -v '^!.*$' $1/* | grep ${genes} | cut -f5 | sort | uniq | sed 's/:/_/' | awk '{print "http://purl.obolibrary.org/obo/"$1}' >> ontofox_script.txt
 
+echo "http://purl.obolibrary.org/obo/GO_0043055" >> ontofox_script.txt
+echo "http://purl.obolibrary.org/obo/GO_0061065" >> ontofox_script.txt
+echo "http://purl.obolibrary.org/obo/GO_0043054" >> ontofox_script.txt
+echo "http://purl.obolibrary.org/obo/GO_0043053" >> ontofox_script.txt
+
 echo >> ontofox_script.txt
 
 echo "${FOOTER}" >> ontofox_script.txt
