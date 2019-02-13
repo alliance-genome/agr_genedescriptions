@@ -225,6 +225,7 @@ class OntologySentenceGenerator(object):
         elif trimming_threshold <= 0 < len(terms_low_priority):
             add_others_lowp = True
         terms = terms_high_priority
+        terms_low_priority_orig = terms_low_priority[:]
         # remove exact overlap
         terms_low_priority = list(set(terms_low_priority) - set(terms_high_priority))
         # remove possible children of terms in the high priority list
@@ -236,6 +237,8 @@ class OntologySentenceGenerator(object):
         terms_low_priority = OntologySentenceGenerator.remove_parents_if_child_present(
             terms_low_priority, self.ontology)
         terms_low_priority = list(set(terms_low_priority) - set(terms_high_priority))
+        if len(terms_low_priority) < len(terms_low_priority_orig):
+            add_others_lowp = True
         terms.extend(terms_low_priority)
         # cutoff terms - if number of terms with high priority is higher than max_num_terms
         terms = terms[0:max_terms]
