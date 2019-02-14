@@ -112,7 +112,7 @@ go_sentences_options:
     "(.*)embryo development ending in birth or egg hatching(.*)": "\\1embryo development\\2"
     "(.*)synaptic transmission, (\\w+)(.*)": "\\1\\2 synaptic transmission\\3"
     "(.*)postsynaptic synaptic(.*)": "\\1postsynaptic\\2"
-    "(.*)binding(.*)": "\\1binding activity\\2"
+    "^(?!.*activity)(.*)binding(.*)$": "\\1binding activity\\2"
   evidence_codes:
     EXP:
       group: EXPERIMENTAL

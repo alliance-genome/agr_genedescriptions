@@ -33,6 +33,9 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                                                                  "gene_association_1.7.wb.partial"),
                                             config=self.conf_parser)
         logging.basicConfig(filename=None, level="INFO", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
+        logger.info("Loading do ontology from file")
+        logging.basicConfig(filename=None, level="ERROR",
+                            format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
 
     def test_trimming_with_high_priority(self):
         generator = OntologySentenceGenerator(gene_id="WB:WBGene00000912", module=Module.GO,
@@ -62,6 +65,12 @@ class TestDescriptionsGenerator(unittest.TestCase):
         self.assertTrue("several processes" not in sentences.get_description())
         self.assertTrue("dauer larval development, determination of adult lifespan, and insulin receptor "
                         "signaling pathway" in sentences.get_description())
+        go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00002335", module=Module.GO,
+                                                      data_manager=self.df, config=self.conf_parser)
+        sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='F',
+                                                           qualifier='', merge_groups_with_same_prefix=True,
+                                                           keep_only_best_group=True)
+        print(sentences.get_description())
         self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
             self.this_dir, "data", "gene_association_1.7.fb.partial"),
                                             associations_cache_path=os.path.join(self.this_dir, "cache",
@@ -418,6 +427,48 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
         self.assertTrue("dauer larval development" not in sentences.get_description(), "Blacklist not working")
+
+    def test_disease_trimming(self):
+        self.df.load_ontology_from_file(ontology_type=DataType.DO, ontology_url="file://" + os.path.join(
+            self.this_dir, "data", "doid.obo"),
+                                        ontology_cache_path=os.path.join(self.this_dir, "cache", "doid.obo"),
+                                        config=self.conf_parser)
+        associations = [DataManager.create_annotation_record(source_line="", gene_id="RGD:HGNC:7225",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0110200", qualifiers="", aspect="D",
+                                                             ecode="IAGP", references="", prvdr="RGD", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="RGD:HGNC:7225",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0110152", qualifiers="", aspect="D",
+                                                             ecode="IAGP", references="", prvdr="RGD", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="RGD:HGNC:7225",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0110158", qualifiers="", aspect="D",
+                                                             ecode="IAGP", references="", prvdr="RGD", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="RGD:HGNC:7225",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0110157", qualifiers="", aspect="D",
+                                                             ecode="IAGP", references="", prvdr="RGD", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="RGD:HGNC:7225",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0050540", qualifiers="", aspect="D",
+                                                             ecode="IAGP", references="", prvdr="RGD", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="RGD:HGNC:7225",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0110195", qualifiers="", aspect="D",
+                                                             ecode="IAGP", references="", prvdr="RGD", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="RGD:HGNC:7225",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:10595", qualifiers="", aspect="D",
+                                                             ecode="IAGP", references="", prvdr="RGD", date="")]
+        self.df.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
+                                                                             ontology=self.df.do_ontology)
+        generator = OntologySentenceGenerator(gene_id="RGD:HGNC:7225", module=Module.DO_EXPERIMENTAL,
+                                              data_manager=self.df, config=self.conf_parser, humans=True)
+        sentences = generator.get_module_sentences(
+            config=self.conf_parser, aspect='D', qualifier='', merge_groups_with_same_prefix=True,
+            keep_only_best_group=True)
+        print(sentences.get_description())
 
 
 

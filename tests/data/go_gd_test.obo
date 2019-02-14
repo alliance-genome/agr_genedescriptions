@@ -1,10 +1,24 @@
 format-version: 1.2
 ontology: go_gd_tests
-owl-axioms: Prefix(owl:=<http://www.w3.org/2002/07/owl#>)\nPrefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)\nPrefix(xml:=<http://www.w3.org/XML/1998/namespace>)\nPrefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\nPrefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)\n\n\nOntology(\nDeclaration(AnnotationProperty(<http://purl.obolibrary.org/obo/IAO_0000412>))\n\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0000982> <http://purl.obolibrary.org/obo/go.owl>)\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0000983> <http://purl.obolibrary.org/obo/go.owl>)\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0001077> <http://purl.obolibrary.org/obo/go.owl>)\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0001078> <http://purl.obolibrary.org/obo/go.owl>)\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0003705> <http://purl.obolibrary.org/obo/go.owl>)\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0010107> <http://purl.obolibrary.org/obo/go.owl>)\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0015222> <http://purl.obolibrary.org/obo/go.owl>)\n)
+owl-axioms: Prefix(owl:=<http://www.w3.org/2002/07/owl#>)\nPrefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)\nPrefix(xml:=<http://www.w3.org/XML/1998/namespace>)\nPrefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\nPrefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)\n\n\nOntology(\nDeclaration(AnnotationProperty(<http://purl.obolibrary.org/obo/IAO_0000412>))\n\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0000982> <http://purl.obolibrary.org/obo/go.owl>)\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0000983> <http://purl.obolibrary.org/obo/go.owl>)\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0001077> <http://purl.obolibrary.org/obo/go.owl>)\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0001078> <http://purl.obolibrary.org/obo/go.owl>)\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0001104> <http://purl.obolibrary.org/obo/go.owl>)\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0003705> <http://purl.obolibrary.org/obo/go.owl>)\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0010107> <http://purl.obolibrary.org/obo/go.owl>)\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0015222> <http://purl.obolibrary.org/obo/go.owl>)\nAnnotationAssertion(<http://purl.obolibrary.org/obo/IAO_0000412> <http://purl.obolibrary.org/obo/GO_0043234> <http://purl.obolibrary.org/obo/go.owl>)\n)
 
 [Term]
 id: GO:0000003
 name: reproduction
+namespace: biological_process
+alt_id: GO:0019952
+alt_id: GO:0050876
+def: "The production of new individuals that contain some portion of genetic material inherited from one or more parent organisms." []
+subset: goslim_agr
+subset: goslim_chembl
+subset: goslim_flybase_ribbon
+subset: goslim_generic
+subset: goslim_pir
+subset: goslim_plant
+synonym: "reproductive physiological process" EXACT []
+xref: Wikipedia:Reproduction
+is_a: GO:0008150 ! biological_process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0000018
@@ -28,6 +42,10 @@ intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002211 GO:0006312 ! regulates mitotic recombination
 relationship: RO:0002211 GO:0006312 ! regulates mitotic recombination
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0000022
+name: mitotic spindle elongation
 
 [Term]
 id: GO:0000041
@@ -327,6 +345,22 @@ is_a: GO:1901265 ! nucleoside phosphate binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0000184
+name: nuclear-transcribed mRNA catabolic process, nonsense-mediated decay
+namespace: biological_process
+def: "The nonsense-mediated decay pathway for nuclear-transcribed mRNAs degrades mRNAs in which an amino-acid codon has changed to a nonsense codon; this prevents the translation of such mRNAs into truncated, and potentially harmful, proteins." []
+synonym: "mRNA breakdown, nonsense-mediated decay" EXACT []
+synonym: "mRNA catabolic process, nonsense-mediated" EXACT []
+synonym: "mRNA catabolism, nonsense-mediated" EXACT []
+synonym: "mRNA degradation, nonsense-mediated decay" EXACT []
+synonym: "nonsense-mediated mRNA decay" EXACT []
+synonym: "nuclear mRNA catabolic process, nonsense-mediated decay" EXACT []
+xref: Wikipedia:Nonsense-mediated_decay
+xref: Wikipedia:Nonsense-mediated_mRNA_decay
+is_a: GO:0000956 ! nuclear-transcribed mRNA catabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0000212
 name: meiotic spindle organization
 namespace: biological_process
@@ -366,6 +400,17 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0000228
 name: nuclear chromosome
+namespace: cellular_component
+def: "A chromosome that encodes the nuclear genome and is found in the nucleus of a eukaryotic cell during the cell cycle phases when the nucleus is intact." []
+subset: goslim_chembl
+subset: goslim_generic
+synonym: "nuclear interphase chromosome" NARROW []
+is_a: GO:0005694 ! chromosome
+is_a: GO:0044428 ! nuclear part
+intersection_of: GO:0005694 ! chromosome
+intersection_of: BFO:0000050 GO:0005634 ! part of nucleus
+relationship: BFO:0000050 GO:0031981 ! part of nuclear lumen
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0000235
@@ -510,6 +555,17 @@ relationship: BFO:0000050 GO:0000324 ! part of fungal-type vacuole
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0000339
+name: RNA cap binding
+namespace: molecular_function
+def: "Interacting selectively and non-covalently with a 7-methylguanosine (m7G) group or derivative located at the 5' end of an RNA molecule." []
+synonym: "binding to mRNA cap" NARROW []
+synonym: "mRNA cap binding" NARROW []
+synonym: "snRNA cap binding" NARROW []
+is_a: GO:0003723 ! RNA binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0000375
 name: RNA splicing, via transesterification reactions
 namespace: biological_process
@@ -598,6 +654,24 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0000423
 name: mitophagy
+
+[Term]
+id: GO:0000491
+name: small nucleolar ribonucleoprotein complex assembly
+namespace: biological_process
+def: "The aggregation, arrangement and bonding together of proteins and a snoRNA to form a small nucleolar ribonucleoprotein (snoRNP) complex." []
+synonym: "snoRNP assembly" EXACT []
+is_a: GO:0022618 ! ribonucleoprotein complex assembly
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0000492
+name: box C/D snoRNP assembly
+namespace: biological_process
+def: "The aggregation, arrangement and bonding together of proteins and a box C/D snoRNA to form a box C/D small nucleolar ribonucleoprotein (snoRNP) complex." []
+synonym: "box C/D small nucleolar ribonucleoprotein complex assembly" EXACT []
+is_a: GO:0000491 ! small nucleolar ribonucleoprotein complex assembly
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0000502
@@ -810,10 +884,34 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0000779
 name: condensed chromosome, centromeric region
+namespace: cellular_component
+def: "The region of a condensed chromosome that includes the centromere and associated proteins, including the kinetochore. In monocentric chromosomes, this region corresponds to a single area of the chromosome, whereas in holocentric chromosomes, it is evenly distributed along the chromosome." []
+comment: Note that this term can be used in place of the obsolete cellular component term 'centromere ; GO:0005698'. Use with caution because this term refers to a specific region of the chromosome and not a protein complex.
+synonym: "condensed chromosome, centric region" EXACT []
+synonym: "condensed chromosome, centromere" RELATED []
+synonym: "condensed chromosome, pericentric region" RELATED []
+is_a: GO:0000775 ! chromosome, centromeric region
+intersection_of: GO:0000775 ! chromosome, centromeric region
+intersection_of: BFO:0000050 GO:0000793 ! part of condensed chromosome
+relationship: BFO:0000050 GO:0000793 ! part of condensed chromosome
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0000780
 name: condensed nuclear chromosome, centromeric region
+namespace: cellular_component
+def: "The region of a condensed nuclear chromosome that includes the centromere and associated proteins, including the kinetochore. In monocentric chromosomes, this region corresponds to a single area of the chromosome, whereas in holocentric chromosomes, it is evenly distributed along the chromosome." []
+comment: Note that this term can be used in place of the obsolete cellular component term 'centromere ; GO:0005698'. Use with caution because this term refers to a specific region of the chromosome and not a protein complex.
+synonym: "condensed nuclear chromosome, centric region" EXACT []
+synonym: "condensed nuclear chromosome, centromere" RELATED []
+synonym: "condensed nuclear chromosome, pericentric region" RELATED []
+is_a: GO:0000779 ! condensed chromosome, centromeric region
+is_a: GO:0044454 ! nuclear chromosome part
+intersection_of: GO:0000779 ! condensed chromosome, centromeric region
+intersection_of: BFO:0000050 GO:0000794 ! part of condensed nuclear chromosome
+intersection_of: BFO:0000050 GO:0005634 ! part of nucleus
+relationship: BFO:0000050 GO:0000794 ! part of condensed nuclear chromosome
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0000781
@@ -875,10 +973,28 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0000793
 name: condensed chromosome
+namespace: cellular_component
+def: "A highly compacted molecule of DNA and associated proteins resulting in a cytologically distinct structure." []
+comment: Note that this term can be used to annotate gene products that localize to a mitotic chromosome in an organism that undergoes an 'open mitosis' in which the nuclear envelope breaks down during mitosis.
+synonym: "cytoplasmic mitotic chromosome" RELATED []
+synonym: "metaphase chromosome" RELATED []
+synonym: "mitotic chromosome" RELATED []
+is_a: GO:0005694 ! chromosome
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0000794
 name: condensed nuclear chromosome
+namespace: cellular_component
+def: "A highly compacted molecule of DNA and associated proteins resulting in a cytologically distinct nuclear chromosome." []
+comment: Note that this term and its children can be used to annotate gene products that localize to a mitotic chromosome in an organism that undergoes a 'closed mitosis' in which the nuclear envelope does not break down during mitosis and for gene products that localize to a meiotic chromosome.
+synonym: "meiotic chromosome" RELATED []
+synonym: "nuclear mitotic chromosome" RELATED []
+is_a: GO:0000228 ! nuclear chromosome
+is_a: GO:0000793 ! condensed chromosome
+intersection_of: GO:0000793 ! condensed chromosome
+intersection_of: BFO:0000050 GO:0005634 ! part of nucleus
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0000795
@@ -1014,6 +1130,10 @@ name: cytokinesis
 [Term]
 id: GO:0000915
 name: actomyosin contractile ring assembly
+
+[Term]
+id: GO:0000916
+name: actomyosin contractile ring contraction
 
 [Term]
 id: GO:0000922
@@ -2094,6 +2214,26 @@ synonym: "neurulation" EXACT []
 xref: Wikipedia:Neurulation
 is_a: GO:0001838 ! embryonic epithelial tube formation
 relationship: BFO:0000050 GO:0021915 ! part of neural tube development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0001882
+name: nucleoside binding
+namespace: molecular_function
+def: "Interacting selectively and non-covalently with a nucleoside, a compound consisting of a purine or pyrimidine nitrogenous base linked either to ribose or deoxyribose." []
+subset: goslim_pir
+is_a: GO:0036094 ! small molecule binding
+is_a: GO:0097159 ! organic cyclic compound binding
+is_a: GO:0097367 ! carbohydrate derivative binding
+is_a: GO:1901363 ! heterocyclic compound binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0001883
+name: purine nucleoside binding
+namespace: molecular_function
+def: "Interacting selectively and non-covalently with a purine nucleoside, a compound consisting of a purine base linked either to ribose or deoxyribose." []
+is_a: GO:0001882 ! nucleoside binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -3586,6 +3726,19 @@ is_a: GO:0003676 ! nucleic acid binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0003729
+name: mRNA binding
+namespace: molecular_function
+alt_id: GO:0000499
+def: "Interacting selectively and non-covalently with messenger RNA (mRNA), an intermediate molecule between DNA and protein. mRNA includes UTR and coding sequences, but does not contain introns." []
+subset: goslim_chembl
+subset: goslim_generic
+subset: goslim_yeast
+synonym: "base pairing with mRNA" NARROW []
+is_a: GO:0003723 ! RNA binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0003779
 name: actin binding
 namespace: molecular_function
@@ -3699,6 +3852,84 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0003924
 name: GTPase activity
+namespace: molecular_function
+def: "Catalysis of the reaction: GTP + H2O = GDP + phosphate." []
+subset: goslim_chembl
+subset: goslim_generic
+subset: goslim_yeast
+synonym: "ARF small monomeric GTPase activity" NARROW []
+synonym: "dynamin GTPase activity" NARROW []
+synonym: "heterotrimeric G-protein GTPase activity" NARROW []
+synonym: "heterotrimeric G-protein GTPase, alpha-subunit" RELATED []
+synonym: "heterotrimeric G-protein GTPase, beta-subunit" RELATED []
+synonym: "heterotrimeric G-protein GTPase, gamma-subunit" RELATED []
+synonym: "hydrolase activity, acting on acid anhydrides, acting on GTP, involved in cellular and subcellular movement" BROAD []
+synonym: "protein-synthesizing GTPase activity" NARROW []
+synonym: "protein-synthesizing GTPase activity, elongation" NARROW []
+synonym: "protein-synthesizing GTPase activity, initiation" NARROW []
+synonym: "protein-synthesizing GTPase activity, termination" NARROW []
+synonym: "Rab small monomeric GTPase activity" NARROW []
+synonym: "Ran small monomeric GTPase activity" NARROW []
+synonym: "Ras small monomeric GTPase activity" NARROW []
+synonym: "RHEB small monomeric GTPase activity" NARROW []
+synonym: "Rho small monomeric GTPase activity" NARROW []
+synonym: "Sar small monomeric GTPase activity" NARROW []
+synonym: "signal-recognition-particle GTPase activity" NARROW []
+synonym: "small monomeric GTPase activity" NARROW []
+synonym: "tubulin GTPase activity" NARROW []
+xref: reactome:R-HSA-1445143
+xref: reactome:R-HSA-1458485
+xref: reactome:R-HSA-156923
+xref: reactome:R-HSA-164381
+xref: reactome:R-HSA-165055
+xref: reactome:R-HSA-167415
+xref: reactome:R-HSA-170666
+xref: reactome:R-HSA-170685
+xref: reactome:R-HSA-170686
+xref: reactome:R-HSA-177501
+xref: reactome:R-HSA-203973
+xref: reactome:R-HSA-2130641
+xref: reactome:R-HSA-2130725
+xref: reactome:R-HSA-2584246
+xref: reactome:R-HSA-380979
+xref: reactome:R-HSA-392133
+xref: reactome:R-HSA-392212
+xref: reactome:R-HSA-418574
+xref: reactome:R-HSA-418582
+xref: reactome:R-HSA-421835
+xref: reactome:R-HSA-428941
+xref: reactome:R-HSA-432707
+xref: reactome:R-HSA-5333615
+xref: reactome:R-HSA-5389839
+xref: reactome:R-HSA-5389842
+xref: reactome:R-HSA-5419273
+xref: reactome:R-HSA-5419279
+xref: reactome:R-HSA-555065
+xref: reactome:R-HSA-5623513
+xref: reactome:R-HSA-5638006
+xref: reactome:R-HSA-5658231
+xref: reactome:R-HSA-5665809
+xref: reactome:R-HSA-5672017
+xref: reactome:R-HSA-5694527
+xref: reactome:R-HSA-6807877
+xref: reactome:R-HSA-6814833
+xref: reactome:R-HSA-8847534
+xref: reactome:R-HSA-8847883
+xref: reactome:R-HSA-8849082
+xref: reactome:R-HSA-8854173
+xref: reactome:R-HSA-8854255
+xref: reactome:R-HSA-8854329
+xref: reactome:R-HSA-8854604
+xref: reactome:R-HSA-8854612
+xref: reactome:R-HSA-8868661
+xref: reactome:R-HSA-8981353
+xref: reactome:R-HSA-8982020
+xref: reactome:R-HSA-8982021
+xref: reactome:R-HSA-8982025
+xref: reactome:R-HSA-983422
+xref: RHEA:19669
+is_a: GO:0017111 ! nucleoside-triphosphatase activity
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0004003
@@ -4233,6 +4464,35 @@ xref: reactome:R-HSA-6785986
 is_a: GO:0004518 ! nuclease activity
 is_a: GO:0140097 ! catalytic activity, acting on DNA
 relationship: BFO:0000050 GO:0006259 ! part of DNA metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0004652
+name: polynucleotide adenylyltransferase activity
+namespace: molecular_function
+def: "Catalysis of the template-independent extension of the 3'- end of an RNA or DNA strand by addition of one adenosine molecule at a time. Cannot initiate a chain 'de novo'. The primer, depending on the source of the enzyme, may be an RNA or DNA fragment, or oligo(A) bearing a 3'-OH terminal group." []
+synonym: "adenosine triphosphate:ribonucleic acid adenylyltransferase activity" EXACT []
+synonym: "AMP polynucleotidylexotransferase activity" EXACT []
+synonym: "ATP-polynucleotide adenylyltransferase activity" EXACT []
+synonym: "ATP:polynucleotide adenylyltransferase activity" EXACT []
+synonym: "ATP:polynucleotidylexotransferase activity" EXACT []
+synonym: "NTP polymerase activity" EXACT []
+synonym: "poly(A) hydrolase activity" EXACT []
+synonym: "poly(A) polymerase activity" EXACT []
+synonym: "poly(A) synthetase activity" EXACT []
+synonym: "poly-A polymerase activity" EXACT []
+synonym: "polyadenylate nucleotidyltransferase activity" EXACT []
+synonym: "polyadenylate polymerase activity" EXACT []
+synonym: "polyadenylate synthetase activity" EXACT []
+synonym: "polyadenylic acid polymerase activity" EXACT []
+synonym: "polyadenylic polymerase activity" EXACT []
+synonym: "RNA adenylating enzyme activity" EXACT []
+synonym: "RNA formation factors, PF1" RELATED []
+synonym: "terminal riboadenylate transferase activity" EXACT []
+xref: EC:2.7.7.19
+xref: MetaCyc:POLYNUCLEOTIDE-ADENYLYLTRANSFERASE-RXN
+xref: reactome:R-HSA-72185
+is_a: GO:0070566 ! adenylyltransferase activity
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -5558,6 +5818,136 @@ id: GO:0004972
 name: NMDA glutamate receptor activity
 
 [Term]
+id: GO:0005085
+name: guanyl-nucleotide exchange factor activity
+namespace: molecular_function
+alt_id: GO:0008433
+alt_id: GO:0016219
+alt_id: GO:0019839
+def: "Stimulates the exchange of guanyl nucleotides associated with a GTPase. Under normal cellular physiological conditions, the concentration of GTP is higher than that of GDP, favoring the replacement of GDP by GTP in association with the GTPase." []
+comment: Note that guanyl-nucleotide exchange factor (GEF) activity alters binding affinity, but not GTPase catalytic activity directly. Therefore GO:0005085 is under 'regulation of GTPase activity' but is not a 'GTPase regulator', which is reserved for cases where the action of one gene product directly alters the rate of catalysis by another gene product.
+subset: goslim_chembl
+subset: goslim_yeast
+synonym: "GDP-dissociation stimulator activity" EXACT []
+synonym: "GDS" EXACT []
+synonym: "GEF" EXACT []
+synonym: "GNRP" NARROW []
+synonym: "guanyl-nucleotide release factor activity" EXACT []
+synonym: "guanyl-nucleotide releasing factor" EXACT []
+xref: reactome:R-HSA-114544
+xref: reactome:R-HSA-1168636
+xref: reactome:R-HSA-1433415
+xref: reactome:R-HSA-156913
+xref: reactome:R-HSA-169904
+xref: reactome:R-HSA-170979
+xref: reactome:R-HSA-187746
+xref: reactome:R-HSA-2029445
+xref: reactome:R-HSA-2029451
+xref: reactome:R-HSA-2029467
+xref: reactome:R-HSA-203977
+xref: reactome:R-HSA-205039
+xref: reactome:R-HSA-2424476
+xref: reactome:R-HSA-2485180
+xref: reactome:R-HSA-2730840
+xref: reactome:R-HSA-354173
+xref: reactome:R-HSA-379044
+xref: reactome:R-HSA-379048
+xref: reactome:R-HSA-380073
+xref: reactome:R-HSA-389348
+xref: reactome:R-HSA-389350
+xref: reactome:R-HSA-392195
+xref: reactome:R-HSA-3928592
+xref: reactome:R-HSA-3928612
+xref: reactome:R-HSA-3928628
+xref: reactome:R-HSA-3928632
+xref: reactome:R-HSA-3928633
+xref: reactome:R-HSA-3928642
+xref: reactome:R-HSA-3928651
+xref: reactome:R-HSA-392870
+xref: reactome:R-HSA-3965444
+xref: reactome:R-HSA-399995
+xref: reactome:R-HSA-4093336
+xref: reactome:R-HSA-416530
+xref: reactome:R-HSA-418579
+xref: reactome:R-HSA-420883
+xref: reactome:R-HSA-428750
+xref: reactome:R-HSA-428917
+xref: reactome:R-HSA-442273
+xref: reactome:R-HSA-442291
+xref: reactome:R-HSA-442314
+xref: reactome:R-HSA-445064
+xref: reactome:R-HSA-5218829
+xref: reactome:R-HSA-5218839
+xref: reactome:R-HSA-5218850
+xref: reactome:R-HSA-5694409
+xref: reactome:R-HSA-6807868
+xref: reactome:R-HSA-6811429
+xref: reactome:R-HSA-749453
+xref: reactome:R-HSA-751029
+xref: reactome:R-HSA-825631
+xref: reactome:R-HSA-8848618
+xref: reactome:R-HSA-8850041
+xref: reactome:R-HSA-8851827
+xref: reactome:R-HSA-8851877
+xref: reactome:R-HSA-8851899
+xref: reactome:R-HSA-8875568
+xref: reactome:R-HSA-8875591
+xref: reactome:R-HSA-8964604
+xref: reactome:R-HSA-8982637
+xref: reactome:R-HSA-8982640
+xref: reactome:R-HSA-939265
+is_a: GO:0051020 ! GTPase binding
+is_a: GO:0098772 ! molecular function regulator
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0005088
+name: Ras guanyl-nucleotide exchange factor activity
+namespace: molecular_function
+def: "Stimulates the exchange of guanyl nucleotides associated with a GTPase of the Ras superfamily. Under normal cellular physiological conditions, the concentration of GTP is higher than that of GDP, favoring the replacement of GDP by GTP in association with the GTPase." []
+xref: reactome:R-HSA-109807
+xref: reactome:R-HSA-109817
+xref: reactome:R-HSA-1225951
+xref: reactome:R-HSA-1225957
+xref: reactome:R-HSA-1250383
+xref: reactome:R-HSA-1250463
+xref: reactome:R-HSA-1250498
+xref: reactome:R-HSA-1306972
+xref: reactome:R-HSA-1433471
+xref: reactome:R-HSA-177938
+xref: reactome:R-HSA-177945
+xref: reactome:R-HSA-186834
+xref: reactome:R-HSA-210977
+xref: reactome:R-HSA-2179407
+xref: reactome:R-HSA-2424477
+xref: reactome:R-HSA-392054
+xref: reactome:R-HSA-442732
+xref: reactome:R-HSA-5637806
+xref: reactome:R-HSA-5637808
+xref: reactome:R-HSA-5654392
+xref: reactome:R-HSA-5654402
+xref: reactome:R-HSA-5654413
+xref: reactome:R-HSA-5654426
+xref: reactome:R-HSA-5654600
+xref: reactome:R-HSA-5654618
+xref: reactome:R-HSA-5654647
+xref: reactome:R-HSA-5654663
+xref: reactome:R-HSA-5655241
+xref: reactome:R-HSA-5655277
+xref: reactome:R-HSA-5655326
+xref: reactome:R-HSA-5655347
+xref: reactome:R-HSA-5672965
+xref: reactome:R-HSA-5686071
+xref: reactome:R-HSA-5686318
+xref: reactome:R-HSA-8853307
+xref: reactome:R-HSA-9026891
+xref: reactome:R-HSA-9029158
+xref: reactome:R-HSA-9032067
+is_a: GO:0005085 ! guanyl-nucleotide exchange factor activity
+is_a: GO:0017016 ! Ras GTPase binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0005102
 name: signaling receptor binding
 namespace: molecular_function
@@ -5944,6 +6334,17 @@ def: "Interacting selectively and non-covalently with ATP, adenosine 5'-triphosp
 xref: reactome:R-HSA-265682
 is_a: GO:0008144 ! drug binding
 is_a: GO:0032559 ! adenyl ribonucleotide binding
+is_a: GO:0035639 ! purine ribonucleoside triphosphate binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0005525
+name: GTP binding
+namespace: molecular_function
+def: "Interacting selectively and non-covalently with GTP, guanosine triphosphate." []
+xref: reactome:R-HSA-167429
+is_a: GO:0032550 ! purine ribonucleoside binding
+is_a: GO:0032561 ! guanyl ribonucleotide binding
 is_a: GO:0035639 ! purine ribonucleoside triphosphate binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
@@ -6554,6 +6955,18 @@ relationship: BFO:0000050 GO:0042175 ! part of nuclear outer membrane-endoplasmi
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0005791
+name: rough endoplasmic reticulum
+namespace: cellular_component
+def: "The rough (or granular) endoplasmic reticulum (ER) has ribosomes adhering to the outer surface; the ribosomes are the site of translation of the mRNA for those proteins which are either to be retained within the cisternae (ER-resident proteins), the proteins of the lysosomes, or the proteins destined for export from the cell. Glycoproteins undergo their initial glycosylation within the cisternae." []
+synonym: "RER" EXACT []
+synonym: "rough ER" EXACT []
+xref: NIF_Subcellular:sao1881364067
+xref: Wikipedia:Endoplasmic_reticulum#Rough_endoplasmic_reticulum
+is_a: GO:0005783 ! endoplasmic reticulum
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0005793
 name: endoplasmic reticulum-Golgi intermediate compartment
 
@@ -6725,6 +7138,30 @@ is_a: GO:1990904 ! ribonucleoprotein complex
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0005845
+name: mRNA cap binding complex
+namespace: cellular_component
+def: "Any protein complex that binds to an mRNA cap at any time in the lifetime of the mRNA." []
+synonym: "mRNA cap complex" RELATED []
+is_a: GO:0034518 ! RNA cap binding complex
+is_a: GO:0044424 ! intracellular part
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0005846
+name: nuclear cap binding complex
+namespace: cellular_component
+def: "A conserved heterodimeric protein complex that binds to the 5' terminal cap structure m7G(5')ppp(5')N of nascent eukaryotic RNA polymerase II transcripts such as pre-mRNA and U snRNA. The consists of proteins known as CBP20 and CBP80, binds to cap structures in the nucleus, and is involved in pre-mRNA splicing, 3'-end formation, and RNA nuclear export." []
+comment: Note that this complex can be found in the cytoplasm as well as the nucleus.
+synonym: "CBC" RELATED []
+synonym: "mRNA cap binding complex" NARROW []
+synonym: "NCBP-NIP1 complex" NARROW []
+synonym: "snRNA cap binding complex" NARROW []
+is_a: GO:0034518 ! RNA cap binding complex
+is_a: GO:0044424 ! intracellular part
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0005856
 name: cytoskeleton
 namespace: cellular_component
@@ -6755,6 +7192,16 @@ synonym: "neurotubule" NARROW []
 xref: NIF_Subcellular:sao1846835077
 xref: Wikipedia:Microtubule
 is_a: GO:0099513 ! polymeric cytoskeletal fiber
+relationship: BFO:0000050 GO:0015630 ! part of microtubule cytoskeleton
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0005875
+name: microtubule associated complex
+namespace: cellular_component
+def: "Any multimeric complex connected to a microtubule." []
+is_a: GO:0032991 ! protein-containing complex
+is_a: GO:0044430 ! cytoskeletal part
 relationship: BFO:0000050 GO:0015630 ! part of microtubule cytoskeleton
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
@@ -7795,6 +8242,34 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0006403
 name: RNA localization
+
+[Term]
+id: GO:0006405
+name: RNA export from nucleus
+namespace: biological_process
+def: "The directed movement of RNA from the nucleus to the cytoplasm." []
+synonym: "RNA export from cell nucleus" EXACT []
+synonym: "RNA export out of nucleus" EXACT []
+synonym: "RNA transport from nucleus to cytoplasm" EXACT []
+synonym: "RNA-nucleus export" EXACT []
+is_a: GO:0050658 ! RNA transport
+is_a: GO:0051168 ! nuclear export
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0006406
+name: mRNA export from nucleus
+namespace: biological_process
+def: "The directed movement of mRNA from the nucleus to the cytoplasm." []
+synonym: "mRNA export from cell nucleus" EXACT []
+synonym: "mRNA export out of nucleus" EXACT []
+synonym: "mRNA transport from nucleus to cytoplasm" EXACT []
+synonym: "mRNA-nucleus export" EXACT []
+is_a: GO:0006405 ! RNA export from nucleus
+is_a: GO:0051028 ! mRNA transport
+relationship: BFO:0000050 GO:0010467 ! part of gene expression
+relationship: BFO:0000050 GO:0071427 ! part of mRNA-containing ribonucleoprotein complex export from nucleus
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0006412
@@ -8942,6 +9417,20 @@ id: GO:0006911
 name: phagocytosis, engulfment
 
 [Term]
+id: GO:0006913
+name: nucleocytoplasmic transport
+namespace: biological_process
+alt_id: GO:0000063
+def: "The directed movement of molecules between the nucleus and the cytoplasm." []
+comment: Note that transport through the nuclear pore complex is not transmembrane because the nuclear membrane is a double membrane, and is not traversed.
+subset: goslim_chembl
+subset: goslim_generic
+subset: goslim_pombe
+synonym: "nucleocytoplasmic shuttling" NARROW []
+is_a: GO:0051169 ! nuclear transport
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0006914
 name: autophagy
 namespace: biological_process
@@ -9213,6 +9702,20 @@ creation_date: 2013-12-19T15:25:51Z
 [Term]
 id: GO:0006997
 name: nucleus organization
+namespace: biological_process
+alt_id: GO:0048287
+def: "A process that is carried out at the cellular level which results in the assembly, arrangement of constituent parts, or disassembly of the nucleus." []
+subset: goslim_aspergillus
+subset: goslim_candida
+subset: goslim_pir
+subset: goslim_yeast
+synonym: "nuclear morphology" RELATED []
+synonym: "nuclear organisation" EXACT []
+synonym: "nuclear organization" EXACT []
+synonym: "nuclear organization and biogenesis" RELATED []
+synonym: "nucleus organization and biogenesis" RELATED []
+is_a: GO:0006996 ! organelle organization
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0007004
@@ -9751,6 +10254,14 @@ created_by: davidos
 creation_date: 2014-04-15T15:59:10Z
 
 [Term]
+id: GO:0007156
+name: homophilic cell adhesion via plasma membrane adhesion molecules
+namespace: biological_process
+def: "The attachment of a plasma membrane adhesion molecule in one cell to an identical molecule in an adjacent cell." []
+is_a: GO:0098742 ! cell-cell adhesion via plasma-membrane adhesion molecules
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0007160
 name: cell-matrix adhesion
 namespace: biological_process
@@ -9774,6 +10285,10 @@ intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002212 GO:0007155 ! negatively regulates cell adhesion
 relationship: RO:0002212 GO:0007155 ! negatively regulates cell adhesion
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0007163
+name: establishment or maintenance of cell polarity
 
 [Term]
 id: GO:0007165
@@ -9827,6 +10342,20 @@ namespace: biological_process
 def: "A series of molecular signals initiated by the binding of an extracellular ligand to a receptor on the surface of the target cell where the receptor possesses tyrosine kinase activity, and ending with regulation of a downstream cellular process, e.g. transcription." []
 synonym: "transmembrane receptor protein tyrosine kinase signalling pathway" EXACT []
 is_a: GO:0007167 ! enzyme linked receptor protein signaling pathway
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0007173
+name: epidermal growth factor receptor signaling pathway
+namespace: biological_process
+def: "A series of molecular signals initiated by binding of a ligand to the tyrosine kinase receptor EGFR (ERBB1) on the surface of a cell. The pathway ends with regulation of a downstream cellular process, e.g. transcription." []
+synonym: "EGF receptor signaling pathway" EXACT []
+synonym: "EGF receptor signalling pathway" EXACT []
+synonym: "EGFR signaling pathway" EXACT []
+synonym: "epidermal growth factor receptor signalling pathway" EXACT []
+synonym: "ERBB1 signaling pathway" EXACT []
+synonym: "receptor tyrosine-protein kinase erbB-1 signaling pathway" EXACT []
+is_a: GO:0038127 ! ERBB signaling pathway
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -9975,6 +10504,16 @@ namespace: biological_process
 def: "The process of synaptic transmission from a neuron to another neuron across a synapse." []
 synonym: "nerve-nerve synaptic transmission" RELATED []
 is_a: GO:0007268 ! chemical synaptic transmission
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0007272
+name: ensheathment of neurons
+namespace: biological_process
+def: "The process in which glial cells envelop neuronal cell bodies and/or axons to form an insulating layer. This can take the form of myelinating or non-myelinating ensheathment." []
+synonym: "ionic insulation of neurons by glial cells" RELATED []
+is_a: GO:0009987 ! cellular process
+relationship: BFO:0000050 GO:0007399 ! part of nervous system development
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -10334,6 +10873,14 @@ id: GO:0007480
 name: imaginal disc-derived leg morphogenesis
 
 [Term]
+id: GO:0007492
+name: endoderm development
+
+[Term]
+id: GO:0007498
+name: mesoderm development
+
+[Term]
 id: GO:0007507
 name: heart development
 namespace: biological_process
@@ -10349,6 +10896,11 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0007517
 name: muscle organ development
+namespace: biological_process
+def: "The process whose specific outcome is the progression of the muscle over time, from its formation to the mature structure. The muscle is an organ consisting of a tissue made up of various elongated cells that are specialized to contract and thus to produce movement and mechanical work." []
+is_a: GO:0048513 ! animal organ development
+is_a: GO:0061061 ! muscle structure development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0007519
@@ -11408,6 +11960,18 @@ is_a: GO:0032535 ! regulation of cellular component size
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0008366
+name: axon ensheathment
+namespace: biological_process
+alt_id: GO:0042553
+def: "Any process in which the axon of a neuron is insulated, and that insulation maintained, thereby preventing dispersion of the electrical signal." []
+synonym: "cellular axon ensheathment" EXACT []
+synonym: "cellular nerve ensheathment" RELATED []
+synonym: "nerve ensheathment" RELATED []
+is_a: GO:0007272 ! ensheathment of neurons
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0008380
 name: RNA splicing
 namespace: biological_process
@@ -12304,6 +12868,16 @@ subset: goslim_metagenomics
 subset: goslim_plant
 synonym: "response to abiotic stress" NARROW []
 is_a: GO:0050896 ! response to stimulus
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0009635
+name: response to herbicide
+namespace: biological_process
+def: "Any process that results in a change in state or activity of a cell or an organism (in terms of movement, secretion, enzyme production, gene expression, etc.) as a result of a herbicide stimulus. Herbicides are chemicals used to kill or control the growth of plants." []
+synonym: "herbicide susceptibility/resistance" RELATED []
+is_a: GO:0006950 ! response to stress
+is_a: GO:0009636 ! response to toxic substance
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -16412,6 +16986,22 @@ id: GO:0016591
 name: RNA polymerase II, holoenzyme
 
 [Term]
+id: GO:0016592
+name: mediator complex
+namespace: cellular_component
+alt_id: GO:0000119
+def: "A protein complex that interacts with the carboxy-terminal domain of the largest subunit of RNA polymerase II and plays an active role in transducing the signal from a transcription factor to the transcriptional machinery. The mediator complex is required for activation of transcription of most protein-coding genes, but can also act as a transcriptional corepressor. The Saccharomyces complex contains several identifiable subcomplexes: a head domain comprising Srb2, -4, and -5, Med6, -8, and -11, and Rox3 proteins; a middle domain comprising Med1, -4, and -7, Nut1 and -2, Cse2, Rgr1, Soh1, and Srb7 proteins; a tail consisting of Gal11p, Med2p, Pgd1p, and Sin4p; and a regulatory subcomplex comprising Ssn2, -3, and -8, and Srb8 proteins. Metazoan mediator complexes have similar modular structures and include homologs of yeast Srb and Med proteins." []
+synonym: "CDK8-containing TRAP/mediator complex" RELATED []
+synonym: "L mediator complex" EXACT []
+synonym: "Srb-mediator complex" EXACT []
+synonym: "TRAP complex" NARROW []
+xref: Wikipedia:Mediator_(coactivator)
+is_a: GO:0032991 ! protein-containing complex
+is_a: GO:0044451 ! nucleoplasm part
+relationship: BFO:0000051 GO:0070847 ! has part core mediator complex
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0016593
 name: Cdc73/Paf1 complex
 namespace: cellular_component
@@ -16968,6 +17558,14 @@ is_a: GO:0140296 ! general transcription initiation factor binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0017034
+name: Rap guanyl-nucleotide exchange factor activity
+namespace: molecular_function
+def: "Stimulates the exchange of guanyl nucleotides associated with a GTPase of the Rap family. Under normal cellular physiological conditions, the concentration of GTP is higher than that of GDP, favoring the replacement of GDP by GTP in association with the GTPase." []
+is_a: GO:0005088 ! Ras guanyl-nucleotide exchange factor activity
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0017038
 name: protein import
 namespace: biological_process
@@ -17014,6 +17612,16 @@ def: "Modulates the activity of a chloride channel." []
 xref: reactome:R-HSA-383190
 is_a: GO:0016247 ! channel regulator activity
 relationship: RO:0002211 GO:0005254 ! regulates chloride channel activity
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0017085
+name: response to insecticide
+namespace: biological_process
+def: "Any process that results in a change in state or activity of a cell or an organism (in terms of movement, secretion, enzyme production, gene expression, etc.) as a result of an insecticide stimulus. Insecticides are chemicals used to kill insects." []
+synonym: "insecticide resistance" RELATED []
+synonym: "insecticide susceptibility/resistance" RELATED []
+is_a: GO:0009636 ! response to toxic substance
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -17271,6 +17879,15 @@ xref: UM-BBD_pathwayID:phe
 is_a: GO:0006725 ! cellular aromatic compound metabolic process
 is_a: GO:1901360 ! organic cyclic compound metabolic process
 is_a: GO:1901615 ! organic hydroxy compound metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0019001
+name: guanyl nucleotide binding
+namespace: molecular_function
+def: "Interacting selectively and non-covalently with guanyl nucleotides, any compound consisting of guanosine esterified with (ortho)phosphate." []
+xref: reactome:R-HSA-156909
+is_a: GO:0017076 ! purine nucleotide binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -17856,6 +18473,14 @@ relationship: BFO:0000051 GO:0019903 ! has part protein phosphatase binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0019894
+name: kinesin binding
+namespace: molecular_function
+def: "Interacting selectively and non-covalently and stoichiometrically with kinesin, a member of a superfamily of microtubule-based motor proteins that perform force-generating tasks such as organelle transport and chromosome segregation." []
+is_a: GO:0008092 ! cytoskeletal protein binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0019898
 name: extrinsic component of membrane
 
@@ -18395,6 +19020,21 @@ def: "The DNA metabolic process in which an existing DNA strand is extended by a
 comment: Changed definition https://github.com/geneontology/go-ontology/issues/12633
 is_a: GO:0006259 ! DNA metabolic process
 relationship: BFO:0000051 GO:0071897 ! has part DNA biosynthetic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0022618
+name: ribonucleoprotein complex assembly
+namespace: biological_process
+def: "The aggregation, arrangement and bonding together of proteins and RNA molecules to form a ribonucleoprotein complex." []
+subset: goslim_chembl
+subset: goslim_generic
+synonym: "protein-RNA complex assembly" EXACT []
+synonym: "RNA-protein complex assembly" EXACT []
+synonym: "RNP complex assembly" EXACT []
+is_a: GO:0034622 ! cellular protein-containing complex assembly
+is_a: GO:0071826 ! ribonucleoprotein complex subunit organization
+relationship: BFO:0000050 GO:0022613 ! part of ribonucleoprotein complex biogenesis
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -18969,6 +19609,21 @@ comment: Note that the term 'secretory vesicle' is sometimes used in this sense,
 synonym: "secretory vesicle" BROAD []
 is_a: GO:0099503 ! secretory vesicle
 relationship: BFO:0000050 GO:0012505 ! part of endomembrane system
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0030150
+name: protein import into mitochondrial matrix
+namespace: biological_process
+def: "The import of proteins across the outer and inner mitochondrial membranes into the matrix. Unfolded proteins enter the mitochondrial matrix with a chaperone protein; the information required to target the precursor protein from the cytosol to the mitochondrial matrix is contained within its N-terminal matrix-targeting sequence. Translocation of precursors to the matrix occurs at the rare sites where the outer and inner membranes are close together." []
+synonym: "mitochondrial matrix protein import" EXACT []
+synonym: "mitochondrial translocation" BROAD []
+synonym: "protein transport into mitochondrial matrix" EXACT []
+is_a: GO:0044743 ! protein transmembrane import into intracellular organelle
+is_a: GO:0065002 ! intracellular protein transmembrane transport
+is_a: GO:0072655 ! establishment of protein localization to mitochondrion
+is_a: GO:1990542 ! mitochondrial transmembrane transport
+relationship: BFO:0000050 GO:0006626 ! part of protein targeting to mitochondrion
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -19645,6 +20300,16 @@ relationship: BFO:0000050 GO:0042274 ! part of ribosomal small subunit biogenesi
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0030496
+name: midbody
+namespace: cellular_component
+def: "A thin cytoplasmic bridge formed between daughter cells at the end of cytokinesis. The midbody forms where the contractile ring constricts, and may persist for some time before finally breaking to complete cytokinesis." []
+subset: goslim_pir
+xref: Wikipedia:Midbody_(cell_biology)
+is_a: GO:0044464 ! cell part
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0030500
 name: regulation of bone mineralization
 namespace: biological_process
@@ -20164,6 +20829,17 @@ id: GO:0030879
 name: mammary gland development
 
 [Term]
+id: GO:0030880
+name: RNA polymerase complex
+namespace: cellular_component
+def: "Any complex that possesses RNA polymerase activity; generally comprises a catalytic subunit and one or more additional subunits." []
+subset: goslim_pir
+synonym: "multisubunit RNA polymerase" EXACT []
+is_a: GO:0044424 ! intracellular part
+is_a: GO:0061695 ! transferase complex, transferring phosphorus-containing groups
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0030888
 name: regulation of B cell proliferation
 namespace: biological_process
@@ -20285,6 +20961,26 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0031038
 name: myosin II filament organization
+
+[Term]
+id: GO:0031047
+name: gene silencing by RNA
+namespace: biological_process
+def: "Any process in which RNA molecules inactivate expression of target genes." []
+synonym: "RNA-mediated gene silencing" EXACT []
+is_a: GO:0016458 ! gene silencing
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0031053
+name: primary miRNA processing
+namespace: biological_process
+def: "Any process involved in the conversion of a primary microRNA transcript into a pre-microRNA molecule." []
+synonym: "pri-miRNA processing" EXACT []
+synonym: "primary microRNA processing" EXACT []
+is_a: GO:0034470 ! ncRNA processing
+relationship: BFO:0000050 GO:0035196 ! part of production of miRNAs involved in gene silencing by miRNA
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0031056
@@ -20977,6 +21673,14 @@ relationship: RO:0002213 GO:0006952 ! positively regulates defense response
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0031379
+name: RNA-directed RNA polymerase complex
+namespace: cellular_component
+def: "A protein complex that possesses RNA-directed RNA polymerase activity." []
+is_a: GO:0030880 ! RNA polymerase complex
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0031396
 name: regulation of protein ubiquitination
 namespace: biological_process
@@ -21348,6 +22052,17 @@ is_a: GO:0140030 ! modification-dependent protein binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0031616
+name: spindle pole centrosome
+namespace: cellular_component
+def: "A centrosome from which one pole of a mitotic or meiotic spindle is organized." []
+is_a: GO:0005813 ! centrosome
+intersection_of: GO:0005813 ! centrosome
+intersection_of: BFO:0000050 GO:0000922 ! part of spindle pole
+relationship: BFO:0000050 GO:0000922 ! part of spindle pole
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0031625
 name: ubiquitin protein ligase binding
 namespace: molecular_function
@@ -21569,6 +22284,24 @@ is_a: GO:0035556 ! intracellular signal transduction
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0031931
+name: TORC1 complex
+namespace: cellular_component
+def: "A protein complex that contains at least TOR (target of rapamycin) and Raptor (regulatory-associated protein of TOR), or orthologs of, in complex with other signaling components. Mediates the phosphorylation and activation of S6K. In Saccharomyces, the complex contains Kog1p, Lst8p, Tco89p, and either Tor1p or Tor2p." []
+synonym: "dTOR/dRaptor complex" NARROW []
+synonym: "dTORC1" NARROW []
+synonym: "mTORC1" NARROW []
+synonym: "nutrient sensitive complex" EXACT []
+synonym: "rapamycin and nutrient-sensitive TOR complex" EXACT []
+synonym: "TOR complex 1" EXACT []
+synonym: "TORC 1 complex" EXACT []
+synonym: "TORC1" EXACT []
+xref: Wikipedia:MTORC1
+is_a: GO:0032991 ! protein-containing complex
+is_a: GO:0038201 ! TOR complex
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0031932
 name: TORC2 complex
 namespace: cellular_component
@@ -21679,6 +22412,21 @@ relationship: BFO:0000050 GO:0043227 ! part of membrane-bounded organelle
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0031991
+name: regulation of actomyosin contractile ring contraction
+namespace: biological_process
+def: "Any process that modulates the frequency, rate or extent of contraction of the actomyosin ring involved in cytokinesis that takes place as part of a cell cycle." []
+synonym: "regulation of contractile ring contraction involved in cell cycle cytokinesis" EXACT []
+synonym: "regulation of contractile ring contraction involved in cytokinesis during cell cycle" RELATED []
+is_a: GO:0032506 ! cytokinetic process
+is_a: GO:0032954 ! regulation of cytokinetic process
+is_a: GO:0110020 ! regulation of actomyosin structure organization
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002211 GO:0000916 ! regulates actomyosin contractile ring contraction
+relationship: RO:0002211 GO:0000916 ! regulates actomyosin contractile ring contraction
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0032006
 name: regulation of TOR signaling
 namespace: biological_process
@@ -21781,6 +22529,17 @@ is_a: GO:0048584 ! positive regulation of response to stimulus
 intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002213 GO:0009605 ! positively regulates response to external stimulus
 relationship: RO:0002213 GO:0009605 ! positively regulates response to external stimulus
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0032133
+name: chromosome passenger complex
+namespace: cellular_component
+def: "A eukaryotically conserved protein complex that localizes to kinetochores in early mitosis, the spindle mid-zone in anaphase B and to the telophase midbody. It has been proposed that the passenger complex coordinates various events based on its location to different structures during the course of mitosis. Complex members include the BIR-domain-containing protein Survivin, Aurora kinase, INCENP and Borealin." []
+synonym: "chromosomal passenger complex" EXACT []
+synonym: "CPC" BROAD []
+synonym: "CPC complex" EXACT []
+is_a: GO:0005875 ! microtubule associated complex
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -22504,6 +23263,11 @@ name: reproduction of a single-celled organism
 [Term]
 id: GO:0032506
 name: cytokinetic process
+namespace: biological_process
+def: "A cellular process that is involved in cytokinesis (the division of the cytoplasm of a cell and its separation into two daughter cells)." []
+is_a: GO:0022402 ! cell cycle process
+relationship: BFO:0000050 GO:0000910 ! part of cytokinesis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0032507
@@ -22582,6 +23346,23 @@ is_a: GO:0090066 ! regulation of anatomical structure size
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0032549
+name: ribonucleoside binding
+namespace: molecular_function
+def: "Interacting selectively and non-covalently with a ribonucleoside, a compound consisting of a purine or pyrimidine nitrogenous base linked to ribose." []
+is_a: GO:0001882 ! nucleoside binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0032550
+name: purine ribonucleoside binding
+namespace: molecular_function
+def: "Interacting selectively and non-covalently with a purine ribonucleoside, a compound consisting of a purine base linked to ribose." []
+is_a: GO:0001883 ! purine nucleoside binding
+is_a: GO:0032549 ! ribonucleoside binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0032553
 name: ribonucleotide binding
 namespace: molecular_function
@@ -22605,6 +23386,15 @@ name: adenyl ribonucleotide binding
 namespace: molecular_function
 def: "Interacting selectively and non-covalently with an adenyl ribonucleotide, any compound consisting of adenosine esterified with (ortho)phosphate or an oligophosphate at any hydroxyl group on the ribose moiety." []
 is_a: GO:0030554 ! adenyl nucleotide binding
+is_a: GO:0032555 ! purine ribonucleotide binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0032561
+name: guanyl ribonucleotide binding
+namespace: molecular_function
+def: "Interacting selectively and non-covalently with a guanyl ribonucleotide, any compound consisting of guanosine esterified with (ortho)phosphate or an oligophosphate at any hydroxyl group on the ribose moiety." []
+is_a: GO:0019001 ! guanyl nucleotide binding
 is_a: GO:0032555 ! purine ribonucleotide binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
@@ -22774,6 +23564,17 @@ is_a: GO:0070303 ! negative regulation of stress-activated protein kinase signal
 intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002212 GO:0051403 ! negatively regulates stress-activated MAPK cascade
 relationship: RO:0002212 GO:0051403 ! negatively regulates stress-activated MAPK cascade
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0032878
+name: regulation of establishment or maintenance of cell polarity
+namespace: biological_process
+def: "Any process that modulates the frequency, rate or extent of the specification, formation or maintenance of anisotropic intracellular organization or cell growth patterns." []
+is_a: GO:0050794 ! regulation of cellular process
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002211 GO:0007163 ! regulates establishment or maintenance of cell polarity
+relationship: RO:0002211 GO:0007163 ! regulates establishment or maintenance of cell polarity
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -24135,6 +24936,14 @@ relationship: BFO:0000051 GO:0032790 ! has part ribosome disassembly
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0034518
+name: RNA cap binding complex
+namespace: cellular_component
+def: "Any protein complex that binds to a specialized RNA cap structure at any time in the lifetime of the RNA." []
+is_a: GO:0032991 ! protein-containing complex
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0034551
 name: mitochondrial respiratory chain complex III assembly
 namespace: biological_process
@@ -24900,6 +25709,17 @@ relationship: BFO:0000050 GO:0016572 ! part of histone phosphorylation
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0035174
+name: histone serine kinase activity
+namespace: molecular_function
+def: "Catalysis of the transfer of a phosphate group to a serine residue of a histone. Histones are any of a group of water-soluble proteins found in association with the DNA of eukaroytic  chromosomes." []
+synonym: "histone-serine kinase activity" EXACT []
+is_a: GO:0004674 ! protein serine/threonine kinase activity
+is_a: GO:0035173 ! histone kinase activity
+relationship: BFO:0000050 GO:0035404 ! part of histone-serine phosphorylation
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0035176
 name: social behavior
 namespace: biological_process
@@ -24915,6 +25735,10 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0035186
 name: syncytial blastoderm mitotic cell cycle
+
+[Term]
+id: GO:0035196
+name: production of miRNAs involved in gene silencing by miRNA
 
 [Term]
 id: GO:0035206
@@ -25218,6 +26042,22 @@ is_a: GO:0022839 ! ion gated channel activity
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: rfoulger
 creation_date: 2010-03-18T01:21:45Z
+
+[Term]
+id: GO:0035404
+name: histone-serine phosphorylation
+namespace: biological_process
+def: "The modification of histones by addition of a phosphate group to a serine residue." []
+synonym: "histone serine phosphorylation" EXACT []
+is_a: GO:0016572 ! histone phosphorylation
+is_a: GO:0018105 ! peptidyl-serine phosphorylation
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: rfoulger
+creation_date: 2010-03-24T10:08:25Z
+
+[Term]
+id: GO:0035418
+name: protein localization to synapse
 
 [Term]
 id: GO:0035434
@@ -25944,6 +26784,20 @@ id: GO:0038084
 name: vascular endothelial growth factor signaling pathway
 
 [Term]
+id: GO:0038127
+name: ERBB signaling pathway
+namespace: biological_process
+def: "A series of molecular signals initiated by binding of a ligand to a member of the ERBB family of receptor tyrosine kinases on the surface of a cell, and ending with regulation of a downstream cellular process, e.g. transcription." []
+synonym: "EGF receptor family signaling pathway" EXACT []
+synonym: "EGFR family signaling pathway" RELATED []
+synonym: "ErbB signaling" EXACT []
+synonym: "ERBB signalling pathway" EXACT []
+is_a: GO:0007169 ! transmembrane receptor protein tyrosine kinase signaling pathway
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: rfoulger
+creation_date: 2012-03-30T09:23:01Z
+
+[Term]
 id: GO:0038201
 name: TOR complex
 namespace: cellular_component
@@ -25959,6 +26813,13 @@ creation_date: 2013-12-09T14:38:09Z
 [Term]
 id: GO:0038202
 name: TORC1 signaling
+namespace: biological_process
+def: "A series of intracellular molecular signals mediated by TORC1; TOR (target of rapamycin) in complex with at least Raptor (regulatory-associated protein of TOR), or orthologs of, and other signaling components." []
+synonym: "TORC1 signal transduction" EXACT []
+is_a: GO:0031929 ! TOR signaling
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: rfoulger
+creation_date: 2013-12-09T14:43:29Z
 
 [Term]
 id: GO:0038203
@@ -26164,6 +27025,38 @@ name: dauer larval development
 namespace: biological_process
 def: "The process whose specific outcome is the progression of the dauer larva over time, through the facultative diapause of the dauer (enduring) larval stage, with specialized traits adapted for dispersal and long-term survival, with elevated stress resistance and without feeding." []
 is_a: GO:0002119 ! nematode larval development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0040025
+name: vulval development
+
+[Term]
+id: GO:0040026
+name: positive regulation of vulval development
+namespace: biological_process
+def: "Any process that activates or increases the frequency, rate or extent of development of the vulva. Vulval development is the process whose specific outcome is the progression of the egg-laying organ of female and hermaphrodite nematodes over time, from its formation to the mature structure. In nematodes, the vulva is formed from ventral epidermal cells during larval stages to give rise to a fully formed vulva in the adult." []
+synonym: "activation of vulval development" RELATED []
+synonym: "stimulation of vulval development" RELATED []
+synonym: "up regulation of vulval development" RELATED []
+synonym: "up-regulation of vulval development" RELATED []
+synonym: "upregulation of vulval development" RELATED []
+is_a: GO:0040028 ! regulation of vulval development
+is_a: GO:0061063 ! positive regulation of nematode larval development
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002213 GO:0040025 ! positively regulates vulval development
+relationship: RO:0002213 GO:0040025 ! positively regulates vulval development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0040028
+name: regulation of vulval development
+namespace: biological_process
+def: "Any process that modulates the frequency, rate or extent of development of the vulva. Vulval development is the process whose specific outcome is the progression of the egg-laying organ of female and hermaphrodite nematodes over time, from its formation to the mature structure. In nematodes, the vulva is formed from ventral epidermal cells during larval stages to give rise to a fully formed vulva in the adult." []
+is_a: GO:0061062 ! regulation of nematode larval development
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002211 GO:0040025 ! regulates vulval development
+relationship: RO:0002211 GO:0040025 ! regulates vulval development
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -26474,6 +27367,15 @@ is_a: GO:0098598 ! learned vocalization behavior or vocal learning
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0042303
+name: molting cycle
+namespace: biological_process
+def: "The periodic casting off and regeneration of an outer covering of cuticle, feathers, hair, horns, skin, etc." []
+subset: goslim_pir
+is_a: GO:0032501 ! multicellular organismal process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0042310
 name: vasoconstriction
 namespace: biological_process
@@ -26706,6 +27608,12 @@ name: cell wall biogenesis
 [Term]
 id: GO:0042552
 name: myelination
+namespace: biological_process
+def: "The process in which myelin sheaths are formed and maintained around neurons. Oligodendrocytes in the brain and spinal cord and Schwann cells in the peripheral nervous system wrap axons with compact layers of their plasma membrane. Adjacent myelin segments are separated by a non-myelinated stretch of axon called a node of Ranvier." []
+synonym: "myelinogenesis" RELATED []
+xref: Wikipedia:Myelin
+is_a: GO:0008366 ! axon ensheathment
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0042555
@@ -26850,6 +27758,14 @@ is_a: GO:0005764 ! lysosome
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0042633
+name: hair cycle
+namespace: biological_process
+def: "The cyclical phases of growth (anagen), regression (catagen), quiescence (telogen), and shedding (exogen) in the life of a hair; one of the collection or mass of filaments growing from the skin of an animal, and forming a covering for a part of the head or for any part or the whole of the body." []
+is_a: GO:0042303 ! molting cycle
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0042641
 name: actomyosin
 namespace: cellular_component
@@ -26858,6 +27774,17 @@ synonym: "actomyosin complex" EXACT []
 synonym: "actomyosin structure" EXACT []
 is_a: GO:0044430 ! cytoskeletal part
 relationship: BFO:0000050 GO:0015629 ! part of actin cytoskeleton
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0042659
+name: regulation of cell fate specification
+namespace: biological_process
+def: "Any process that mediates the adoption of a specific fate by a cell." []
+is_a: GO:0010453 ! regulation of cell fate commitment
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002211 GO:0001708 ! regulates cell fate specification
+relationship: RO:0002211 GO:0001708 ! regulates cell fate specification
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -27911,6 +28838,14 @@ relationship: RO:0002212 GO:0006811 ! negatively regulates ion transport
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0043274
+name: phospholipase binding
+namespace: molecular_function
+def: "Interacting selectively and non-covalently with any phospholipase, enzymes that catalyze of the hydrolysis of a glycerophospholipid." []
+is_a: GO:0019899 ! enzyme binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0043277
 name: apoptotic cell clearance
 
@@ -28710,6 +29645,14 @@ def: "Any process that results in a change in state or activity of a cell or an 
 synonym: "response to estrogen stimulus" EXACT []
 synonym: "response to oestrogen stimulus" EXACT []
 is_a: GO:0050896 ! response to stimulus
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0043631
+name: RNA polyadenylation
+namespace: biological_process
+def: "The enzymatic addition of a sequence of adenylyl residues at the 3' end of an RNA molecule." []
+is_a: GO:0016070 ! RNA metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -30493,6 +31436,17 @@ is_a: GO:0016043 ! cellular component organization
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0045292
+name: mRNA cis splicing, via spliceosome
+namespace: biological_process
+def: "The joining together, after removal of an intervening sequence composed of one or more introns, of two segments of the same RNA molecule via spliceosomal catalysis to produce an mRNA composed only of exon sequences that all came from the same primary transcript." []
+synonym: "nuclear mRNA cis splicing, via spliceosome" EXACT []
+synonym: "nuclear mRNA cis splicing, via U2-type spliceosome" NARROW []
+synonym: "splicing" BROAD []
+is_a: GO:0000398 ! mRNA splicing, via spliceosome
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0045321
 name: leukocyte activation
 namespace: biological_process
@@ -31273,6 +32227,26 @@ is_a: GO:0051784 ! negative regulation of nuclear division
 intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002212 GO:0140013 ! negatively regulates meiotic nuclear division
 relationship: RO:0002212 GO:0140013 ! negatively regulates meiotic nuclear division
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0045836
+name: positive regulation of meiotic nuclear division
+namespace: biological_process
+def: "Any process that activates or increases the frequency, rate or extent of meiosis." []
+synonym: "activation of meiosis" NARROW []
+synonym: "positive regulation of meiosis" EXACT []
+synonym: "stimulation of meiosis" NARROW []
+synonym: "up regulation of meiosis" EXACT []
+synonym: "up-regulation of meiosis" EXACT []
+synonym: "upregulation of meiosis" EXACT []
+is_a: GO:0040020 ! regulation of meiotic nuclear division
+is_a: GO:0051446 ! positive regulation of meiotic cell cycle
+is_a: GO:0051785 ! positive regulation of nuclear division
+is_a: GO:0090068 ! positive regulation of cell cycle process
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002213 GO:0140013 ! positively regulates meiotic nuclear division
+relationship: RO:0002213 GO:0140013 ! positively regulates meiotic nuclear division
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -33256,6 +34230,16 @@ namespace: biological_process
 def: "The process that gives rise to the paraxial mesoderm. This process pertains to the initial formation of the structure from unspecified parts." []
 is_a: GO:0001707 ! mesoderm formation
 relationship: BFO:0000050 GO:0048340 ! part of paraxial mesoderm morphogenesis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0048382
+name: mesendoderm development
+namespace: biological_process
+def: "The process whose specific outcome is the progression of the mesendoderm over time, from its formation to the mature structure. In animal embryos, mesendoderm development gives rise to both mesoderm and endoderm tissues." []
+is_a: GO:0048856 ! anatomical structure development
+relationship: BFO:0000050 GO:0007492 ! part of endoderm development
+relationship: BFO:0000050 GO:0007498 ! part of mesoderm development
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -35554,6 +36538,14 @@ relationship: RO:0002211 GO:0003677 ! regulates DNA binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0051117
+name: ATPase binding
+namespace: molecular_function
+def: "Interacting selectively and non-covalently with an ATPase, any enzyme that catalyzes the hydrolysis of ATP." []
+is_a: GO:0019899 ! enzyme binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0051123
 name: RNA polymerase II preinitiation complex assembly
 
@@ -35773,6 +36765,28 @@ is_a: GO:0051153 ! regulation of striated muscle cell differentiation
 intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002213 GO:0051146 ! positively regulates striated muscle cell differentiation
 relationship: RO:0002213 GO:0051146 ! positively regulates striated muscle cell differentiation
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0051168
+name: nuclear export
+namespace: biological_process
+def: "The directed movement of substances out of the nucleus." []
+synonym: "export from nucleus" EXACT []
+synonym: "nucleus export" EXACT []
+synonym: "substance nuclear export" EXACT []
+is_a: GO:0006913 ! nucleocytoplasmic transport
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0051169
+name: nuclear transport
+namespace: biological_process
+def: "The directed movement of substances into, out of, or within the nucleus." []
+subset: goslim_yeast
+synonym: "nucleus transport" EXACT []
+xref: Wikipedia:Nuclear_transport
+is_a: GO:0046907 ! intracellular transport
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -36073,6 +37087,17 @@ is_a: GO:1903008 ! organelle disassembly
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0051233
+name: spindle midzone
+namespace: cellular_component
+def: "The area in the center of the spindle where the spindle microtubules from opposite poles overlap." []
+synonym: "central spindle" EXACT []
+synonym: "spindle equator" EXACT []
+is_a: GO:0044430 ! cytoskeletal part
+relationship: BFO:0000050 GO:0005819 ! part of spindle
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0051234
 name: establishment of localization
 namespace: biological_process
@@ -36311,6 +37336,25 @@ is_a: GO:0007017 ! microtubule-based process
 is_a: GO:0022402 ! cell cycle process
 is_a: GO:0022607 ! cellular component assembly
 relationship: BFO:0000050 GO:0051225 ! part of spindle assembly
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0051256
+name: mitotic spindle midzone assembly
+namespace: biological_process
+def: "The cell cycle process in which the aggregation, arrangement and bonding together of a set of components forms the spindle midzone." []
+synonym: "mitotic spindle midzone biogenesis" EXACT []
+synonym: "mitotic spindle midzone biosynthesis" EXACT []
+synonym: "mitotic spindle midzone formation" EXACT []
+synonym: "spindle midzone assembly involved in mitosis" EXACT []
+synonym: "spindle midzone biogenesis involved in mitosis" EXACT []
+synonym: "spindle midzone formation involved in mitosis" EXACT []
+is_a: GO:0051255 ! spindle midzone assembly
+is_a: GO:1903047 ! mitotic cell cycle process
+intersection_of: GO:0051255 ! spindle midzone assembly
+intersection_of: BFO:0000050 GO:0140014 ! part of mitotic nuclear division
+relationship: BFO:0000050 GO:0000022 ! part of mitotic spindle elongation
+relationship: BFO:0000050 GO:0090307 ! part of mitotic spindle assembly
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -37461,6 +38505,41 @@ relationship: RO:0002211 GO:0007049 ! regulates cell cycle
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0051728
+name: cell cycle switching, mitotic to meiotic cell cycle
+namespace: biological_process
+alt_id: GO:0042061
+def: "The process in which a cell switches cell cycle mode from mitotic to meiotic division." []
+synonym: "cell cycle switching, mitosis to meiosis" NARROW []
+synonym: "conversion to meiosis" NARROW []
+synonym: "conversion to meiotic cell cycle" EXACT []
+synonym: "entry into meiosis" NARROW []
+synonym: "entry into meiotic cell cycle" EXACT []
+synonym: "initiation of meiosis" NARROW []
+synonym: "initiation of meiotic cell cycle" EXACT []
+synonym: "meiotic entry" NARROW []
+is_a: GO:0045930 ! negative regulation of mitotic cell cycle
+is_a: GO:0051446 ! positive regulation of meiotic cell cycle
+is_a: GO:0060184 ! cell cycle switching
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0051729
+name: germline cell cycle switching, mitotic to meiotic cell cycle
+namespace: biological_process
+def: "The process in which a germline cell switches cell cycle mode from mitotic to meiotic division." []
+synonym: "germline cell cycle switching, mitosis to meiosis" NARROW []
+synonym: "germline conversion to meiosis" NARROW []
+synonym: "germline conversion to meiotic cell cycle" EXACT []
+synonym: "germline entry into meiosis" NARROW []
+synonym: "germline entry into meiotic cell cycle" EXACT []
+synonym: "germline initiation of meiosis" NARROW []
+synonym: "germline initiation of meiotic cell cycle" EXACT []
+synonym: "germline meiotic entry" NARROW []
+is_a: GO:0051728 ! cell cycle switching, mitotic to meiotic cell cycle
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0051781
 name: positive regulation of cell division
 namespace: biological_process
@@ -37475,6 +38554,22 @@ is_a: GO:0051302 ! regulation of cell division
 intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002213 GO:0051301 ! positively regulates cell division
 relationship: RO:0002213 GO:0051301 ! positively regulates cell division
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0051782
+name: negative regulation of cell division
+namespace: biological_process
+def: "Any process that stops, prevents, or reduces the frequency, rate or extent of cell division." []
+synonym: "down regulation of cell division" EXACT []
+synonym: "down-regulation of cell division" EXACT []
+synonym: "downregulation of cell division" EXACT []
+synonym: "inhibition of cell division" NARROW []
+is_a: GO:0048523 ! negative regulation of cellular process
+is_a: GO:0051302 ! regulation of cell division
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002212 GO:0051301 ! negatively regulates cell division
+relationship: RO:0002212 GO:0051301 ! negatively regulates cell division
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -37502,6 +38597,23 @@ is_a: GO:0051783 ! regulation of nuclear division
 intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002212 GO:0000280 ! negatively regulates nuclear division
 relationship: RO:0002212 GO:0000280 ! negatively regulates nuclear division
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0051785
+name: positive regulation of nuclear division
+namespace: biological_process
+def: "Any process that activates or increases the frequency, rate or extent of nuclear division, the partitioning of the nucleus and its genetic information." []
+synonym: "activation of nuclear division" NARROW []
+synonym: "stimulation of nuclear division" NARROW []
+synonym: "up regulation of nuclear division" EXACT []
+synonym: "up-regulation of nuclear division" EXACT []
+synonym: "upregulation of nuclear division" EXACT []
+is_a: GO:0010638 ! positive regulation of organelle organization
+is_a: GO:0051783 ! regulation of nuclear division
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002213 GO:0000280 ! positively regulates nuclear division
+relationship: RO:0002213 GO:0000280 ! positively regulates nuclear division
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -38460,6 +39572,14 @@ is_a: GO:0007617 ! mating behavior
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0060184
+name: cell cycle switching
+namespace: biological_process
+def: "The process in which a cell switches cell cycle mode." []
+is_a: GO:0022402 ! cell cycle process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0060218
 name: hematopoietic stem cell differentiation
 namespace: biological_process
@@ -39065,6 +40185,20 @@ relationship: BFO:0000050 GO:0048839 ! part of inner ear development
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: dph
 creation_date: 2009-08-13T09:36:37Z
+
+[Term]
+id: GO:0060903
+name: positive regulation of meiosis I
+namespace: biological_process
+def: "Any process that increases the rate, frequency, or extent of meiosis I, a cell cycle process comprising the steps by which a cell progresses through the first phase of meiosis, in which cells divide and homologous chromosomes are paired and segregated from each other, producing two daughter cells." []
+is_a: GO:0045836 ! positive regulation of meiotic nuclear division
+is_a: GO:0060631 ! regulation of meiosis I
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002213 GO:0007127 ! positively regulates meiosis I
+relationship: RO:0002213 GO:0007127 ! positively regulates meiosis I
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: dph
+creation_date: 2009-08-14T01:06:57Z
 
 [Term]
 id: GO:0060947
@@ -40377,6 +41511,10 @@ is_a: GO:0090575 ! RNA polymerase II transcription factor complex
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0070528
+name: protein kinase C signaling
+
+[Term]
 id: GO:0070536
 name: protein K63-linked deubiquitination
 
@@ -40389,6 +41527,16 @@ is_a: GO:0001101 ! response to acid chemical
 is_a: GO:0033993 ! response to lipid
 is_a: GO:1901700 ! response to oxygen-containing compound
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0070566
+name: adenylyltransferase activity
+namespace: molecular_function
+def: "Catalysis of the transfer of an adenylyl group to an acceptor." []
+is_a: GO:0016779 ! nucleotidyltransferase activity
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: midori
+creation_date: 2009-04-15T11:04:22Z
 
 [Term]
 id: GO:0070570
@@ -40653,6 +41801,19 @@ is_a: GO:0070841 ! inclusion body assembly
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: midori
 creation_date: 2009-07-31T01:30:25Z
+
+[Term]
+id: GO:0070847
+name: core mediator complex
+namespace: cellular_component
+def: "A protein complex that interacts with the carboxy-terminal domain of the largest subunit of RNA polymerase II and plays an active role in transducing the signal from a transcription factor to the transcriptional machinery. The core mediator complex has a stimulatory effect on basal transcription, and contains most of the same subdomains as the larger form of mediator complex -- a head domain comprising proteins known in Saccharomyces as Srb2, -4, and -5, Med6, -8, and -11, and Rox3 proteins; a middle domain comprising Med1, -4, and -7, Nut1 and -2, Cse2, Rgr1, Soh1, and Srb7 proteins; and a tail consisting of Gal11p, Med2p, Pgd1p, and Sin4p -- but lacks the regulatory subcomplex comprising Ssn2, -3, and -8, and Srb8 proteins. Metazoan core mediator complexes have similar modular structures and include homologs of yeast Srb and Med proteins." []
+comment: Changed subclasses, see https://github.com/geneontology/go-ontology/issues/15979
+synonym: "C mediator complex" EXACT []
+synonym: "S mediator complex" EXACT []
+is_a: GO:0090575 ! RNA polymerase II transcription factor complex
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: midori
+creation_date: 2009-08-04T02:56:11Z
 
 [Term]
 id: GO:0070848
@@ -41312,6 +42473,10 @@ created_by: midori
 creation_date: 2009-12-14T04:07:27Z
 
 [Term]
+id: GO:0071427
+name: mRNA-containing ribonucleoprotein complex export from nucleus
+
+[Term]
 id: GO:0071453
 name: cellular response to oxygen levels
 namespace: biological_process
@@ -41909,6 +43074,19 @@ created_by: midori
 creation_date: 2010-09-08T10:03:26Z
 
 [Term]
+id: GO:0071826
+name: ribonucleoprotein complex subunit organization
+namespace: biological_process
+def: "Any process in which macromolecules aggregate, disaggregate, or are modified, resulting in the formation, disassembly, or alteration of a ribonucleoprotein complex." []
+synonym: "protein-RNA complex subunit organization" EXACT []
+synonym: "ribonucleoprotein complex subunit organisation" EXACT []
+synonym: "RNA-protein complex subunit organization" EXACT []
+is_a: GO:0043933 ! protein-containing complex subunit organization
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: midori
+creation_date: 2010-09-08T10:10:35Z
+
+[Term]
 id: GO:0071840
 name: cellular component organization or biogenesis
 namespace: biological_process
@@ -41923,6 +43101,20 @@ is_a: GO:0008150 ! biological_process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: midori
 creation_date: 2010-09-10T01:39:16Z
+
+[Term]
+id: GO:0071850
+name: mitotic cell cycle arrest
+namespace: biological_process
+def: "The process in which the mitotic cell cycle is halted during one of the normal phases (G1, S, G2, M)." []
+synonym: "arrest of mitotic cell cycle progression" EXACT []
+synonym: "cessation of mitotic cell cycle" EXACT []
+synonym: "termination of mitotic cell cycle" EXACT []
+is_a: GO:0007050 ! cell cycle arrest
+is_a: GO:0045930 ! negative regulation of mitotic cell cycle
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: midori
+creation_date: 2010-09-10T02:56:30Z
 
 [Term]
 id: GO:0071852
@@ -42224,6 +43416,21 @@ is_a: GO:0072176 ! nephric duct development
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: midori
 creation_date: 2010-02-26T02:32:22Z
+
+[Term]
+id: GO:0072325
+name: vulval cell fate commitment
+
+[Term]
+id: GO:0072327
+name: vulval cell fate specification
+namespace: biological_process
+def: "The process in which a cell becomes capable of differentiating autonomously into a nematode vulval cell in an environment that is neutral with respect to the developmental pathway; upon specification, the cell fate can be reversed. In nematodes, the vulva is formed from ventral epidermal cells during larval stages to give rise to a fully formed adult vulva, which is the egg-laying organ of female and hermaphrodite nematodes." []
+is_a: GO:0001708 ! cell fate specification
+relationship: BFO:0000050 GO:0072325 ! part of vulval cell fate commitment
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: midori
+creation_date: 2010-11-01T02:14:06Z
 
 [Term]
 id: GO:0072330
@@ -42700,6 +43907,10 @@ id: GO:0072673
 name: lamellipodium morphogenesis
 
 [Term]
+id: GO:0072697
+name: protein localization to cell cortex
+
+[Term]
 id: GO:0072698
 name: protein localization to microtubule cytoskeleton
 namespace: biological_process
@@ -42806,6 +44017,37 @@ relationship: RO:0002211 GO:0030593 ! regulates neutrophil chemotaxis
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: tanyaberardini
 creation_date: 2009-08-03T10:09:34Z
+
+[Term]
+id: GO:0090036
+name: regulation of protein kinase C signaling
+namespace: biological_process
+def: "Any process that modulates the frequency, rate, or extent of a series of reactions, mediated by the intracellular serine/threonine kinase protein kinase C, which occurs as a result of a single trigger reaction or compound." []
+synonym: "regulation of protein kinase C signaling cascade" RELATED []
+synonym: "regulation of protein kinase C signalling cascade" RELATED []
+is_a: GO:1902531 ! regulation of intracellular signal transduction
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002211 GO:0070528 ! regulates protein kinase C signaling
+relationship: RO:0002211 GO:0070528 ! regulates protein kinase C signaling
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: tanyaberardini
+creation_date: 2009-08-03T11:27:26Z
+
+[Term]
+id: GO:0090038
+name: negative regulation of protein kinase C signaling
+namespace: biological_process
+def: "Any process that decreases the frequency, rate, or extent of a series of reactions, mediated by the intracellular serine/threonine kinase protein kinase C, which occurs as a result of a single trigger reaction or compound." []
+synonym: "negative regulation of protein kinase C signaling cascade" RELATED []
+synonym: "negative regulation of protein kinase C signalling cascade" RELATED []
+is_a: GO:0090036 ! regulation of protein kinase C signaling
+is_a: GO:1902532 ! negative regulation of intracellular signal transduction
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002212 GO:0070528 ! negatively regulates protein kinase C signaling
+relationship: RO:0002212 GO:0070528 ! negatively regulates protein kinase C signaling
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: tanyaberardini
+creation_date: 2009-08-03T11:29:33Z
 
 [Term]
 id: GO:0090045
@@ -43709,6 +44951,10 @@ created_by: paola
 creation_date: 2011-07-27T05:21:39Z
 
 [Term]
+id: GO:0097120
+name: receptor localization to synapse
+
+[Term]
 id: GO:0097153
 name: cysteine-type endopeptidase activity involved in apoptotic process
 
@@ -43833,6 +45079,16 @@ is_a: GO:1901701 ! cellular response to oxygen-containing compound
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: paola
 creation_date: 2012-05-15T03:49:51Z
+
+[Term]
+id: GO:0097327
+name: response to antineoplastic agent
+namespace: biological_process
+def: "Any process that results in a change in state or activity of a cell or an organism (in terms of movement, secretion, enzyme production, gene expression, etc.) as a result of an antineoplastic agent stimulus. An antineoplastic agent is a substance that inhibits or prevents the proliferation of neoplasms." []
+is_a: GO:0042493 ! response to drug
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: paola
+creation_date: 2012-06-12T10:48:28Z
 
 [Term]
 id: GO:0097352
@@ -44469,6 +45725,22 @@ namespace: biological_process
 def: "The directed movement of some substance from outside of a cell, across the plasma membrane and into the cytosol." []
 is_a: GO:0055085 ! transmembrane transport
 is_a: GO:0098657 ! import into cell
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0098742
+name: cell-cell adhesion via plasma-membrane adhesion molecules
+namespace: biological_process
+def: "The attachment of one cell to another cell via adhesion molecules that are at least partially embedded in the plasma membrane." []
+is_a: GO:0098609 ! cell-cell adhesion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0098743
+name: cell aggregation
+namespace: biological_process
+def: "The clustering together and adhesion of initially separate cells to form an aggregate.  Examples include the clustering of unicellular organisms or blood cells in suspension and the condensation of mesenchymal cells during cartilage formation." []
+is_a: GO:0008150 ! biological_process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -47911,6 +49183,17 @@ created_by: tb
 creation_date: 2013-04-16T21:21:14Z
 
 [Term]
+id: GO:1902074
+name: response to salt
+namespace: biological_process
+def: "Any process that results in a change in state or activity of a cell or an organism (in terms of movement, secretion, enzyme production, gene expression, etc.) as a result of a salt stimulus." []
+synonym: "response to salinity" NARROW []
+is_a: GO:0042221 ! response to chemical
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: mls
+creation_date: 2013-04-22T15:41:57Z
+
+[Term]
 id: GO:1902099
 name: regulation of metaphase/anaphase transition of cell cycle
 namespace: biological_process
@@ -48297,6 +49580,43 @@ id: GO:1902440
 name: protein localization to mitotic spindle pole body
 
 [Term]
+id: GO:1902473
+name: regulation of protein localization to synapse
+namespace: biological_process
+def: "Any process that modulates the frequency, rate or extent of protein localization to synapse." []
+synonym: "regulation of protein localisation to synapse" EXACT []
+is_a: GO:0032880 ! regulation of protein localization
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002211 GO:0035418 ! regulates protein localization to synapse
+relationship: RO:0002211 GO:0035418 ! regulates protein localization to synapse
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: kmv
+creation_date: 2013-10-25T15:09:09Z
+
+[Term]
+id: GO:1902474
+name: positive regulation of protein localization to synapse
+namespace: biological_process
+def: "Any process that activates or increases the frequency, rate or extent of protein localization to synapse." []
+synonym: "activation of protein localisation to synapse" NARROW []
+synonym: "activation of protein localization to synapse" NARROW []
+synonym: "positive regulation of protein localisation to synapse" EXACT []
+synonym: "up regulation of protein localisation to synapse" EXACT []
+synonym: "up regulation of protein localization to synapse" EXACT []
+synonym: "up-regulation of protein localisation to synapse" EXACT []
+synonym: "up-regulation of protein localization to synapse" EXACT []
+synonym: "upregulation of protein localisation to synapse" EXACT []
+synonym: "upregulation of protein localization to synapse" EXACT []
+is_a: GO:0048518 ! positive regulation of biological process
+is_a: GO:1902473 ! regulation of protein localization to synapse
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002213 GO:0035418 ! positively regulates protein localization to synapse
+relationship: RO:0002213 GO:0035418 ! positively regulates protein localization to synapse
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: kmv
+creation_date: 2013-10-25T15:09:18Z
+
+[Term]
 id: GO:1902476
 name: chloride transmembrane transport
 namespace: biological_process
@@ -48662,6 +49982,44 @@ relationship: RO:0002213 GO:0032774 ! positively regulates RNA biosynthetic proc
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: jl
 creation_date: 2014-02-05T16:32:10Z
+
+[Term]
+id: GO:1902683
+name: regulation of receptor localization to synapse
+namespace: biological_process
+def: "Any process that modulates the frequency, rate or extent of receptor localization to synapse." []
+synonym: "regulation of receptor localisation to synapse" EXACT []
+is_a: GO:0060341 ! regulation of cellular localization
+is_a: GO:1902473 ! regulation of protein localization to synapse
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002211 GO:0097120 ! regulates receptor localization to synapse
+relationship: RO:0002211 GO:0097120 ! regulates receptor localization to synapse
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: kmv
+creation_date: 2014-02-07T17:38:31Z
+
+[Term]
+id: GO:1902685
+name: positive regulation of receptor localization to synapse
+namespace: biological_process
+def: "Any process that activates or increases the frequency, rate or extent of receptor localization to synapse." []
+synonym: "activation of receptor localisation to synapse" NARROW []
+synonym: "activation of receptor localization to synapse" NARROW []
+synonym: "positive regulation of receptor localisation to synapse" EXACT []
+synonym: "up regulation of receptor localisation to synapse" EXACT []
+synonym: "up regulation of receptor localization to synapse" EXACT []
+synonym: "up-regulation of receptor localisation to synapse" EXACT []
+synonym: "up-regulation of receptor localization to synapse" EXACT []
+synonym: "upregulation of receptor localisation to synapse" EXACT []
+synonym: "upregulation of receptor localization to synapse" EXACT []
+is_a: GO:1902474 ! positive regulation of protein localization to synapse
+is_a: GO:1902683 ! regulation of receptor localization to synapse
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002213 GO:0097120 ! positively regulates receptor localization to synapse
+relationship: RO:0002213 GO:0097120 ! positively regulates receptor localization to synapse
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: kmv
+creation_date: 2014-02-07T17:38:51Z
 
 [Term]
 id: GO:1902743
@@ -51227,6 +52585,22 @@ created_by: pga
 creation_date: 2015-02-09T10:22:25Z
 
 [Term]
+id: GO:1903935
+name: response to sodium arsenite
+namespace: biological_process
+def: "Any process that results in a change in state or activity of a cell or an organism (in terms of movement, secretion, enzyme production, gene expression, etc.) as a result of a sodium arsenite stimulus." []
+is_a: GO:0009635 ! response to herbicide
+is_a: GO:0010035 ! response to inorganic substance
+is_a: GO:0017085 ! response to insecticide
+is_a: GO:0046677 ! response to antibiotic
+is_a: GO:0046685 ! response to arsenic-containing substance
+is_a: GO:0097327 ! response to antineoplastic agent
+is_a: GO:1902074 ! response to salt
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: sl
+creation_date: 2015-02-12T20:54:33Z
+
+[Term]
 id: GO:1903955
 name: positive regulation of protein targeting to mitochondrion
 namespace: biological_process
@@ -51628,6 +53002,19 @@ relationship: RO:0002213 GO:0010833 ! positively regulates telomere maintenance 
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: nc
 creation_date: 2015-06-12T16:53:28Z
+
+[Term]
+id: GO:1904375
+name: regulation of protein localization to cell periphery
+namespace: biological_process
+def: "Any process that modulates the frequency, rate or extent of protein localization to cell periphery." []
+is_a: GO:1903827 ! regulation of cellular protein localization
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002211 GO:1990778 ! regulates protein localization to cell periphery
+relationship: RO:0002211 GO:1990778 ! regulates protein localization to cell periphery
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: sl
+creation_date: 2015-06-22T22:09:25Z
 
 [Term]
 id: GO:1904396
@@ -52070,6 +53457,60 @@ relationship: RO:0002212 GO:1904738 ! negatively regulates vascular associated s
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: rph
 creation_date: 2015-10-19T15:49:58Z
+
+[Term]
+id: GO:1904776
+name: regulation of protein localization to cell cortex
+namespace: biological_process
+def: "Any process that modulates the frequency, rate or extent of protein localization to cell cortex." []
+comment: An example is cye-1 in C. elegans, UniProt ID O01501 in PMID:17115027.
+synonym: "regulation of protein localisation to cell cortex" EXACT []
+is_a: GO:1904375 ! regulation of protein localization to cell periphery
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002211 GO:0072697 ! regulates protein localization to cell cortex
+relationship: RO:0002211 GO:0072697 ! regulates protein localization to cell cortex
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: es
+creation_date: 2015-10-29T16:55:01Z
+
+[Term]
+id: GO:1904779
+name: regulation of protein localization to centrosome
+namespace: biological_process
+def: "Any process that modulates the frequency, rate or extent of protein localization to centrosome." []
+comment: An example is cdk-2 in C. elegans (UniProt ID O61847) in PMID:17115027 (inferred from mutant phenotype).
+synonym: "regulation of protein localisation to centrosome" EXACT []
+is_a: GO:1903827 ! regulation of cellular protein localization
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002211 GO:0071539 ! regulates protein localization to centrosome
+relationship: RO:0002211 GO:0071539 ! regulates protein localization to centrosome
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: es
+creation_date: 2015-10-30T11:54:30Z
+
+[Term]
+id: GO:1904781
+name: positive regulation of protein localization to centrosome
+namespace: biological_process
+def: "Any process that activates or increases the frequency, rate or extent of protein localization to centrosome." []
+comment: An example is cdk-2 in C. elegans (UniProt ID O61847) in PMID:17115027 (inferred from mutant phenotype).
+synonym: "activation of protein localisation to centrosome" NARROW []
+synonym: "activation of protein localization to centrosome" NARROW []
+synonym: "positive regulation of protein localisation to centrosome" EXACT []
+synonym: "up regulation of protein localisation to centrosome" EXACT []
+synonym: "up regulation of protein localization to centrosome" EXACT []
+synonym: "up-regulation of protein localisation to centrosome" EXACT []
+synonym: "up-regulation of protein localization to centrosome" EXACT []
+synonym: "upregulation of protein localisation to centrosome" EXACT []
+synonym: "upregulation of protein localization to centrosome" EXACT []
+is_a: GO:1903829 ! positive regulation of cellular protein localization
+is_a: GO:1904779 ! regulation of protein localization to centrosome
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002213 GO:0071539 ! positively regulates protein localization to centrosome
+relationship: RO:0002213 GO:0071539 ! positively regulates protein localization to centrosome
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: es
+creation_date: 2015-10-30T11:54:53Z
 
 [Term]
 id: GO:1904783
@@ -53608,6 +55049,10 @@ created_by: sl
 creation_date: 2015-06-09T23:29:42Z
 
 [Term]
+id: GO:1990778
+name: protein localization to cell periphery
+
+[Term]
 id: GO:1990782
 name: protein tyrosine kinase binding
 namespace: molecular_function
@@ -53922,6 +55367,21 @@ relationship: RO:0002212 GO:0034645 ! negatively regulates cellular macromolecul
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: tanyaberardini
 creation_date: 2010-09-15T08:55:48Z
+
+[Term]
+id: GO:2000114
+name: regulation of establishment of cell polarity
+namespace: biological_process
+def: "Any process that modulates the frequency, rate or extent of establishment of cell polarity." []
+synonym: "regulation of bud site selection/establishment of cell polarity" RELATED []
+synonym: "regulation of cell polarization" EXACT []
+is_a: GO:0032878 ! regulation of establishment or maintenance of cell polarity
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002211 GO:0030010 ! regulates establishment of cell polarity
+relationship: RO:0002211 GO:0030010 ! regulates establishment of cell polarity
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: dph
+creation_date: 2010-09-16T01:22:36Z
 
 [Term]
 id: GO:2000116

@@ -289,7 +289,7 @@ def get_best_nodes(terms, trimming_algorithm, max_terms, ontology, terms_already
     if ancestors_covering_multiple_children is not None:
         ancestors_covering_multiple_children.update({ontology.label(term_id, id_if_null=True) for
                                                      term_id, covered_nodes in merged_terms_coverset if
-                                                     term_id not in terms})
+                                                     len(covered_nodes) > 1})
     terms_already_covered.update([e for term_id, covered_nodes in merged_terms_coverset for e in covered_nodes])
     terms = [term_id for term_id, covered_nodes in merged_terms_coverset]
     return terms, add_others
