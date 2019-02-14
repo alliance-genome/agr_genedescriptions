@@ -181,6 +181,7 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                             associations_cache_path=os.path.join(self.this_dir, "cache",
                                                                                  "gene_association_1.7.zfin.partial"),
                                             config=self.conf_parser)
+        self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "ic"
         go_sent_generator = OntologySentenceGenerator(gene_id="ZFIN:ZDB-GENE-010608-2", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',

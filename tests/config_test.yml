@@ -296,6 +296,18 @@ go_sentences_options:
       prefix: "is involved in"
       postfix: ""
       special_cases:
+    - aspect: P
+      group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
+      qualifier: ""
+      prefix: "predicted to be involved in"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
+      qualifier: "contributes_to"
+      prefix: "predicted to contribute to"
+      postfix: ""
+      special_cases:
     - aspect: C
       group: EXPERIMENTAL
       qualifier: ""
