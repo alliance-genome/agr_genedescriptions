@@ -49,7 +49,7 @@ class TestDescriptionsGenerator(unittest.TestCase):
         self.assertTrue("positive regulation of defense response to bacterium" in sentences.get_description())
         self.assertTrue("regulation of cellular biosynthetic process" in sentences.get_description())
 
-    def test_generate_sentence(self):
+    def test_generate_sentence_wb(self):
         go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00000018", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
@@ -71,6 +71,8 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
         print(sentences.get_description())
+
+    def test_generate_sentence_fb(self):
         self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
             self.this_dir, "data", "gene_association_1.7.fb.partial"),
                                             associations_cache_path=os.path.join(self.this_dir, "cache",
@@ -91,6 +93,8 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                                            keep_only_best_group=True)
         self.assertTrue('is involved in several processes, including DNA metabolic process, chromatin organization, '
                         'and negative regulation of cell death', sentences.get_description())
+
+    def test_generate_sentence_human(self):
         self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
             self.this_dir, "data", "gene_association_1.7.human.partial"),
                                             associations_cache_path=os.path.join(self.this_dir, "cache",
@@ -134,6 +138,8 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                                            keep_only_best_group=True)
         self.assertTrue('is involved in several processes, including cAMP-mediated signaling, cellular response to '
                         'organic cyclic compound, and regulation of B cell proliferation', sentences.get_description())
+
+    def test_generate_sentence_mgi(self):
         self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
             self.this_dir, "data", "gene_association_1.7.mgi.partial"),
                                             associations_cache_path=os.path.join(self.this_dir, "cache",
@@ -168,6 +174,21 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                                            keep_only_best_group=True)
         self.assertTrue('is involved in several processes, including actin cytoskeleton organization, animal organ '
                         'development, and morphogenesis of an epithelium', sentences.get_description())
+
+    def test_generate_sentence_zfin(self):
+        self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
+            self.this_dir, "data", "gene_association_1.7.zfin.partial"),
+                                            associations_cache_path=os.path.join(self.this_dir, "cache",
+                                                                                 "gene_association_1.7.zfin.partial"),
+                                            config=self.conf_parser)
+        go_sent_generator = OntologySentenceGenerator(gene_id="ZFIN:ZDB-GENE-010608-2", module=Module.GO,
+                                                      data_manager=self.df, config=self.conf_parser)
+        sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
+                                                           qualifier='', merge_groups_with_same_prefix=True,
+                                                           keep_only_best_group=True)
+        print(sentences.get_description())
+
+    def test_generate_sentence_rgd(self):
         self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
             self.this_dir, "data", "gene_association_1.7.rgd.partial"),
                                             associations_cache_path=os.path.join(self.this_dir, "cache",
@@ -218,6 +239,8 @@ class TestDescriptionsGenerator(unittest.TestCase):
         self.assertTrue('is involved in several processes, including cellular response to organic cyclic compound, '
                         'ovarian follicle development, and regulation of transcription, DNA-templated',
                         sentences.get_description())
+
+    def test_generate_sentence_sgd(self):
         self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
             self.this_dir, "data", "gene_association_1.7.sgd.partial"),
                                             associations_cache_path=os.path.join(self.this_dir, "cache",
@@ -468,7 +491,7 @@ class TestDescriptionsGenerator(unittest.TestCase):
         sentences = generator.get_module_sentences(
             config=self.conf_parser, aspect='D', qualifier='', merge_groups_with_same_prefix=True,
             keep_only_best_group=True)
-        print(sentences.get_description())
+        self.assertTrue("Charcot-Marie-Tooth disease (multiple)" in sentences.get_description())
 
 
 

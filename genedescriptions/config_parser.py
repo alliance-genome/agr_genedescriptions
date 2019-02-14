@@ -1,3 +1,6 @@
+import json
+import urllib.request
+
 import yaml
 
 from enum import Enum
@@ -28,6 +31,19 @@ class GenedescConfigParser(object):
     def __init__(self, file_path):
         with open(file_path) as conf_file:
             self.config = yaml.safe_load(conf_file)
+            self.add_go_do_not_annotate_to_blacklist(
+                'http://current.geneontology.org/ontology/subsets/gocheck_do_not_annotate.json')
+            self.add_go_do_not_annotate_to_blacklist(
+                'http://current.geneontology.org/ontology/subsets/gocheck_do_not_manually_annotate.json')
+
+    def add_go_do_not_annotate_to_blacklist(self, slim_url):
+        response = urllib.request.urlopen(slim_url)
+        data = json.load(response)
+        self.config["go_sentences_options"]["exclude_terms"].extend(
+            [node['id'].replace('http://purl.obolibrary.org/obo/', '').replace('_', ':') for node in
+             data["graphs"][0]['nodes'] if "GO_"in node["id"]])
+        self.config["go_sentences_options"]["exclude_terms"] = list(set(
+            self.config["go_sentences_options"]["exclude_terms"]))
 
     def get_module_property(self, module: Module, prop: ConfigModuleProperty):
         module_name = self._get_module_name(module)
