@@ -226,7 +226,7 @@ def get_best_nodes_ic(node_ids: List[str], ontology: Ontology, max_number_of_ter
     if "IC" not in ontology.node(common_ancestors[0][0]):
         logger.warning("ontology terms do not have information content values set")
         set_all_information_content_values(ontology=ontology)
-    values = [0 if ontology.node(node[0])["depth"] < min_distance_from_root else
+    values = [0 if node[0] not in node_ids and ontology.node(node[0])["depth"] < min_distance_from_root else
               ontology.node(node[0])["IC"] * (1 + slim_terms_ic_bonus_perc) if slim_set and node[0] in slim_set else
               ontology.node(node[0])["IC"] for node in common_ancestors]
     if slim_set and any([node[0] in slim_set for node in common_ancestors]):
