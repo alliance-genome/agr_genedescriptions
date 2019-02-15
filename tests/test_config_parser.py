@@ -17,10 +17,8 @@ class TestConfigParser(unittest.TestCase):
         self.conf_parser = GenedescConfigParser(os.path.join(self.this_dir, os.path.pardir, "tests", "config_test.yml"))
 
     def test_exclude_terms_list(self):
-        self.assertTrue(all([term in ["GO:0008150", "GO:0003674", "GO:0005575", "GO:0005488", "GO:0005515",
-                                      "GO:0044877"] for term in
-                             self.conf_parser.get_module_property(module=Module.GO,
-                                                                  prop=ConfigModuleProperty.EXCLUDE_TERMS)]),
+        self.assertTrue(len(self.conf_parser.get_module_property(module=Module.GO,
+                                                                 prop=ConfigModuleProperty.EXCLUDE_TERMS)) > 0,
                         "GO exclusion term list not loading")
         self.assertTrue(len(self.conf_parser.get_module_property(module=Module.DO_EXPERIMENTAL,
                                                                  prop=ConfigModuleProperty.EXCLUDE_TERMS)) > 0,

@@ -181,13 +181,12 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                             associations_cache_path=os.path.join(self.this_dir, "cache",
                                                                                  "gene_association_1.7.zfin.partial"),
                                             config=self.conf_parser)
-        self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "ic"
-        go_sent_generator = OntologySentenceGenerator(gene_id="ZFIN:ZDB-GENE-010608-2", module=Module.GO,
+        go_sent_generator = OntologySentenceGenerator(gene_id="ZFIN:ZDB-GENE-990415-168", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        print(sentences.get_description())
+        self.assertTrue(len(sentences.sentences[0].terms_ids) == len(set(sentences.sentences[0].terms_ids)))
 
     def test_generate_sentence_rgd(self):
         self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
@@ -493,6 +492,124 @@ class TestDescriptionsGenerator(unittest.TestCase):
             config=self.conf_parser, aspect='D', qualifier='', merge_groups_with_same_prefix=True,
             keep_only_best_group=True)
         self.assertTrue("Charcot-Marie-Tooth disease (multiple)" in sentences.get_description())
+
+        associations = [DataManager.create_annotation_record(source_line="", gene_id="MGI:99511",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:12930", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:99511",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0014667", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:99511",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0050868", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:99511",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:11984", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:99511",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0050458", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:99511",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:14291", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:99511",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0060578", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date="")]
+        self.df.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
+                                                                             ontology=self.df.do_ontology)
+        generator = OntologySentenceGenerator(gene_id="MGI:99511", module=Module.DO_EXPERIMENTAL,
+                                              data_manager=self.df, config=self.conf_parser, humans=False)
+        sentences = generator.get_module_sentences(
+            config=self.conf_parser, aspect='D', qualifier='', merge_groups_with_same_prefix=True,
+            keep_only_best_group=True)
+        self.assertTrue("Noonan syndrome" in sentences.get_description())
+
+        associations = [DataManager.create_annotation_record(source_line="", gene_id="MGI:109482",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0050753", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:109482",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0050704", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:109482",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0050990", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:109482",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0060178", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:109482",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0050835", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:109482",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0050214", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:109482",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0050956", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date="")]
+        self.df.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
+                                                                             ontology=self.df.do_ontology)
+        self.conf_parser.config["do_exp_sentences_options"]["trimming_algorithm"] = "naive"
+        generator = OntologySentenceGenerator(gene_id="MGI:109482", module=Module.DO_EXPERIMENTAL,
+                                              data_manager=self.df, config=self.conf_parser, humans=False)
+        sentences = generator.get_module_sentences(
+            config=self.conf_parser, aspect='D', qualifier='', merge_groups_with_same_prefix=True,
+            keep_only_best_group=True)
+        self.assertTrue("spinocerebellar ataxia type 6" not in sentences.get_description())
+
+        associations = [DataManager.create_annotation_record(source_line="", gene_id="HGNC:2888",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0050432", qualifiers="", aspect="D",
+                                                             ecode="IAGP", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="HGNC:2888",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:12849", qualifiers="", aspect="D",
+                                                             ecode="IAGP", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="HGNC:2888",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:3312", qualifiers="", aspect="D",
+                                                             ecode="IAGP", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="HGNC:2888",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:8544", qualifiers="", aspect="D",
+                                                             ecode="IAGP", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="HGNC:2888",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:1470", qualifiers="", aspect="D",
+                                                             ecode="IAGP", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="HGNC:2888",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:2468", qualifiers="", aspect="D",
+                                                             ecode="IAGP", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="HGNC:2888",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0070085", qualifiers="", aspect="D",
+                                                             ecode="IAGP", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="HGNC:2888",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:5419", qualifiers="", aspect="D",
+                                                             ecode="IAGP", references="", prvdr="MGI", date="")
+                        ]
+        self.df.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
+                                                                             ontology=self.df.do_ontology)
+        self.conf_parser.config["do_exp_sentences_options"]["trimming_algorithm"] = "ic"
+        generator = OntologySentenceGenerator(gene_id="HGNC:2888", module=Module.DO_EXPERIMENTAL,
+                                              data_manager=self.df, config=self.conf_parser, humans=True)
+        sentences = generator.get_module_sentences(
+            config=self.conf_parser, aspect='D', qualifier='', merge_groups_with_same_prefix=True,
+            keep_only_best_group=True)
+        self.assertTrue("chronic fatigue syndrome" in sentences.get_description())
 
 
 

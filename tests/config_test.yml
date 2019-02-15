@@ -205,6 +205,16 @@ go_sentences_options:
           prefix: "contributes as a"
           postfix: ""
     - aspect: F
+      group: EXPERIMENTAL
+      qualifier: "colocalizes_with"
+      prefix: "colocalizes with"
+      postfix: ""
+      special_cases:
+        - id: 1
+          match_regex: "structural constituent"
+          prefix: "contributes as a"
+          postfix: ""
+    - aspect: F
       group: HIGH_THROUGHPUT_EXPERIMENTAL
       qualifier: ""
       prefix: "exhibits"
@@ -212,7 +222,7 @@ go_sentences_options:
       special_cases:
         - id: 1
           match_regex: "structural constituent"
-          prefix: "is a"
+          prefix: "a"
           postfix: ""
     - aspect: F
       group: HIGH_THROUGHPUT_EXPERIMENTAL
@@ -222,78 +232,154 @@ go_sentences_options:
       special_cases:
         - id: 1
           match_regex: "structural constituent"
-          prefix: "is a"
+          prefix: "a"
+          postfix: ""
+    - aspect: F
+      group: HIGH_THROUGHPUT_EXPERIMENTAL
+      qualifier: "colocalizes_with"
+      prefix: "colocalizes with"
+      postfix: ""
+      special_cases:
+        - id: 1
+          match_regex: "structural constituent"
+          prefix: "colocalizes with a"
           postfix: ""
     - aspect: F
       group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
       qualifier: ""
-      prefix: "is predicted to have"
+      prefix: "predicted to have"
       postfix: ""
       special_cases:
         - id: 1
           match_regex: "structural constituent"
-          prefix: "is predicted to be a"
+          prefix: "predicted to be a"
           postfix: ""
     - aspect: F
       group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
       qualifier: "contributes_to"
-      prefix: "is predicted to contribute to"
+      prefix: "predicted to contribute to"
       postfix: ""
       special_cases:
         - id: 1
           match_regex: "structural constituent"
-          prefix: "is predicted to contribute as a"
+          prefix: "predicted to contribute as a"
+          postfix: ""
+    - aspect: F
+      group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
+      qualifier: "colocalizes_with"
+      prefix: "predicted to colocalize with"
+      postfix: ""
+      special_cases:
+        - id: 1
+          match_regex: "structural constituent"
+          prefix: "predicted to colocalize with a"
           postfix: ""
     - aspect: F
       group: INFERRED_BY_CURATORS_AND_AUTHORS
       qualifier: ""
-      prefix: "is predicted to have"
+      prefix: "predicted to have"
       postfix: ""
       special_cases:
         - id: 1
           match_regex: "structural constituent"
-          prefix: "is predicted to be a"
+          prefix: "predicted to be a"
           postfix: ""
     - aspect: F
       group: INFERRED_BY_CURATORS_AND_AUTHORS
       qualifier: "contributes_to"
-      prefix: "is predicted to contribute to"
+      prefix: "predicted to contribute to"
       postfix: ""
       special_cases:
         - id: 1
           match_regex: "structural constituent"
-          prefix: "is predicted to contribute as a"
+          prefix: "predicted to contribute as a"
+          postfix: ""
+    - aspect: F
+      group: INFERRED_BY_CURATORS_AND_AUTHORS
+      qualifier: "colocalizes_with"
+      prefix: "predicted to colocalize with"
+      postfix: ""
+      special_cases:
+        - id: 1
+          match_regex: "structural constituent"
+          prefix: "predicted to colocalize with a"
           postfix: ""
     - aspect: F
       group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
       qualifier: ""
-      prefix: "is predicted to have"
+      prefix: "predicted to have"
       postfix: ""
       special_cases:
         - id: 1
           match_regex: "structural constituent"
-          prefix: "is predicted to be a"
+          prefix: "predicted to be a"
           postfix: ""
     - aspect: F
       group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
       qualifier: "contributes_to"
-      prefix: "is predicted to contribute to"
+      prefix: "predicted to contribute to"
       postfix: ""
       special_cases:
         - id: 1
           match_regex: "structural constituent"
-          prefix: "is predicted to contribute as a"
+          prefix: "predicted to contribute as a"
+          postfix: ""
+    - aspect: F
+      group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
+      qualifier: "colocalizes_with"
+      prefix: "predicted to colocalize with"
+      postfix: ""
+      special_cases:
+        - id: 1
+          match_regex: "structural constituent"
+          prefix: "predicted to colocalize with a"
           postfix: ""
     - aspect: P
       group: EXPERIMENTAL
       qualifier: ""
-      prefix: "is involved in"
+      prefix: "involved in"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: EXPERIMENTAL
+      qualifier: "contributes_to"
+      prefix: "contributes to"
       postfix: ""
       special_cases:
     - aspect: P
       group: HIGH_THROUGHPUT_EXPERIMENTAL
       qualifier: ""
-      prefix: "is involved in"
+      prefix: "involved in"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: HIGH_THROUGHPUT_EXPERIMENTAL
+      qualifier: "contributes_to"
+      prefix: "contributes to"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
+      qualifier: ""
+      prefix: "predicted to be involved in"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
+      qualifier: "contributes_to"
+      prefix: "predicted to contribute to"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: INFERRED_BY_CURATORS_AND_AUTHORS
+      qualifier: ""
+      prefix: "predicted to be involved in"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: INFERRED_BY_CURATORS_AND_AUTHORS
+      qualifier: "contributes_to"
+      prefix: "predicted to contribute to"
       postfix: ""
       special_cases:
     - aspect: P
@@ -348,7 +434,66 @@ go_sentences_options:
           match_regex: "intracellular$"
           prefix: "is"
           postfix: ""
-
+    - aspect: C
+      group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
+      qualifier: ""
+      prefix: "predicted to localize to"
+      postfix: ""
+      special_cases:
+        - id: 1
+          match_regex: "intracellular$"
+          prefix: "predicted to be"
+          postfix: ""
+    - aspect: C
+      group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
+      qualifier: "colocalizes_with"
+      prefix: "predicted to colocalize with"
+      postfix: ""
+      special_cases:
+        - id: 1
+          match_regex: "intracellular$"
+          prefix: "predicted to be"
+          postfix: ""
+    - aspect: C
+      group: INFERRED_BY_CURATORS_AND_AUTHORS
+      qualifier: ""
+      prefix: "predicted to localize to"
+      postfix: ""
+      special_cases:
+        - id: 1
+          match_regex: "intracellular$"
+          prefix: "predicted to be"
+          postfix: ""
+    - aspect: C
+      group: INFERRED_BY_CURATORS_AND_AUTHORS
+      qualifier: "colocalizes_with"
+      prefix: "predicted to colocalize with"
+      postfix: ""
+      special_cases:
+        - id: 1
+          match_regex: "intracellular$"
+          prefix: "predicted to be"
+          postfix: ""
+    - aspect: C
+      group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
+      qualifier: ""
+      prefix: "predicted to localize to"
+      postfix: ""
+      special_cases:
+        - id: 1
+          match_regex: "intracellular$"
+          prefix: "predicted to be"
+          postfix: ""
+    - aspect: C
+      group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
+      qualifier: "colocalize_with"
+      prefix: "predicted to colocalize with"
+      postfix: ""
+      special_cases:
+        - id: 1
+          match_regex: "intracellular$"
+          prefix: "predicted to be"
+          postfix: ""
   truncate_others_aggregation_word: several
   truncate_others_terms:
     F: "functions"
@@ -411,7 +556,7 @@ do_exp_sentences_options:
       qualifier: ""
       prefix: "is implicated in"
       postfix: ""
-  remove_parents_if_children_are_present: true
+  remove_parents_if_children_are_present: false
   remove_children_if_parent_is_present: false
   trim_terms_by_common_ancestors: true
   trimming_algorithm: ic

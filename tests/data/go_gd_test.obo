@@ -1146,6 +1146,18 @@ relationship: BFO:0000050 GO:0005819 ! part of spindle
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0000932
+name: P-body
+namespace: cellular_component
+def: "A focus in the cytoplasm where mRNAs may become inactivated by decapping or some other mechanism. Protein and RNA localized to these foci are involved in mRNA degradation, nonsense-mediated mRNA decay (NMD), translational repression, and RNA-mediated gene silencing." []
+synonym: "cytoplasmic foci" RELATED []
+synonym: "cytoplasmic mRNA processing body" EXACT []
+synonym: "P body" EXACT []
+xref: Wikipedia:P_body
+is_a: GO:0036464 ! cytoplasmic ribonucleoprotein granule
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0000940
 name: condensed chromosome outer kinetochore
 namespace: cellular_component
@@ -3726,6 +3738,25 @@ is_a: GO:0003676 ! nucleic acid binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0003725
+name: double-stranded RNA binding
+namespace: molecular_function
+def: "Interacting selectively and non-covalently with double-stranded RNA." []
+synonym: "dsRNA binding" EXACT []
+is_a: GO:0003723 ! RNA binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0003727
+name: single-stranded RNA binding
+namespace: molecular_function
+alt_id: GO:0003728
+def: "Interacting selectively and non-covalently with single-stranded RNA." []
+synonym: "ssRNA binding" EXACT []
+is_a: GO:0003723 ! RNA binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0003729
 name: mRNA binding
 namespace: molecular_function
@@ -4433,6 +4464,28 @@ is_a: GO:0004536 ! deoxyribonuclease activity
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0004521
+name: endoribonuclease activity
+namespace: molecular_function
+def: "Catalysis of the hydrolysis of ester linkages within ribonucleic acid by creating internal breaks." []
+synonym: "endonuclease G activity" RELATED []
+xref: reactome:R-HSA-425923
+xref: reactome:R-HSA-426520
+xref: reactome:R-HSA-5601887
+xref: reactome:R-HSA-5601910
+xref: reactome:R-HSA-6791223
+xref: reactome:R-HSA-6814555
+xref: reactome:R-HSA-9009936
+xref: reactome:R-HSA-9009941
+xref: reactome:R-HSA-9023909
+xref: reactome:R-HSA-9023912
+xref: reactome:R-HSA-927836
+is_a: GO:0004519 ! endonuclease activity
+is_a: GO:0004540 ! ribonuclease activity
+relationship: BFO:0000050 GO:0090502 ! part of RNA phosphodiester bond hydrolysis, endonucleolytic
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0004527
 name: exonuclease activity
 namespace: molecular_function
@@ -4464,6 +4517,16 @@ xref: reactome:R-HSA-6785986
 is_a: GO:0004518 ! nuclease activity
 is_a: GO:0140097 ! catalytic activity, acting on DNA
 relationship: BFO:0000050 GO:0006259 ! part of DNA metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0004540
+name: ribonuclease activity
+namespace: molecular_function
+def: "Catalysis of the hydrolysis of phosphodiester bonds in chains of RNA." []
+is_a: GO:0004518 ! nuclease activity
+is_a: GO:0140098 ! catalytic activity, acting on RNA
+relationship: BFO:0000050 GO:0090501 ! part of RNA phosphodiester bond hydrolysis
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -8187,6 +8250,16 @@ is_a: GO:0009452 ! 7-methylguanosine RNA capping
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0006379
+name: mRNA cleavage
+namespace: biological_process
+def: "Any process in which a pre-mRNA or mRNA molecule is cleaved at specific sites or in a regulated manner." []
+synonym: "cleavage stimulation factor activity" RELATED []
+is_a: GO:0016071 ! mRNA metabolic process
+is_a: GO:0090501 ! RNA phosphodiester bond hydrolysis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0006396
 name: RNA processing
 namespace: biological_process
@@ -10710,6 +10783,20 @@ synonym: "neuron long process generation" EXACT []
 is_a: GO:0048812 ! neuron projection morphogenesis
 relationship: BFO:0000050 GO:0048667 ! part of cell morphogenesis involved in neuron differentiation
 relationship: BFO:0000050 GO:0061564 ! part of axon development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0007411
+name: axon guidance
+namespace: biological_process
+alt_id: GO:0008040
+def: "The chemotaxis process that directs the migration of an axon growth cone to a specific target site in response to a combination of attractive and repulsive cues." []
+synonym: "axon chemotaxis" RELATED []
+synonym: "axon growth cone guidance" NARROW []
+synonym: "axon pathfinding" EXACT []
+xref: Wikipedia:Axon_guidance
+is_a: GO:0097485 ! neuron projection guidance
+relationship: BFO:0000050 GO:0007409 ! part of axonogenesis
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -17443,6 +17530,27 @@ is_a: GO:0016894 ! endonuclease activity, active with either ribo- or deoxyribon
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0016891
+name: endoribonuclease activity, producing 5'-phosphomonoesters
+namespace: molecular_function
+def: "Catalysis of the hydrolysis of ester linkages within ribonucleic acids by creating internal breaks to yield 5'-phosphomonoesters." []
+xref: EC:3.1.26
+is_a: GO:0004521 ! endoribonuclease activity
+is_a: GO:0016893 ! endonuclease activity, active with either ribo- or deoxyribonucleic acids and producing 5'-phosphomonoesters
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0016892
+name: endoribonuclease activity, producing 3'-phosphomonoesters
+namespace: molecular_function
+def: "Catalysis of the hydrolysis of ester linkages within ribonucleic acids by creating internal breaks to yield 3'-phosphomonoesters." []
+synonym: "endoribonuclease activity, producing other than 5'-phosphomonoesters" EXACT []
+xref: EC:3.1.27
+is_a: GO:0004521 ! endoribonuclease activity
+is_a: GO:0016894 ! endonuclease activity, active with either ribo- or deoxyribonucleic acids and producing 3'-phosphomonoesters
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0016893
 name: endonuclease activity, active with either ribo- or deoxyribonucleic acids and producing 5'-phosphomonoesters
 namespace: molecular_function
@@ -18756,6 +18864,16 @@ relationship: RO:0002212 GO:0021930 ! negatively regulates cerebellar granule ce
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0021952
+name: central nervous system projection neuron axonogenesis
+namespace: biological_process
+def: "Generation of a long process of a CNS neuron, that carries efferent (outgoing) action potentials from the cell body towards target cells in a different central nervous system region." []
+comment: This term was added by GO_REF:0000021.
+synonym: "central nervous system axon tract development" NARROW []
+is_a: GO:0021955 ! central nervous system neuron axonogenesis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0021953
 name: central nervous system neuron differentiation
 
@@ -18777,6 +18895,16 @@ def: "Generation of a long process from a neuron whose cell body resides in the 
 comment: This term was added by GO_REF:0000021.
 is_a: GO:0007409 ! axonogenesis
 relationship: BFO:0000050 GO:0021954 ! part of central nervous system neuron development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0021960
+name: anterior commissure morphogenesis
+namespace: biological_process
+def: "Generation of a long process of a CNS neuron, that carries efferent (outgoing) action potentials from the cell body in one half of the cerebral cortex towards target cells in the contralateral half. This axonal process is a member of those that make up the anterior commissure, a small midline fiber tract that lies at the anterior end of the corpus callosum." []
+comment: This term was added by GO_REF:0000021.
+is_a: GO:0021952 ! central nervous system projection neuron axonogenesis
+relationship: BFO:0000050 GO:0021537 ! part of telencephalon development
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -20969,6 +21097,16 @@ namespace: biological_process
 def: "Any process in which RNA molecules inactivate expression of target genes." []
 synonym: "RNA-mediated gene silencing" EXACT []
 is_a: GO:0016458 ! gene silencing
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0031050
+name: dsRNA processing
+namespace: biological_process
+def: "Cleavage of double-stranded RNA molecules by an RNaseIII-family enzyme to produce small RNAs (generally 20-30 nucleotides, depending on species) with biological function." []
+synonym: "double-stranded RNA fragmentation" RELATED []
+synonym: "dsRNA fragmentation" RELATED []
+is_a: GO:0006396 ! RNA processing
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -25561,6 +25699,15 @@ relationship: RO:0002211 GO:0016573 ! regulates histone acetylation
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0035068
+name: micro-ribonucleoprotein complex
+namespace: cellular_component
+def: "A complex containing both protein and micro-RNA (miRNA) molecules. miRNAs are approximately 22 nucleotide noncoding RNAs derived from endogenous genes; they are processed from the stem of a longer hairpin like structure termed a pre-miRNA." []
+synonym: "miRNP complex" EXACT []
+is_a: GO:1990904 ! ribonucleoprotein complex
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0035069
 name: larval midgut histolysis
 namespace: biological_process
@@ -25737,8 +25884,39 @@ id: GO:0035186
 name: syncytial blastoderm mitotic cell cycle
 
 [Term]
+id: GO:0035195
+name: gene silencing by miRNA
+
+[Term]
 id: GO:0035196
 name: production of miRNAs involved in gene silencing by miRNA
+namespace: biological_process
+alt_id: GO:0030918
+def: "Cleavage of stem-loop RNA precursors into microRNAs (miRNAs), a class of small RNAs that primarily silence genes by blocking the translation of mRNA transcripts into protein." []
+synonym: "gene silencing by miRNA, production of miRNAs" EXACT []
+synonym: "microRNA biogenesis" RELATED []
+synonym: "microRNA biosynthesis" RELATED []
+synonym: "microRNA biosynthetic process" RELATED []
+synonym: "microRNA metabolic process" RELATED []
+synonym: "microRNA metabolism" RELATED []
+synonym: "microRNA processing" BROAD []
+synonym: "microRNA-mediated gene silencing, production of microRNAs" EXACT []
+synonym: "miRNA biogenesis" RELATED []
+synonym: "miRNA processing" EXACT []
+synonym: "miRNA-mediated gene silencing, production of miRNAs" EXACT []
+synonym: "production of microRNAs involved in gene silencing by microRNA" EXACT []
+is_a: GO:0070918 ! production of small RNA involved in gene silencing by RNA
+relationship: BFO:0000050 GO:0035195 ! part of gene silencing by miRNA
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0035198
+name: miRNA binding
+namespace: molecular_function
+def: "Interacting selectively and non-covalently with a microRNA, a 21-23 nucleotide RNA that is processed from a stem-loop RNA precursor (pre-miRNA) that is encoded within plant and animal genomes." []
+synonym: "microRNA binding" EXACT []
+is_a: GO:0061980 ! regulatory RNA binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0035206
@@ -25858,6 +26036,20 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0035270
 name: endocrine system development
+
+[Term]
+id: GO:0035279
+name: mRNA cleavage involved in gene silencing by miRNA
+namespace: biological_process
+def: "The process in which microRNAs (miRNAs) direct the cleavage of target mRNAs. Once incorporated into a RNA-induced silencing complex (RISC), a miRNA base pairing with near-perfect complementarity to the target mRNA will typically direct targeted endonucleolytic cleavage of the mRNA. Many plant miRNAs downregulate gene expression through this mechanism." []
+synonym: "gene silencing by miRNA, mRNA cleavage" EXACT []
+synonym: "miRNA-mediated gene silencing, mRNA cleavage" EXACT []
+synonym: "mRNA cleavage involved in gene silencing by microRNA" EXACT []
+is_a: GO:0098795 ! mRNA cleavage involved in gene silencing
+intersection_of: GO:0006379 ! mRNA cleavage
+intersection_of: BFO:0000050 GO:0035195 ! part of gene silencing by miRNA
+relationship: BFO:0000050 GO:0035195 ! part of gene silencing by miRNA
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0035282
@@ -27030,6 +27222,11 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0040025
 name: vulval development
+namespace: biological_process
+def: "The process whose specific outcome is the progression of the egg-laying organ of female and hermaphrodite nematodes over time, from its formation to the mature structure. In nematodes, the vulva is formed from ventral epidermal cells during larval stages to give rise to a fully formed vulva in the adult." []
+is_a: GO:0048569 ! post-embryonic animal organ development
+relationship: BFO:0000050 GO:0002119 ! part of nematode larval development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0040026
@@ -27069,8 +27266,24 @@ is_a: GO:0010468 ! regulation of gene expression
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0040034
+name: regulation of development, heterochronic
+namespace: biological_process
+def: "Any process that modulates the consistent predetermined time point at which an integrated living unit or organism progresses from an initial condition to a later condition and the rate at which this time point is reached." []
+synonym: "developmental timing" RELATED []
+synonym: "heterochronic regulation of development" EXACT []
+synonym: "temporal regulation of development" EXACT []
+is_a: GO:0050793 ! regulation of developmental process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0040035
 name: hermaphrodite genitalia development
+namespace: biological_process
+def: "The process whose specific outcome is the progression of the hermaphrodite genitalia over time, from formation to the mature structures." []
+is_a: GO:0008406 ! gonad development
+is_a: GO:0048806 ! genitalia development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0042023
@@ -40951,6 +41164,16 @@ created_by: dph
 creation_date: 2017-07-13T19:42:14Z
 
 [Term]
+id: GO:0061980
+name: regulatory RNA binding
+namespace: molecular_function
+def: "Interacting selectively and non-covalently with a small regulatory RNA, a short RNA (usually 50-200 nt long) that is either independently transcribed or processed from a longer RNA by an RNAse enzyme." []
+is_a: GO:0003723 ! RNA binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: dph
+creation_date: 2018-02-13T21:46:08Z
+
+[Term]
 id: GO:0061982
 name: meiosis I cell cycle process
 namespace: biological_process
@@ -41529,6 +41752,15 @@ is_a: GO:1901700 ! response to oxygen-containing compound
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0070551
+name: endoribonuclease activity, cleaving siRNA-paired mRNA
+namespace: molecular_function
+def: "Catalysis of the endonucleolytic cleavage of the mRNA in a double-stranded RNA molecule formed by the base pairing of an mRNA with an siRNA, yielding 5'-phosphomonoesters." []
+synonym: "argonaute endoribonuclease activity" RELATED []
+is_a: GO:0016891 ! endoribonuclease activity, producing 5'-phosphomonoesters
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0070566
 name: adenylyltransferase activity
 namespace: molecular_function
@@ -41935,6 +42167,32 @@ is_a: GO:0034644 ! cellular response to UV
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: midori
 creation_date: 2009-09-10T03:14:06Z
+
+[Term]
+id: GO:0070918
+name: production of small RNA involved in gene silencing by RNA
+namespace: biological_process
+def: "The process in which a double-stranded RNA precursor is processed into short (20-30 nt) fragments. RNA cleavage is catalyzed by a Dicer endonuclease." []
+synonym: "gene silencing by RNA, production of guide RNA" EXACT []
+synonym: "gene silencing by RNA, production of small RNA" EXACT []
+is_a: GO:0031050 ! dsRNA processing
+relationship: BFO:0000050 GO:0031047 ! part of gene silencing by RNA
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: midori
+creation_date: 2009-09-11T03:32:19Z
+
+[Term]
+id: GO:0070922
+name: small RNA loading onto RISC
+namespace: biological_process
+def: "The process in which a single-stranded small RNA associates with the RNA-initiated silencing complex (RISC); occurs as part of a process of gene silencing by small RNA." []
+synonym: "gene silencing by RNA, small RNA loading onto RISC" EXACT []
+synonym: "RISC assembly" RELATED []
+is_a: GO:0022618 ! ribonucleoprotein complex assembly
+relationship: BFO:0000050 GO:0031047 ! part of gene silencing by RNA
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: midori
+creation_date: 2009-09-11T03:57:38Z
 
 [Term]
 id: GO:0070925
@@ -42892,6 +43150,17 @@ relationship: RO:0002213 GO:0071604 ! positively regulates transforming growth f
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: midori
 creation_date: 2010-02-12T10:39:51Z
+
+[Term]
+id: GO:0071678
+name: olfactory bulb axon guidance
+namespace: biological_process
+def: "The process in which the migration of an axon growth cone of a neuron in the olfactory bulb is directed to its target in the brain in response to a combination of attractive and repulsive cues." []
+synonym: "olfactory bulb axon pathfinding" EXACT []
+is_a: GO:0007411 ! axon guidance
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: midori
+creation_date: 2010-02-17T02:09:34Z
 
 [Term]
 id: GO:0071696
@@ -44793,6 +45062,27 @@ created_by: tanyaberardini
 creation_date: 2011-12-12T11:32:34Z
 
 [Term]
+id: GO:0090501
+name: RNA phosphodiester bond hydrolysis
+namespace: biological_process
+def: "The RNA metabolic process in which the phosphodiester bonds between ribonucleotides are cleaved by hydrolysis." []
+is_a: GO:0016070 ! RNA metabolic process
+is_a: GO:0090305 ! nucleic acid phosphodiester bond hydrolysis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: tanyaberardini
+creation_date: 2012-10-22T12:05:27Z
+
+[Term]
+id: GO:0090502
+name: RNA phosphodiester bond hydrolysis, endonucleolytic
+namespace: biological_process
+def: "The chemical reactions and pathways involving the hydrolysis of internal 3',5'-phosphodiester bonds in one or two strands of ribonucleotides." []
+is_a: GO:0090501 ! RNA phosphodiester bond hydrolysis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: tanyaberardini
+creation_date: 2012-10-22T12:05:27Z
+
+[Term]
 id: GO:0090559
 name: regulation of membrane permeability
 namespace: biological_process
@@ -45270,6 +45560,22 @@ relationship: BFO:0000050 GO:0097479 ! part of synaptic vesicle localization
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: paola
 creation_date: 2013-05-22T14:32:12Z
+
+[Term]
+id: GO:0097485
+name: neuron projection guidance
+namespace: biological_process
+def: "The process in which the migration of a neuron projection is directed to a specific target site in response to a combination of attractive and repulsive cues." []
+synonym: "neurite guidance" NARROW []
+synonym: "neuron process guidance" EXACT []
+synonym: "neuron protrusion guidance" EXACT []
+synonym: "neuronal cell projection guidance" EXACT []
+is_a: GO:0006928 ! movement of cell or subcellular component
+relationship: BFO:0000050 GO:0006935 ! part of chemotaxis
+relationship: BFO:0000050 GO:0048812 ! part of neuron projection morphogenesis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: paola
+creation_date: 2013-07-08T13:32:37Z
 
 [Term]
 id: GO:0097517
@@ -45825,6 +46131,17 @@ def: "The part of a synapse that is part of the post-synaptic cell." []
 subset: goslim_synapse
 is_a: GO:0044456 ! synapse part
 is_a: GO:0044464 ! cell part
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0098795
+name: mRNA cleavage involved in gene silencing
+namespace: biological_process
+def: "Cleavage of an mRNA occurring as part of the mechanism of gene silencing." []
+is_a: GO:0006379 ! mRNA cleavage
+intersection_of: GO:0006379 ! mRNA cleavage
+intersection_of: BFO:0000050 GO:0016458 ! part of gene silencing
+relationship: BFO:0000050 GO:0016458 ! part of gene silencing
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -46722,6 +47039,17 @@ is_a: GO:0003824 ! catalytic activity
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: pg
 creation_date: 2017-09-14T12:03:51Z
+
+[Term]
+id: GO:0140098
+name: catalytic activity, acting on RNA
+namespace: molecular_function
+def: "Catalytic activity that acts to modify RNA." []
+comment: https://github.com/geneontology/go-ontology/issues/14225
+is_a: GO:0003824 ! catalytic activity
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: pg
+creation_date: 2017-09-14T12:05:21Z
 
 [Term]
 id: GO:0140110
