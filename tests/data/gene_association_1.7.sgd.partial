@@ -452,6 +452,15 @@ SGD	S000002678	CCC2		GO:0006879	PMID:7708696|SGD_REF:S000039583	IMP		P	Cu(+2)-tr
 SGD	S000002678	CCC2		GO:0055085	PMID:7708696|SGD_REF:S000039583	IMP		P	Cu(+2)-transporting P-type ATPase	YDR270W|Cu(2+)-transporting P-type ATPase CCC2	gene	taxon:559292	20090114	SGD		
 SGD	S000002678	CCC2		GO:0060003	PMID:7708696|SGD_REF:S000039583	IMP		P	Cu(+2)-transporting P-type ATPase	YDR270W|Cu(2+)-transporting P-type ATPase CCC2	gene	taxon:559292	20100413	SGD		
 SGD	S000002678	CCC2		GO:0012510	PMID:9325307|SGD_REF:S000050925	IDA		C	Cu(+2)-transporting P-type ATPase	YDR270W|Cu(2+)-transporting P-type ATPase CCC2	gene	taxon:559292	20050720	SGD		
+SGD	S000001906	UBP6		GO:0008234	SGD_REF:S000148669	IEA	UniProtKB-KW:KW-0788	F	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20180616	UniProt		
+SGD	S000001906	UBP6		GO:0036459	SGD_REF:S000124036	IEA	InterPro:IPR001394	F	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20180616	InterPro		
+SGD	S000001906	UBP6		GO:0036459	SGD_REF:S000124036	IEA	InterPro:IPR018200	F	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20180616	InterPro		
+SGD	S000001906	UBP6		GO:0008233	SGD_REF:S000148669	IEA	UniProtKB-KW:KW-0645	F	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20180616	UniProt		
+SGD	S000001906	UBP6		GO:0016787	SGD_REF:S000148669	IEA	UniProtKB-KW:KW-0378	F	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20180616	UniProt		
+SGD	S000001906	UBP6		GO:0036459	SGD_REF:S000124037	IEA	EC:3.4.19.12	F	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20180616	UniProt		
+SGD	S000001906	UBP6		GO:0016579	SGD_REF:S000124036	IEA	InterPro:IPR001394	P	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20180616	InterPro		
+SGD	S000001906	UBP6		GO:0006511	SGD_REF:S000124036	IEA	InterPro:IPR018200	P	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20180616	InterPro		
+SGD	S000001906	UBP6		GO:0006508	SGD_REF:S000148669	IEA	UniProtKB-KW:KW-0645	P	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20180616	UniProt		
 SGD	S000005995	YTA6		GO:0016887	PMID:7754704|SGD_REF:S000057468	ISS		F	Putative ATPase of the CDC48/PAS1/SEC18 (AAA) family	YPL074W|putative AAA family ATPase YTA6	gene	taxon:559292	20021018	SGD		
 SGD	S000005995	YTA6		GO:0008150	SGD_REF:S000069584	ND		P	Putative ATPase of the CDC48/PAS1/SEC18 (AAA) family	YPL074W|putative AAA family ATPase YTA6	gene	taxon:559292	20021018	SGD		
 SGD	S000005995	YTA6		GO:0005938	PMID:11553699|SGD_REF:S000068954	IDA		C	Putative ATPase of the CDC48/PAS1/SEC18 (AAA) family	YPL074W|putative AAA family ATPase YTA6	gene	taxon:559292	20021018	SGD		
@@ -519,6 +528,15 @@ SGD	S000006068	PXA1		GO:0042626	PMID:8670886|SGD_REF:S000053188	IMP		F	Subunit o
 SGD	S000006068	PXA1		GO:0015908	PMID:8670886|SGD_REF:S000053188	IMP		P	Subunit of heterodimeric peroxisomal ABC transport complex, with Pxa2p	YPL147W|LPI1|PAL1|PAT2|SSH2|ATP-binding cassette long-chain fatty acid transporter PXA1	gene	taxon:559292	20020919	SGD		
 SGD	S000006068	PXA1		GO:0005779	PMID:8670886|SGD_REF:S000053188	IDA		C	Subunit of heterodimeric peroxisomal ABC transport complex, with Pxa2p	YPL147W|LPI1|PAL1|PAT2|SSH2|ATP-binding cassette long-chain fatty acid transporter PXA1	gene	taxon:559292	20020919	SGD		
 SGD	S000004777	MLH1		GO:0016887	SGD_REF:S000124036	IEA	InterPro:IPR038973	F	Protein required for mismatch repair in mitosis and meiosis	YMR167W|PMS2|mismatch repair ATPase MLH1	gene	taxon:559292	20180616	InterPro		
+SGD	S000001906	UBP6		GO:0004843	PMID:12408819|SGD_REF:S000071808	IDA		F	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20080512	SGD		
+SGD	S000001906	UBP6		GO:0004843	PMID:12408819|SGD_REF:S000071808	IMP		F	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20080512	SGD		
+SGD	S000001906	UBP6		GO:0004843	PMID:17018280|SGD_REF:S000119130	IDA		F	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20130702	SGD		
+SGD	S000001906	UBP6		GO:0004843	PMID:17018280|SGD_REF:S000119130	IMP		F	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20130702	SGD		
+SGD	S000001906	UBP6		GO:0016579	PMID:12408819|SGD_REF:S000071808	IMP		P	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20080512	SGD		
+SGD	S000001906	UBP6		GO:0016579	PMID:14581483|SGD_REF:S000074981	IGI	SGD:S000001900	P	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20100714	SGD		
+SGD	S000001906	UBP6		GO:1901799	PMID:17018280|SGD_REF:S000119130	IMP		P	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20130702	SGD		
+SGD	S000001906	UBP6		GO:0000502	PMID:12408819|SGD_REF:S000071808	IPI		C	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20080512	SGD		
+SGD	S000001906	UBP6		GO:0005838	PMID:11029046|SGD_REF:S000056447	IPI		C	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20020403	SGD		
 SGD	S000005929	CHL1		GO:0032508	SGD_REF:S000204515	IEA	GO:0003678	P	Probable DNA helicase	YPL008W|MCM12|CTF1|LPA9	gene	taxon:559292	20180616	GOC		
 SGD	S000005929	CHL1		GO:0032508	SGD_REF:S000204515	IEA	GO:0004003	P	Probable DNA helicase	YPL008W|MCM12|CTF1|LPA9	gene	taxon:559292	20180616	GOC		
 SGD	S000005929	CHL1		GO:0005634	SGD_REF:S000148669	IEA	UniProtKB-KW:KW-0539	C	Probable DNA helicase	YPL008W|MCM12|CTF1|LPA9	gene	taxon:559292	20180616	UniProt		
@@ -663,6 +681,10 @@ SGD	S000000482	DPB3		GO:0005634	SGD_REF:S000148671	IEA	UniProtKB-SubCell:SL-0191
 SGD	S000001596	RAD27		GO:0005739	SGD_REF:S000148671	IEA	UniProtKB-SubCell:SL-0173	C	5' to 3' exonuclease, 5' flap endonuclease	YKL113C|ERC11|RTH1|FEN1|multifunctional nuclease RAD27	gene	taxon:559292	20180616	UniProt		
 SGD	S000004802	SGS1		GO:0044237	SGD_REF:S000124036	IEA	InterPro:IPR010997	P	RecQ family nucleolar DNA helicase	YMR190C|ATP-dependent DNA helicase SGS1	gene	taxon:559292	20180616	InterPro		
 SGD	S000001596	RAD27		GO:0005739	SGD_REF:S000148669	IEA	UniProtKB-KW:KW-0496	C	5' to 3' exonuclease, 5' flap endonuclease	YKL113C|ERC11|RTH1|FEN1|multifunctional nuclease RAD27	gene	taxon:559292	20180616	UniProt		
+SGD	S000002179	GPM2	NOT	GO:0004619	PMID:9544241|SGD_REF:S000049007	IMP		F	Nonfunctional homolog of Gpm1p phosphoglycerate mutase	YDL021W|phosphoglycerate mutase family protein GPM2	gene	taxon:559292	20030911	SGD		
+SGD	S000002179	GPM2		GO:0003674	SGD_REF:S000069584	ND		F	Nonfunctional homolog of Gpm1p phosphoglycerate mutase	YDL021W|phosphoglycerate mutase family protein GPM2	gene	taxon:559292	20040929	SGD		
+SGD	S000002179	GPM2		GO:0008150	SGD_REF:S000069584	ND		P	Nonfunctional homolog of Gpm1p phosphoglycerate mutase	YDL021W|phosphoglycerate mutase family protein GPM2	gene	taxon:559292	20050510	SGD		
+SGD	S000002179	GPM2		GO:0005737	PMID:24146988|SGD_REF:S000155539	IDA		C	Nonfunctional homolog of Gpm1p phosphoglycerate mutase	YDL021W|phosphoglycerate mutase family protein GPM2	gene	taxon:559292	20131030	SGD		
 SGD	S000002290	CDC53	contributes_to	GO:0004842	PMID:10385629|SGD_REF:S000056381	IDA		F	Cullin	YDL132W|cullin CDC53	gene	taxon:559292	20070221	SGD		
 SGD	S000002290	CDC53	contributes_to	GO:0004842	PMID:9346239|SGD_REF:S000041398	IDA		F	Cullin	YDL132W|cullin CDC53	gene	taxon:559292	20070207	SGD		
 SGD	S000002290	CDC53	contributes_to	GO:0061630	PMID:9346238|SGD_REF:S000058226	IDA		F	Cullin	YDL132W|cullin CDC53	gene	taxon:559292	20140626	SGD		
@@ -706,6 +728,9 @@ SGD	S000004916	ATM1		GO:0016021	PMID:12192589|SGD_REF:S000114049	ISM		C	Mitochon
 SGD	S000006068	PXA1		GO:0016021	PMID:12192589|SGD_REF:S000114049	ISM		C	Subunit of heterodimeric peroxisomal ABC transport complex, with Pxa2p	YPL147W|LPI1|PAL1|PAT2|SSH2|ATP-binding cassette long-chain fatty acid transporter PXA1	gene	taxon:559292	20110531	SGD		
 SGD	S000006223	MCM4	contributes_to	GO:0003678	PMID:18657510|SGD_REF:S000149850	IDA		F	Essential helicase component of heterohexameric MCM2-7 complexes	YPR019W|CDC54|HCD21|MCM DNA helicase complex subunit MCM4	gene	taxon:559292	20110210	UniProt		
 SGD	S000006074	RAD53		GO:0006468	PMID:10508166|SGD_REF:S000045637	IMP		P	DNA damage response protein kinase	YPL153C|LSD1|MEC2|SPK1|serine/threonine/tyrosine protein kinase RAD53	gene	taxon:559292	20170504	SGD	happens_during(GO:0072711),has_direct_input(UniProtKB:P32325)	
+SGD	S000001906	UBP6		GO:0072671	PMID:21070972|SGD_REF:S000140158	IMP		P	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20170311	SGD	has_input(UniProtKB:P07213)	
+SGD	S000001906	UBP6		GO:0072671	PMID:21070972|SGD_REF:S000140158	IMP		P	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20170311	SGD	has_input(UniProtKB:P53083)	
+SGD	S000001906	UBP6		GO:0072671	PMID:21070972|SGD_REF:S000140158	IMP		P	Ubiquitin-specific protease	YFR010W|ubiquitin-specific protease UBP6	gene	taxon:559292	20170311	SGD	has_input(UniProtKB:P28737)	
 SGD	S000005707	LAS17		GO:2000601	PMID:11604421|SGD_REF:S000068956	IDA		P	Actin assembly factor	YOR181W|BEE1|actin-binding protein LAS17	gene	taxon:559292	20170217	SGD		
 SGD	S000005707	LAS17		GO:2000601	PMID:12499356|SGD_REF:S000072632	IDA		P	Actin assembly factor	YOR181W|BEE1|actin-binding protein LAS17	gene	taxon:559292	20170217	SGD		
 SGD	S000005707	LAS17		GO:2000601	PMID:12814545|SGD_REF:S000075162	IDA		P	Actin assembly factor	YOR181W|BEE1|actin-binding protein LAS17	gene	taxon:559292	20170426	SGD		
@@ -735,6 +760,7 @@ SGD	S000003487	COQ6		GO:0005739	PMID:24769239|SGD_REF:S000175707	HDA		C	Flavin-d
 SGD	S000004695	YTA12		GO:0005737	PMID:11914276|SGD_REF:S000069459	HDA		C	Mitochondrial inner membrane m-AAA protease component	YMR089C|RCA1|m-AAA protease subunit YTA12	gene	taxon:559292	20020507	SGD		
 SGD	S000004695	YTA12		GO:0005739	PMID:11914276|SGD_REF:S000069459	HDA		C	Mitochondrial inner membrane m-AAA protease component	YMR089C|RCA1|m-AAA protease subunit YTA12	gene	taxon:559292	20020507	SGD		
 SGD	S000005707	LAS17		GO:0005737	PMID:11914276|SGD_REF:S000069459	HDA		C	Actin assembly factor	YOR181W|BEE1|actin-binding protein LAS17	gene	taxon:559292	20020507	SGD		
+SGD	S000002179	GPM2		GO:0005737	PMID:11914276|SGD_REF:S000069459	HDA		C	Nonfunctional homolog of Gpm1p phosphoglycerate mutase	YDL021W|phosphoglycerate mutase family protein GPM2	gene	taxon:559292	20020507	SGD		
 SGD	S000003487	COQ6		GO:0005739	PMID:16823961|SGD_REF:S000117178	HDA		C	Flavin-dependent monooxygenase involved in ubiquinone biosynthesis	YGR255C|putative N,N-dimethylaniline monooxygenase COQ6	gene	taxon:559292	20061212	SGD		
 SGD	S000004695	YTA12		GO:0005739	PMID:14576278|SGD_REF:S000075100	HDA		C	Mitochondrial inner membrane m-AAA protease component	YMR089C|RCA1|m-AAA protease subunit YTA12	gene	taxon:559292	20040924	SGD		
 SGD	S000003487	COQ6		GO:0005739	PMID:14576278|SGD_REF:S000075100	HDA		C	Flavin-dependent monooxygenase involved in ubiquinone biosynthesis	YGR255C|putative N,N-dimethylaniline monooxygenase COQ6	gene	taxon:559292	20040928	SGD		
@@ -1026,6 +1052,12 @@ SGD	S000005939	CTF19		GO:0051301	SGD_REF:S000148669	IEA	UniProtKB-KW:KW-0132	P	O
 SGD	S000005939	CTF19		GO:0051321	SGD_REF:S000148669	IEA	UniProtKB-KW:KW-0469	P	Outer kinetochore protein, needed for accurate chromosome segregation	YPL018W|MCM18	gene	taxon:559292	20180616	UniProt		
 SGD	S000005939	CTF19		GO:0005634	SGD_REF:S000148671	IEA	UniProtKB-SubCell:SL-0191	C	Outer kinetochore protein, needed for accurate chromosome segregation	YPL018W|MCM18	gene	taxon:559292	20180616	UniProt		
 SGD	S000005939	CTF19		GO:0005694	SGD_REF:S000148669	IEA	UniProtKB-KW:KW-0158	C	Outer kinetochore protein, needed for accurate chromosome segregation	YPL018W|MCM18	gene	taxon:559292	20180616	UniProt		
+SGD	S000002179	GPM2		GO:0016868	SGD_REF:S000124036	IEA	InterPro:IPR005952	F	Nonfunctional homolog of Gpm1p phosphoglycerate mutase	YDL021W|phosphoglycerate mutase family protein GPM2	gene	taxon:559292	20180616	InterPro		
+SGD	S000002179	GPM2		GO:0003824	SGD_REF:S000124036	IEA	InterPro:IPR001345	F	Nonfunctional homolog of Gpm1p phosphoglycerate mutase	YDL021W|phosphoglycerate mutase family protein GPM2	gene	taxon:559292	20180616	InterPro		
+SGD	S000002179	GPM2		GO:0005737	SGD_REF:S000148669	IEA	UniProtKB-KW:KW-0963	C	Nonfunctional homolog of Gpm1p phosphoglycerate mutase	YDL021W|phosphoglycerate mutase family protein GPM2	gene	taxon:559292	20180616	UniProt		
+SGD	S000002179	GPM2		GO:0016853	SGD_REF:S000148669	IEA	UniProtKB-KW:KW-0413	F	Nonfunctional homolog of Gpm1p phosphoglycerate mutase	YDL021W|phosphoglycerate mutase family protein GPM2	gene	taxon:559292	20180616	UniProt		
+SGD	S000002179	GPM2		GO:0008152	SGD_REF:S000124036	IEA	InterPro:IPR001345	P	Nonfunctional homolog of Gpm1p phosphoglycerate mutase	YDL021W|phosphoglycerate mutase family protein GPM2	gene	taxon:559292	20180616	InterPro		
+SGD	S000002179	GPM2		GO:0005737	SGD_REF:S000148671	IEA	UniProtKB-SubCell:SL-0086	C	Nonfunctional homolog of Gpm1p phosphoglycerate mutase	YDL021W|phosphoglycerate mutase family protein GPM2	gene	taxon:559292	20180616	UniProt		
 SGD	S000002290	CDC53		GO:0007049	SGD_REF:S000148669	IEA	UniProtKB-KW:KW-0131	P	Cullin	YDL132W|cullin CDC53	gene	taxon:559292	20180616	UniProt		
 SGD	S000002290	CDC53		GO:0051301	SGD_REF:S000148669	IEA	UniProtKB-KW:KW-0132	P	Cullin	YDL132W|cullin CDC53	gene	taxon:559292	20180616	UniProt		
 SGD	S000002290	CDC53		GO:0006511	SGD_REF:S000124036	IEA	InterPro:IPR001373	P	Cullin	YDL132W|cullin CDC53	gene	taxon:559292	20180616	InterPro		
@@ -1117,6 +1149,7 @@ SGD	S000004802	SGS1		GO:0031573	PMID:21873635	IBA	PANTHER:PTN001009292|PomBase:S
 SGD	S000002284	CDC48		GO:0030433	PMID:21873635	IBA	PANTHER:PTN000554506|SGD:S000002284|UniProtKB:P46468|UniProtKB:P55072	P	AAA ATPase	YDL126C|AAA family ATPase CDC48	gene	NCBITaxon:	20171103	GO_Central		
 SGD	S000004802	SGS1		GO:0006265	PMID:21873635	IBA	PANTHER:PTN001009292|SGD:S000004802	P	RecQ family nucleolar DNA helicase	YMR190C|ATP-dependent DNA helicase SGS1	gene	NCBITaxon:	20180411	GO_Central		
 SGD	S000006074	RAD53		GO:0005737	PMID:21873635	IBA	PANTHER:PTN002389571|PomBase:SPAC23A1.06c|PomBase:SPCC1322.08|UniProtKB:Q7YTF7|WB:WBGene00006993	C	DNA damage response protein kinase	YPL153C|LSD1|MEC2|SPK1|serine/threonine/tyrosine protein kinase RAD53	gene	NCBITaxon:	20180209	GO_Central		
+SGD	S000002360	TRM8		GO:0008176	PMID:21873635	IBA	EcoGene:EG11779|PANTHER:PTN000602515|SGD:S000002360|UniProtKB:Q9UBP6	F	Catalytic subunit of a tRNA methyltransferase complex	YDL201W|tRNA (guanine46-N7)-methyltransferase	gene	NCBITaxon:	20170228	GO_Central		
 SGD	S000001596	RAD27		GO:1903469	PMID:21873635	IBA	PANTHER:PTN000871783|PomBase:SPAC3G6.06c	P	5' to 3' exonuclease, 5' flap endonuclease	YKL113C|ERC11|RTH1|FEN1|multifunctional nuclease RAD27	gene	NCBITaxon:	20180409	GO_Central		
 SGD	S000004802	SGS1		GO:0001302	PMID:21873635	IBA	PANTHER:PTN001009292|SGD:S000004802	P	RecQ family nucleolar DNA helicase	YMR190C|ATP-dependent DNA helicase SGS1	gene	NCBITaxon:	20180411	GO_Central		
 SGD	S000004802	SGS1		GO:0005634	PMID:21873635	IBA	FB:FBgn0002906|FB:FBgn0027375|FB:FBgn0040290|MGI:MGI:109635|PANTHER:PTN000749808|UniProtKB:O94762|UniProtKB:P46063|UniProtKB:P54132|WB:WBGene00004322|WB:WBGene00006944	C	RecQ family nucleolar DNA helicase	YMR190C|ATP-dependent DNA helicase SGS1	gene	NCBITaxon:	20170228	GO_Central		

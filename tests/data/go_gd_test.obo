@@ -1745,6 +1745,10 @@ is_a: GO:0065008 ! regulation of biological quality
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0001510
+name: RNA methylation
+
+[Term]
 id: GO:0001525
 name: angiogenesis
 namespace: biological_process
@@ -4138,6 +4142,86 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0004197
 name: cysteine-type endopeptidase activity
+namespace: molecular_function
+def: "Catalysis of the hydrolysis of internal, alpha-peptide bonds in a polypeptide chain by a mechanism in which the sulfhydryl group of a cysteine residue at the active center acts as a nucleophile." []
+synonym: "caspase activity" NARROW []
+synonym: "lysosomal cysteine-type endopeptidase" NARROW []
+synonym: "metacaspase activity" NARROW []
+synonym: "thiol endopeptidase activity" EXACT []
+xref: EC:3.4.22
+xref: reactome:R-HSA-114252
+xref: reactome:R-HSA-114259
+xref: reactome:R-HSA-114261
+xref: reactome:R-HSA-1236948
+xref: reactome:R-HSA-139898
+xref: reactome:R-HSA-139952
+xref: reactome:R-HSA-1678920
+xref: reactome:R-HSA-1678981
+xref: reactome:R-HSA-201595
+xref: reactome:R-HSA-201603
+xref: reactome:R-HSA-201608
+xref: reactome:R-HSA-201611
+xref: reactome:R-HSA-201622
+xref: reactome:R-HSA-201628
+xref: reactome:R-HSA-201629
+xref: reactome:R-HSA-201630
+xref: reactome:R-HSA-201631
+xref: reactome:R-HSA-201634
+xref: reactome:R-HSA-201636
+xref: reactome:R-HSA-201637
+xref: reactome:R-HSA-201639
+xref: reactome:R-HSA-201640
+xref: reactome:R-HSA-2028692
+xref: reactome:R-HSA-2028697
+xref: reactome:R-HSA-202917
+xref: reactome:R-HSA-202939
+xref: reactome:R-HSA-202947
+xref: reactome:R-HSA-202960
+xref: reactome:R-HSA-202966
+xref: reactome:R-HSA-202967
+xref: reactome:R-HSA-202969
+xref: reactome:R-HSA-211186
+xref: reactome:R-HSA-211190
+xref: reactome:R-HSA-211651
+xref: reactome:R-HSA-212552
+xref: reactome:R-HSA-2130336
+xref: reactome:R-HSA-2130349
+xref: reactome:R-HSA-2130504
+xref: reactome:R-HSA-2130706
+xref: reactome:R-HSA-2562564
+xref: reactome:R-HSA-264865
+xref: reactome:R-HSA-264871
+xref: reactome:R-HSA-3465448
+xref: reactome:R-HSA-350158
+xref: reactome:R-HSA-350318
+xref: reactome:R-HSA-350319
+xref: reactome:R-HSA-350651
+xref: reactome:R-HSA-351849
+xref: reactome:R-HSA-351871
+xref: reactome:R-HSA-351876
+xref: reactome:R-HSA-351877
+xref: reactome:R-HSA-351894
+xref: reactome:R-HSA-351901
+xref: reactome:R-HSA-351913
+xref: reactome:R-HSA-351936
+xref: reactome:R-HSA-352268
+xref: reactome:R-HSA-418845
+xref: reactome:R-HSA-418846
+xref: reactome:R-HSA-418852
+xref: reactome:R-HSA-448703
+xref: reactome:R-HSA-5357828
+xref: reactome:R-HSA-5634228
+xref: reactome:R-HSA-5660663
+xref: reactome:R-HSA-5681987
+xref: reactome:R-HSA-5682377
+xref: reactome:R-HSA-6814387
+xref: reactome:R-HSA-9012556
+xref: reactome:R-HSA-9013895
+xref: reactome:R-HSA-933532
+xref: reactome:R-HSA-9603534
+is_a: GO:0004175 ! endopeptidase activity
+is_a: GO:0008234 ! cysteine-type peptidase activity
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0004222
@@ -4528,6 +4612,39 @@ is_a: GO:0004518 ! nuclease activity
 is_a: GO:0140098 ! catalytic activity, acting on RNA
 relationship: BFO:0000050 GO:0090501 ! part of RNA phosphodiester bond hydrolysis
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0004618
+name: phosphoglycerate kinase activity
+
+[Term]
+id: GO:0004619
+name: phosphoglycerate mutase activity
+namespace: molecular_function
+def: "Catalysis of the reaction: 2-phospho-D-glycerate = 3-phospho-D-glycerate." []
+synonym: "bisphosphoglyceromutase" RELATED []
+synonym: "D-phosphoglycerate 2,3-phosphomutase activity" EXACT []
+synonym: "diphosphoglycomutase" RELATED []
+synonym: "GriP mutase" NARROW []
+synonym: "monophosphoglycerate mutase activity" EXACT []
+synonym: "monophosphoglyceromutase activity" EXACT []
+synonym: "MPGM" RELATED []
+synonym: "PGA mutase activity" EXACT []
+synonym: "PGAM activity" EXACT []
+synonym: "PGM" EXACT []
+synonym: "phosphoglycerate phosphomutase activity" EXACT []
+synonym: "phosphoglyceromutase activity" EXACT []
+xref: EC:5.4.2.1
+xref: MetaCyc:3PGAREARR-RXN
+xref: reactome:R-HSA-71445
+xref: reactome:R-HSA-71654
+xref: RHEA:15901
+is_a: GO:0016868 ! intramolecular transferase activity, phosphotransferases
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0004634
+name: phosphopyruvate hydratase activity
 
 [Term]
 id: GO:0004652
@@ -5807,6 +5924,37 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0004843
 name: thiol-dependent ubiquitin-specific protease activity
+namespace: molecular_function
+def: "Catalysis of the thiol-dependent hydrolysis of a peptide bond formed by the C-terminal glycine of ubiquitin and another protein." []
+synonym: "deubiquitinase" EXACT []
+synonym: "deubiquitinase activity" NARROW []
+synonym: "deubiquitinating enzyme" NARROW []
+synonym: "deubiquitylase" EXACT []
+synonym: "ubiquitin C-terminal hydrolase activity" EXACT []
+synonym: "ubiquitin hydrolase activity" BROAD []
+synonym: "ubiquitin-specific protease activity" BROAD []
+synonym: "UBP" NARROW []
+synonym: "UCH2" NARROW []
+xref: reactome:R-HSA-1358795
+xref: reactome:R-HSA-2179291
+xref: reactome:R-HSA-3215295
+xref: reactome:R-HSA-3215310
+xref: reactome:R-HSA-4641236
+xref: reactome:R-HSA-5653770
+xref: reactome:R-HSA-5655466
+xref: reactome:R-HSA-5696465
+xref: reactome:R-HSA-6782069
+xref: reactome:R-HSA-6786171
+xref: reactome:R-HSA-6807118
+xref: reactome:R-HSA-6807206
+xref: reactome:R-HSA-8853503
+xref: reactome:R-HSA-8853514
+xref: reactome:R-HSA-8853515
+xref: reactome:R-HSA-8853529
+xref: reactome:R-HSA-8875443
+xref: reactome:R-HSA-8986083
+is_a: GO:0036459 ! thiol-dependent ubiquitinyl hydrolase activity
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0004874
@@ -7177,6 +7325,20 @@ is_a: GO:0044444 ! cytoplasmic part
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0005838
+name: proteasome regulatory particle
+namespace: cellular_component
+def: "A multisubunit complex, which caps one or both ends of the proteasome core complex. This complex recognizes and unfolds ubiquitinated proteins, and translocates them to the proteasome core complex." []
+synonym: "19S regulatory particle" NARROW []
+synonym: "modulator complex" RELATED []
+synonym: "PA700 proteasome activator" NARROW []
+synonym: "PA700-dependent proteasome activator" EXACT []
+is_a: GO:0032991 ! protein-containing complex
+is_a: GO:0044424 ! intracellular part
+relationship: BFO:0000050 GO:0022624 ! part of proteasome accessory complex
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0005840
 name: ribosome
 namespace: cellular_component
@@ -7674,6 +7836,31 @@ is_a: GO:0044237 ! cellular metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0006096
+name: glycolytic process
+namespace: biological_process
+alt_id: GO:0019641
+alt_id: GO:0019642
+def: "The chemical reactions and pathways resulting in the breakdown of a carbohydrate into pyruvate, with the concomitant production of a small amount of ATP and the reduction of NAD(P) to NAD(P)H. Glycolysis begins with the metabolism of a carbohydrate to generate products that can enter the pathway and ends with the production of pyruvate. Pyruvate may be converted to acetyl-coenzyme A, ethanol, lactate, or other small molecules." []
+synonym: "anaerobic glycolysis" RELATED []
+synonym: "Embden-Meyerhof pathway" RELATED []
+synonym: "Embden-Meyerhof-Parnas pathway" RELATED []
+synonym: "glycolysis" RELATED []
+synonym: "modifed Embden-Meyerhof pathway" RELATED []
+xref: MetaCyc:GLYCOLYSIS-VARIANTS
+is_a: GO:0006754 ! ATP biosynthetic process
+is_a: GO:0006757 ! ATP generation from ADP
+is_a: GO:0009166 ! nucleotide catabolic process
+is_a: GO:0016052 ! carbohydrate catabolic process
+is_a: GO:0019359 ! nicotinamide nucleotide biosynthetic process
+is_a: GO:0042866 ! pyruvate biosynthetic process
+relationship: BFO:0000051 GO:0004618 ! has part phosphoglycerate kinase activity
+relationship: BFO:0000051 GO:0004619 ! has part phosphoglycerate mutase activity
+relationship: BFO:0000051 GO:0004634 ! has part phosphopyruvate hydratase activity
+relationship: BFO:0000051 GO:0043891 ! has part glyceraldehyde-3-phosphate dehydrogenase (NAD(P)+) (phosphorylating) activity
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0006109
 name: regulation of carbohydrate metabolic process
 namespace: biological_process
@@ -7742,6 +7929,26 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0006164
 name: purine nucleotide biosynthetic process
+namespace: biological_process
+def: "The chemical reactions and pathways resulting in the formation of a purine nucleotide, a compound consisting of nucleoside (a purine base linked to a deoxyribose or ribose sugar) esterified with a phosphate group at either the 3' or 5'-hydroxyl group of the sugar." []
+synonym: "purine nucleotide anabolism" EXACT []
+synonym: "purine nucleotide biosynthesis" EXACT []
+synonym: "purine nucleotide formation" EXACT []
+synonym: "purine nucleotide synthesis" EXACT []
+xref: MetaCyc:DENOVOPURINE2-PWY
+is_a: GO:0006163 ! purine nucleotide metabolic process
+is_a: GO:0009165 ! nucleotide biosynthetic process
+is_a: GO:0072522 ! purine-containing compound biosynthetic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0006165
+name: nucleoside diphosphate phosphorylation
+namespace: biological_process
+def: "The process of introducing a phosphate group into a nucleoside diphosphate to produce a nucleoside triphosphate." []
+is_a: GO:0009132 ! nucleoside diphosphate metabolic process
+is_a: GO:0046939 ! nucleotide phosphorylation
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0006259
@@ -8282,6 +8489,30 @@ subset: goslim_yeast
 synonym: "mRNA maturation" RELATED []
 is_a: GO:0006396 ! RNA processing
 is_a: GO:0016071 ! mRNA metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0006399
+name: tRNA metabolic process
+namespace: biological_process
+def: "The chemical reactions and pathways involving tRNA, transfer RNA, a class of relatively small RNA molecules responsible for mediating the insertion of amino acids into the sequence of nascent polypeptide chains during protein synthesis. Transfer RNA is characterized by the presence of many unusual minor bases, the function of which has not been completely established." []
+subset: goslim_chembl
+subset: goslim_generic
+subset: goslim_pombe
+synonym: "tRNA metabolism" EXACT []
+is_a: GO:0034660 ! ncRNA metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0006400
+name: tRNA modification
+namespace: biological_process
+alt_id: GO:0016549
+def: "The covalent alteration of one or more nucleotides within a tRNA molecule to produce a tRNA molecule with a sequence that differs from that coded genetically." []
+comment: The term 'RNA editing' (GO:0016547) was merged into 'RNA modification' (GO:0009451) on the basis of statements in the preface of Modification and Editing of RNA (ISBN:1555811337) that there is no clear distinction between modification and editing. Parallel changes were made for substrate (e.g. tRNA, rRNA, etc.) specific child terms of 'RNA editing'.
+synonym: "tRNA editing" NARROW []
+is_a: GO:0008033 ! tRNA processing
+is_a: GO:0009451 ! RNA modification
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -8972,6 +9203,31 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0006754
 name: ATP biosynthetic process
+namespace: biological_process
+alt_id: GO:0006758
+alt_id: GO:0006759
+def: "The chemical reactions and pathways resulting in the formation of ATP, adenosine 5'-triphosphate, a universally important coenzyme and enzyme regulator." []
+synonym: "ATP anabolism" EXACT []
+synonym: "ATP biosynthesis" EXACT []
+synonym: "ATP formation" EXACT []
+synonym: "ATP regeneration" NARROW []
+synonym: "ATP synthesis" EXACT []
+is_a: GO:0009152 ! purine ribonucleotide biosynthetic process
+is_a: GO:0009206 ! purine ribonucleoside triphosphate biosynthetic process
+is_a: GO:0046034 ! ATP metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0006757
+name: ATP generation from ADP
+namespace: biological_process
+def: "The process of introducing a phosphate group into ADP, adenosine diphosphate, to produce ATP." []
+synonym: "ADP phosphorylation" EXACT []
+is_a: GO:0006091 ! generation of precursor metabolites and energy
+is_a: GO:0006165 ! nucleoside diphosphate phosphorylation
+is_a: GO:0046031 ! ADP metabolic process
+is_a: GO:0046034 ! ATP metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0006766
@@ -11383,6 +11639,17 @@ relationship: BFO:0000050 GO:0015718 ! part of monocarboxylic acid transport
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0008033
+name: tRNA processing
+namespace: biological_process
+def: "The process in which a pre-tRNA molecule is converted to a mature tRNA, ready for addition of an aminoacyl group." []
+subset: goslim_yeast
+synonym: "tRNA maturation" EXACT []
+is_a: GO:0006399 ! tRNA metabolic process
+is_a: GO:0034470 ! ncRNA processing
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0008047
 name: enzyme activator activity
 namespace: molecular_function
@@ -11625,6 +11892,52 @@ relationship: BFO:0000050 GO:0032259 ! part of methylation
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0008173
+name: RNA methyltransferase activity
+namespace: molecular_function
+def: "Catalysis of the transfer of a methyl group from a donor to a nucleoside residue in an RNA molecule." []
+comment: Note that the methyl donor is usually S-adenosyl-L-methionine, but there is at least one exception (see GO:0030698).
+xref: reactome:R-HSA-191784
+is_a: GO:0008168 ! methyltransferase activity
+is_a: GO:0140098 ! catalytic activity, acting on RNA
+relationship: BFO:0000050 GO:0001510 ! part of RNA methylation
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0008175
+name: tRNA methyltransferase activity
+namespace: molecular_function
+def: "Catalysis of the transfer of a methyl group from a donor to a nucleoside residue in a tRNA molecule." []
+xref: reactome:R-HSA-6782879
+xref: reactome:R-HSA-6782881
+xref: reactome:R-HSA-6782890
+xref: reactome:R-HSA-6783473
+xref: reactome:R-HSA-6786500
+xref: reactome:R-HSA-6786567
+is_a: GO:0008173 ! RNA methyltransferase activity
+is_a: GO:0140101 ! catalytic activity, acting on a tRNA
+relationship: BFO:0000050 GO:0030488 ! part of tRNA methylation
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0008176
+name: tRNA (guanine-N7-)-methyltransferase activity
+namespace: molecular_function
+def: "Catalysis of the reaction: S-adenosyl-L-methionine + tRNA = S-adenosyl-L-homocysteine + tRNA containing N7-methylguanine." []
+synonym: "7-methylguanine transfer ribonucleate methylase activity" EXACT []
+synonym: "N7-methylguanine methylase activity" EXACT []
+synonym: "S-adenosyl-L-methionine:tRNA (guanine-7-N-)-methyltransferase activity" EXACT []
+synonym: "S-adenosyl-L-methionine:tRNA (guanine-N7-)-methyltransferase activity" EXACT []
+synonym: "transfer ribonucleate guanine 7-methyltransferase activity" EXACT []
+synonym: "tRNA guanine 7-methyltransferase activity" EXACT []
+xref: EC:2.1.1.33
+xref: MetaCyc:TRNA-GUANINE-N7--METHYLTRANSFERASE-RXN
+xref: reactome:R-HSA-6782286
+is_a: GO:0016423 ! tRNA (guanine) methyltransferase activity
+relationship: BFO:0000050 GO:0106004 ! part of tRNA (guanine-N7)-methylation
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0008186
 name: RNA-dependent ATPase activity
 namespace: molecular_function
@@ -11730,6 +12043,22 @@ xref: reactome:R-HSA-5693319
 is_a: GO:0016787 ! hydrolase activity
 is_a: GO:0140096 ! catalytic activity, acting on a protein
 relationship: BFO:0000050 GO:0006508 ! part of proteolysis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0008234
+name: cysteine-type peptidase activity
+namespace: molecular_function
+alt_id: GO:0004220
+def: "Catalysis of the hydrolysis of peptide bonds in a polypeptide chain by a mechanism in which the sulfhydryl group of a cysteine residue at the active center acts as a nucleophile." []
+synonym: "cysteine protease activity" NARROW []
+synonym: "thiol protease activity" NARROW []
+xref: EC:3.4
+xref: reactome:R-HSA-2022381
+xref: reactome:R-HSA-2467775
+xref: reactome:R-HSA-2467809
+xref: reactome:R-HSA-5660752
+is_a: GO:0070011 ! peptidase activity, acting on L-amino acid peptides
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -12373,6 +12702,16 @@ is_a: GO:0016705 ! oxidoreductase activity, acting on paired donors, with incorp
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0008757
+name: S-adenosylmethionine-dependent methyltransferase activity
+namespace: molecular_function
+def: "Catalysis of the transfer of a methyl group from S-adenosyl-L-methionine to a substrate." []
+synonym: "S-adenosyl methionine-dependent methyltransferase activity" EXACT []
+synonym: "SAM-dependent methyltransferase activity" EXACT []
+is_a: GO:0008168 ! methyltransferase activity
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0008821
 name: crossover junction endodeoxyribonuclease activity
 namespace: molecular_function
@@ -12612,6 +12951,24 @@ is_a: GO:0009116 ! nucleoside metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0009132
+name: nucleoside diphosphate metabolic process
+namespace: biological_process
+def: "The chemical reactions and pathways involving a nucleoside diphosphate, a compound consisting of a nucleobase linked to a deoxyribose or ribose sugar esterified with diphosphate on the sugar." []
+synonym: "nucleoside diphosphate metabolism" EXACT []
+is_a: GO:0006753 ! nucleoside phosphate metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0009135
+name: purine nucleoside diphosphate metabolic process
+namespace: biological_process
+def: "The chemical reactions and pathways involving purine nucleoside diphosphate, a compound consisting of a purine base linked to a ribose or deoxyribose sugar esterified with diphosphate on the sugar." []
+synonym: "purine nucleoside diphosphate metabolism" EXACT []
+is_a: GO:0009132 ! nucleoside diphosphate metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0009141
 name: nucleoside triphosphate metabolic process
 namespace: biological_process
@@ -12643,6 +13000,19 @@ is_a: GO:0009141 ! nucleoside triphosphate metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0009145
+name: purine nucleoside triphosphate biosynthetic process
+namespace: biological_process
+def: "The chemical reactions and pathways resulting in the formation of purine nucleoside triphosphate, a compound consisting of a purine base linked to a ribose or deoxyribose sugar esterified with triphosphate on the sugar." []
+synonym: "purine nucleoside triphosphate anabolism" EXACT []
+synonym: "purine nucleoside triphosphate biosynthesis" EXACT []
+synonym: "purine nucleoside triphosphate formation" EXACT []
+synonym: "purine nucleoside triphosphate synthesis" EXACT []
+is_a: GO:0009142 ! nucleoside triphosphate biosynthetic process
+is_a: GO:0009144 ! purine nucleoside triphosphate metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0009150
 name: purine ribonucleotide metabolic process
 namespace: biological_process
@@ -12653,8 +13023,31 @@ is_a: GO:0009259 ! ribonucleotide metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0009152
+name: purine ribonucleotide biosynthetic process
+namespace: biological_process
+def: "The chemical reactions and pathways resulting in the formation of a purine ribonucleotide, a compound consisting of ribonucleoside (a purine base linked to a ribose sugar) esterified with a phosphate group at either the 3' or 5'-hydroxyl group of the sugar." []
+synonym: "purine ribonucleotide anabolism" EXACT []
+synonym: "purine ribonucleotide biosynthesis" EXACT []
+synonym: "purine ribonucleotide formation" EXACT []
+synonym: "purine ribonucleotide synthesis" EXACT []
+is_a: GO:0006164 ! purine nucleotide biosynthetic process
+is_a: GO:0009150 ! purine ribonucleotide metabolic process
+is_a: GO:0009260 ! ribonucleotide biosynthetic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0009165
 name: nucleotide biosynthetic process
+namespace: biological_process
+def: "The chemical reactions and pathways resulting in the formation of nucleotides, any nucleoside that is esterified with (ortho)phosphate or an oligophosphate at any hydroxyl group on the glycose moiety; may be mono-, di- or triphosphate; this definition includes cyclic-nucleotides (nucleoside cyclic phosphates)." []
+synonym: "nucleotide anabolism" EXACT []
+synonym: "nucleotide biosynthesis" EXACT []
+synonym: "nucleotide formation" EXACT []
+synonym: "nucleotide synthesis" EXACT []
+is_a: GO:0009117 ! nucleotide metabolic process
+is_a: GO:1901293 ! nucleoside phosphate biosynthetic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0009166
@@ -12666,6 +13059,25 @@ synonym: "nucleotide catabolism" EXACT []
 synonym: "nucleotide degradation" EXACT []
 is_a: GO:0009117 ! nucleotide metabolic process
 is_a: GO:1901292 ! nucleoside phosphate catabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0009179
+name: purine ribonucleoside diphosphate metabolic process
+namespace: biological_process
+def: "The chemical reactions and pathways involving purine ribonucleoside diphosphate, a compound consisting of a purine base linked to a ribose sugar esterified with diphosphate on the sugar." []
+synonym: "purine ribonucleoside diphosphate metabolism" EXACT []
+is_a: GO:0009135 ! purine nucleoside diphosphate metabolic process
+is_a: GO:0009185 ! ribonucleoside diphosphate metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0009185
+name: ribonucleoside diphosphate metabolic process
+namespace: biological_process
+def: "The chemical reactions and pathways involving a ribonucleoside diphosphate, a compound consisting of a nucleobase linked to a ribose sugar esterified with diphosphate on the sugar." []
+synonym: "ribonucleoside diphosphate metabolism" EXACT []
+is_a: GO:0009132 ! nucleoside diphosphate metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -12684,6 +13096,19 @@ namespace: biological_process
 def: "The chemical reactions and pathways involving a deoxyribonucleoside triphosphate, a compound consisting of a nucleobase linked to a deoxyribose sugar esterified with triphosphate on the sugar." []
 synonym: "deoxyribonucleoside triphosphate metabolism" EXACT []
 is_a: GO:0009141 ! nucleoside triphosphate metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0009201
+name: ribonucleoside triphosphate biosynthetic process
+namespace: biological_process
+def: "The chemical reactions and pathways resulting in the formation of a ribonucleoside triphosphate, a compound consisting of a nucleobase linked to a ribose sugar esterified with triphosphate on the sugar." []
+synonym: "ribonucleoside triphosphate anabolism" EXACT []
+synonym: "ribonucleoside triphosphate biosynthesis" EXACT []
+synonym: "ribonucleoside triphosphate formation" EXACT []
+synonym: "ribonucleoside triphosphate synthesis" EXACT []
+is_a: GO:0009142 ! nucleoside triphosphate biosynthetic process
+is_a: GO:0009199 ! ribonucleoside triphosphate metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -12710,6 +13135,20 @@ is_a: GO:0009199 ! ribonucleoside triphosphate metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0009206
+name: purine ribonucleoside triphosphate biosynthetic process
+namespace: biological_process
+def: "The chemical reactions and pathways resulting in the formation of purine ribonucleoside triphosphate, a compound consisting of a purine base linked to a ribose sugar esterified with triphosphate on the sugar." []
+synonym: "purine ribonucleoside triphosphate anabolism" EXACT []
+synonym: "purine ribonucleoside triphosphate biosynthesis" EXACT []
+synonym: "purine ribonucleoside triphosphate formation" EXACT []
+synonym: "purine ribonucleoside triphosphate synthesis" EXACT []
+is_a: GO:0009145 ! purine nucleoside triphosphate biosynthetic process
+is_a: GO:0009201 ! ribonucleoside triphosphate biosynthetic process
+is_a: GO:0009205 ! purine ribonucleoside triphosphate metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0009259
 name: ribonucleotide metabolic process
 namespace: biological_process
@@ -12718,6 +13157,20 @@ def: "The chemical reactions and pathways involving a ribonucleotide, a compound
 synonym: "ribonucleotide metabolism" EXACT []
 is_a: GO:0009117 ! nucleotide metabolic process
 is_a: GO:0019693 ! ribose phosphate metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0009260
+name: ribonucleotide biosynthetic process
+namespace: biological_process
+def: "The chemical reactions and pathways resulting in the formation of a ribonucleotide, a compound consisting of ribonucleoside (a base linked to a ribose sugar) esterified with a phosphate group at either the 3' or 5'-hydroxyl group of the sugar." []
+synonym: "ribonucleotide anabolism" EXACT []
+synonym: "ribonucleotide biosynthesis" EXACT []
+synonym: "ribonucleotide formation" EXACT []
+synonym: "ribonucleotide synthesis" EXACT []
+is_a: GO:0009165 ! nucleotide biosynthetic process
+is_a: GO:0009259 ! ribonucleotide metabolic process
+is_a: GO:0046390 ! ribose phosphate biosynthetic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -12869,6 +13322,20 @@ name: response to light stimulus
 namespace: biological_process
 def: "Any process that results in a change in state or activity of a cell or an organism (in terms of movement, secretion, enzyme production, gene expression, etc.) as a result of a light stimulus, electromagnetic radiation of wavelengths classified as infrared, visible or ultraviolet light." []
 is_a: GO:0009314 ! response to radiation
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0009451
+name: RNA modification
+namespace: biological_process
+alt_id: GO:0016547
+def: "The covalent alteration of one or more nucleotides within an RNA molecule to produce an RNA molecule with a sequence that differs from that coded genetically." []
+comment: The term 'RNA editing' (GO:0016547) was merged into 'RNA modification' (GO:0009451) on the basis of statements in the preface of Modification and Editing of RNA (ISBN:1555811337) that there is no clear distinction between modification and editing.
+subset: goslim_yeast
+synonym: "RNA editing" NARROW []
+xref: Wikipedia:RNA_editing
+is_a: GO:0016070 ! RNA metabolic process
+is_a: GO:0043412 ! macromolecule modification
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -16248,6 +16715,23 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0016052
 name: carbohydrate catabolic process
+namespace: biological_process
+alt_id: GO:0006095
+alt_id: GO:0044276
+alt_id: GO:0044724
+def: "The chemical reactions and pathways resulting in the breakdown of carbohydrates, any of a group of organic compounds based of the general formula Cx(H2O)y." []
+synonym: "carbohydrate breakdown" EXACT []
+synonym: "carbohydrate catabolism" EXACT []
+synonym: "carbohydrate degradation" EXACT []
+synonym: "catabolic carbohydrate metabolic process" EXACT []
+synonym: "catabolic carbohydrate metabolism" EXACT []
+synonym: "multicellular organismal carbohydrate catabolic process" NARROW []
+synonym: "single-organism carbohydrate catabolic process" RELATED []
+is_a: GO:0005975 ! carbohydrate metabolic process
+is_a: GO:1901575 ! organic substance catabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: janelomax
+creation_date: 2012-10-23T16:34:39Z
 
 [Term]
 id: GO:0016053
@@ -16809,6 +17293,17 @@ name: CoA carboxylase activity
 namespace: molecular_function
 def: "Catalysis of the joining of a carboxyl group to a molecule that is attached to CoA, with the concomitant hydrolysis of the diphosphate bond in ATP or a similar triphosphate." []
 is_a: GO:0016885 ! ligase activity, forming carbon-carbon bonds
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0016423
+name: tRNA (guanine) methyltransferase activity
+namespace: molecular_function
+alt_id: GO:0016424
+def: "Catalysis of the reaction: S-adenosyl-L-methionine + tRNA = S-adenosyl-L-homocysteine + tRNA containing methylguanine." []
+synonym: "tRNA (guanosine) methyltransferase activity" EXACT []
+is_a: GO:0008175 ! tRNA methyltransferase activity
+is_a: GO:0008757 ! S-adenosylmethionine-dependent methyltransferase activity
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -17438,6 +17933,49 @@ namespace: molecular_function
 def: "Catalysis of the hydrolysis of any acid anhydride which contains phosphorus." []
 xref: EC:3.6.1
 is_a: GO:0016817 ! hydrolase activity, acting on acid anhydrides
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0016853
+name: isomerase activity
+namespace: molecular_function
+def: "Catalysis of the geometric or structural changes within one molecule. Isomerase is the systematic name for any enzyme of EC class 5." []
+comment: Note that enzymes of class EC:5.99.-.- should also be annotated to this term.
+subset: goslim_aspergillus
+subset: goslim_candida
+subset: goslim_chembl
+subset: goslim_generic
+subset: goslim_metagenomics
+subset: goslim_pir
+subset: goslim_yeast
+synonym: "other isomerase activity" NARROW []
+xref: EC:5
+xref: reactome:R-HSA-6787623
+is_a: GO:0003824 ! catalytic activity
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0016866
+name: intramolecular transferase activity
+namespace: molecular_function
+def: "Catalysis of the transfer of a functional group from one position to another within a single molecule." []
+comment: Note that enzymes of class EC:5.4.99.- should also be annotated to this term.
+synonym: "intramolecular transferase activity, transferring other groups" NARROW []
+synonym: "mutase activity" EXACT []
+xref: EC:5.4
+is_a: GO:0016853 ! isomerase activity
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0016868
+name: intramolecular transferase activity, phosphotransferases
+namespace: molecular_function
+alt_id: GO:0016777
+def: "Catalysis of the transfer of a phosphate group from one position to another within a single molecule." []
+synonym: "phosphomutase activity" EXACT []
+synonym: "phosphotransferase activity, with regeneration of donors, apparently catalyzing intramolecular transfers" EXACT []
+xref: EC:5.4.2
+is_a: GO:0016866 ! intramolecular transferase activity
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -18196,6 +18734,19 @@ is_a: GO:0005996 ! monosaccharide metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0019359
+name: nicotinamide nucleotide biosynthetic process
+namespace: biological_process
+def: "The chemical reactions and pathways resulting in the formation of nicotinamide nucleotides, any nucleotide that contains combined nicotinamide." []
+synonym: "nicotinamide nucleotide anabolism" EXACT []
+synonym: "nicotinamide nucleotide biosynthesis" EXACT []
+synonym: "nicotinamide nucleotide formation" EXACT []
+synonym: "nicotinamide nucleotide synthesis" EXACT []
+is_a: GO:0019363 ! pyridine nucleotide biosynthetic process
+is_a: GO:0046496 ! nicotinamide nucleotide metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0019362
 name: pyridine nucleotide metabolic process
 namespace: biological_process
@@ -18204,6 +18755,22 @@ synonym: "pyridine nucleotide metabolism" EXACT []
 is_a: GO:0006733 ! oxidoreduction coenzyme metabolic process
 is_a: GO:0009117 ! nucleotide metabolic process
 is_a: GO:0072524 ! pyridine-containing compound metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0019363
+name: pyridine nucleotide biosynthetic process
+namespace: biological_process
+def: "The chemical reactions and pathways resulting in the formation of a pyridine nucleotide, a nucleotide characterized by a pyridine derivative as a nitrogen base." []
+synonym: "pyridine nucleotide anabolism" EXACT []
+synonym: "pyridine nucleotide biosynthesis" EXACT []
+synonym: "pyridine nucleotide formation" EXACT []
+synonym: "pyridine nucleotide synthesis" EXACT []
+xref: MetaCyc:PYRIDNUCSYN-PWY
+is_a: GO:0009108 ! coenzyme biosynthetic process
+is_a: GO:0009165 ! nucleotide biosynthetic process
+is_a: GO:0019362 ! pyridine nucleotide metabolic process
+is_a: GO:0072525 ! pyridine-containing compound biosynthetic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -18438,6 +19005,17 @@ namespace: biological_process
 def: "The chemical reactions and pathways involving carboxylic acids, any organic acid containing one or more carboxyl (COOH) groups or anions (COO-)." []
 synonym: "carboxylic acid metabolism" EXACT []
 is_a: GO:0043436 ! oxoacid metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0019783
+name: ubiquitin-like protein-specific protease activity
+namespace: molecular_function
+def: "Catalysis of the hydrolysis of peptide or isopeptide bonds within small proteins such as ubiquitin or ubiquitin-like proteins (e.g. APG8, ISG15, NEDD8, SUMO), or between the small protein and a larger protein to which it has been conjugated." []
+synonym: "small conjugating protein-specific protease activity" EXACT []
+synonym: "ubiquitin-like specific protease activity" NARROW []
+synonym: "ubiquitin-like-protein-specific protease activity" NARROW []
+is_a: GO:0008234 ! cysteine-type peptidase activity
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -19164,6 +19742,10 @@ is_a: GO:0034622 ! cellular protein-containing complex assembly
 is_a: GO:0071826 ! ribonucleoprotein complex subunit organization
 relationship: BFO:0000050 GO:0022613 ! part of ribonucleoprotein complex biogenesis
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0022624
+name: proteasome accessory complex
 
 [Term]
 id: GO:0022625
@@ -20415,6 +20997,10 @@ is_a: GO:0044430 ! cytoskeletal part
 is_a: GO:0061645 ! endocytic patch
 relationship: BFO:0000050 GO:0030864 ! part of cortical actin cytoskeleton
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0030488
+name: tRNA methylation
 
 [Term]
 id: GO:0030490
@@ -22455,6 +23041,20 @@ is_a: GO:0038201 ! TOR complex
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0031935
+name: regulation of chromatin silencing
+namespace: biological_process
+def: "Any process that affects the rate, extent or location of chromatin silencing." []
+synonym: "regulation of heterochromatic silencing" RELATED []
+is_a: GO:0006355 ! regulation of transcription, DNA-templated
+is_a: GO:0060968 ! regulation of gene silencing
+is_a: GO:1902275 ! regulation of chromatin organization
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002211 GO:0006342 ! regulates chromatin silencing
+relationship: RO:0002211 GO:0006342 ! regulates chromatin silencing
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0031960
 name: response to corticosteroid
 namespace: biological_process
@@ -23296,6 +23896,23 @@ is_a: GO:2000058 ! regulation of ubiquitin-dependent protein catabolic process
 intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002211 GO:0043161 ! regulates proteasome-mediated ubiquitin-dependent protein catabolic process
 relationship: RO:0002211 GO:0043161 ! regulates proteasome-mediated ubiquitin-dependent protein catabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0032435
+name: negative regulation of proteasomal ubiquitin-dependent protein catabolic process
+namespace: biological_process
+def: "Any process that stops, prevents, or reduces the frequency, rate or extent of the breakdown of a protein or peptide by hydrolysis of its peptide bonds, initiated by the covalent attachment of ubiquitin, and mediated by the proteasome." []
+synonym: "down regulation of proteasomal ubiquitin-dependent protein catabolic process" EXACT []
+synonym: "down-regulation of proteasomal ubiquitin-dependent protein catabolic process" EXACT []
+synonym: "downregulation of proteasomal ubiquitin-dependent protein catabolic process" EXACT []
+synonym: "inhibition of proteasomal ubiquitin-dependent protein catabolic process" NARROW []
+is_a: GO:0032434 ! regulation of proteasomal ubiquitin-dependent protein catabolic process
+is_a: GO:1901799 ! negative regulation of proteasomal protein catabolic process
+is_a: GO:2000059 ! negative regulation of ubiquitin-dependent protein catabolic process
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002212 GO:0043161 ! negatively regulates proteasome-mediated ubiquitin-dependent protein catabolic process
+relationship: RO:0002212 GO:0043161 ! negatively regulates proteasome-mediated ubiquitin-dependent protein catabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -26848,6 +27465,66 @@ created_by: rfoulger
 creation_date: 2013-09-18T14:51:06Z
 
 [Term]
+id: GO:0036459
+name: thiol-dependent ubiquitinyl hydrolase activity
+namespace: molecular_function
+def: "Catalysis of the thiol-dependent hydrolysis of an ester, thioester, amide, peptide or isopeptide bond formed by the C-terminal glycine of ubiquitin." []
+comment: 20160208: Renamed to thiol-dependent ubiquitinyl hydrolase activity
+synonym: "ubiquitin C-terminal hydrolase" EXACT []
+synonym: "ubiquitinyl hydrolase 1 activity" EXACT []
+synonym: "ubiquitinyl hydrolase activity" BROAD []
+xref: EC:3.4.19.12
+xref: reactome:R-HSA-3640872
+xref: reactome:R-HSA-5688797
+xref: reactome:R-HSA-5688837
+xref: reactome:R-HSA-5689950
+xref: reactome:R-HSA-5689972
+xref: reactome:R-HSA-5689973
+xref: reactome:R-HSA-5690080
+xref: reactome:R-HSA-5690152
+xref: reactome:R-HSA-5690157
+xref: reactome:R-HSA-5690159
+xref: reactome:R-HSA-5690196
+xref: reactome:R-HSA-5690319
+xref: reactome:R-HSA-5690759
+xref: reactome:R-HSA-5690790
+xref: reactome:R-HSA-5691381
+xref: reactome:R-HSA-5696534
+xref: reactome:R-HSA-5696564
+xref: reactome:R-HSA-5696600
+xref: reactome:R-HSA-5696605
+xref: reactome:R-HSA-5696627
+xref: reactome:R-HSA-5696872
+xref: reactome:R-HSA-5696914
+xref: reactome:R-HSA-5696945
+xref: reactome:R-HSA-5696947
+xref: reactome:R-HSA-5696958
+xref: reactome:R-HSA-5696960
+xref: reactome:R-HSA-5696968
+xref: reactome:R-HSA-5696997
+xref: reactome:R-HSA-5697009
+xref: reactome:R-HSA-6781764
+xref: reactome:R-HSA-6781779
+xref: reactome:R-HSA-6781814
+xref: reactome:R-HSA-6781897
+xref: reactome:R-HSA-6782106
+xref: reactome:R-HSA-6782628
+xref: reactome:R-HSA-6782820
+xref: reactome:R-HSA-6783177
+xref: reactome:R-HSA-870437
+xref: reactome:R-HSA-8862184
+xref: reactome:R-HSA-8865182
+xref: reactome:R-HSA-8869456
+xref: reactome:R-HSA-8873946
+xref: reactome:R-HSA-9033478
+xref: reactome:R-HSA-9033491
+is_a: GO:0019783 ! ubiquitin-like protein-specific protease activity
+is_a: GO:0101005 ! ubiquitinyl hydrolase activity
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: rfoulger
+creation_date: 2013-12-19T09:39:38Z
+
+[Term]
 id: GO:0036462
 name: TRAIL-activated apoptotic signaling pathway
 
@@ -27445,6 +28122,26 @@ relationship: RO:0002211 GO:0030163 ! regulates protein catabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0042177
+name: negative regulation of protein catabolic process
+namespace: biological_process
+def: "Any process that stops, prevents, or reduces the frequency, rate or extent of the chemical reactions and pathways resulting in the breakdown of a protein by the destruction of the native, active configuration, with or without the hydrolysis of peptide bonds." []
+synonym: "down regulation of protein catabolic process" EXACT []
+synonym: "down-regulation of protein catabolic process" EXACT []
+synonym: "downregulation of protein catabolic process" EXACT []
+synonym: "inhibition of protein catabolic process" NARROW []
+synonym: "negative regulation of protein breakdown" EXACT []
+synonym: "negative regulation of protein catabolism" EXACT []
+synonym: "negative regulation of protein degradation" EXACT []
+is_a: GO:0009895 ! negative regulation of catabolic process
+is_a: GO:0042176 ! regulation of protein catabolic process
+is_a: GO:0051248 ! negative regulation of protein metabolic process
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002212 GO:0030163 ! negatively regulates protein catabolic process
+relationship: RO:0002212 GO:0030163 ! negatively regulates protein catabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0042180
 name: cellular ketone metabolic process
 namespace: biological_process
@@ -28001,6 +28698,16 @@ relationship: RO:0002211 GO:0001708 ! regulates cell fate specification
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0042675
+name: compound eye cone cell differentiation
+namespace: biological_process
+alt_id: GO:0042674
+def: "The process in which a relatively unspecialized cell acquires the specialized features of a compound eye cone cell, a cone-shaped cell, that focuses light in a compound eye." []
+is_a: GO:0030154 ! cell differentiation
+relationship: BFO:0000050 GO:0001745 ! part of compound eye morphogenesis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0042692
 name: muscle cell differentiation
 namespace: biological_process
@@ -28152,6 +28859,19 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0042827
 name: platelet dense granule
+
+[Term]
+id: GO:0042866
+name: pyruvate biosynthetic process
+namespace: biological_process
+def: "The chemical reactions and pathways resulting in the formation of pyruvate, 2-oxopropanoate." []
+synonym: "pyruvate anabolism" EXACT []
+synonym: "pyruvate biosynthesis" EXACT []
+synonym: "pyruvate formation" EXACT []
+synonym: "pyruvate synthesis" EXACT []
+is_a: GO:0006090 ! pyruvate metabolic process
+is_a: GO:0072330 ! monocarboxylic acid biosynthetic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0042886
@@ -29962,6 +30682,10 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0043855
 name: cyclic nucleotide-gated ion channel activity
+
+[Term]
+id: GO:0043891
+name: glyceraldehyde-3-phosphate dehydrogenase (NAD(P)+) (phosphorylating) activity
 
 [Term]
 id: GO:0043900
@@ -33162,6 +33886,16 @@ is_a: GO:0046015 ! regulation of transcription by glucose
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0046031
+name: ADP metabolic process
+namespace: biological_process
+def: "The chemical reactions and pathways involving ADP, adenosine 5'-diphosphate." []
+synonym: "ADP metabolism" EXACT []
+is_a: GO:0009150 ! purine ribonucleotide metabolic process
+is_a: GO:0009179 ! purine ribonucleoside diphosphate metabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0046034
 name: ATP metabolic process
 namespace: biological_process
@@ -33317,6 +34051,20 @@ name: SMAD binding
 namespace: molecular_function
 def: "Interacting selectively and non-covalently with a SMAD signaling protein." []
 is_a: GO:0005515 ! protein binding
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0046390
+name: ribose phosphate biosynthetic process
+namespace: biological_process
+def: "The chemical reactions and pathways resulting in the formation of ribose phosphate, any phosphorylated ribose sugar." []
+synonym: "ribose phosphate anabolism" EXACT []
+synonym: "ribose phosphate biosynthesis" EXACT []
+synonym: "ribose phosphate formation" EXACT []
+synonym: "ribose phosphate synthesis" EXACT []
+is_a: GO:0019693 ! ribose phosphate metabolic process
+is_a: GO:0090407 ! organophosphate biosynthetic process
+is_a: GO:1901137 ! carbohydrate derivative biosynthetic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -34012,6 +34760,15 @@ synonym: "1-phosphatidylinositol 3-kinase regulator activity" EXACT []
 synonym: "phosphatidylinositol 3-kinase, class I, regulator activity" NARROW []
 is_a: GO:0035014 ! phosphatidylinositol 3-kinase regulator activity
 relationship: RO:0002211 GO:0016303 ! regulates 1-phosphatidylinositol-3-kinase activity
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0046939
+name: nucleotide phosphorylation
+namespace: biological_process
+def: "The process of introducing one or more phosphate groups into a nucleotide to produce a phosphorylated nucleoside." []
+is_a: GO:0009117 ! nucleotide metabolic process
+is_a: GO:0016310 ! phosphorylation
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -40427,6 +41184,20 @@ created_by: dph
 creation_date: 2009-09-29T02:56:08Z
 
 [Term]
+id: GO:0060968
+name: regulation of gene silencing
+namespace: biological_process
+def: "Any process that modulates the rate, frequency, or extent of gene silencing, the transcriptional or post-transcriptional process carried out at the cellular level that results in long-term gene inactivation." []
+is_a: GO:0010468 ! regulation of gene expression
+is_a: GO:0050794 ! regulation of cellular process
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002211 GO:0016458 ! regulates gene silencing
+relationship: RO:0002211 GO:0016458 ! regulates gene silencing
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: dph
+creation_date: 2009-10-05T03:23:56Z
+
+[Term]
 id: GO:0060976
 name: coronary vasculature development
 
@@ -44032,6 +44803,26 @@ created_by: midori
 creation_date: 2011-01-04T03:03:59Z
 
 [Term]
+id: GO:0072522
+name: purine-containing compound biosynthetic process
+namespace: biological_process
+def: "The chemical reactions and pathways resulting in the formation of a purine-containing compound, i.e. any compound that contains purine or a formal derivative thereof." []
+synonym: "purine and derivative biosynthetic process" EXACT []
+synonym: "purine-containing compound anabolism" EXACT []
+synonym: "purine-containing compound biosynthesis" EXACT []
+synonym: "purine-containing compound formation" EXACT []
+synonym: "purine-containing compound synthesis" EXACT []
+is_a: GO:0018130 ! heterocycle biosynthetic process
+is_a: GO:0019438 ! aromatic compound biosynthetic process
+is_a: GO:0044271 ! cellular nitrogen compound biosynthetic process
+is_a: GO:0072521 ! purine-containing compound metabolic process
+is_a: GO:1901362 ! organic cyclic compound biosynthetic process
+is_a: GO:1901566 ! organonitrogen compound biosynthetic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: midori
+creation_date: 2011-01-04T03:15:29Z
+
+[Term]
 id: GO:0072524
 name: pyridine-containing compound metabolic process
 namespace: biological_process
@@ -46620,6 +47411,21 @@ id: GO:0100045
 name: negative regulation of arginine catabolic process by transcription from RNA polymerase II promoter
 
 [Term]
+id: GO:0101005
+name: ubiquitinyl hydrolase activity
+namespace: molecular_function
+def: "Catalysis of the hydrolysis of ubiquitin from proteins and other molecules." []
+comment: There are two main classes of deubiquitinating enzymes: cysteine proteases (i.e., thiol dependent) and metalloproteases.
+synonym: "deubiquitinase activity" EXACT []
+synonym: "deubiquitinating peptidase activity" EXACT []
+synonym: "ubiquitin hydrolase activity" EXACT []
+is_a: GO:0016787 ! hydrolase activity
+is_a: GO:0140096 ! catalytic activity, acting on a protein
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: mec
+creation_date: 2016-02-08T09:39:38Z
+
+[Term]
 id: GO:0104004
 name: cellular response to environmental stimulus
 namespace: biological_process
@@ -46628,6 +47434,10 @@ is_a: GO:0051716 ! cellular response to stimulus
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: dos
 creation_date: 2017-02-17T16:02:42Z
+
+[Term]
+id: GO:0106004
+name: tRNA (guanine-N7)-methylation
 
 [Term]
 id: GO:0106017
@@ -47050,6 +47860,16 @@ is_a: GO:0003824 ! catalytic activity
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: pg
 creation_date: 2017-09-14T12:05:21Z
+
+[Term]
+id: GO:0140101
+name: catalytic activity, acting on a tRNA
+namespace: molecular_function
+def: "Catalytic activity that acts to modify a tRNA." []
+is_a: GO:0140098 ! catalytic activity, acting on RNA
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: pg
+creation_date: 2017-09-15T18:41:41Z
 
 [Term]
 id: GO:0140110
@@ -48171,6 +48991,21 @@ created_by: bf
 creation_date: 2012-07-12T04:05:09Z
 
 [Term]
+id: GO:1901137
+name: carbohydrate derivative biosynthetic process
+namespace: biological_process
+def: "The chemical reactions and pathways resulting in the formation of carbohydrate derivative." []
+synonym: "carbohydrate derivative anabolism" EXACT []
+synonym: "carbohydrate derivative biosynthesis" EXACT []
+synonym: "carbohydrate derivative formation" EXACT []
+synonym: "carbohydrate derivative synthesis" EXACT []
+is_a: GO:1901135 ! carbohydrate derivative metabolic process
+is_a: GO:1901576 ! organic substance biosynthetic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: bf
+creation_date: 2012-07-12T04:05:39Z
+
+[Term]
 id: GO:1901213
 name: regulation of transcription from RNA polymerase II promoter involved in heart development
 namespace: biological_process
@@ -49130,6 +49965,34 @@ relationship: RO:0002213 GO:0072331 ! positively regulates signal transduction b
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: hjd
 creation_date: 2013-01-18T21:51:48Z
+
+[Term]
+id: GO:1901799
+name: negative regulation of proteasomal protein catabolic process
+namespace: biological_process
+def: "Any process that stops, prevents or reduces the frequency, rate or extent of proteasomal protein catabolic process." []
+synonym: "down regulation of proteasomal protein catabolic process" EXACT []
+synonym: "down regulation of proteasome-mediated protein catabolic process" EXACT []
+synonym: "down regulation of proteasome-mediated protein catabolism" EXACT []
+synonym: "down-regulation of proteasomal protein catabolic process" EXACT []
+synonym: "down-regulation of proteasome-mediated protein catabolic process" EXACT []
+synonym: "down-regulation of proteasome-mediated protein catabolism" EXACT []
+synonym: "downregulation of proteasomal protein catabolic process" EXACT []
+synonym: "downregulation of proteasome-mediated protein catabolic process" EXACT []
+synonym: "downregulation of proteasome-mediated protein catabolism" EXACT []
+synonym: "inhibition of proteasomal protein catabolic process" NARROW []
+synonym: "inhibition of proteasome-mediated protein catabolic process" EXACT []
+synonym: "inhibition of proteasome-mediated protein catabolism" EXACT []
+synonym: "negative regulation of proteasome-mediated protein catabolic process" EXACT []
+synonym: "negative regulation of proteasome-mediated protein catabolism" EXACT []
+is_a: GO:0061136 ! regulation of proteasomal protein catabolic process
+is_a: GO:1903051 ! negative regulation of proteolysis involved in cellular protein catabolic process
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002212 GO:0010498 ! negatively regulates proteasomal protein catabolic process
+relationship: RO:0002212 GO:0010498 ! negatively regulates proteasomal protein catabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: rl
+creation_date: 2013-01-21T20:10:54Z
 
 [Term]
 id: GO:1901800
@@ -51050,6 +51913,56 @@ created_by: rl
 creation_date: 2014-05-22T18:00:45Z
 
 [Term]
+id: GO:1903051
+name: negative regulation of proteolysis involved in cellular protein catabolic process
+namespace: biological_process
+def: "Any process that stops, prevents or reduces the frequency, rate or extent of proteolysis involved in cellular protein catabolic process." []
+comment: Overexpression of cathepsin C propeptide significantly increased the degradation of intestinal alkaline phosphatase (IAP).
+synonym: "down regulation of peptidolysis during cellular protein catabolic process" RELATED []
+synonym: "down regulation of peptidolysis during cellular protein catabolism" RELATED []
+synonym: "down regulation of peptidolysis involved in cellular protein catabolic process" EXACT []
+synonym: "down regulation of peptidolysis involved in cellular protein catabolism" EXACT []
+synonym: "down regulation of proteolysis during cellular protein catabolic process" RELATED []
+synonym: "down regulation of proteolysis during cellular protein catabolism" RELATED []
+synonym: "down regulation of proteolysis involved in cellular protein catabolic process" EXACT []
+synonym: "down-regulation of peptidolysis during cellular protein catabolic process" RELATED []
+synonym: "down-regulation of peptidolysis during cellular protein catabolism" RELATED []
+synonym: "down-regulation of peptidolysis involved in cellular protein catabolic process" EXACT []
+synonym: "down-regulation of peptidolysis involved in cellular protein catabolism" EXACT []
+synonym: "down-regulation of proteolysis during cellular protein catabolic process" RELATED []
+synonym: "down-regulation of proteolysis during cellular protein catabolism" RELATED []
+synonym: "down-regulation of proteolysis involved in cellular protein catabolic process" EXACT []
+synonym: "downregulation of peptidolysis during cellular protein catabolic process" RELATED []
+synonym: "downregulation of peptidolysis during cellular protein catabolism" RELATED []
+synonym: "downregulation of peptidolysis involved in cellular protein catabolic process" EXACT []
+synonym: "downregulation of peptidolysis involved in cellular protein catabolism" EXACT []
+synonym: "downregulation of proteolysis during cellular protein catabolic process" RELATED []
+synonym: "downregulation of proteolysis during cellular protein catabolism" RELATED []
+synonym: "downregulation of proteolysis involved in cellular protein catabolic process" EXACT []
+synonym: "inhibition of peptidolysis during cellular protein catabolic process" RELATED []
+synonym: "inhibition of peptidolysis during cellular protein catabolism" RELATED []
+synonym: "inhibition of peptidolysis involved in cellular protein catabolic process" NARROW []
+synonym: "inhibition of peptidolysis involved in cellular protein catabolism" NARROW []
+synonym: "inhibition of proteolysis during cellular protein catabolic process" RELATED []
+synonym: "inhibition of proteolysis during cellular protein catabolism" RELATED []
+synonym: "inhibition of proteolysis involved in cellular protein catabolic process" NARROW []
+synonym: "negative regulation of peptidolysis during cellular protein catabolic process" RELATED []
+synonym: "negative regulation of peptidolysis during cellular protein catabolism" RELATED []
+synonym: "negative regulation of peptidolysis involved in cellular protein catabolic process" EXACT []
+synonym: "negative regulation of peptidolysis involved in cellular protein catabolism" EXACT []
+synonym: "negative regulation of proteolysis during cellular protein catabolic process" RELATED []
+synonym: "negative regulation of proteolysis during cellular protein catabolism" RELATED []
+is_a: GO:0045861 ! negative regulation of proteolysis
+is_a: GO:1903050 ! regulation of proteolysis involved in cellular protein catabolic process
+is_a: GO:1903363 ! negative regulation of cellular protein catabolic process
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002212 GO:0051603 ! negatively regulates proteolysis involved in cellular protein catabolic process
+relationship: RO:0002212 GO:0051603 ! negatively regulates proteolysis involved in cellular protein catabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: rl
+creation_date: 2014-05-22T18:00:51Z
+
+[Term]
 id: GO:1903052
 name: positive regulation of proteolysis involved in cellular protein catabolic process
 namespace: biological_process
@@ -51579,6 +52492,47 @@ relationship: RO:0002211 GO:0044257 ! regulates cellular protein catabolic proce
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: kmv
 creation_date: 2014-08-21T15:05:45Z
+
+[Term]
+id: GO:1903363
+name: negative regulation of cellular protein catabolic process
+namespace: biological_process
+alt_id: GO:2000599
+def: "Any process that stops, prevents or reduces the frequency, rate or extent of cellular protein catabolic process." []
+synonym: "down regulation of cellular protein breakdown" EXACT []
+synonym: "down regulation of cellular protein catabolic process" EXACT []
+synonym: "down regulation of cellular protein catabolism" EXACT []
+synonym: "down regulation of cellular protein degradation" EXACT []
+synonym: "down-regulation of cellular protein breakdown" EXACT []
+synonym: "down-regulation of cellular protein catabolic process" EXACT []
+synonym: "down-regulation of cellular protein catabolism" EXACT []
+synonym: "down-regulation of cellular protein degradation" EXACT []
+synonym: "downregulation of cellular protein breakdown" EXACT []
+synonym: "downregulation of cellular protein catabolic process" EXACT []
+synonym: "downregulation of cellular protein catabolism" EXACT []
+synonym: "downregulation of cellular protein degradation" EXACT []
+synonym: "inhibition of cellular protein breakdown" NARROW []
+synonym: "inhibition of cellular protein catabolic process" NARROW []
+synonym: "inhibition of cellular protein catabolism" NARROW []
+synonym: "inhibition of cellular protein degradation" NARROW []
+synonym: "negative regulation of cellular protein breakdown" EXACT []
+synonym: "negative regulation of cellular protein catabolism" EXACT []
+synonym: "negative regulation of cellular protein degradation" EXACT []
+synonym: "negative regulation of cyclin breakdown" NARROW []
+synonym: "negative regulation of cyclin catabolic process" NARROW []
+synonym: "negative regulation of cyclin catabolism" NARROW []
+synonym: "negative regulation of cyclin degradation" NARROW []
+synonym: "negative regulation of degradation of cyclin" NARROW []
+is_a: GO:0031330 ! negative regulation of cellular catabolic process
+is_a: GO:0032269 ! negative regulation of cellular protein metabolic process
+is_a: GO:0042177 ! negative regulation of protein catabolic process
+is_a: GO:1903362 ! regulation of cellular protein catabolic process
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002212 GO:0044257 ! negatively regulates cellular protein catabolic process
+relationship: RO:0002212 GO:0044257 ! negatively regulates cellular protein catabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: kmv
+creation_date: 2014-08-21T15:05:53Z
 
 [Term]
 id: GO:1903364
@@ -55571,6 +56525,30 @@ relationship: RO:0002211 GO:0006511 ! regulates ubiquitin-dependent protein cata
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: jane
 creation_date: 2010-08-20T01:23:46Z
+
+[Term]
+id: GO:2000059
+name: negative regulation of ubiquitin-dependent protein catabolic process
+namespace: biological_process
+def: "Any process that stops, prevents, or reduces the frequency, rate or extent of ubiquitin-dependent protein catabolic process" []
+synonym: "negative regulation of protein degradation tagging activity" BROAD []
+synonym: "negative regulation of protein ubiquitination during ubiquitin-dependent protein breakdown" NARROW []
+synonym: "negative regulation of protein ubiquitination during ubiquitin-dependent protein catabolic process" NARROW []
+synonym: "negative regulation of protein ubiquitination during ubiquitin-dependent protein catabolism" NARROW []
+synonym: "negative regulation of protein ubiquitination during ubiquitin-dependent protein degradation" NARROW []
+synonym: "negative regulation of protein ubiquitination involved in ubiquitin-dependent protein catabolic process" NARROW []
+synonym: "negative regulation of protein ubiquitinylation during ubiquitin-dependent protein catabolic process" NARROW []
+synonym: "negative regulation of protein ubiquitinylation during ubiquitin-dependent protein catabolism" NARROW []
+synonym: "negative regulation of protein ubiquitylation during ubiquitin-dependent protein catabolic process" NARROW []
+synonym: "negative regulation of protein ubiquitylation during ubiquitin-dependent protein catabolism" NARROW []
+is_a: GO:1903051 ! negative regulation of proteolysis involved in cellular protein catabolic process
+is_a: GO:2000058 ! regulation of ubiquitin-dependent protein catabolic process
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002212 GO:0006511 ! negatively regulates ubiquitin-dependent protein catabolic process
+relationship: RO:0002212 GO:0006511 ! negatively regulates ubiquitin-dependent protein catabolic process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: jane
+creation_date: 2010-08-20T01:23:56Z
 
 [Term]
 id: GO:2000060
