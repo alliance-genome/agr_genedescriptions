@@ -345,7 +345,8 @@ class DataManager(object):
             annotations = [annotation for annotation in dataset.associations(gene_id) if (include_obsolete or
                                                                                           not ontology.is_obsolete(
                                                                                               annotation["object"]["id"]))
-                           and (include_negative_results or "NOT" not in annotation["qualifiers"])]
+                           and (include_negative_results or ("NOT" not in annotation["qualifiers"] and
+                                                             not annotation["negated"]))]
             id_selected_annotation = {}
             for annotation in annotations:
                 if annotation["evidence"]["type"] in priority_map.keys():
