@@ -611,5 +611,11 @@ class TestDescriptionsGenerator(unittest.TestCase):
             keep_only_best_group=True)
         self.assertTrue("chronic fatigue syndrome" in sentences.get_description())
 
-
+    def test_remove_mixed_functions_processes(self):
+        generator = OntologySentenceGenerator(gene_id="WB:WBGene00000105", module=Module.GO,
+                                              data_manager=self.df, config=self.conf_parser)
+        sentences = generator.get_module_sentences(
+            config=self.conf_parser, aspect='F', qualifier='', merge_groups_with_same_prefix=True,
+            keep_only_best_group=True)
+        self.assertTrue("process" not in sentences.get_description())
 
