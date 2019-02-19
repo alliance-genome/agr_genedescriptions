@@ -50,7 +50,7 @@ def set_all_information_content_values(ontology: Ontology, relations: List[str] 
 
 def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_root: int = 0,
                           relations: List[str] = None, nodeids_blacklist: List[str] = None,
-                          previous_path: Union[None, List[str]] = None) -> Set[Tuple[str]]:
+                          previous_path: Union[None, List[str]] = None, root_node = None) -> Set[Tuple[str]]:
     """get all possible paths connecting a go term to its root terms
 
     Args:
@@ -71,13 +71,25 @@ def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_ro
         new_path.append(node_id)
     parents = [parent for parent in ontology.parents(node=node_id, relations=relations) if
                ontology.node(parent)["depth"] >= min_distance_from_root]
+    parents_same_root = []
+    if root_node:
+        for parent in parents:
+            parent_root = None
+            if "meta" in parent and "basicPropertyValues" in parent["meta"]:
+                for basic_prop_val in parent["meta"]["basicPropertyValues"]:
+                    if basic_prop_val["pred"] == "OIO:hasOBONamespace":
+                        parent_root = basic_prop_val["val"]
+            if parent_root and parent_root == root_node:
+                parents_same_root.append(parent)
+        parents = parents_same_root
+
     if len(parents) > 0:
         # go up the tree, following a depth first visit
         paths_to_return = set()
         for parent in parents:
             for path in get_all_paths_to_root(node_id=parent, ontology=ontology, previous_path=new_path,
                                               min_distance_from_root=min_distance_from_root, relations=relations,
-                                              nodeids_blacklist=nodeids_blacklist):
+                                              nodeids_blacklist=nodeids_blacklist, root_node=root_node):
                 paths_to_return.add(path)
         return paths_to_return
     if len(new_path) == 0:
@@ -152,9 +164,15 @@ def get_best_nodes_naive(node_ids: List[str], ontology: Ontology, min_distance_f
     term_paths = defaultdict(set)
     # step 1: get all path for each term and populate data structures
     for node_id in node_ids:
+        node_root = None
+        node_ont = ontology.node(node_id)
+        if "meta" in node_ont and "basicPropertyValues" in node_ont["meta"]:
+            for basic_prop_val in node_ont["meta"]["basicPropertyValues"]:
+                if basic_prop_val["pred"] == "OIO:hasOBONamespace":
+                    node_root = basic_prop_val["val"]
         paths = get_all_paths_to_root(node_id=node_id, ontology=ontology,
                                       min_distance_from_root=min_distance_from_root, relations=None,
-                                      nodeids_blacklist=nodeids_blacklist)
+                                      nodeids_blacklist=nodeids_blacklist, root_node=node_root)
         for path in paths:
             term_paths[node_id].add(path)
             ancestor_paths[path[-1]].append(path)
