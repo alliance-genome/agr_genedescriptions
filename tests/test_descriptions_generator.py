@@ -47,7 +47,6 @@ class TestDescriptionsGenerator(unittest.TestCase):
         self.assertTrue("several processes" in sentences.get_description())
         self.assertTrue("aging" in sentences.get_description())
         self.assertTrue("positive regulation of defense response to bacterium" in sentences.get_description())
-        self.assertTrue("regulation of cellular biosynthetic process" in sentences.get_description())
 
     def test_generate_sentence_wb(self):
         go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00000018", module=Module.GO,
