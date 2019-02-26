@@ -471,13 +471,13 @@ do_via_orth_sentences_options:
     - aspect: "D"
       group: ORTHOLOGY_BASED
       qualifier: ""
-      prefix: "human orthologs of this gene are implicated in"
+      prefix: "human ortholog(s) of this gene are implicated in"
       postfix: ""
   prepostfix_sentences_map_humans:
     - aspect: "D"
       group: ORTHOLOGY_BASED
       qualifier: ""
-      prefix: "orthologs of this gene are implicated in"
+      prefix: "ortholog(s) of this gene are implicated in"
       postfix: ""
 
   remove_parents_if_children_are_present: true
