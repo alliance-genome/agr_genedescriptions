@@ -74,9 +74,10 @@ def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_ro
     parents_same_root = []
     if root_node:
         for parent in parents:
+            parent_node = ontology.node(parent)
             parent_root = None
-            if "meta" in parent and "basicPropertyValues" in parent["meta"]:
-                for basic_prop_val in parent["meta"]["basicPropertyValues"]:
+            if "meta" in parent_node and "basicPropertyValues" in parent_node["meta"]:
+                for basic_prop_val in parent_node["meta"]["basicPropertyValues"]:
                     if basic_prop_val["pred"] == "OIO:hasOBONamespace":
                         parent_root = basic_prop_val["val"]
             if parent_root and parent_root == root_node:
