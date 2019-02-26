@@ -111,7 +111,7 @@ def main():
         genes_with_manual_desc))))
     print("Total number of genes that have automated descriptions only is " + str(len(
         genes_with_automated_desc.difference(genes_with_manual_desc))))
-    print("Total number of genes that have both manually curated and automated descriptions is" + str(len(
+    print("Total number of genes that have both manually curated and automated descriptions is " + str(len(
         genes_with_manual_desc.intersection(genes_with_automated_desc))))
 
 
