@@ -126,34 +126,44 @@ class DataManager(object):
                     ontology.node(node)["label"] = re.sub(regex_to_substitute, regex_target,
                                                           ontology.node(node)["label"])
 
-    def set_ontology(self, ontology_type: DataType, ontology: Ontology,
-                     terms_replacement_regex: Dict[str, str] = None) -> None:
+    def set_ontology(self, ontology_type: DataType, ontology: Ontology, config: GenedescConfigParser,
+                     slim_cache_path: str = None) -> None:
         """set the go ontology and apply terms renaming
 
         Args:
             ontology_type (DataType): the type of ontology to set
             ontology (Ontology): an ontology object to set as go ontology
-            terms_replacement_regex (Dict[str, str]): a dictionary containing the regular expression to be applied for
-                renaming terms. Each key must be a regular expression to search for terms and the associated value
-                another regular expression that defines the final result
+            config (GenedescConfigParser): configuration object where to read properties
+            slim_cache_path (str): path to slim file to use
         """
         new_ontology = None
+        module = None
         if ontology_type == DataType.GO:
             logger.info("Setting GO ontology")
             self.go_ontology = ontology.subontology(relations=self.go_relations)
             new_ontology = self.go_ontology
+            module = Module.GO
         elif ontology_type == DataType.DO:
             logger.info("Setting DO ontology")
             self.do_ontology = ontology.subontology(relations=self.do_relations)
             new_ontology = self.do_ontology
+            module = Module.DO
         elif ontology_type == DataType.EXPR:
             logger.info("Setting Expression ontology")
             self.expression_ontology = ontology.subontology()
             DataManager.add_article_to_expression_nodes(self.expression_ontology)
             new_ontology = self.expression_ontology
-        self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
+            module = Module.EXPRESSION
+        terms_replacement_regex = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_TERMS)
+        if terms_replacement_regex:
+            self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
+        if ontology_type == DataType.EXPR:
+            DataManager.add_article_to_expression_nodes(self.expression_ontology)
         for root_id in new_ontology.get_roots():
             set_all_depths_in_subgraph(ontology=new_ontology, root_id=root_id, relations=None)
+        if slim_cache_path:
+            slim_url = config.get_module_property(module=module, prop=ConfigModuleProperty.SLIM_URL)
+            self.load_slim(module=module, slim_url=slim_url, slim_cache_path=slim_cache_path)
 
     @staticmethod
     def add_article_to_expression_nodes(ontology):
