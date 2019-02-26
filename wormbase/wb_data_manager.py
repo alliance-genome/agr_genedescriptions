@@ -7,6 +7,7 @@ import inflect
 from collections import defaultdict
 from typing import List
 from ontobio import AssociationSetFactory
+from ontobio.io.assocparser import AssocParserConfig
 from ontobio.io.gafparser import GafParser
 from genedescriptions.commons import DataType, Gene, Module
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
@@ -155,6 +156,7 @@ class WBDataManager(DataManager):
                                     association_additional_url: str = None,
                                     association_additional_cache_path: str = None) -> None:
         logger.info("Loading associations from file")
+        assoc_config = AssocParserConfig(remove_double_prefixes=True, paint=True)
         if associations_type == DataType.GO:
             super().load_associations_from_file(associations_type=associations_type, associations_url=associations_url,
                                                 associations_cache_path=associations_cache_path, config=config)
@@ -180,9 +182,8 @@ class WBDataManager(DataManager):
                                                            prop=ConfigModuleProperty.EXCLUDE_TERMS))
         elif associations_type == DataType.DO:
             self.do_associations = AssociationSetFactory().create_from_assocs(
-                assocs=GafParser().parse(file=self._get_cached_file(cache_path=associations_cache_path,
-                                                                    file_source_url=associations_url),
-                                         skipheader=True),
+                assocs=GafParser(config=assoc_config).parse(file=self._get_cached_file(
+                    cache_path=associations_cache_path, file_source_url=associations_url), skipheader=True),
                 ontology=self.do_ontology)
             if association_additional_cache_path and association_additional_url:
                 associations = []
@@ -197,8 +198,9 @@ class WBDataManager(DataManager):
                     if not line.strip().startswith("!"):
                         if not header:
                             linearr = line.strip().split("\t")
-                            if self.do_ontology.node(linearr[10]) and linearr[16] != "IEA":
-                                gene_ids = [linearr[2]]
+                            if self.do_ontology.node(linearr[10]) and "IEA" not in linearr[16] and \
+                                    linearr[1] in ["gene", "allele"]:
+                                gene_ids = ["WB:" + linearr[3]]
                                 if linearr[1] == "allele":
                                     gene_ids = linearr[4].split(",")
                                 for gene_id in gene_ids:

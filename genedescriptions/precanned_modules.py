@@ -59,7 +59,7 @@ def set_gene_ontology_module(dm: DataManager, conf_parser: GenedescConfigParser,
 
 
 def set_disease_module(df: DataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription, gene: Gene,
-                       orthologs_key_diseases=None, human: bool=False):
+                       orthologs_key_diseases=None, human: bool = False):
     do_sentence_exp_generator = OntologySentenceGenerator(gene_id=gene.id,
                                                           module=Module.DO_EXPERIMENTAL, data_manager=df,
                                                           config=conf_parser, limit_to_group="EXPERIMENTAL",
