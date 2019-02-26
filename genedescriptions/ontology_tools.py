@@ -295,7 +295,7 @@ def get_best_nodes(terms, trimming_algorithm, max_terms, ontology, terms_already
     if trimming_algorithm == "naive":
         add_others, merged_terms_coverset = get_best_nodes_naive(
             node_ids=list(terms), ontology=ontology, min_distance_from_root=min_dist_from_root,
-            nodeids_blacklist=nodeids_blacklist)
+            nodeids_blacklist=nodeids_blacklist, max_num_nodes=max_terms)
     elif trimming_algorithm == "ic":
         add_others, merged_terms_coverset = get_best_nodes_ic(
             node_ids=list(terms), ontology=ontology, max_number_of_terms=max_terms,
