@@ -22,7 +22,7 @@ def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str],
     Returns:
         str: the text of the go sentence
     """
-    prefix = prefix + additional_prefix + " "
+    new_prefix = prefix + additional_prefix + " "
     term_names = [term_name + " (multiple)" if term_name in ancestors_with_multiple_children else term_name for
                   term_name in sorted(term_names)]
 
@@ -31,13 +31,13 @@ def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str],
     if rename_cell:
         if "the cell" in term_names or "the Cell" in term_names:
             if len(term_names) == 1:
-                prefix = prefix[0:-3]
+                new_prefix = prefix[0:-2]
                 term_names = ["widely"]
             else:
                 if not additional_prefix:
-                    prefix += "several tissues including "
+                    new_prefix += "several tissues including "
                 term_names = [term for term in term_names if term != "the cell" and term != "the Cell"]
-    return prefix + concatenate_words_with_oxford_comma(term_names) + postfix
+    return new_prefix + concatenate_words_with_oxford_comma(term_names) + postfix
 
 
 def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, evidence_group: str, qualifier: str,
