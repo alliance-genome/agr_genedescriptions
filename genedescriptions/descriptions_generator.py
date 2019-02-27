@@ -262,7 +262,8 @@ class OntologySentenceGenerator(object):
                                                                                     term in high_priority_terms):
                 terms_nochildren.append(term)
             elif ancestors_covering_multiple_children is not None:
-                ancestors_covering_multiple_children.update(set(ontology.ancestors(term)).intersection(set(terms)))
+                ancestors_covering_multiple_children.update({ontology.label(term_id, id_if_null=True) for term_id in
+                                                             set(ontology.ancestors(term)).intersection(set(terms))})
         if len(terms_nochildren) < len(terms):
             if terms_already_covered is not None:
                 terms_already_covered.update(set(terms) - set(terms_nochildren))
