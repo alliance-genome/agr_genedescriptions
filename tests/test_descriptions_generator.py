@@ -610,6 +610,45 @@ class TestDescriptionsGenerator(unittest.TestCase):
             keep_only_best_group=True)
         self.assertTrue("chronic fatigue syndrome" in sentences.get_description())
 
+        associations = [DataManager.create_annotation_record(source_line="", gene_id="MGI:107718",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0050144", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:107718",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:10754", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:107718",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0110609", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:107718",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0110599", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:107718",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:9562", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:107718",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:6419", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        DataManager.create_annotation_record(source_line="", gene_id="MGI:107718",
+                                                             gene_symbol="", gene_type="gene", taxon_id="",
+                                                             object_id="DOID:0050545", qualifiers="", aspect="D",
+                                                             ecode="TAS", references="", prvdr="MGI", date=""),
+                        ]
+        self.df.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
+                                                                             ontology=self.df.do_ontology)
+        self.conf_parser.config["do_exp_sentences_options"]["trimming_algorithm"] = "naive"
+        generator = OntologySentenceGenerator(gene_id="MGI:107718", module=Module.DO_EXPERIMENTAL,
+                                              data_manager=self.df, config=self.conf_parser, humans=True)
+        sentences = generator.get_module_sentences(
+            config=self.conf_parser, aspect='D', qualifier='', merge_groups_with_same_prefix=True,
+            keep_only_best_group=True)
+        self.assertTrue("(multiple)" in sentences.get_description())
+
     def test_remove_mixed_functions_processes(self):
         generator = OntologySentenceGenerator(gene_id="WB:WBGene00000105", module=Module.GO,
                                               data_manager=self.df, config=self.conf_parser)
