@@ -427,7 +427,7 @@ do_biomarker_sentences_options:
     - "DOID:0050117"
     - "DOID:0080014"
   evidence_codes:
-    IEP:
+    BMK:
       group: BIOMARKER
       priority: 1
   group_priority:
