@@ -143,6 +143,12 @@ class GenedescConfigParser(object):
     def get_cache_dir(self) -> str:
         return self.config["generic"]["cache_location"]
 
+    def get_modules_delimiter(self):
+        return self.config["generic"]["modules_delimiter"]
+
+    def get_terms_delimiter(self):
+        return self.config["generic"]["terms_delimiter"]
+
     def get_wb_raw_file_sources(self) -> str:
         return self.config["wb_options"]["raw_files_source"]
 
@@ -160,3 +166,4 @@ class GenedescConfigParser(object):
 
     def get_wb_organisms_info(self):
         return self.config["wb_options"]["organisms"]
+

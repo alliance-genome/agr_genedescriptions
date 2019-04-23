@@ -4,18 +4,21 @@ from collections import defaultdict
 from typing import Set, List, Tuple, Dict, Union
 from ontobio import Ontology
 from genedescriptions.commons import Sentence, DataType, Module
+from genedescriptions.config_parser import GenedescConfigParser
 
 logger = logging.getLogger(__name__)
 
 
 def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str], postfix: str,
-                     ancestors_with_multiple_children: Set[str] = None, rename_cell: bool = False) -> str:
+                     config: GenedescConfigParser, ancestors_with_multiple_children: Set[str] = None,
+                     rename_cell: bool = False) -> str:
     """compose the text of a sentence given its prefix, terms, and postfix
 
     Args:
         prefix (str): the prefix of the sentence
         term_names (List[str]): a list of term names
         postfix (str): the postfix of the sentence
+        config (GenedescConfigParser): a gene description configuration object
         additional_prefix (str): an additional prefix to be used for special cases
         ancestors_with_multiple_children (Set[str]): set containing labels of terms that cover more than one children
             term in the original set and which will appear with the label '(multiple)'
@@ -37,12 +40,13 @@ def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str],
                 if not additional_prefix:
                     new_prefix += "several tissues including "
                 term_names = [term for term in term_names if term != "the cell" and term != "the Cell"]
-    return new_prefix + concatenate_words_with_oxford_comma(term_names) + postfix
+    return new_prefix + concatenate_words_with_oxford_comma(term_names,
+                                                            separator=config.get_terms_delimiter()) + postfix
 
 
 def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, evidence_group: str, qualifier: str,
                          prepostfix_sentences_map: Dict[Tuple[str, str, str], Tuple[str, str]],
-                         terms_merged: bool = False, add_others: bool = False,
+                         config: GenedescConfigParser, terms_merged: bool = False, add_others: bool = False,
                          truncate_others_generic_word: str = "several",
                          truncate_others_aspect_words: Dict[str, str] = None,
                          ancestors_with_multiple_children: Set[str] = None,
@@ -56,6 +60,7 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
         evidence_group (str): evidence group
         qualifier (str): qualifier
         prepostfix_sentences_map (Dict[Tuple[str, str, str], Tuple[str, str]]): map for prefix and postfix phrases
+        config (GenedescConfigParser): a gene description configuration object
         terms_merged (bool): whether the terms set has been merged to reduce its size
         add_others (bool): whether to say that there are other terms which have been omitted from the sentence
         truncate_others_generic_word (str): a generic word to indicate that the set of terms reported in the sentence is
@@ -84,7 +89,7 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
                         text=compose_sentence(prefix=prefix, term_names=term_labels, postfix=postfix,
                                               additional_prefix=additional_prefix,
                                               ancestors_with_multiple_children=ancestors_with_multiple_children,
-                                              rename_cell=rename_cell),
+                                              rename_cell=rename_cell, config=config),
                         aspect=aspect, evidence_group=evidence_group, terms_merged=terms_merged,
                         additional_prefix=additional_prefix, qualifier=qualifier,
                         ancestors_covering_multiple_terms=ancestors_with_multiple_children, trimmed=trimmed)
@@ -106,17 +111,18 @@ def is_human_ortholog_name_valid(ortholog_name: str):
     return True
 
 
-def concatenate_words_with_oxford_comma(words: List[str]):
+def concatenate_words_with_oxford_comma(words: List[str], separator: str = ","):
     """concatenate words by separating them with commas and a final oxford comma if more than two or by 'and' if two
 
     Args:
         words (List[str]): a list of words
+        separator: the separator to be used between words, default to 'comma'
 
     Returns:
         str: a concatenated string representing the list of words
     """
     if len(words) > 2:
-        return ", ".join(words[0:-1]) + ", and " + words[-1]
+        return (separator + " ").join(words[0:-1]) + separator + " and " + words[-1]
     else:
         return " and ".join(words)
 
