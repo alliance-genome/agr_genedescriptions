@@ -197,29 +197,23 @@ class GeneDescription(object):
 
         """
         if module == Module.GO_FUNCTION:
-            set_initial_ids_f = self._get_module_initial_set(
+            self.stats.set_initial_go_ids_f = self._get_module_initial_set(
                 aspect="F", additional_qualifier="contributes_to", sentence_generator=sentence_generator)
-            self.stats.num_initial_go_ids_f = len(set_initial_ids_f)
-            self.stats.num_initial_experimental_go_ids_f = self._get_module_initial_num(
+            self.stats.set_initial_experimental_go_ids_f = self._get_module_initial_set(
                 aspect="F", additional_qualifier="contributes_to", sentence_generator=sentence_generator_exp_only)
-            self.stats.set_initial_go_ids.extend(set_initial_ids_f)
         elif module == Module.GO_COMPONENT:
-            set_initial_ids_c = self._get_module_initial_set(
+            self.stats.set_initial_go_ids_c = self._get_module_initial_set(
                 aspect="C", additional_qualifier="colocalizes_with", sentence_generator=sentence_generator)
-            self.stats.num_initial_go_ids_c = len(set_initial_ids_c)
-            self.stats.num_initial_experimental_go_ids_c = self._get_module_initial_num(
+            self.stats.set_initial_experimental_go_ids_c = self._get_module_initial_set(
                 aspect="C", additional_qualifier="colocalizes_with", sentence_generator=sentence_generator_exp_only)
-            self.stats.set_initial_go_ids.extend(set_initial_ids_c)
         elif module == Module.GO_PROCESS:
-            set_initial_ids_p = self._get_module_initial_set(aspect="P", sentence_generator=sentence_generator)
-            self.stats.num_initial_go_ids_p = len(set_initial_ids_p)
-            self.stats.num_initial_experimental_go_ids_p = self._get_module_initial_num(
+            self.stats.set_initial_go_ids_p = self._get_module_initial_set(
+                aspect="P", sentence_generator=sentence_generator)
+            self.stats.set_initial_experimental_go_ids_p = self._get_module_initial_set(
                 aspect="P", sentence_generator=sentence_generator_exp_only)
-            self.stats.set_initial_go_ids.extend(set_initial_ids_p)
         elif module == Module.EXPRESSION:
             self.stats.set_initial_expression_ids = self._get_module_initial_set(
                 aspect="A", main_qualifier="Verified", sentence_generator=sentence_generator)
-            self.stats.num_initial_expression_ids = len(self.stats.set_initial_expression_ids)
         elif module == Module.DO_EXPERIMENTAL:
             self.stats.total_number_do_exp_bio_annotations += len(sentence_generator.annotations)
             self.stats.set_initial_do_ids = self._get_merged_ids(
