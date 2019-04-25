@@ -24,6 +24,7 @@ ZFIN	ZDB-GENE-041212-53	pink1		GO:2000377	PMID:23454196|ZFIN:ZDB-PUB-130313-12	I
 ZFIN	ZDB-GENE-050517-15	abcc1		GO:0005524	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0067	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 1	si:dkeyp-72e1.5	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-18	abcc6a		GO:0016887	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR017871	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 6a	grate	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-16	abcc3		GO:0022857	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR005292	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 3	si:ch211-176g6.3|si:ch73-359p15.1|wu:fb94e12	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0046872	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0479	F	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-23	abcc9		GO:0016020	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0472	C	ATP-binding cassette, sub-family C (CFTR/MRP), member 9	si:dkey-183c2.3|SUR2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-120215-45	abcc8b		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR003439	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 8b	si:ch73-347o10.1|zmp:0000001173	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-25	abcc12		GO:0042626	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR030250	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 12	mrp9	protein	taxon:7955	20180628	ZFIN		
@@ -60,6 +61,7 @@ ZFIN	ZDB-GENE-050517-23	abcc9		GO:0006813	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR
 ZFIN	ZDB-GENE-990714-16	ahr2		GO:0045893	PMID:16306231|ZFIN:ZDB-PUB-051128-10	IPI	UniProtKB:Q45FA8,UniProtKB:Q9YGV3	P	aryl hydrocarbon receptor 2	AHR1b|ahrb	protein	taxon:7955	20060315	ZFIN		
 ZFIN	ZDB-GENE-020531-2	ahr1a		GO:0005634	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR001067	C	aryl hydrocarbon receptor 1a	ahr1|AHR2|ahra|zfAHR1	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-990415-131	htt		GO:0001841	PMID:22466506|ZFIN:ZDB-PUB-120406-1	IMP	ZFIN:ZDB-MRPHLNO-070917-1	P	huntingtin	etID309952.1|hd|ZHD	protein	taxon:7955	20130429	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0007275	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0217	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-20	cftr		GO:0050891	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P13569	P	cystic fibrosis transmembrane conductance regulator (ATP-binding cassette sub-family C, member 7)	abcc7|si:dkey-270i2.2	protein	taxon:7955	20170301	UniProt		
 ZFIN	ZDB-GENE-040426-1523	abcc2		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR017871	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 2	zgc:66072	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-18	abcc6a		GO:0043009	PMID:24352041|ZFIN:ZDB-PUB-140220-3	IMP	ZFIN:ZDB-MRPHLNO-101228-2	P	ATP-binding cassette, sub-family C (CFTR/MRP), member 6a	grate	protein	taxon:7955	20140429	ZFIN		
@@ -86,8 +88,10 @@ ZFIN	ZDB-GENE-040426-1523	abcc2		GO:0055085	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:I
 ZFIN	ZDB-GENE-050208-508	cks2		GO:0051301	ZFIN:ZDB-PUB-170525-1	IEA	UniRule:UR000107179	P	CDC28 protein kinase regulatory subunit 2	si:dkey-94n12.2	protein	taxon:7955	20180616	UniProt		
 ZFIN	ZDB-GENE-050517-17	abcc5		GO:0000166	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0547	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 5	fj51h02|mrp5|si:ch1073-183g13.2|wu:fj51h02	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-041212-53	pink1		GO:0004672	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR008271	F	PTEN induced putative kinase 1	wu:fc39e12|zgc:101729	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0005634	PMID:14709556|ZFIN:ZDB-PUB-040109-9	IDA		C	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20110516	ZFIN		
 ZFIN	ZDB-GENE-050517-16	abcc3		GO:0016887	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR003439	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 3	si:ch211-176g6.3|si:ch73-359p15.1|wu:fb94e12	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-990714-16	ahr2		GO:0004874	PMID:16042621|ZFIN:ZDB-PUB-050727-18	IDA		F	aryl hydrocarbon receptor 2	AHR1b|ahrb	protein	taxon:7955	20130717	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0060271	PMID:26327644|ZFIN:ZDB-PUB-150904-15	IMP	ZFIN:ZDB-CRISPR-160202-1	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20160815	ZFIN		
 ZFIN	ZDB-GENE-990415-168	ntn1b		GO:0021952	PMID:22956848|ZFIN:ZDB-PUB-120909-8	IGI	ZFIN:ZDB-MRPHLNO-070328-6,ZFIN:ZDB-MRPHLNO-120604-2,ZFIN:ZDB-MRPHLNO-121016-3	P	netrin 1b	etID309922.3|net1|ntn1	protein	taxon:7955	20131125	ZFIN		
 ZFIN	ZDB-GENE-050517-17	abcc5		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR003439	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 5	fj51h02|mrp5|si:ch1073-183g13.2|wu:fj51h02	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-990714-16	ahr2		GO:0009410	PMID:16580747|ZFIN:ZDB-PUB-060412-2	IMP	ZFIN:ZDB-MRPHLNO-050604-1	P	aryl hydrocarbon receptor 2	AHR1b|ahrb	protein	taxon:7955	20060719	ZFIN		
@@ -170,12 +174,14 @@ ZFIN	ZDB-GENE-120215-45	abcc8b		GO:0016021	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IP
 ZFIN	ZDB-GENE-050517-22	abcc8		GO:0055085	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	P	ATP-binding cassette, sub-family C (CFTR/MRP), member 8	zSur1	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-120215-45	abcc8b		GO:0005524	ZFIN:ZDB-PUB-170525-1	IEA	UniRule:UR000400038	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 8b	si:ch73-347o10.1|zmp:0000001173	protein	taxon:7955	20180616	UniProt		
 ZFIN	ZDB-GENE-040809-1	atm		GO:0016310	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0418	P	ATM serine/threonine kinase	chunp9624	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0030902	PMID:15042707|ZFIN:ZDB-PUB-040326-3	IGI	ZFIN:ZDB-GENE-031113-5	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20040419	ZFIN		
 ZFIN	ZDB-GENE-120215-45	abcc8b		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 8b	si:ch73-347o10.1|zmp:0000001173	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-26	abcc13		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR017871	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 13	si:ch211-80n22.6	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-18	abcc6a		GO:0016021	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0812	C	ATP-binding cassette, sub-family C (CFTR/MRP), member 6a	grate	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-051018-2	ahrrb		GO:0003700	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR001067	F	aryl-hydrocarbon receptor repressor b	AHR1c|ahrr2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-15	abcc1		GO:0022857	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR005292	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 1	si:dkeyp-72e1.5	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-990415-131	htt		GO:0048703	PMID:19451134|ZFIN:ZDB-PUB-090526-19	IMP	ZFIN:ZDB-MRPHLNO-070917-1	P	huntingtin	etID309952.1|hd|ZHD	protein	taxon:7955	20100727	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0007420	PMID:14550789|ZFIN:ZDB-PUB-031014-6	IEP		P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20031125	ZFIN		
 ZFIN	ZDB-GENE-050517-25	abcc12		GO:0016021	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	C	ATP-binding cassette, sub-family C (CFTR/MRP), member 12	mrp9	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-22	abcc8		GO:0006813	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR000388	P	ATP-binding cassette, sub-family C (CFTR/MRP), member 8	zSur1	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-030131-5408	vcp		GO:0007626	PMID:25866181|ZFIN:ZDB-PUB-150414-8	IMP	ZFIN:ZDB-MRPHLNO-150622-10	P	valosin containing protein	CDC48|wu:fd16d05|wu:fj63d11	protein	taxon:7955	20150921	ZFIN		
@@ -183,6 +189,7 @@ ZFIN	ZDB-GENE-040426-1523	abcc2		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:I
 ZFIN	ZDB-GENE-050517-20	cftr		GO:0034707	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0869	C	cystic fibrosis transmembrane conductance regulator (ATP-binding cassette sub-family C, member 7)	abcc7|si:dkey-270i2.2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-23	abcc9		GO:0016020	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR000388	C	ATP-binding cassette, sub-family C (CFTR/MRP), member 9	si:dkey-183c2.3|SUR2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-040809-1	atm		GO:0005524	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0067	F	ATM serine/threonine kinase	chunp9624	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0005634	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0539	C	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-23	abcc9		GO:0008281	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR001475	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 9	si:dkey-183c2.3|SUR2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-16	abcc3		GO:0005524	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0067	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 3	si:ch211-176g6.3|si:ch73-359p15.1|wu:fb94e12	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-20	cftr		GO:0015106	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P13569	F	cystic fibrosis transmembrane conductance regulator (ATP-binding cassette sub-family C, member 7)	abcc7|si:dkey-270i2.2	protein	taxon:7955	20170301	UniProt		
@@ -194,10 +201,13 @@ ZFIN	ZDB-GENE-050517-25	abcc12		GO:0042626	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IP
 ZFIN	ZDB-GENE-050517-25	abcc12		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR036640	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 12	mrp9	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-17	abcc5		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 5	fj51h02|mrp5|si:ch1073-183g13.2|wu:fj51h02	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-22	abcc8		GO:0016021	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	C	ATP-binding cassette, sub-family C (CFTR/MRP), member 8	zSur1	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0048596	PMID:19171890|ZFIN:ZDB-PUB-090204-20	IGI	ZFIN:ZDB-GENE-990415-8,ZFIN:ZDB-MRPHLNO-090413-3	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20090414	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0007420	PMID:14550789|ZFIN:ZDB-PUB-031014-6	IMP		P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20031125	ZFIN		
 ZFIN	ZDB-GENE-110208-2	abcc6b.2		GO:0016021	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR036640	C	ATP-binding cassette, sub-family C (CFTR/MRP), member 6b, tandem duplicate 2	abcc6c|zmp:0000001324	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-020531-2	ahr1a		GO:0009410	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR033348	P	aryl hydrocarbon receptor 1a	ahr1|AHR2|ahra|zfAHR1	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-24	abcc10		GO:0016020	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0472	C	ATP-binding cassette, sub-family C (CFTR/MRP), member 10	si:ch211-69b7.2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-990415-168	ntn1b		GO:0071678	PMID:22457493|ZFIN:ZDB-PUB-120330-2	IGI	ZFIN:ZDB-MRPHLNO-060810-1,ZFIN:ZDB-MRPHLNO-070328-6	P	netrin 1b	etID309922.3|net1|ntn1	protein	taxon:7955	20130617	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0042826	PMID:14709556|ZFIN:ZDB-PUB-040109-9	IPI		F	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20040416	ZFIN		
 ZFIN	ZDB-GENE-050517-15	abcc1		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 1	si:dkeyp-72e1.5	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-990415-131	htt		GO:2000047	PMID:22466506|ZFIN:ZDB-PUB-120406-1	IMP	ZFIN:ZDB-MRPHLNO-070917-1	P	huntingtin	etID309952.1|hd|ZHD	protein	taxon:7955	20130429	ZFIN		
 ZFIN	ZDB-GENE-050517-18	abcc6a		GO:0005524	ZFIN:ZDB-PUB-170525-1	IEA	UniRule:UR000400038	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 6a	grate	protein	taxon:7955	20180616	UniProt		
@@ -226,6 +236,7 @@ ZFIN	ZDB-GENE-050517-20	cftr		GO:0016020	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:
 ZFIN	ZDB-GENE-050208-508	cks2		GO:0016538	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR036858	F	CDC28 protein kinase regulatory subunit 2	si:dkey-94n12.2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-040809-1	atm		GO:0004674	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR015519	F	ATM serine/threonine kinase	chunp9624	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-22	abcc8		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 8	zSur1	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0003676	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR013087	F	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-040809-1	atm		GO:0016301	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR036940	F	ATM serine/threonine kinase	chunp9624	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-23	abcc9		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 9	si:dkey-183c2.3|SUR2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-15	abcc1		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR003439	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 1	si:dkeyp-72e1.5	protein	taxon:7955	20180628	ZFIN		
@@ -278,6 +289,7 @@ ZFIN	ZDB-GENE-020531-2	ahr1a		GO:0006351	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:
 ZFIN	ZDB-GENE-030616-511	abcc4		GO:0005524	ZFIN:ZDB-PUB-170525-1	IEA	UniRule:UR000400038	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 4	cb1019|leakytail|lkt|sb:eu668|sb:eu872|si:busm1-52i16.4|si:dz202l16.5|si:dz52i16.4	protein	taxon:7955	20180616	UniProt		
 ZFIN	ZDB-GENE-030131-5408	vcp		GO:0005524	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0067	F	valosin containing protein	CDC48|wu:fd16d05|wu:fj63d11	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-120215-45	abcc8b		GO:0000166	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0547	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 8b	si:ch73-347o10.1|zmp:0000001173	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0000118	PMID:14709556|ZFIN:ZDB-PUB-040109-9	IPI		C	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20040416	ZFIN		
 ZFIN	ZDB-GENE-050517-22	abcc8		GO:0016020	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0472	C	ATP-binding cassette, sub-family C (CFTR/MRP), member 8	zSur1	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-020531-2	ahr1a		GO:0046983	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011598	F	aryl hydrocarbon receptor 1a	ahr1|AHR2|ahra|zfAHR1	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-040426-1523	abcc2		GO:0005887	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR030247	C	ATP-binding cassette, sub-family C (CFTR/MRP), member 2	zgc:66072	protein	taxon:7955	20180628	ZFIN		
@@ -288,6 +300,7 @@ ZFIN	ZDB-GENE-990714-16	ahr2		GO:0071466	PMID:16687390|ZFIN:ZDB-PUB-060517-22	IM
 ZFIN	ZDB-GENE-110208-2	abcc6b.2		GO:0042626	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 6b, tandem duplicate 2	abcc6c|zmp:0000001324	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-26	abcc13		GO:0016021	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0812	C	ATP-binding cassette, sub-family C (CFTR/MRP), member 13	si:ch211-80n22.6	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-23	abcc9		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR036640	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 9	si:dkey-183c2.3|SUR2	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0005515	PMID:14550789|ZFIN:ZDB-PUB-031014-6	IPI	UniProtKB:Q98TH2	F	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20040903	ZFIN		
 ZFIN	ZDB-GENE-990714-16	ahr2		GO:0045944	PMID:16122694|ZFIN:ZDB-PUB-050831-4	IDA		P	aryl hydrocarbon receptor 2	AHR1b|ahrb	protein	taxon:7955	20051018	ZFIN		
 ZFIN	ZDB-GENE-050517-17	abcc5		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR036640	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 5	fj51h02|mrp5|si:ch1073-183g13.2|wu:fj51h02	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-030616-511	abcc4		GO:0098754	PMID:25478949|ZFIN:ZDB-PUB-141206-2	IMP	ZFIN:ZDB-MRPHLNO-150402-9	P	ATP-binding cassette, sub-family C (CFTR/MRP), member 4	cb1019|leakytail|lkt|sb:eu668|sb:eu872|si:busm1-52i16.4|si:dz202l16.5|si:dz52i16.4	protein	taxon:7955	20150406	ZFIN		
@@ -295,6 +308,7 @@ ZFIN	ZDB-GENE-050517-16	abcc3		GO:0016020	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW
 ZFIN	ZDB-GENE-050517-22	abcc8		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR017871	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 8	zSur1	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-20	cftr		GO:0016020	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR009147	C	cystic fibrosis transmembrane conductance regulator (ATP-binding cassette sub-family C, member 7)	abcc7|si:dkey-270i2.2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-990714-16	ahr2		GO:0071466	PMID:18618001|ZFIN:ZDB-PUB-080714-17	IDA		P	aryl hydrocarbon receptor 2	AHR1b|ahrb	protein	taxon:7955	20130716	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0003677	PMID:14550789|ZFIN:ZDB-PUB-031014-6	ISS		F	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20031125	ZFIN		
 ZFIN	ZDB-GENE-050517-26	abcc13		GO:0016021	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	C	ATP-binding cassette, sub-family C (CFTR/MRP), member 13	si:ch211-80n22.6	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-18	abcc6a		GO:0043009	PMID:23702584|ZFIN:ZDB-PUB-130703-22	IMP	ZFIN:ZDB-MRPHLNO-101228-3	P	ATP-binding cassette, sub-family C (CFTR/MRP), member 6a	grate	protein	taxon:7955	20140416	ZFIN		
 ZFIN	ZDB-GENE-050517-20	cftr		GO:0006811	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0406	P	cystic fibrosis transmembrane conductance regulator (ATP-binding cassette sub-family C, member 7)	abcc7|si:dkey-270i2.2	protein	taxon:7955	20180628	ZFIN		
@@ -318,12 +332,14 @@ ZFIN	ZDB-GENE-990714-29	srfa		GO:0005634	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:
 ZFIN	ZDB-GENE-040426-1523	abcc2		GO:0008514	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR030247	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 2	zgc:66072	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-990714-16	ahr2		GO:0071466	PMID:16122694|ZFIN:ZDB-PUB-050831-4	IDA		P	aryl hydrocarbon receptor 2	AHR1b|ahrb	protein	taxon:7955	20130717	ZFIN		
 ZFIN	ZDB-GENE-050517-18	abcc6a		GO:0016021	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR036640	C	ATP-binding cassette, sub-family C (CFTR/MRP), member 6a	grate	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0007368	PMID:26327644|ZFIN:ZDB-PUB-150904-15	IMP	ZFIN:ZDB-MRPHLNO-090413-3	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20160815	ZFIN		
 ZFIN	ZDB-GENE-030616-511	abcc4		GO:0055085	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	P	ATP-binding cassette, sub-family C (CFTR/MRP), member 4	cb1019|leakytail|lkt|sb:eu668|sb:eu872|si:busm1-52i16.4|si:dz202l16.5|si:dz52i16.4	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-020531-2	ahr1a		GO:0034751	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR033348	C	aryl hydrocarbon receptor 1a	ahr1|AHR2|ahra|zfAHR1	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-041212-53	pink1		GO:0006468	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR008271	P	PTEN induced putative kinase 1	wu:fc39e12|zgc:101729	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-19	abcc6b.1		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR036640	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 6b, tandem duplicate 1	abcc6b	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-15	abcc1		GO:0005524	ZFIN:ZDB-PUB-170525-1	IEA	UniRule:UR000400038	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 1	si:dkeyp-72e1.5	protein	taxon:7955	20180616	UniProt		
 ZFIN	ZDB-GENE-040809-1	atm		GO:0000723	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR015519	P	ATM serine/threonine kinase	chunp9624	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0060271	PMID:26327644|ZFIN:ZDB-PUB-150904-15	IMP	ZFIN:ZDB-MRPHLNO-090413-3	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20160815	ZFIN		
 ZFIN	ZDB-GENE-050208-508	cks2		GO:0016538	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR000789	F	CDC28 protein kinase regulatory subunit 2	si:dkey-94n12.2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-020531-2	ahr1a	NOT	GO:0004874	PMID:16042621|ZFIN:ZDB-PUB-050727-18	IDA		F	aryl hydrocarbon receptor 1a	ahr1|AHR2|ahra|zfAHR1	protein	taxon:7955	20130717	ZFIN		
 ZFIN	ZDB-GENE-110208-2	abcc6b.2		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR003439	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 6b, tandem duplicate 2	abcc6c|zmp:0000001324	protein	taxon:7955	20180628	ZFIN		
@@ -339,11 +355,13 @@ ZFIN	ZDB-GENE-120215-45	abcc8b		GO:0016887	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IP
 ZFIN	ZDB-GENE-050517-17	abcc5		GO:0042626	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR030238	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 5	fj51h02|mrp5|si:ch1073-183g13.2|wu:fj51h02	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-17	abcc5		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR017871	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 5	fj51h02|mrp5|si:ch1073-183g13.2|wu:fj51h02	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-990714-29	srfa		GO:0003677	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR002100	F	serum response factor a	DreSrf1|srf|srf1	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0031065	PMID:19014486|ZFIN:ZDB-PUB-081121-18	IDA		P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20090804	ZFIN		
 ZFIN	ZDB-GENE-990415-168	ntn1b		GO:0005576	ZFIN:ZDB-PUB-120306-4	IEA	UniProtKB-SubCell:SL-0243	C	netrin 1b	etID309922.3|net1|ntn1	protein	taxon:7955	20180616	UniProt		
 ZFIN	ZDB-GENE-050517-25	abcc12		GO:0016887	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR017871	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 12	mrp9	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-15	abcc1		GO:0016021	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	C	ATP-binding cassette, sub-family C (CFTR/MRP), member 1	si:dkeyp-72e1.5	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-15	abcc1		GO:0098754	PMID:28282619|ZFIN:ZDB-PUB-170311-1	IMP	ZFIN:ZDB-GENO-170807-5	P	ATP-binding cassette, sub-family C (CFTR/MRP), member 1	si:dkeyp-72e1.5	protein	taxon:7955	20170807	ZFIN		
 ZFIN	ZDB-GENE-040801-112	cks1b		GO:0007049	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR036858	P	CDC28 protein kinase regulatory subunit 1B	zgc:101026	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0007368	PMID:26327644|ZFIN:ZDB-PUB-150904-15	IMP	ZFIN:ZDB-CRISPR-160202-1	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20160815	ZFIN		
 ZFIN	ZDB-GENE-990415-131	htt		GO:0005634	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR000091	C	huntingtin	etID309952.1|hd|ZHD	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-120215-45	abcc8b		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR000844	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 8b	si:ch73-347o10.1|zmp:0000001173	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-17	abcc5		GO:0016887	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR017871	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 5	fj51h02|mrp5|si:ch1073-183g13.2|wu:fj51h02	protein	taxon:7955	20180628	ZFIN		
@@ -384,6 +402,7 @@ ZFIN	ZDB-GENE-030131-5408	vcp		GO:0006914	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW
 ZFIN	ZDB-GENE-040426-1294	srfb		GO:0005634	ZFIN:ZDB-PUB-120306-4	IEA	UniProtKB-SubCell:SL-0191	C	serum response factor b	DreSrf2|srf2|srfl|zgc:63911	protein	taxon:7955	20180616	UniProt		
 ZFIN	ZDB-GENE-990714-29	srfa		GO:0006355	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0805	P	serum response factor a	DreSrf1|srf|srf1	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-18	abcc6a		GO:0055085	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	P	ATP-binding cassette, sub-family C (CFTR/MRP), member 6a	grate	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0048596	PMID:19171890|ZFIN:ZDB-PUB-090204-20	IMP	ZFIN:ZDB-MRPHLNO-090413-3	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20090414	ZFIN		
 ZFIN	ZDB-GENE-050517-20	cftr		GO:0005524	PMID:28735752|ZFIN:ZDB-PUB-170726-20	IDA		F	cystic fibrosis transmembrane conductance regulator (ATP-binding cassette sub-family C, member 7)	abcc7|si:dkey-270i2.2	protein	taxon:7955	20171002	ZFIN		
 ZFIN	ZDB-GENE-050517-23	abcc9		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR001475	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 9	si:dkey-183c2.3|SUR2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-20	cftr		GO:0090022	PMID:20732993|ZFIN:ZDB-PUB-100826-18	IMP	ZFIN:ZDB-MRPHLNO-101104-1	P	cystic fibrosis transmembrane conductance regulator (ATP-binding cassette sub-family C, member 7)	abcc7|si:dkey-270i2.2	protein	taxon:7955	20101117	ZFIN		
@@ -407,10 +426,12 @@ ZFIN	ZDB-GENE-050517-20	cftr		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR0
 ZFIN	ZDB-GENE-050517-23	abcc9		GO:0005524	ZFIN:ZDB-PUB-170525-1	IEA	UniRule:UR000400038	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 9	si:dkey-183c2.3|SUR2	protein	taxon:7955	20180616	UniProt		
 ZFIN	ZDB-GENE-030131-4022	greb1l		GO:0048793	PMID:28739660|ZFIN:ZDB-PUB-170726-13	IMP	ZFIN:ZDB-GENO-171025-3	P	GREB1 like retinoic acid receptor coactivator	fc65f09|si:dkey-203o21.1|si:dkey-264l15.1|wu:fc55e03|wu:fc65f09	protein	taxon:7955	20171025	ZFIN		
 ZFIN	ZDB-GENE-050517-24	abcc10		GO:0016887	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR017871	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 10	si:ch211-69b7.2	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0006355	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0805	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-990714-16	ahr2		GO:0043565	PMID:16306231|ZFIN:ZDB-PUB-051128-10	IPI	UniProtKB:Q45FA8,UniProtKB:Q9YGV3	F	aryl hydrocarbon receptor 2	AHR1b|ahrb	protein	taxon:7955	20060311	ZFIN		
 ZFIN	ZDB-GENE-030616-511	abcc4		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 4	cb1019|leakytail|lkt|sb:eu668|sb:eu872|si:busm1-52i16.4|si:dz202l16.5|si:dz52i16.4	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-040426-1523	abcc2		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR003439	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 2	zgc:66072	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-18	abcc6a		GO:0030500	PMID:25758222|ZFIN:ZDB-PUB-150312-4	IMP	ZFIN:ZDB-GENO-150601-5	P	ATP-binding cassette, sub-family C (CFTR/MRP), member 6a	grate	protein	taxon:7955	20150601	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0042802	PMID:14709556|ZFIN:ZDB-PUB-040109-9	IPI	UniProtKB:Q90YM7	F	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20040416	ZFIN		
 ZFIN	ZDB-GENE-040426-1523	abcc2		GO:0042626	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 2	zgc:66072	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-020531-2	ahr1a		GO:0004874	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR033348	F	aryl hydrocarbon receptor 1a	ahr1|AHR2|ahra|zfAHR1	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-990415-168	ntn1b		GO:0071678	PMID:22457493|ZFIN:ZDB-PUB-120330-2	IGI	ZFIN:ZDB-MRPHLNO-070328-5,ZFIN:ZDB-MRPHLNO-070328-6	P	netrin 1b	etID309922.3|net1|ntn1	protein	taxon:7955	20130618	ZFIN		
@@ -444,6 +465,7 @@ ZFIN	ZDB-GENE-050517-23	abcc9		GO:0016887	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR
 ZFIN	ZDB-GENE-990415-131	htt		GO:0005737	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR000091	C	huntingtin	etID309952.1|hd|ZHD	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-040801-112	cks1b		GO:0007049	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0131	P	CDC28 protein kinase regulatory subunit 1B	zgc:101026	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-030131-5408	vcp		GO:2000058	PMID:22549779|ZFIN:ZDB-PUB-120503-23	IMP	ZFIN:ZDB-MRPHLNO-120717-1	P	valosin containing protein	CDC48|wu:fd16d05|wu:fj63d11	protein	taxon:7955	20130320	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0045892	PMID:14550789|ZFIN:ZDB-PUB-031014-6	IMP		P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20110602	ZFIN		
 ZFIN	ZDB-GENE-050517-18	abcc6a		GO:0005524	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0067	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 6a	grate	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-110208-2	abcc6b.2		GO:0016887	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR003439	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 6b, tandem duplicate 2	abcc6c|zmp:0000001324	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-040426-821	cdc5l		GO:0051301	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0132	P	CDC5 cell division cycle 5-like (S. pombe)	zgc:55853	protein	taxon:7955	20180628	ZFIN		
@@ -476,6 +498,7 @@ ZFIN	ZDB-GENE-990714-16	ahr2		GO:0046983	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR0
 ZFIN	ZDB-GENE-050517-16	abcc3		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR003439	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 3	si:ch211-176g6.3|si:ch73-359p15.1|wu:fb94e12	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-16	abcc3		GO:0042626	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 3	si:ch211-176g6.3|si:ch73-359p15.1|wu:fb94e12	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-030616-511	abcc4		GO:0005524	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0067	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 4	cb1019|leakytail|lkt|sb:eu668|sb:eu872|si:busm1-52i16.4|si:dz202l16.5|si:dz52i16.4	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0006351	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0804	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-20	cftr		GO:0005524	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0067	F	cystic fibrosis transmembrane conductance regulator (ATP-binding cassette sub-family C, member 7)	abcc7|si:dkey-270i2.2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-20	cftr		GO:0016887	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR003439	F	cystic fibrosis transmembrane conductance regulator (ATP-binding cassette sub-family C, member 7)	abcc7|si:dkey-270i2.2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-040809-1	atm		GO:0000077	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR015519	P	ATM serine/threonine kinase	chunp9624	protein	taxon:7955	20180628	ZFIN		
@@ -502,10 +525,12 @@ ZFIN	ZDB-GENE-990714-29	srfa		GO:0006351	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:
 ZFIN	ZDB-GENE-050517-19	abcc6b.1		GO:0005524	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0067	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 6b, tandem duplicate 1	abcc6b	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-25	abcc12		GO:0055085	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	P	ATP-binding cassette, sub-family C (CFTR/MRP), member 12	mrp9	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-020531-2	ahr1a		GO:0003700	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR001067	F	aryl hydrocarbon receptor 1a	ahr1|AHR2|ahra|zfAHR1	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0005737	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0963	C	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-051018-2	ahrrb		GO:0006355	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR013767	P	aryl-hydrocarbon receptor repressor b	AHR1c|ahrr2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-990714-16	ahr2		GO:0045893	PMID:16306231|ZFIN:ZDB-PUB-051128-10	IPI	UniProtKB:Q64FF8,UniProtKB:Q9YGV3	P	aryl hydrocarbon receptor 2	AHR1b|ahrb	protein	taxon:7955	20060315	ZFIN		
 ZFIN	ZDB-GENE-990714-16	ahr2		GO:0005634	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0539	C	aryl hydrocarbon receptor 2	AHR1b|ahrb	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-030131-5408	vcp		GO:0005783	ZFIN:ZDB-PUB-120306-2	IEA	UniProtKB-SubCell:SL-0095	C	valosin containing protein	CDC48|wu:fd16d05|wu:fj63d11	protein	taxon:7955	20180616	UniProt		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0005515	PMID:14709556|ZFIN:ZDB-PUB-040109-9	IPI	UniProtKB:Q803U2	F	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20040416	ZFIN		
 ZFIN	ZDB-GENE-040426-1294	srfb		GO:0045944	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR033897	P	serum response factor b	DreSrf2|srf2|srfl|zgc:63911	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-030616-511	abcc4		GO:0016021	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR030240	C	ATP-binding cassette, sub-family C (CFTR/MRP), member 4	cb1019|leakytail|lkt|sb:eu668|sb:eu872|si:busm1-52i16.4|si:dz202l16.5|si:dz52i16.4	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-16	abcc3		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR017871	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 3	si:ch211-176g6.3|si:ch73-359p15.1|wu:fb94e12	protein	taxon:7955	20180628	ZFIN		
@@ -521,12 +546,14 @@ ZFIN	ZDB-GENE-050517-19	abcc6b.1		GO:0016887	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:
 ZFIN	ZDB-GENE-050208-508	cks2		GO:0051301	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0132	P	CDC28 protein kinase regulatory subunit 2	si:dkey-94n12.2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-17	abcc5		GO:0016887	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR003439	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 5	fj51h02|mrp5|si:ch1073-183g13.2|wu:fj51h02	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-20	cftr		GO:0005886	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-1003	C	cystic fibrosis transmembrane conductance regulator (ATP-binding cassette sub-family C, member 7)	abcc7|si:dkey-270i2.2	protein	taxon:7955	20180628	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0005634	PMID:14550789|ZFIN:ZDB-PUB-031014-6	IDA		C	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20031125	ZFIN		
 ZFIN	ZDB-GENE-110208-2	abcc6b.2		GO:0016020	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0472	C	ATP-binding cassette, sub-family C (CFTR/MRP), member 6b, tandem duplicate 2	abcc6c|zmp:0000001324	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-24	abcc10		GO:0000166	ZFIN:ZDB-PUB-020723-1	IEA	UniProtKB-KW:KW-0547	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 10	si:ch211-69b7.2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-041212-53	pink1		GO:0071542	PMID:24027110|ZFIN:ZDB-PUB-130923-1	IMP	ZFIN:ZDB-GENO-140514-3	P	PTEN induced putative kinase 1	wu:fc39e12|zgc:101729	protein	taxon:7955	20140514	ZFIN		
 ZFIN	ZDB-GENE-030131-5408	vcp		GO:0005737	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P55072	C	valosin containing protein	CDC48|wu:fd16d05|wu:fj63d11	protein	taxon:7955	20170531	UniProt		
 ZFIN	ZDB-GENE-050517-18	abcc6a		GO:0022857	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR005292	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 6a	grate	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-20	cftr		GO:0055038	ZFIN:ZDB-PUB-120306-2	IEA	UniProtKB-SubCell:SL-0231	C	cystic fibrosis transmembrane conductance regulator (ATP-binding cassette sub-family C, member 7)	abcc7|si:dkey-270i2.2	protein	taxon:7955	20180616	UniProt		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0045892	PMID:14550789|ZFIN:ZDB-PUB-031014-6	IPI	UniProtKB:Q98TH2	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20110602	ZFIN		
 ZFIN	ZDB-GENE-050517-15	abcc1		GO:0055085	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR005292	P	ATP-binding cassette, sub-family C (CFTR/MRP), member 1	si:dkeyp-72e1.5	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-25	abcc12		GO:0005524	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR017871	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 12	mrp9	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-050517-22	abcc8		GO:0006813	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR000844	P	ATP-binding cassette, sub-family C (CFTR/MRP), member 8	zSur1	protein	taxon:7955	20180628	ZFIN		
@@ -544,19 +571,28 @@ ZFIN	ZDB-GENE-990415-131	htt		GO:0031550	PMID:19797250|ZFIN:ZDB-PUB-091005-11	IM
 ZFIN	ZDB-GENE-050517-24	abcc10		GO:0042626	ZFIN:ZDB-PUB-020724-1	IEA	InterPro:IPR011527	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 10	si:ch211-69b7.2	protein	taxon:7955	20180628	ZFIN		
 ZFIN	ZDB-GENE-990415-168	ntn1b		GO:0016358	PMID:17182783|ZFIN:ZDB-PUB-061229-17	IGI	ZFIN:ZDB-MRPHLNO-060810-1,ZFIN:ZDB-MRPHLNO-070328-6	P	netrin 1b	etID309922.3|net1|ntn1	protein	taxon:7955	20071126	ZFIN		
 ZFIN	ZDB-GENE-020531-2	ahr1a		GO:0071407	PMID:16330359|ZFIN:ZDB-PUB-051214-14	IGI	ZFIN:ZDB-GENE-011219-1,ZFIN:ZDB-MRPHLNO-050604-1	P	aryl hydrocarbon receptor 1a	ahr1|AHR2|ahra|zfAHR1	protein	taxon:7955	20130715	ZFIN		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0005737	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P0CL69	C	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20131203	UniProt		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0034111	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P0CL69	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20110223	UniProt		
 ZFIN	ZDB-GENE-041010-24	mettl1		GO:0006400	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:Q9UBP6	P	methyltransferase like 1	zgc:103636	protein	taxon:7955	20090318	UniProt		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0005737	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:Q9H7S9	C	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20131203	UniProt		
 ZFIN	ZDB-GENE-030131-5408	vcp		GO:0030433	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P55072	P	valosin containing protein	CDC48|wu:fd16d05|wu:fj63d11	protein	taxon:7955	20160622	UniProt		
 ZFIN	ZDB-GENE-030131-5408	vcp		GO:0005829	ZFIN:ZDB-PUB-120306-2	IEA	UniProtKB-SubCell:SL-0091	C	valosin containing protein	CDC48|wu:fd16d05|wu:fj63d11	protein	taxon:7955	20180616	UniProt		
 ZFIN	ZDB-GENE-030131-5408	vcp		GO:0035861	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P55072	C	valosin containing protein	CDC48|wu:fd16d05|wu:fj63d11	protein	taxon:7955	20120827	UniProt		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0030335	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P0CL69	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20110223	UniProt		
 ZFIN	ZDB-GENE-041010-24	mettl1		GO:0008176	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:Q9UBP6	F	methyltransferase like 1	zgc:103636	protein	taxon:7955	20090324	UniProt		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0034333	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P0CL69	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20110223	UniProt		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0017015	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P0CL69	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20110223	UniProt		
 ZFIN	ZDB-GENE-030131-5408	vcp		GO:0018279	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P55072	P	valosin containing protein	CDC48|wu:fd16d05|wu:fj63d11	protein	taxon:7955	20120920	UniProt		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0060828	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P0CL69	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20110223	UniProt		
 ZFIN	ZDB-GENE-030131-5408	vcp		GO:0016567	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P55072	P	valosin containing protein	CDC48|wu:fd16d05|wu:fj63d11	protein	taxon:7955	20120827	UniProt		
 ZFIN	ZDB-GENE-060421-6989	brat1		GO:0005634	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:Q6PJG6	C	BRCA1-associated ATM activator 1	zgc:136845	protein	taxon:7955	20100510	UniProt		
 ZFIN	ZDB-GENE-030131-5408	vcp		GO:0005634	ZFIN:ZDB-PUB-120306-2	IEA	UniProtKB-SubCell:SL-0191	C	valosin containing protein	CDC48|wu:fd16d05|wu:fj63d11	protein	taxon:7955	20180616	UniProt		
 ZFIN	ZDB-GENE-030131-5408	vcp		GO:0006302	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P55072	P	valosin containing protein	CDC48|wu:fd16d05|wu:fj63d11	protein	taxon:7955	20120827	UniProt		
 ZFIN	ZDB-GENE-041010-24	mettl1		GO:0005634	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:Q9UBP6	C	methyltransferase like 1	zgc:103636	protein	taxon:7955	20090318	UniProt		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0045892	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P0CL69	P	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20110607	UniProt		
 ZFIN	ZDB-GENE-060421-6989	brat1		GO:0010212	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:Q6PJG6	P	BRCA1-associated ATM activator 1	zgc:136845	protein	taxon:7955	20100510	UniProt		
 ZFIN	ZDB-GENE-030131-5408	vcp		GO:0019985	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:P55072	P	valosin containing protein	CDC48|wu:fd16d05|wu:fj63d11	protein	taxon:7955	20121102	UniProt		
+ZFIN	ZDB-GENE-010717-1	znf703		GO:0016363	ZFIN:ZDB-PUB-110105-1	ISS	UniProtKB:Q9H7S9	C	zinc finger protein 703	cb514|fc45d06|fk28e09|NH11|nlz|nlz1|noz1|wu:fc45d06|wu:fk28e09|zgc:111927	protein	taxon:7955	20131203	UniProt		
 ZFIN	ZDB-GENE-030616-511	abcc4		GO:0042626	PMID:21873635	IBA	PANTHER:PTN000657997|RGD:71101|TAIR:locus:2061559|UniProtKB:Q9LK64	F	ATP-binding cassette, sub-family C (CFTR/MRP), member 4	cb1019|leakytail|lkt|sb:eu668|sb:eu872|si:busm1-52i16.4|si:dz202l16.5|si:dz52i16.4	protein	NCBITaxon:	20170228	GO_Central		
 UniProtKB	A0A0G2KPL1	srfb		GO:0005634	PMID:21873635	IBA	FB:FBgn0004101|MGI:MGI:106658|PANTHER:PTN000235373|RGD:1559787|SGD:S000004645|SGD:S000004646|TAIR:locus:2005522|TAIR:locus:2033273|TAIR:locus:2041233|TAIR:locus:2047304|TAIR:locus:2121924|TAIR:locus:2127213|TAIR:locus:2137070|TAIR:locus:2152511|UniProtKB:O22456|UniProtKB:P11831|UniProtKB:P17839|UniProtKB:Q8VXG0|UniProtKB:Q9FPN7|WB:WBGene00006844	C	Serum response factor b	UniProtKB:A0A0G2KPL1|PTN002278660	protein	NCBITaxon:	20170829	GO_Central		
 UniProtKB	A0A0G2KPL1	srfb		GO:0043565	PMID:21873635	IBA	MGI:MGI:106658|PANTHER:PTN000235373|RGD:1559787|TAIR:locus:2041233|TAIR:locus:2121924|TAIR:locus:2152511	F	Serum response factor b	UniProtKB:A0A0G2KPL1|PTN002278660	protein	NCBITaxon:	20170829	GO_Central		

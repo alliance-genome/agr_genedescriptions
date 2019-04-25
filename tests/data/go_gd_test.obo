@@ -195,6 +195,17 @@ relationship: BFO:0000050 GO:0000086 ! part of G2/M transition of mitotic cell c
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0000118
+name: histone deacetylase complex
+namespace: cellular_component
+def: "A protein complex that possesses histone deacetylase activity." []
+comment: Note that this term represents a location, not a function; the activity possessed by this complex is mentioned in the definition for the purpose of describing and distinguishing the complex. The function of this complex is represented by the molecular function term 'histone deacetylase activity ; GO:0004407'.
+synonym: "HDAC complex" EXACT []
+is_a: GO:0044451 ! nucleoplasm part
+is_a: GO:1902494 ! catalytic complex
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0000122
 name: negative regulation of transcription by RNA polymerase II
 namespace: biological_process
@@ -2471,7 +2482,6 @@ namespace: biological_process
 def: "Any process that modulates the frequency, rate or extent of the chemical reactions and pathways resulting in the phosphorylation of ADP to ATP that accompanies the oxidation of a metabolite through the operation of the respiratory chain. Oxidation of compounds establishes a proton gradient across the membrane, providing the energy for ATP synthesis." []
 is_a: GO:0042325 ! regulation of phosphorylation
 is_a: GO:0043467 ! regulation of generation of precursor metabolites and energy
-is_a: GO:1903578 ! regulation of ATP metabolic process
 intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002211 GO:0006119 ! regulates oxidative phosphorylation
 relationship: RO:0002211 GO:0006119 ! regulates oxidative phosphorylation
@@ -3958,9 +3968,6 @@ xref: reactome:R-HSA-8854604
 xref: reactome:R-HSA-8854612
 xref: reactome:R-HSA-8868661
 xref: reactome:R-HSA-8981353
-xref: reactome:R-HSA-8982020
-xref: reactome:R-HSA-8982021
-xref: reactome:R-HSA-8982025
 xref: reactome:R-HSA-983422
 xref: RHEA:19669
 is_a: GO:0017111 ! nucleoside-triphosphatase activity
@@ -4701,8 +4708,6 @@ xref: reactome:R-HSA-5218804
 xref: reactome:R-HSA-5607726
 xref: reactome:R-HSA-74615
 xref: reactome:R-HSA-8857583
-xref: reactome:R-HSA-8964242
-xref: reactome:R-HSA-8964252
 xref: reactome:R-HSA-8983872
 xref: reactome:R-HSA-918229
 xref: reactome:R-HSA-933525
@@ -4933,7 +4938,6 @@ xref: reactome:R-HSA-4332363
 xref: reactome:R-HSA-4332388
 xref: reactome:R-HSA-4411383
 xref: reactome:R-HSA-4411402
-xref: reactome:R-HSA-442739
 xref: reactome:R-HSA-442832
 xref: reactome:R-HSA-445072
 xref: reactome:R-HSA-446694
@@ -5138,11 +5142,6 @@ xref: reactome:R-HSA-936991
 xref: reactome:R-HSA-937022
 xref: reactome:R-HSA-9604328
 xref: reactome:R-HSA-9612980
-xref: reactome:R-HSA-9619515
-xref: reactome:R-HSA-9619843
-xref: reactome:R-HSA-9620004
-xref: reactome:R-HSA-9626880
-xref: reactome:R-HSA-9627089
 xref: reactome:R-HSA-975125
 xref: reactome:R-HSA-975134
 xref: reactome:R-HSA-975160
@@ -5366,7 +5365,6 @@ xref: reactome:R-HSA-2404199
 xref: reactome:R-HSA-2424484
 xref: reactome:R-HSA-2424486
 xref: reactome:R-HSA-2424487
-xref: reactome:R-HSA-2428926
 xref: reactome:R-HSA-2454208
 xref: reactome:R-HSA-2454239
 xref: reactome:R-HSA-2586553
@@ -5570,7 +5568,6 @@ xref: reactome:R-HSA-9603420
 xref: reactome:R-HSA-9606159
 xref: reactome:R-HSA-9606162
 xref: reactome:R-HSA-9606163
-xref: reactome:R-HSA-9612085
 xref: reactome:R-HSA-9612996
 xref: reactome:R-HSA-9613023
 xref: reactome:R-HSA-982807
@@ -5724,9 +5721,6 @@ xref: reactome:R-HSA-6811504
 xref: reactome:R-HSA-6814559
 xref: reactome:R-HSA-74948
 xref: reactome:R-HSA-8948139
-xref: reactome:R-HSA-9619430
-xref: reactome:R-HSA-9619449
-xref: reactome:R-HSA-9619467
 is_a: GO:0004721 ! phosphoprotein phosphatase activity
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
@@ -5911,7 +5905,6 @@ xref: reactome:R-HSA-918224
 xref: reactome:R-HSA-936412
 xref: reactome:R-HSA-936942
 xref: reactome:R-HSA-936986
-xref: reactome:R-HSA-9628444
 xref: reactome:R-HSA-975118
 xref: reactome:R-HSA-975147
 xref: reactome:R-HSA-983140
@@ -6103,7 +6096,6 @@ xref: reactome:R-HSA-8851877
 xref: reactome:R-HSA-8851899
 xref: reactome:R-HSA-8875568
 xref: reactome:R-HSA-8875591
-xref: reactome:R-HSA-8964604
 xref: reactome:R-HSA-8982637
 xref: reactome:R-HSA-8982640
 xref: reactome:R-HSA-939265
@@ -7800,20 +7792,6 @@ synonym: "alpha-hydroxypropionate metabolic process" EXACT []
 synonym: "alpha-hydroxypropionate metabolism" EXACT []
 synonym: "lactate metabolism" EXACT []
 is_a: GO:0032787 ! monocarboxylic acid metabolic process
-is_a: GO:1901615 ! organic hydroxy compound metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
-id: GO:0006090
-name: pyruvate metabolic process
-namespace: biological_process
-alt_id: GO:0006087
-def: "The chemical reactions and pathways involving pyruvate, 2-oxopropanoate." []
-synonym: "pyruvate dehydrogenase bypass" RELATED []
-synonym: "pyruvate metabolism" EXACT []
-xref: MetaCyc:P41-PWY
-xref: Wikipedia:Pyruvic_acid
-is_a: GO:0032787 ! monocarboxylic acid metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -7848,12 +7826,8 @@ synonym: "Embden-Meyerhof-Parnas pathway" RELATED []
 synonym: "glycolysis" RELATED []
 synonym: "modifed Embden-Meyerhof pathway" RELATED []
 xref: MetaCyc:GLYCOLYSIS-VARIANTS
-is_a: GO:0006754 ! ATP biosynthetic process
-is_a: GO:0006757 ! ATP generation from ADP
-is_a: GO:0009166 ! nucleotide catabolic process
+is_a: GO:0006091 ! generation of precursor metabolites and energy
 is_a: GO:0016052 ! carbohydrate catabolic process
-is_a: GO:0019359 ! nicotinamide nucleotide biosynthetic process
-is_a: GO:0042866 ! pyruvate biosynthetic process
 relationship: BFO:0000051 GO:0004618 ! has part phosphoglycerate kinase activity
 relationship: BFO:0000051 GO:0004619 ! has part phosphoglycerate mutase activity
 relationship: BFO:0000051 GO:0004634 ! has part phosphopyruvate hydratase activity
@@ -7929,26 +7903,6 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0006164
 name: purine nucleotide biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of a purine nucleotide, a compound consisting of nucleoside (a purine base linked to a deoxyribose or ribose sugar) esterified with a phosphate group at either the 3' or 5'-hydroxyl group of the sugar." []
-synonym: "purine nucleotide anabolism" EXACT []
-synonym: "purine nucleotide biosynthesis" EXACT []
-synonym: "purine nucleotide formation" EXACT []
-synonym: "purine nucleotide synthesis" EXACT []
-xref: MetaCyc:DENOVOPURINE2-PWY
-is_a: GO:0006163 ! purine nucleotide metabolic process
-is_a: GO:0009165 ! nucleotide biosynthetic process
-is_a: GO:0072522 ! purine-containing compound biosynthetic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
-id: GO:0006165
-name: nucleoside diphosphate phosphorylation
-namespace: biological_process
-def: "The process of introducing a phosphate group into a nucleoside diphosphate to produce a nucleoside triphosphate." []
-is_a: GO:0009132 ! nucleoside diphosphate metabolic process
-is_a: GO:0046939 ! nucleotide phosphorylation
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0006259
@@ -7982,7 +7936,6 @@ subset: goslim_pir
 subset: goslim_pombe
 subset: goslim_yeast
 xref: Wikipedia:DNA_replication
-is_a: GO:0006259 ! DNA metabolic process
 is_a: GO:0034645 ! cellular macromolecule biosynthetic process
 relationship: BFO:0000051 GO:0071897 ! has part DNA biosynthetic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
@@ -8074,7 +8027,6 @@ namespace: biological_process
 def: "The process in which an existing DNA strand is extended continuously in a 5' to 3' direction by activities including the addition of nucleotides to the 3' end of the strand, complementary to an existing template, as part of DNA replication. Leading strand elongation proceeds in the same direction as the replication fork." []
 comment: Changed definition https://github.com/geneontology/go-ontology/issues/12633
 is_a: GO:0006271 ! DNA strand elongation involved in DNA replication
-is_a: GO:0016070 ! RNA metabolic process
 relationship: BFO:0000051 GO:0006269 ! has part DNA replication, synthesis of RNA primer
 relationship: BFO:0000051 GO:0043137 ! has part DNA replication, removal of RNA primer
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
@@ -8084,7 +8036,6 @@ id: GO:0006275
 name: regulation of DNA replication
 namespace: biological_process
 def: "Any process that modulates the frequency, rate or extent of DNA replication." []
-is_a: GO:0051052 ! regulation of DNA metabolic process
 is_a: GO:2000112 ! regulation of cellular macromolecule biosynthetic process
 intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002211 GO:0006260 ! regulates DNA replication
@@ -8126,6 +8077,7 @@ id: GO:0006286
 name: base-excision repair, base-free sugar-phosphate removal
 namespace: biological_process
 def: "Excision of the sugar phosphate residue at an AP site, i.e. a deoxyribose sugar with a missing base, by a phosphodiesterase enzyme." []
+is_a: GO:0006259 ! DNA metabolic process
 is_a: GO:0098502 ! DNA dephosphorylation
 relationship: BFO:0000050 GO:0006284 ! part of base-excision repair
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
@@ -8462,7 +8414,6 @@ name: mRNA cleavage
 namespace: biological_process
 def: "Any process in which a pre-mRNA or mRNA molecule is cleaved at specific sites or in a regulated manner." []
 synonym: "cleavage stimulation factor activity" RELATED []
-is_a: GO:0016071 ! mRNA metabolic process
 is_a: GO:0090501 ! RNA phosphodiester bond hydrolysis
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
@@ -8878,8 +8829,7 @@ name: leucine metabolic process
 namespace: biological_process
 def: "The chemical reactions and pathways involving leucine, 2-amino-4-methylpentanoic acid." []
 synonym: "leucine metabolism" EXACT []
-is_a: GO:0009081 ! branched-chain amino acid metabolic process
-is_a: GO:1901605 ! alpha-amino acid metabolic process
+is_a: GO:0006520 ! cellular amino acid metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -8892,8 +8842,7 @@ synonym: "leucine catabolism" EXACT []
 synonym: "leucine degradation" EXACT []
 xref: MetaCyc:LEU-DEG2-PWY
 is_a: GO:0006551 ! leucine metabolic process
-is_a: GO:0009083 ! branched-chain amino acid catabolic process
-is_a: GO:1901606 ! alpha-amino acid catabolic process
+is_a: GO:0009063 ! cellular amino acid catabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -8940,7 +8889,6 @@ def: "The chemical reactions and pathways involving creatine (N-(aminoiminomethy
 synonym: "creatine metabolism" EXACT []
 is_a: GO:0006575 ! cellular modified amino acid metabolic process
 is_a: GO:0017144 ! drug metabolic process
-is_a: GO:1901605 ! alpha-amino acid metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -8954,7 +8902,6 @@ synonym: "creatine formation" EXACT []
 synonym: "creatine synthesis" EXACT []
 is_a: GO:0006600 ! creatine metabolic process
 is_a: GO:0042398 ! cellular modified amino acid biosynthetic process
-is_a: GO:1901607 ! alpha-amino acid biosynthetic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -9203,31 +9150,6 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0006754
 name: ATP biosynthetic process
-namespace: biological_process
-alt_id: GO:0006758
-alt_id: GO:0006759
-def: "The chemical reactions and pathways resulting in the formation of ATP, adenosine 5'-triphosphate, a universally important coenzyme and enzyme regulator." []
-synonym: "ATP anabolism" EXACT []
-synonym: "ATP biosynthesis" EXACT []
-synonym: "ATP formation" EXACT []
-synonym: "ATP regeneration" NARROW []
-synonym: "ATP synthesis" EXACT []
-is_a: GO:0009152 ! purine ribonucleotide biosynthetic process
-is_a: GO:0009206 ! purine ribonucleoside triphosphate biosynthetic process
-is_a: GO:0046034 ! ATP metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
-id: GO:0006757
-name: ATP generation from ADP
-namespace: biological_process
-def: "The process of introducing a phosphate group into ADP, adenosine diphosphate, to produce ATP." []
-synonym: "ADP phosphorylation" EXACT []
-is_a: GO:0006091 ! generation of precursor metabolites and energy
-is_a: GO:0006165 ! nucleoside diphosphate phosphorylation
-is_a: GO:0046031 ! ADP metabolic process
-is_a: GO:0046034 ! ATP metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0006766
@@ -9263,15 +9185,9 @@ synonym: "vitamin B7 metabolism" EXACT []
 synonym: "vitamin H metabolic process" EXACT []
 synonym: "vitamin H metabolism" EXACT []
 xref: Wikipedia:Biotin
-is_a: GO:0006732 ! coenzyme metabolic process
 is_a: GO:0006767 ! water-soluble vitamin metabolic process
-is_a: GO:0006790 ! sulfur compound metabolic process
-is_a: GO:0017144 ! drug metabolic process
 is_a: GO:0032787 ! monocarboxylic acid metabolic process
-is_a: GO:0043603 ! cellular amide metabolic process
-is_a: GO:0046483 ! heterocycle metabolic process
-is_a: GO:1901360 ! organic cyclic compound metabolic process
-is_a: GO:1901564 ! organonitrogen compound metabolic process
+is_a: GO:0051186 ! cofactor metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -9289,7 +9205,6 @@ synonym: "molybdenum cofactor biosynthetic process" RELATED []
 xref: MetaCyc:PWY-6823
 is_a: GO:0009108 ! coenzyme biosynthetic process
 is_a: GO:0018130 ! heterocycle biosynthetic process
-is_a: GO:0019538 ! protein metabolic process
 is_a: GO:0019720 ! Mo-molybdopterin cofactor metabolic process
 is_a: GO:0090407 ! organophosphate biosynthetic process
 is_a: GO:1901362 ! organic cyclic compound biosynthetic process
@@ -10404,9 +10319,12 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 id: GO:0007094
 name: mitotic spindle assembly checkpoint
 namespace: biological_process
+alt_id: GO:0044810
 def: "A cell cycle checkpoint that delays the metaphase/anaphase transition of a mitotic nuclear division until the spindle is correctly assembled and chromosomes are attached to the spindle." []
+synonym: "Dma1-dependent checkpoint" NARROW []
 synonym: "Mad2-dependent checkpoint" NARROW []
 synonym: "mitotic cell cycle spindle assembly checkpoint" EXACT []
+synonym: "SAC-independent checkpoint" NARROW []
 is_a: GO:0045841 ! negative regulation of mitotic metaphase/anaphase transition
 is_a: GO:0071173 ! spindle assembly checkpoint
 is_a: GO:0071174 ! mitotic spindle checkpoint
@@ -10992,6 +10910,15 @@ alt_id: GO:0009796
 def: "The separation of a multi-nucleate cell or syncytium into individual cells. An example of this is found in Drosophila melanogaster embryo development." []
 is_a: GO:0048646 ! anatomical structure formation involved in morphogenesis
 relationship: BFO:0000050 GO:0007275 ! part of multicellular organism development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0007368
+name: determination of left/right symmetry
+namespace: biological_process
+def: "The establishment of an organism's body plan or part of an organism with respect to the left and right halves. The pattern can either be symmetric, such that the halves are mirror images, or asymmetric where the pattern deviates from this symmetry." []
+synonym: "determination of left/right asymmetry" EXACT []
+is_a: GO:0009855 ! determination of bilateral symmetry
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -12659,18 +12586,6 @@ name: intrinsic apoptotic signaling pathway in response to oxidative stress
 [Term]
 id: GO:0008652
 name: cellular amino acid biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of amino acids, organic acids containing one or more amino substituents." []
-synonym: "amino acid biosynthetic process" EXACT []
-synonym: "cellular amino acid anabolism" EXACT []
-synonym: "cellular amino acid biosynthesis" EXACT []
-synonym: "cellular amino acid formation" EXACT []
-synonym: "cellular amino acid synthesis" EXACT []
-xref: Wikipedia:Amino_acid_synthesis
-is_a: GO:0006520 ! cellular amino acid metabolic process
-is_a: GO:0046394 ! carboxylic acid biosynthetic process
-is_a: GO:1901566 ! organonitrogen compound biosynthetic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0008654
@@ -12865,28 +12780,6 @@ is_a: GO:1901605 ! alpha-amino acid metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
-id: GO:0009081
-name: branched-chain amino acid metabolic process
-namespace: biological_process
-def: "The chemical reactions and pathways involving amino acids containing a branched carbon skeleton, comprising isoleucine, leucine and valine." []
-synonym: "branched chain family amino acid metabolism" EXACT []
-is_a: GO:0006520 ! cellular amino acid metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
-id: GO:0009083
-name: branched-chain amino acid catabolic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the breakdown of amino acids containing a branched carbon skeleton, comprising isoleucine, leucine and valine." []
-synonym: "branched chain family amino acid breakdown" EXACT []
-synonym: "branched chain family amino acid catabolic process" EXACT []
-synonym: "branched chain family amino acid catabolism" EXACT []
-synonym: "branched chain family amino acid degradation" EXACT []
-is_a: GO:0009063 ! cellular amino acid catabolic process
-is_a: GO:0009081 ! branched-chain amino acid metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
 id: GO:0009101
 name: glycoprotein biosynthetic process
 
@@ -12920,18 +12813,6 @@ is_a: GO:0051187 ! cofactor catabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
-id: GO:0009116
-name: nucleoside metabolic process
-namespace: biological_process
-def: "The chemical reactions and pathways involving a nucleoside, a nucleobase linked to either beta-D-ribofuranose (a ribonucleoside) or 2-deoxy-beta-D-ribofuranose, (a deoxyribonucleoside), e.g. adenosine, guanosine, inosine, cytidine, uridine and deoxyadenosine, deoxyguanosine, deoxycytidine and thymidine (= deoxythymidine)." []
-subset: goslim_pir
-synonym: "nucleoside metabolism" EXACT []
-is_a: GO:0055086 ! nucleobase-containing small molecule metabolic process
-is_a: GO:1901564 ! organonitrogen compound metabolic process
-is_a: GO:1901657 ! glycosyl compound metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
 id: GO:0009117
 name: nucleotide metabolic process
 namespace: biological_process
@@ -12939,33 +12820,6 @@ def: "The chemical reactions and pathways involving a nucleotide, a nucleoside t
 subset: goslim_pir
 synonym: "nucleotide metabolism" EXACT []
 is_a: GO:0006753 ! nucleoside phosphate metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
-id: GO:0009119
-name: ribonucleoside metabolic process
-namespace: biological_process
-def: "The chemical reactions and pathways involving any ribonucleoside, a nucleoside in which purine or pyrimidine base is linked to a ribose (beta-D-ribofuranose) molecule." []
-synonym: "ribonucleoside metabolism" EXACT []
-is_a: GO:0009116 ! nucleoside metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
-id: GO:0009132
-name: nucleoside diphosphate metabolic process
-namespace: biological_process
-def: "The chemical reactions and pathways involving a nucleoside diphosphate, a compound consisting of a nucleobase linked to a deoxyribose or ribose sugar esterified with diphosphate on the sugar." []
-synonym: "nucleoside diphosphate metabolism" EXACT []
-is_a: GO:0006753 ! nucleoside phosphate metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
-id: GO:0009135
-name: purine nucleoside diphosphate metabolic process
-namespace: biological_process
-def: "The chemical reactions and pathways involving purine nucleoside diphosphate, a compound consisting of a purine base linked to a ribose or deoxyribose sugar esterified with diphosphate on the sugar." []
-synonym: "purine nucleoside diphosphate metabolism" EXACT []
-is_a: GO:0009132 ! nucleoside diphosphate metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -13000,19 +12854,6 @@ is_a: GO:0009141 ! nucleoside triphosphate metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
-id: GO:0009145
-name: purine nucleoside triphosphate biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of purine nucleoside triphosphate, a compound consisting of a purine base linked to a ribose or deoxyribose sugar esterified with triphosphate on the sugar." []
-synonym: "purine nucleoside triphosphate anabolism" EXACT []
-synonym: "purine nucleoside triphosphate biosynthesis" EXACT []
-synonym: "purine nucleoside triphosphate formation" EXACT []
-synonym: "purine nucleoside triphosphate synthesis" EXACT []
-is_a: GO:0009142 ! nucleoside triphosphate biosynthetic process
-is_a: GO:0009144 ! purine nucleoside triphosphate metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
 id: GO:0009150
 name: purine ribonucleotide metabolic process
 namespace: biological_process
@@ -13023,31 +12864,8 @@ is_a: GO:0009259 ! ribonucleotide metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
-id: GO:0009152
-name: purine ribonucleotide biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of a purine ribonucleotide, a compound consisting of ribonucleoside (a purine base linked to a ribose sugar) esterified with a phosphate group at either the 3' or 5'-hydroxyl group of the sugar." []
-synonym: "purine ribonucleotide anabolism" EXACT []
-synonym: "purine ribonucleotide biosynthesis" EXACT []
-synonym: "purine ribonucleotide formation" EXACT []
-synonym: "purine ribonucleotide synthesis" EXACT []
-is_a: GO:0006164 ! purine nucleotide biosynthetic process
-is_a: GO:0009150 ! purine ribonucleotide metabolic process
-is_a: GO:0009260 ! ribonucleotide biosynthetic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
 id: GO:0009165
 name: nucleotide biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of nucleotides, any nucleoside that is esterified with (ortho)phosphate or an oligophosphate at any hydroxyl group on the glycose moiety; may be mono-, di- or triphosphate; this definition includes cyclic-nucleotides (nucleoside cyclic phosphates)." []
-synonym: "nucleotide anabolism" EXACT []
-synonym: "nucleotide biosynthesis" EXACT []
-synonym: "nucleotide formation" EXACT []
-synonym: "nucleotide synthesis" EXACT []
-is_a: GO:0009117 ! nucleotide metabolic process
-is_a: GO:1901293 ! nucleoside phosphate biosynthetic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0009166
@@ -13059,25 +12877,6 @@ synonym: "nucleotide catabolism" EXACT []
 synonym: "nucleotide degradation" EXACT []
 is_a: GO:0009117 ! nucleotide metabolic process
 is_a: GO:1901292 ! nucleoside phosphate catabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
-id: GO:0009179
-name: purine ribonucleoside diphosphate metabolic process
-namespace: biological_process
-def: "The chemical reactions and pathways involving purine ribonucleoside diphosphate, a compound consisting of a purine base linked to a ribose sugar esterified with diphosphate on the sugar." []
-synonym: "purine ribonucleoside diphosphate metabolism" EXACT []
-is_a: GO:0009135 ! purine nucleoside diphosphate metabolic process
-is_a: GO:0009185 ! ribonucleoside diphosphate metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
-id: GO:0009185
-name: ribonucleoside diphosphate metabolic process
-namespace: biological_process
-def: "The chemical reactions and pathways involving a ribonucleoside diphosphate, a compound consisting of a nucleobase linked to a ribose sugar esterified with diphosphate on the sugar." []
-synonym: "ribonucleoside diphosphate metabolism" EXACT []
-is_a: GO:0009132 ! nucleoside diphosphate metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -13096,19 +12895,6 @@ namespace: biological_process
 def: "The chemical reactions and pathways involving a deoxyribonucleoside triphosphate, a compound consisting of a nucleobase linked to a deoxyribose sugar esterified with triphosphate on the sugar." []
 synonym: "deoxyribonucleoside triphosphate metabolism" EXACT []
 is_a: GO:0009141 ! nucleoside triphosphate metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
-id: GO:0009201
-name: ribonucleoside triphosphate biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of a ribonucleoside triphosphate, a compound consisting of a nucleobase linked to a ribose sugar esterified with triphosphate on the sugar." []
-synonym: "ribonucleoside triphosphate anabolism" EXACT []
-synonym: "ribonucleoside triphosphate biosynthesis" EXACT []
-synonym: "ribonucleoside triphosphate formation" EXACT []
-synonym: "ribonucleoside triphosphate synthesis" EXACT []
-is_a: GO:0009142 ! nucleoside triphosphate biosynthetic process
-is_a: GO:0009199 ! ribonucleoside triphosphate metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -13135,20 +12921,6 @@ is_a: GO:0009199 ! ribonucleoside triphosphate metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
-id: GO:0009206
-name: purine ribonucleoside triphosphate biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of purine ribonucleoside triphosphate, a compound consisting of a purine base linked to a ribose sugar esterified with triphosphate on the sugar." []
-synonym: "purine ribonucleoside triphosphate anabolism" EXACT []
-synonym: "purine ribonucleoside triphosphate biosynthesis" EXACT []
-synonym: "purine ribonucleoside triphosphate formation" EXACT []
-synonym: "purine ribonucleoside triphosphate synthesis" EXACT []
-is_a: GO:0009145 ! purine nucleoside triphosphate biosynthetic process
-is_a: GO:0009201 ! ribonucleoside triphosphate biosynthetic process
-is_a: GO:0009205 ! purine ribonucleoside triphosphate metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
 id: GO:0009259
 name: ribonucleotide metabolic process
 namespace: biological_process
@@ -13157,20 +12929,6 @@ def: "The chemical reactions and pathways involving a ribonucleotide, a compound
 synonym: "ribonucleotide metabolism" EXACT []
 is_a: GO:0009117 ! nucleotide metabolic process
 is_a: GO:0019693 ! ribose phosphate metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
-id: GO:0009260
-name: ribonucleotide biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of a ribonucleotide, a compound consisting of ribonucleoside (a base linked to a ribose sugar) esterified with a phosphate group at either the 3' or 5'-hydroxyl group of the sugar." []
-synonym: "ribonucleotide anabolism" EXACT []
-synonym: "ribonucleotide biosynthesis" EXACT []
-synonym: "ribonucleotide formation" EXACT []
-synonym: "ribonucleotide synthesis" EXACT []
-is_a: GO:0009165 ! nucleotide biosynthetic process
-is_a: GO:0009259 ! ribonucleotide metabolic process
-is_a: GO:0046390 ! ribose phosphate biosynthetic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -13583,6 +13341,24 @@ is_a: GO:0045995 ! regulation of embryonic development
 intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002211 GO:0045448 ! regulates mitotic cell cycle, embryonic
 relationship: RO:0002211 GO:0045448 ! regulates mitotic cell cycle, embryonic
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0009799
+name: specification of symmetry
+namespace: biological_process
+def: "The establishment of an organism's body plan or part of an organism such that a similar arrangement in form and relationship of parts around a common axis, or around each side of a plane is created." []
+synonym: "determination of symmetry" EXACT []
+is_a: GO:0007389 ! pattern specification process
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0009855
+name: determination of bilateral symmetry
+namespace: biological_process
+def: "The establishment of an organism's body plan or part of an organism with respect to a single longitudinal plane. The pattern can either be symmetric, such that the halves are mirror images, or asymmetric where the pattern deviates from this symmetry." []
+synonym: "determination of bilateral asymmetry" EXACT []
+is_a: GO:0009799 ! specification of symmetry
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -16936,7 +16712,6 @@ synonym: "iron-sulfur cluster biosynthesis" RELATED []
 synonym: "iron-sulphur cluster assembly" EXACT []
 is_a: GO:0006790 ! sulfur compound metabolic process
 is_a: GO:0031163 ! metallo-sulfur cluster assembly
-is_a: GO:0051186 ! cofactor metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -17105,6 +16880,10 @@ xref: reactome:R-HSA-2529020
 xref: reactome:R-HSA-389762
 xref: reactome:R-HSA-392752
 xref: reactome:R-HSA-442724
+xref: reactome:R-HSA-442726
+xref: reactome:R-HSA-442737
+xref: reactome:R-HSA-442739
+xref: reactome:R-HSA-444253
 xref: reactome:R-HSA-445079
 xref: reactome:R-HSA-5654690
 xref: reactome:R-HSA-5654692
@@ -17266,6 +17045,17 @@ namespace: biological_process
 def: "The process whose specific outcome is the progression of the dendrite over time, from its formation to the mature structure." []
 is_a: GO:0031175 ! neuron projection development
 is_a: GO:0048856 ! anatomical structure development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0016363
+name: nuclear matrix
+namespace: cellular_component
+def: "The dense fibrillar network lying on the inner side of the nuclear membrane." []
+synonym: "nucleoskeleton" EXACT []
+xref: Wikipedia:Nuclear_matrix
+is_a: GO:0044428 ! nuclear part
+relationship: BFO:0000050 GO:0034399 ! part of nuclear periphery
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -18705,7 +18495,6 @@ synonym: "lactate formation from pyruvate" EXACT []
 synonym: "lactate synthesis from pyruvate" EXACT []
 synonym: "pyruvate fermentation to lactate" EXACT []
 xref: Reactome:R-HSA-71849.1
-is_a: GO:0006090 ! pyruvate metabolic process
 is_a: GO:0019249 ! lactate biosynthetic process
 relationship: BFO:0000051 GO:0004457 ! has part lactate dehydrogenase activity
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
@@ -18721,7 +18510,6 @@ synonym: "lactate formation" EXACT []
 synonym: "lactate synthesis" EXACT []
 is_a: GO:0006089 ! lactate metabolic process
 is_a: GO:0072330 ! monocarboxylic acid biosynthetic process
-is_a: GO:1901617 ! organic hydroxy compound biosynthetic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -18734,19 +18522,6 @@ is_a: GO:0005996 ! monosaccharide metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
-id: GO:0019359
-name: nicotinamide nucleotide biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of nicotinamide nucleotides, any nucleotide that contains combined nicotinamide." []
-synonym: "nicotinamide nucleotide anabolism" EXACT []
-synonym: "nicotinamide nucleotide biosynthesis" EXACT []
-synonym: "nicotinamide nucleotide formation" EXACT []
-synonym: "nicotinamide nucleotide synthesis" EXACT []
-is_a: GO:0019363 ! pyridine nucleotide biosynthetic process
-is_a: GO:0046496 ! nicotinamide nucleotide metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
 id: GO:0019362
 name: pyridine nucleotide metabolic process
 namespace: biological_process
@@ -18755,22 +18530,6 @@ synonym: "pyridine nucleotide metabolism" EXACT []
 is_a: GO:0006733 ! oxidoreduction coenzyme metabolic process
 is_a: GO:0009117 ! nucleotide metabolic process
 is_a: GO:0072524 ! pyridine-containing compound metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
-id: GO:0019363
-name: pyridine nucleotide biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of a pyridine nucleotide, a nucleotide characterized by a pyridine derivative as a nitrogen base." []
-synonym: "pyridine nucleotide anabolism" EXACT []
-synonym: "pyridine nucleotide biosynthesis" EXACT []
-synonym: "pyridine nucleotide formation" EXACT []
-synonym: "pyridine nucleotide synthesis" EXACT []
-xref: MetaCyc:PYRIDNUCSYN-PWY
-is_a: GO:0009108 ! coenzyme biosynthetic process
-is_a: GO:0009165 ! nucleotide biosynthetic process
-is_a: GO:0019362 ! pyridine nucleotide metabolic process
-is_a: GO:0072525 ! pyridine-containing compound biosynthetic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -19050,7 +18809,6 @@ synonym: "quinolinate formation" EXACT []
 synonym: "quinolinate synthesis" EXACT []
 is_a: GO:0043650 ! dicarboxylic acid biosynthetic process
 is_a: GO:0046874 ! quinolinate metabolic process
-is_a: GO:0072525 ! pyridine-containing compound biosynthetic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -19586,6 +19344,22 @@ is_a: GO:0030155 ! regulation of cell adhesion
 intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002211 GO:0098609 ! regulates cell-cell adhesion
 relationship: RO:0002211 GO:0098609 ! regulates cell-cell adhesion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0022408
+name: negative regulation of cell-cell adhesion
+namespace: biological_process
+def: "Any process that stops, prevents or reduces the rate or extent of cell adhesion to another cell." []
+synonym: "down regulation of cell-cell adhesion" EXACT []
+synonym: "down-regulation of cell-cell adhesion" EXACT []
+synonym: "downregulation of cell-cell adhesion" EXACT []
+synonym: "inhibition of cell-cell adhesion" NARROW []
+is_a: GO:0007162 ! negative regulation of cell adhesion
+is_a: GO:0022407 ! regulation of cell-cell adhesion
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002212 GO:0098609 ! negatively regulates cell-cell adhesion
+relationship: RO:0002212 GO:0098609 ! negatively regulates cell-cell adhesion
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -21599,6 +21373,16 @@ relationship: BFO:0000050 GO:0007420 ! part of brain development
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
+id: GO:0030902
+name: hindbrain development
+namespace: biological_process
+def: "The process whose specific outcome is the progression of the hindbrain over time, from its formation to the mature structure. The hindbrain is the posterior of the three primary divisions of the developing chordate brain, or the corresponding part of the adult brain (in vertebrates, includes the cerebellum, pons, and medulla oblongata and controls the autonomic functions and equilibrium)." []
+synonym: "rhombencephalon development" EXACT []
+is_a: GO:0048856 ! anatomical structure development
+relationship: BFO:0000050 GO:0007420 ! part of brain development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0030968
 name: endoplasmic reticulum unfolded protein response
 namespace: biological_process
@@ -21777,6 +21561,10 @@ namespace: molecular_function
 def: "Interacting selectively and non-covalently with a heat shock protein, any protein synthesized or activated in response to heat shock." []
 is_a: GO:0005515 ! protein binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0031076
+name: embryonic camera-type eye development
 
 [Term]
 id: GO:0031088
@@ -23665,7 +23453,6 @@ synonym: "molybdopterin cofactor synthesis" EXACT []
 xref: MetaCyc:Molybdenum-Cofactor-Biosynthesis
 is_a: GO:0018130 ! heterocycle biosynthetic process
 is_a: GO:0043545 ! molybdopterin cofactor metabolic process
-is_a: GO:0046039 ! GTP metabolic process
 is_a: GO:0051188 ! cofactor biosynthetic process
 is_a: GO:0090407 ! organophosphate biosynthetic process
 is_a: GO:1901362 ! organic cyclic compound biosynthetic process
@@ -25347,6 +25134,33 @@ id: GO:0034101
 name: erythrocyte homeostasis
 
 [Term]
+id: GO:0034109
+name: homotypic cell-cell adhesion
+
+[Term]
+id: GO:0034110
+name: regulation of homotypic cell-cell adhesion
+namespace: biological_process
+def: "Any process that modulates the frequency, rate, or extent of homotypic cell-cell adhesion." []
+is_a: GO:0022407 ! regulation of cell-cell adhesion
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002211 GO:0034109 ! regulates homotypic cell-cell adhesion
+relationship: RO:0002211 GO:0034109 ! regulates homotypic cell-cell adhesion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0034111
+name: negative regulation of homotypic cell-cell adhesion
+namespace: biological_process
+def: "Any process that stops, prevents, or reduces the frequency, rate, or extent of homotypic cell-cell adhesion." []
+is_a: GO:0022408 ! negative regulation of cell-cell adhesion
+is_a: GO:0034110 ! regulation of homotypic cell-cell adhesion
+intersection_of: GO:0008150 ! biological_process
+intersection_of: RO:0002212 GO:0034109 ! negatively regulates homotypic cell-cell adhesion
+relationship: RO:0002212 GO:0034109 ! negatively regulates homotypic cell-cell adhesion
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
 id: GO:0034204
 name: lipid translocation
 namespace: biological_process
@@ -25483,6 +25297,22 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0034332
 name: adherens junction organization
+namespace: biological_process
+def: "A process that is carried out at the cellular level which results in the assembly, arrangement of constituent parts, or disassembly of an adherens junction. An adherens junction is a cell junction at which the cytoplasmic face of the plasma membrane is attached to actin filaments." []
+synonym: "adherens junction assembly and maintenance" EXACT []
+synonym: "adherens junction organisation" EXACT []
+is_a: GO:0034330 ! cell junction organization
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0034333
+name: adherens junction assembly
+namespace: biological_process
+def: "The aggregation, arrangement and bonding together of a set of components to form an adherens junction. An adherens junction is a cell junction at which the cytoplasmic face of the plasma membrane is attached to actin filaments." []
+synonym: "adherens junction formation" EXACT []
+is_a: GO:0034329 ! cell junction assembly
+is_a: GO:0034332 ! adherens junction organization
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0034349
@@ -25568,6 +25398,10 @@ def: "Any process in which a telomere is transported to, and/or maintained in, a
 synonym: "telomere localisation" EXACT []
 is_a: GO:0050000 ! chromosome localization
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0034399
+name: nuclear periphery
 
 [Term]
 id: GO:0034401
@@ -28228,18 +28062,6 @@ is_a: GO:0019985 ! translesion synthesis
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
-id: GO:0042278
-name: purine nucleoside metabolic process
-namespace: biological_process
-def: "The chemical reactions and pathways involving one of a family of organic molecules consisting of a purine base covalently bonded to a sugar ribose (a ribonucleoside) or deoxyribose (a deoxyribonucleoside)." []
-synonym: "purine metabolic process" BROAD []
-synonym: "purine metabolism" BROAD []
-synonym: "purine nucleoside metabolism" EXACT []
-is_a: GO:0009116 ! nucleoside metabolic process
-is_a: GO:0072521 ! purine-containing compound metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
 id: GO:0042287
 name: MHC protein binding
 namespace: molecular_function
@@ -28312,10 +28134,10 @@ name: penicillin metabolic process
 namespace: biological_process
 def: "The chemical reactions and pathways involving any antibiotic that contains the condensed beta-lactamthiazolidine ring system. Penicillins are produced naturally during the growth of various microfungi of the genera Penicillium and Aspergillus." []
 synonym: "penicillin metabolism" EXACT []
+is_a: GO:0006082 ! organic acid metabolic process
 is_a: GO:0006790 ! sulfur compound metabolic process
 is_a: GO:0019748 ! secondary metabolic process
 is_a: GO:0030653 ! beta-lactam antibiotic metabolic process
-is_a: GO:0032787 ! monocarboxylic acid metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -28859,19 +28681,6 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0042827
 name: platelet dense granule
-
-[Term]
-id: GO:0042866
-name: pyruvate biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of pyruvate, 2-oxopropanoate." []
-synonym: "pyruvate anabolism" EXACT []
-synonym: "pyruvate biosynthesis" EXACT []
-synonym: "pyruvate formation" EXACT []
-synonym: "pyruvate synthesis" EXACT []
-is_a: GO:0006090 ! pyruvate metabolic process
-is_a: GO:0072330 ! monocarboxylic acid biosynthetic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0042886
@@ -31773,7 +31582,6 @@ def: "The chemical reactions and pathways involving daunorubicin, a chemotherape
 is_a: GO:0006725 ! cellular aromatic compound metabolic process
 is_a: GO:0030638 ! polyketide metabolic process
 is_a: GO:0030647 ! aminoglycoside antibiotic metabolic process
-is_a: GO:0097164 ! ammonium ion metabolic process
 is_a: GO:1901360 ! organic cyclic compound metabolic process
 is_a: GO:1901661 ! quinone metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
@@ -31790,7 +31598,6 @@ is_a: GO:0016137 ! glycoside metabolic process
 is_a: GO:0016999 ! antibiotic metabolic process
 is_a: GO:0030638 ! polyketide metabolic process
 is_a: GO:0034308 ! primary alcohol metabolic process
-is_a: GO:0097164 ! ammonium ion metabolic process
 is_a: GO:1901360 ! organic cyclic compound metabolic process
 is_a: GO:1901661 ! quinone metabolic process
 is_a: GO:1902644 ! tertiary alcohol metabolic process
@@ -32853,7 +32660,6 @@ synonym: "upregulation of DNA replication" EXACT []
 is_a: GO:0006275 ! regulation of DNA replication
 is_a: GO:0010557 ! positive regulation of macromolecule biosynthetic process
 is_a: GO:0031328 ! positive regulation of cellular biosynthetic process
-is_a: GO:0051054 ! positive regulation of DNA metabolic process
 intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002213 GO:0006260 ! positively regulates DNA replication
 relationship: RO:0002213 GO:0006260 ! positively regulates DNA replication
@@ -33886,16 +33692,6 @@ is_a: GO:0046015 ! regulation of transcription by glucose
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
-id: GO:0046031
-name: ADP metabolic process
-namespace: biological_process
-def: "The chemical reactions and pathways involving ADP, adenosine 5'-diphosphate." []
-synonym: "ADP metabolism" EXACT []
-is_a: GO:0009150 ! purine ribonucleotide metabolic process
-is_a: GO:0009179 ! purine ribonucleoside diphosphate metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
 id: GO:0046034
 name: ATP metabolic process
 namespace: biological_process
@@ -33904,27 +33700,6 @@ synonym: "ATP metabolism" EXACT []
 is_a: GO:0009150 ! purine ribonucleotide metabolic process
 is_a: GO:0009205 ! purine ribonucleoside triphosphate metabolic process
 is_a: GO:0017144 ! drug metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
-id: GO:0046039
-name: GTP metabolic process
-namespace: biological_process
-def: "The chemical reactions and pathways involving GTP, guanosine triphosphate." []
-synonym: "GTP metabolism" EXACT []
-is_a: GO:0009150 ! purine ribonucleotide metabolic process
-is_a: GO:0009205 ! purine ribonucleoside triphosphate metabolic process
-is_a: GO:1901068 ! guanosine-containing compound metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
-id: GO:0046128
-name: purine ribonucleoside metabolic process
-namespace: biological_process
-def: "The chemical reactions and pathways involving any ribonucleoside, a nucleoside in which purine base is linked to a ribose (beta-D-ribofuranose) molecule." []
-synonym: "purine ribonucleoside metabolism" EXACT []
-is_a: GO:0009119 ! ribonucleoside metabolic process
-is_a: GO:0042278 ! purine nucleoside metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -34051,20 +33826,6 @@ name: SMAD binding
 namespace: molecular_function
 def: "Interacting selectively and non-covalently with a SMAD signaling protein." []
 is_a: GO:0005515 ! protein binding
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
-id: GO:0046390
-name: ribose phosphate biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of ribose phosphate, any phosphorylated ribose sugar." []
-synonym: "ribose phosphate anabolism" EXACT []
-synonym: "ribose phosphate biosynthesis" EXACT []
-synonym: "ribose phosphate formation" EXACT []
-synonym: "ribose phosphate synthesis" EXACT []
-is_a: GO:0019693 ! ribose phosphate metabolic process
-is_a: GO:0090407 ! organophosphate biosynthetic process
-is_a: GO:1901137 ! carbohydrate derivative biosynthetic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -34580,9 +34341,7 @@ name: quinolinate metabolic process
 namespace: biological_process
 def: "The chemical reactions and pathways involving quinolinate, the anion of quinolinic acid, also known as 2,3-pyridinedicarboxylic acid." []
 synonym: "quinolinate metabolism" EXACT []
-is_a: GO:0017144 ! drug metabolic process
 is_a: GO:0043648 ! dicarboxylic acid metabolic process
-is_a: GO:0072524 ! pyridine-containing compound metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
@@ -34763,15 +34522,6 @@ relationship: RO:0002211 GO:0016303 ! regulates 1-phosphatidylinositol-3-kinase 
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
-id: GO:0046939
-name: nucleotide phosphorylation
-namespace: biological_process
-def: "The process of introducing one or more phosphate groups into a nucleotide to produce a phosphorylated nucleoside." []
-is_a: GO:0009117 ! nucleotide metabolic process
-is_a: GO:0016310 ! phosphorylation
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-
-[Term]
 id: GO:0046942
 name: carboxylic acid transport
 namespace: biological_process
@@ -34867,6 +34617,15 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0048041
 name: focal adhesion assembly
+
+[Term]
+id: GO:0048048
+name: embryonic eye morphogenesis
+namespace: biological_process
+def: "The process occurring in the embryo by which the anatomical structures of the post-embryonic eye are generated and organized." []
+is_a: GO:0048562 ! embryonic organ morphogenesis
+is_a: GO:0048592 ! eye morphogenesis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0048066
@@ -35461,6 +35220,12 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0048562
 name: embryonic organ morphogenesis
+namespace: biological_process
+def: "Morphogenesis, during the embryonic phase, of a tissue or tissues that work together to perform a specific function or functions. Morphogenesis is the process in which anatomical structures are generated and organized. Organs are commonly observed as visibly distinct structures, but may also exist as loosely associated clusters of cells that work together to perform a specific function or functions." []
+is_a: GO:0009887 ! animal organ morphogenesis
+is_a: GO:0048598 ! embryonic morphogenesis
+relationship: BFO:0000050 GO:0048568 ! part of embryonic organ development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0048565
@@ -35595,6 +35360,27 @@ property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 [Term]
 id: GO:0048592
 name: eye morphogenesis
+namespace: biological_process
+alt_id: GO:0048748
+def: "The process in which the anatomical structures of the eye are generated and organized." []
+is_a: GO:0090596 ! sensory organ morphogenesis
+relationship: BFO:0000050 GO:0001654 ! part of eye development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+
+[Term]
+id: GO:0048593
+name: camera-type eye morphogenesis
+
+[Term]
+id: GO:0048596
+name: embryonic camera-type eye morphogenesis
+namespace: biological_process
+def: "The process in which the anatomical structures of the eye are generated and organized during embryonic development." []
+synonym: "embryonic eye morphogenesis" BROAD []
+is_a: GO:0048048 ! embryonic eye morphogenesis
+relationship: BFO:0000050 GO:0031076 ! part of embryonic camera-type eye development
+relationship: BFO:0000050 GO:0048593 ! part of camera-type eye morphogenesis
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 
 [Term]
 id: GO:0048598
@@ -44803,26 +44589,6 @@ created_by: midori
 creation_date: 2011-01-04T03:03:59Z
 
 [Term]
-id: GO:0072522
-name: purine-containing compound biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of a purine-containing compound, i.e. any compound that contains purine or a formal derivative thereof." []
-synonym: "purine and derivative biosynthetic process" EXACT []
-synonym: "purine-containing compound anabolism" EXACT []
-synonym: "purine-containing compound biosynthesis" EXACT []
-synonym: "purine-containing compound formation" EXACT []
-synonym: "purine-containing compound synthesis" EXACT []
-is_a: GO:0018130 ! heterocycle biosynthetic process
-is_a: GO:0019438 ! aromatic compound biosynthetic process
-is_a: GO:0044271 ! cellular nitrogen compound biosynthetic process
-is_a: GO:0072521 ! purine-containing compound metabolic process
-is_a: GO:1901362 ! organic cyclic compound biosynthetic process
-is_a: GO:1901566 ! organonitrogen compound biosynthetic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-created_by: midori
-creation_date: 2011-01-04T03:15:29Z
-
-[Term]
 id: GO:0072524
 name: pyridine-containing compound metabolic process
 namespace: biological_process
@@ -44836,25 +44602,6 @@ is_a: GO:1901564 ! organonitrogen compound metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: midori
 creation_date: 2011-01-04T03:21:47Z
-
-[Term]
-id: GO:0072525
-name: pyridine-containing compound biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of a pyridine-containing compound, i.e. any compound that contains pyridine or a formal derivative thereof." []
-synonym: "pyridine and derivative biosynthetic process" EXACT []
-synonym: "pyridine-containing compound anabolism" EXACT []
-synonym: "pyridine-containing compound biosynthesis" EXACT []
-synonym: "pyridine-containing compound formation" EXACT []
-synonym: "pyridine-containing compound synthesis" EXACT []
-is_a: GO:0018130 ! heterocycle biosynthetic process
-is_a: GO:0044271 ! cellular nitrogen compound biosynthetic process
-is_a: GO:0072524 ! pyridine-containing compound metabolic process
-is_a: GO:1901362 ! organic cyclic compound biosynthetic process
-is_a: GO:1901566 ! organonitrogen compound biosynthetic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-created_by: midori
-creation_date: 2011-01-04T03:23:01Z
 
 [Term]
 id: GO:0072537
@@ -45898,6 +45645,17 @@ id: GO:0090592
 name: DNA synthesis involved in DNA replication
 
 [Term]
+id: GO:0090596
+name: sensory organ morphogenesis
+namespace: biological_process
+def: "Morphogenesis of a sensory organ. A sensory organ is defined as a tissue or set of tissues that work together to receive and transmit signals from external or internal stimuli. Morphogenesis is the process in which anatomical structures are generated and organized. Organs are commonly observed as visibly distinct structures, but may also exist as loosely associated clusters of cells that work together to perform a specific function or functions." []
+is_a: GO:0009887 ! animal organ morphogenesis
+relationship: BFO:0000050 GO:0007423 ! part of sensory organ development
+property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
+created_by: tanyaberardini
+creation_date: 2014-08-22T13:23:20Z
+
+[Term]
 id: GO:0090734
 name: site of DNA damage
 namespace: cellular_component
@@ -46048,18 +45806,6 @@ is_a: GO:0005488 ! binding
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: paola
 creation_date: 2011-09-23T02:31:01Z
-
-[Term]
-id: GO:0097164
-name: ammonium ion metabolic process
-namespace: biological_process
-def: "The chemical reactions and pathways involving the ammonium ion." []
-synonym: "ammonium ion metabolism" EXACT []
-synonym: "ammonium metabolic process" RELATED []
-is_a: GO:0006807 ! nitrogen compound metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-created_by: paola
-creation_date: 2011-09-28T04:21:30Z
 
 [Term]
 id: GO:0097190
@@ -46530,9 +46276,7 @@ id: GO:0098501
 name: polynucleotide dephosphorylation
 namespace: biological_process
 def: "The process of removing one or more phosphate groups from a polynucleotide." []
-is_a: GO:0006139 ! nucleobase-containing compound metabolic process
 is_a: GO:0016311 ! dephosphorylation
-is_a: GO:0043170 ! macromolecule metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: davidos
 creation_date: 2013-09-18T14:49:10Z
@@ -46542,7 +46286,6 @@ id: GO:0098502
 name: DNA dephosphorylation
 namespace: biological_process
 def: "The process of removing one or more phosphate groups from a DNA molecule." []
-is_a: GO:0006259 ! DNA metabolic process
 is_a: GO:0098501 ! polynucleotide dephosphorylation
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: davidos
@@ -48840,19 +48583,6 @@ created_by: kmv
 creation_date: 2012-06-20T07:47:28Z
 
 [Term]
-id: GO:1901068
-name: guanosine-containing compound metabolic process
-namespace: biological_process
-def: "The chemical reactions and pathways involving guanosine-containing compounds (guanosines)." []
-synonym: "guanosine-containing compound metabolism" EXACT []
-synonym: "guanosines metabolic process" EXACT []
-synonym: "guanosines metabolism" EXACT []
-is_a: GO:0046128 ! purine ribonucleoside metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-created_by: bf
-creation_date: 2012-07-02T01:51:37Z
-
-[Term]
 id: GO:1901074
 name: regulation of engulfment of apoptotic cell
 namespace: biological_process
@@ -48989,21 +48719,6 @@ is_a: GO:0071704 ! organic substance metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: bf
 creation_date: 2012-07-12T04:05:09Z
-
-[Term]
-id: GO:1901137
-name: carbohydrate derivative biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of carbohydrate derivative." []
-synonym: "carbohydrate derivative anabolism" EXACT []
-synonym: "carbohydrate derivative biosynthesis" EXACT []
-synonym: "carbohydrate derivative formation" EXACT []
-synonym: "carbohydrate derivative synthesis" EXACT []
-is_a: GO:1901135 ! carbohydrate derivative metabolic process
-is_a: GO:1901576 ! organic substance biosynthetic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-created_by: bf
-creation_date: 2012-07-12T04:05:39Z
 
 [Term]
 id: GO:1901213
@@ -49613,35 +49328,6 @@ is_a: GO:0006520 ! cellular amino acid metabolic process
 property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
 created_by: tb
 creation_date: 2012-11-08T17:39:50Z
-
-[Term]
-id: GO:1901606
-name: alpha-amino acid catabolic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the breakdown of an alpha-amino acid." []
-synonym: "alpha-amino acid breakdown" EXACT []
-synonym: "alpha-amino acid catabolism" EXACT []
-synonym: "alpha-amino acid degradation" EXACT []
-is_a: GO:0009063 ! cellular amino acid catabolic process
-is_a: GO:1901605 ! alpha-amino acid metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-created_by: tb
-creation_date: 2012-11-08T17:39:54Z
-
-[Term]
-id: GO:1901607
-name: alpha-amino acid biosynthetic process
-namespace: biological_process
-def: "The chemical reactions and pathways resulting in the formation of an alpha-amino acid." []
-synonym: "alpha-amino acid anabolism" EXACT []
-synonym: "alpha-amino acid biosynthesis" EXACT []
-synonym: "alpha-amino acid formation" EXACT []
-synonym: "alpha-amino acid synthesis" EXACT []
-is_a: GO:0008652 ! cellular amino acid biosynthetic process
-is_a: GO:1901605 ! alpha-amino acid metabolic process
-property_value: IAO:0000412 http://purl.obolibrary.org/obo/go.owl
-created_by: tb
-creation_date: 2012-11-08T17:39:58Z
 
 [Term]
 id: GO:1901615
@@ -53803,7 +53489,6 @@ synonym: "upregulation of oxidative phosphorylation" EXACT []
 synonym: "upregulation of respiratory-chain phosphorylation" EXACT []
 is_a: GO:0002082 ! regulation of oxidative phosphorylation
 is_a: GO:0042327 ! positive regulation of phosphorylation
-is_a: GO:1903580 ! positive regulation of ATP metabolic process
 intersection_of: GO:0008150 ! biological_process
 intersection_of: RO:0002213 GO:0006119 ! positively regulates oxidative phosphorylation
 relationship: RO:0002213 GO:0006119 ! positively regulates oxidative phosphorylation
