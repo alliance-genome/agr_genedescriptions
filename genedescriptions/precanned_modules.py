@@ -17,35 +17,35 @@ def set_gene_ontology_module(dm: DataManager, conf_parser: GenedescConfigParser,
     go_sent_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.GO, data_manager=dm,
                                                   config=conf_parser)
     contributes_to_module_sentences = go_sent_generator.get_module_sentences(
-        config=conf_parser, aspect='F', qualifier='contributes_to', merge_groups_with_same_prefix=True,
+        aspect='F', qualifier='contributes_to', merge_groups_with_same_prefix=True,
         keep_only_best_group=True)
     if contributes_to_module_sentences.contains_sentences():
         func_module_sentences = go_sent_generator_exp.get_module_sentences(
-            config=conf_parser, aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+            aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=func_module_sentences,
                                                                    module=Module.GO_FUNCTION)
     else:
         func_module_sentences = go_sent_generator.get_module_sentences(
-            config=conf_parser, aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+            aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(
             module_sentences=func_module_sentences, module=Module.GO_FUNCTION)
     gene_desc.set_or_extend_module_description_and_final_stats(
         module_sentences=contributes_to_module_sentences, module=Module.GO_FUNCTION)
     proc_module_sentences = go_sent_generator.get_module_sentences(
-        config=conf_parser, aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+        aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True)
     gene_desc.set_or_extend_module_description_and_final_stats(
         module_sentences=proc_module_sentences, module=Module.GO_PROCESS)
     colocalizes_with_module_sentences = go_sent_generator.get_module_sentences(
-        config=conf_parser, aspect='C', qualifier='colocalizes_with', merge_groups_with_same_prefix=True,
+        aspect='C', qualifier='colocalizes_with', merge_groups_with_same_prefix=True,
         keep_only_best_group=True)
     if colocalizes_with_module_sentences.contains_sentences():
         comp_module_sentences = go_sent_generator_exp.get_module_sentences(
-            config=conf_parser, aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+            aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(
             module_sentences=comp_module_sentences, module=Module.GO_COMPONENT)
     else:
         comp_module_sentences = go_sent_generator.get_module_sentences(
-            config=conf_parser, aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+            aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(
             module_sentences=comp_module_sentences, module=Module.GO_COMPONENT)
     gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=colocalizes_with_module_sentences,
@@ -65,20 +65,20 @@ def set_disease_module(df: DataManager, conf_parser: GenedescConfigParser, gene_
                                                           config=conf_parser, limit_to_group="EXPERIMENTAL",
                                                           humans=human)
     disease_exp_module_sentences = do_sentence_exp_generator.get_module_sentences(
-        config=conf_parser, aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False)
+        aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module=Module.DO_EXPERIMENTAL,
                                                                module_sentences=disease_exp_module_sentences)
     do_sentence_bio_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.DO_BIOMARKER,
                                                           data_manager=df, config=conf_parser,
                                                           limit_to_group="BIOMARKER", humans=human)
     disease_bio_module_sentences = do_sentence_bio_generator.get_module_sentences(
-        config=conf_parser, aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False)
+        aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module=Module.DO_BIOMARKER,
                                                                module_sentences=disease_bio_module_sentences)
     do_via_orth_sentence_generator = OntologySentenceGenerator(
         gene_id=gene.id, module=Module.DO_ORTHOLOGY, data_manager=df, config=conf_parser, humans=human)
     disease_via_orth_module_sentences = do_via_orth_sentence_generator.get_module_sentences(
-        config=conf_parser, aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False,
+        aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False,
         high_priority_term_ids=orthologs_key_diseases)
     gene_desc.set_or_extend_module_description_and_final_stats(module=Module.DO_ORTHOLOGY,
                                                                module_sentences=disease_via_orth_module_sentences)
@@ -88,12 +88,13 @@ def set_disease_module(df: DataManager, conf_parser: GenedescConfigParser, gene_
 
 
 def set_alliance_human_orthology_module(orthologs: List[List[str]], gene_desc: GeneDescription,
-                                        excluded_orthologs: bool = False):
+                                        config: GenedescConfigParser, excluded_orthologs: bool = False):
     """set orthology module for Alliance human orthologs
 
     Args:
         orthologs (List[List[str]]): list of human orthologs, containing gene_id, gene_symbol, and gene_name
         gene_desc (GeneDescription): the gene description object to update
+        config (GenedescConfigParser): a gene descriptions configuration object
         excluded_orthologs (bool): whether some of the orthologs have been excluded from the final set. If true, the
             final sentence will include a prefix to specify that some orthologs have been omitted
     """
@@ -104,16 +105,19 @@ def set_alliance_human_orthology_module(orthologs: List[List[str]], gene_desc: G
             orthologs_display = orthologs_display[0:3]
             prefix = "several human genes including"
         sentence = "orthologous to " + prefix + " " + concatenate_words_with_oxford_comma(
-            [orth[1] + " (" + orth[2] + ")" if orth[2] else orth[1] for orth in orthologs_display])
+            [orth[1] + " (" + orth[2] + ")" if orth[2] else orth[1] for orth in orthologs_display],
+            separator=config.get_terms_delimiter())
         gene_desc.set_or_extend_module_description_and_final_stats(module=Module.ORTHOLOGY, description=sentence)
 
 
-def generate_ortholog_sentence_wormbase_human(orthologs: List[List[str]], human_genes_props: Dict[str, List[str]]):
+def generate_ortholog_sentence_wormbase_human(orthologs: List[List[str]], human_genes_props: Dict[str, List[str]],
+                                              config: GenedescConfigParser):
     """build orthology sentence for WormBase human orthologs
 
     Args:
         orthologs (List[List[str]]): list of human orthologs, containing gene_id, gene_symbol
         human_genes_props (Dict[str, List[str]]): dictionary containing human gene properties
+        config (GenedescConfigParser): a gene description configuration object
     Returns:
         Tuple[list, str]: the orthologs and the sentence
     """
@@ -124,19 +128,21 @@ def generate_ortholog_sentence_wormbase_human(orthologs: List[List[str]], human_
     symbol_name_arr = sorted([human_genes_props[best_orth[0]][1] + " (" + human_genes_props[best_orth[0]][2] +
                               ")" if best_orth[0] in human_genes_props and human_genes_props[best_orth[0]] else
                               best_orth[1] for best_orth in orthologs])
-    orth_sentence = "is an ortholog of " + prefix + concatenate_words_with_oxford_comma(symbol_name_arr)
+    orth_sentence = "is an ortholog of " + prefix + concatenate_words_with_oxford_comma(
+        symbol_name_arr, separator=config.get_terms_delimiter())
     return [human_genes_props[best_orth[0]][1] for best_orth in orthologs if best_orth[0] in human_genes_props and
             human_genes_props[best_orth[0]]], orth_sentence
 
 
 def generate_ortholog_sentence_wormbase_non_c_elegans(orthologs: List[List[str]], orthologs_sp_fullname: str,
-                                                      api_manager: APIManager):
+                                                      api_manager: APIManager, config: GenedescConfigParser):
     """build orthology sentence for WormBase non-human hortologs
 
         Args:
             orthologs (List[str]): list of human orthologs, containing gene_id, gene_symbol
             orthologs_sp_fullname (str): full name of species from which to extract orthologs
             api_manager (APIManager): api manager to send requests to wormbase and textpresso
+            config (GenedescConfigParser): a gene description configuration object
         Returns:
             str: the orthology sentence
         """
@@ -178,10 +184,12 @@ def generate_ortholog_sentence_wormbase_non_c_elegans(orthologs: List[List[str]]
             sentences_arr = []
             if len(gene_symbols_wo_class) > 0:
                 sentences_arr.append(orthologs_sp_fullname + " " + concatenate_words_with_oxford_comma(
-                    gene_symbols_wo_class))
+                    gene_symbols_wo_class, separator=config.get_terms_delimiter()))
             if len(classes_symbols) > 0:
-                genes_symbols_in_classes_sent = concatenate_words_with_oxford_comma(genes_symbols_in_classes)
-                classes_symbols_sent = concatenate_words_with_oxford_comma(classes_symbols)
+                genes_symbols_in_classes_sent = concatenate_words_with_oxford_comma(
+                    genes_symbols_in_classes, separator=config.get_terms_delimiter())
+                classes_symbols_sent = concatenate_words_with_oxford_comma(classes_symbols,
+                                                                           separator=config.get_terms_delimiter())
                 classes_word = "classes" if len(classes_symbols) > 1 else "class"
                 sentences_arr.append("members of the " + orthologs_sp_fullname + " " + classes_symbols_sent +
                                      " gene " + classes_word + " including " + genes_symbols_in_classes_sent)
@@ -190,5 +198,6 @@ def generate_ortholog_sentence_wormbase_non_c_elegans(orthologs: List[List[str]]
             # sort orthologs alphabetically
             orthologs_symbols = sorted([orth[1] for orth in orthologs])
             orth_sentence = "is an ortholog of " + orthologs_sp_fullname + " " + \
-                            concatenate_words_with_oxford_comma(orthologs_symbols)
+                            concatenate_words_with_oxford_comma(orthologs_symbols,
+                                                                separator=config.get_terms_delimiter())
     return orth_sentence

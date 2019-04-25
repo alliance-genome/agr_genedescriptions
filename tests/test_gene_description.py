@@ -33,7 +33,8 @@ class TestDescriptionsGenerator(unittest.TestCase):
         logging.basicConfig(filename=None, level="INFO", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
 
     def test_set_or_extend_module_description_and_final_stats(self):
-        gene_desc = GeneDescription(gene_id="FB:FBgn0027655", gene_name="Test gene", add_gene_name=False)
+        gene_desc = GeneDescription(gene_id="FB:FBgn0027655", gene_name="Test gene", add_gene_name=False,
+                                    config=self.conf_parser)
         go_sent_generator = OntologySentenceGenerator(gene_id="FB:FBgn0027655", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
@@ -43,7 +44,8 @@ class TestDescriptionsGenerator(unittest.TestCase):
         self.assertTrue(gene_desc.description, "Is involved in several processes, including axo-dendritic transport, "
                                                "establishment of mitotic spindle orientation, and positive regulation "
                                                "of extent of heterochromatin assembly")
-        gene_desc = GeneDescription(gene_id="FB:FBgn0027655", gene_name="Test gene", add_gene_name=True)
+        gene_desc = GeneDescription(gene_id="FB:FBgn0027655", gene_name="Test gene", add_gene_name=True,
+                                    config=self.conf_parser)
         gene_desc.set_or_extend_module_description_and_final_stats(module=Module.GO_PROCESS, module_sentences=sentences)
         self.assertTrue(gene_desc.description, "Test gene is involved in several processes, including axo-dendritic "
                                                "transport, establishment of mitotic spindle orientation, and positive "

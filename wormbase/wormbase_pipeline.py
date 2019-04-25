@@ -58,18 +58,19 @@ def load_data(organism, conf_parser: GenedescConfigParser):
 
 
 def set_orthology_sentence(dm: WBDataManager, orth_fullnames: List[str], gene_desc: GeneDescription,
-                           human_genes_props, api_manager):
+                           human_genes_props, api_manager, config: GenedescConfigParser):
     best_orthologs, selected_orth_name = dm.get_best_orthologs_for_gene(gene_desc.gene_id,
                                                                         orth_species_full_name=orth_fullnames)
     selected_orthologs = []
     if best_orthologs:
         gene_desc.stats.set_best_orthologs = [orth[0] for orth in best_orthologs]
         if len(orth_fullnames) == 1 and orth_fullnames[0] == "Homo sapiens":
-            sel_orthologs, orth_sent = generate_ortholog_sentence_wormbase_human(best_orthologs, human_genes_props)
+            sel_orthologs, orth_sent = generate_ortholog_sentence_wormbase_human(best_orthologs, human_genes_props,
+                                                                                 config=config)
             selected_orthologs = [orth for orth in best_orthologs if orth[1] in sel_orthologs]
         else:
             orth_sent = generate_ortholog_sentence_wormbase_non_c_elegans(best_orthologs, selected_orth_name,
-                                                                          api_manager=api_manager)
+                                                                          api_manager=api_manager, config=config)
         gene_desc.set_or_extend_module_description_and_final_stats(module=Module.ORTHOLOGY, description=orth_sent)
     return selected_orthologs
 
@@ -78,7 +79,7 @@ def set_tissue_expression_sentence(dm, gene, conf_parser, gene_desc):
     expr_sentence_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.EXPRESSION, data_manager=dm,
                                                         config=conf_parser)
     expression_module_sentences = expr_sentence_generator.get_module_sentences(
-        config=conf_parser, aspect='A', qualifier="Verified", merge_groups_with_same_prefix=True,
+        aspect='A', qualifier="Verified", merge_groups_with_same_prefix=True,
         keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=expression_module_sentences,
                                                                module=Module.EXPRESSION)
@@ -99,7 +100,7 @@ def set_expression_cluster_sentence(dm: WBDataManager, conf_parser: GenedescConf
                                                          expression_cluster_type=ExpressionClusterType.ANATOMY)
     if dm.expression_ontology is not None:
         expression_enriched_module_sentences = expr_sentence_generator.get_module_sentences(
-            config=conf_parser, aspect='A', qualifier="Enriched", merge_groups_with_same_prefix=True,
+            aspect='A', qualifier="Enriched", merge_groups_with_same_prefix=True,
             keep_only_best_group=False)
         gene_desc.set_or_extend_module_description_and_final_stats(
             module=Module.EXPRESSION_CLUSTER_ANATOMY,
@@ -109,7 +110,8 @@ def set_expression_cluster_sentence(dm: WBDataManager, conf_parser: GenedescConf
     elif ec_anatomy_terms:
         gene_desc.set_or_extend_module_description_and_final_stats(
             module=Module.EXPRESSION_CLUSTER_ANATOMY,
-            description="is enriched in " + concatenate_words_with_oxford_comma(ec_anatomy_terms) + " based on",
+            description="is enriched in " + concatenate_words_with_oxford_comma(
+                ec_anatomy_terms, separator=conf_parser.get_terms_delimiter()) + " based on",
             additional_postfix_terms_list=ec_anatomy_studies,
             additional_postfix_final_word="studies", use_single_form=True)
     ec_molreg_terms = dm.get_expression_cluster_feature(gene_id=ec_gene_id,
@@ -135,7 +137,8 @@ def set_expression_cluster_sentence(dm: WBDataManager, conf_parser: GenedescConf
         gene_desc.set_or_extend_module_description_and_final_stats(
             module=Module.EXPRESSION_CLUSTER_GENE,
             description="is affected by " + several_word +
-                        concatenate_words_with_oxford_comma(ec_genereg_terms) + " based on",
+                        concatenate_words_with_oxford_comma(ec_genereg_terms,
+                                                            separator=conf_parser.get_terms_delimiter()) + " based on",
             additional_postfix_terms_list=ec_genereg_studies,
             additional_postfix_final_word="studies", use_single_form=True)
     if ec_molreg_terms:
@@ -145,7 +148,7 @@ def set_expression_cluster_sentence(dm: WBDataManager, conf_parser: GenedescConf
         gene_desc.set_or_extend_module_description_and_final_stats(
             module=Module.EXPRESSION_CLUSTER_MOLECULE,
             description="is affected by " + several_word + concatenate_words_with_oxford_comma(
-                ec_molreg_terms[0:3]) + " based on",
+                ec_molreg_terms[0:3], separator=conf_parser.get_terms_delimiter()) + " based on",
             additional_postfix_terms_list=ec_molreg_studies,
             additional_postfix_final_word="studies", use_single_form=True)
 
@@ -164,7 +167,7 @@ def set_information_poor_sentence(orth_fullnames: List[str], selected_orthologs,
                                                                 data_manager=human_df_agr, config=conf_parser,
                                                                 humans=False, limit_to_group="EXPERIMENTAL")
             human_func_module_sentences = human_go_sent_generator.get_module_sentences(
-                config=conf_parser, aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+                aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True)
             human_func_sent = human_func_module_sentences.get_description()
             if human_func_sent:
                 gene_desc.set_or_extend_module_description_and_final_stats(
@@ -181,7 +184,8 @@ def set_information_poor_sentence(orth_fullnames: List[str], selected_orthologs,
             module=Module.PROTEIN_DOMAIN,
             description="is predicted to encode a protein with the following " + dom_word + ": " +
                         concatenate_words_with_oxford_comma([ptdom[1] if ptdom[1] != "" else ptdom[0] for
-                                                             ptdom in protein_domains]))
+                                                             ptdom in protein_domains],
+                                                            separator=conf_parser.get_terms_delimiter()))
 
 
 def set_sister_species_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser, sister_sp_fullname,
@@ -197,7 +201,7 @@ def set_sister_species_sentence(dm: WBDataManager, conf_parser: GenedescConfigPa
                                                            humans=sister_sp_fullname == "Homo sapiens",
                                                            limit_to_group="EXPERIMENTAL")
     sister_sp_module_sentences = sister_sentences_generator.get_module_sentences(
-        config=conf_parser, aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+        aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True)
     if sister_sp_module_sentences.contains_sentences():
         gene_desc.set_or_extend_module_description_and_final_stats(
             module=Module.SISTER_SP, description="in " + species[species[organism]["main_sister_species"]]["name"] +
@@ -241,10 +245,10 @@ def main():
         desc_writer.overall_properties.date = datetime.date.today().strftime("%B %d, %Y")
         for gene in dm.get_gene_data():
             logger.debug("Generating description for gene " + gene.name)
-            gene_desc = GeneDescription(gene_id=gene.id, gene_name=gene.name, add_gene_name=False)
+            gene_desc = GeneDescription(gene_id=gene.id, config=conf_parser, gene_name=gene.name, add_gene_name=False)
             selected_orthologs = set_orthology_sentence(dm=dm, orth_fullnames=dm.orth_fullnames,
                                                         human_genes_props=human_genes_props, gene_desc=gene_desc,
-                                                        api_manager=api_manager)
+                                                        api_manager=api_manager, config=conf_parser)
             set_gene_ontology_module(dm=dm, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene)
             set_tissue_expression_sentence(dm=dm, gene=gene, conf_parser=conf_parser, gene_desc=gene_desc)
             if not gene_desc.description:

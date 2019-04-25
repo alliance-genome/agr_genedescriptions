@@ -14,12 +14,12 @@ class SingleDescStats(object):
         self.total_number_do_exp_bio_annotations = 0
         self.total_number_do_via_orth_annotations = 0
         self.number_final_do_term_covering_multiple_initial_do_terms = 0
-        self.num_initial_experimental_go_ids_f = []
-        self.num_initial_experimental_go_ids_p = []
-        self.num_initial_experimental_go_ids_c = []
-        self.num_initial_go_ids_f = []
-        self.num_initial_go_ids_p = []
-        self.num_initial_go_ids_c = []
+        self.set_initial_experimental_go_ids_f = []
+        self.set_initial_experimental_go_ids_p = []
+        self.set_initial_experimental_go_ids_c = []
+        self.set_initial_go_ids_f = []
+        self.set_initial_go_ids_p = []
+        self.set_initial_go_ids_c = []
         self.set_final_experimental_go_ids_f = []
         self.set_final_experimental_go_ids_p = []
         self.set_final_experimental_go_ids_c = []
@@ -31,18 +31,7 @@ class SingleDescStats(object):
         self.set_initial_expression_ids = []
         self.set_final_do_ids = []
         self.set_best_orthologs = []
-        self.num_initial_expression_ids = 0
         self.set_final_expression_ids = []
-        self.num_final_experimental_go_ids_f = 0
-        self.num_final_experimental_go_ids_p = 0
-        self.num_final_experimental_go_ids_c = 0
-        self.num_final_go_ids_f = 0
-        self.num_final_go_ids_p = 0
-        self.num_final_go_ids_c = 0
-        self.num_initial_do_ids = 0
-        self.num_final_do_ids = 0
-        self.num_best_orthologs = 0
-        self.num_final_expression_ids = 0
         self.average_terms_level = 0
         self.coverage_percentage = 0
         self.trimmed = False
@@ -60,16 +49,6 @@ class SingleDescStats(object):
         return num_covered_nodes
 
     def calculate_stats(self, data_manager: DataManager = None):
-        self.num_final_experimental_go_ids_f = len(self.set_final_experimental_go_ids_f)
-        self.num_final_experimental_go_ids_p = len(self.set_final_experimental_go_ids_p)
-        self.num_final_experimental_go_ids_c = len(self.set_final_experimental_go_ids_c)
-        self.num_final_go_ids_f = len(self.set_final_go_ids_f)
-        self.num_final_go_ids_p = len(self.set_final_go_ids_p)
-        self.num_final_go_ids_c = len(self.set_final_go_ids_c)
-        self.num_initial_do_ids = len(self.set_initial_do_ids)
-        self.num_final_do_ids = len(self.set_final_do_ids)
-        self.num_best_orthologs = len(self.set_best_orthologs)
-        self.num_final_expression_ids = len(self.set_final_expression_ids)
         if data_manager:
             set_final_go_ids = [*self.set_final_go_ids_c, *self.set_final_go_ids_f,
                                 *self.set_final_go_ids_p]
@@ -94,18 +73,7 @@ class SingleDescStats(object):
                                        num_initial_terms if num_initial_terms > 0 else 0
 
     def delete_extra_info(self):
-        del self.set_final_experimental_go_ids_f
-        del self.set_final_experimental_go_ids_p
-        del self.set_final_experimental_go_ids_c
-        del self.set_final_go_ids_f
-        del self.set_final_go_ids_p
-        del self.set_final_go_ids_c
-        del self.set_initial_do_ids
-        del self.set_initial_go_ids
-        del self.set_initial_expression_ids
-        del self.set_final_do_ids
-        del self.set_best_orthologs
-        del self.set_final_expression_ids
+        pass
         #del self.average_terms_level
         #del self.coverage_percentage
 
@@ -181,12 +149,12 @@ class DescriptionsStats(object):
     def calculate_stats(self, gene_descriptions):
         """calculate overall stats and populate fields"""
         self.total_number_of_genes = len(gene_descriptions)
-        self.average_number_initial_go_terms_f = self._get_average("num_initial_go_ids_f", ["go_description"],
-                                                                   gene_descriptions)
-        self.average_number_initial_go_terms_p = self._get_average("num_initial_go_ids_p", ["go_description"],
-                                                                   gene_descriptions)
-        self.average_number_initial_go_terms_c = self._get_average("num_initial_go_ids_c", ["go_description"],
-                                                                   gene_descriptions)
+        self.average_number_initial_go_terms_f = self._get_average_num_items_in_list_of_sets(
+            "set_initial_go_ids_f", "go_description", gene_descriptions)
+        self.average_number_initial_go_terms_p = self._get_average_num_items_in_list_of_sets(
+            "set_initial_go_ids_p", "go_description", gene_descriptions)
+        self.average_number_initial_go_terms_c = self._get_average_num_items_in_list_of_sets(
+            "set_initial_go_ids_c", "go_description", gene_descriptions)
         self.average_number_final_go_terms_f = self._get_average_num_items_in_list_of_sets(
             "set_final_go_ids_f", "go_description", gene_descriptions)
         self.average_number_final_go_terms_p = self._get_average_num_items_in_list_of_sets(
@@ -207,8 +175,8 @@ class DescriptionsStats(object):
         self.number_genes_with_non_null_go_component_description = self._get_num_genes(gene_descriptions,
                                                                                        "go_component_description")
         self.number_genes_with_more_than_3_initial_go_terms = \
-            len([gene_desc for gene_desc in gene_descriptions if gene_desc.stats.num_initial_go_ids_f > 3 or
-                 gene_desc.stats.num_initial_go_ids_p > 3 or gene_desc.stats.num_initial_go_ids_c > 3])
+            len([gene_desc for gene_desc in gene_descriptions if len(gene_desc.stats.set_initial_go_ids_f) > 3 or
+                 len(gene_desc.stats.set_initial_go_ids_p) > 3 or len(gene_desc.stats.set_initial_go_ids_c) > 3])
         self.number_genes_with_non_null_do_description = self._get_num_genes(gene_descriptions, "do_description")
         self.number_genes_with_null_do_description = self._get_num_genes(gene_descriptions, "do_description", True)
         self.number_genes_with_non_null_do_experimental_description = self._get_num_genes(gene_descriptions,

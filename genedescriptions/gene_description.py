@@ -3,6 +3,7 @@ import inflect
 from typing import List
 
 from genedescriptions.commons import Module
+from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.descriptions_generator import OntologySentenceGenerator, ModuleSentences
 from genedescriptions.sentence_generation_functions import concatenate_words_with_oxford_comma
 from genedescriptions.stats import SingleDescStats
@@ -11,7 +12,7 @@ from genedescriptions.stats import SingleDescStats
 class GeneDescription(object):
     """gene description"""
 
-    def __init__(self, gene_id: str, gene_name: str = "", add_gene_name: bool = False):
+    def __init__(self, gene_id: str, config: GenedescConfigParser, gene_name: str = "", add_gene_name: bool = False):
         self.gene_id = gene_id
         self.gene_name = gene_name
         self.description = None
@@ -37,19 +38,19 @@ class GeneDescription(object):
         self.paper_evidences = []
         self.accession_evidences = []
         self.add_gene_name = add_gene_name
+        self.config = config
 
-    @staticmethod
-    def _concatenate_description(desc, desc_destination):
+    def _concatenate_description(self, desc, desc_destination):
         if desc_destination:
             if desc_destination.endswith("."):
                 desc_destination = desc_destination[0:-1]
-            return desc_destination + "; " + desc + "."
+            return desc_destination + self.config.get_modules_delimiter() + " " + desc + "."
         else:
             return desc[0].upper() + desc[1:] + "."
 
-    @staticmethod
-    def _merge_descriptions(desc_list: List[str]):
-        desc = "; ".join([sent[0].lower() + sent[1:].rstrip(".") for sent in desc_list if sent])
+    def _merge_descriptions(self, desc_list: List[str]):
+        desc = (self.config.get_modules_delimiter() + " ").join([sent[0].lower() + sent[1:].rstrip(".") for sent in
+                                                                 desc_list if sent])
         return desc[0].upper() + desc[1:] + "."
 
     @staticmethod
@@ -89,15 +90,18 @@ class GeneDescription(object):
             inflect_engine = inflect.engine()
             desc = description
             if additional_postfix_terms_list and len(additional_postfix_terms_list) > 0:
-                desc += " " + concatenate_words_with_oxford_comma(additional_postfix_terms_list) + " " + \
+                desc += " " + concatenate_words_with_oxford_comma(additional_postfix_terms_list,
+                                                                  separator=self.config.get_terms_delimiter()) + " " + \
                         (additional_postfix_final_word if use_single_form or len(additional_postfix_terms_list) == 1
                          else inflect_engine.plural_noun(additional_postfix_final_word))
         if desc:
             if self.description and self.description != self.gene_name:
-                self.description = self.description[0:-1] + "; " + desc + "."
+                if self.config.get_modules_delimiter() == ".":
+                    desc = desc.capitalize()
+                self.description = self.description[0:-1] + self.config.get_modules_delimiter() + " " + desc + "."
             else:
                 if not self.add_gene_name or not self.gene_name:
-                    desc = desc[0].upper() + desc[1:]
+                    desc = desc.capitalize()
                 self.description = self.gene_name + " " + desc + "." if self.add_gene_name else desc + "."
             if module == Module.GO_FUNCTION:
                 self.go_function_description = self._concatenate_description(desc, self.go_function_description)
@@ -193,29 +197,23 @@ class GeneDescription(object):
 
         """
         if module == Module.GO_FUNCTION:
-            set_initial_ids_f = self._get_module_initial_set(
+            self.stats.set_initial_go_ids_f = self._get_module_initial_set(
                 aspect="F", additional_qualifier="contributes_to", sentence_generator=sentence_generator)
-            self.stats.num_initial_go_ids_f = len(set_initial_ids_f)
-            self.stats.num_initial_experimental_go_ids_f = self._get_module_initial_num(
+            self.stats.set_initial_experimental_go_ids_f = self._get_module_initial_set(
                 aspect="F", additional_qualifier="contributes_to", sentence_generator=sentence_generator_exp_only)
-            self.stats.set_initial_go_ids.extend(set_initial_ids_f)
         elif module == Module.GO_COMPONENT:
-            set_initial_ids_c = self._get_module_initial_set(
+            self.stats.set_initial_go_ids_c = self._get_module_initial_set(
                 aspect="C", additional_qualifier="colocalizes_with", sentence_generator=sentence_generator)
-            self.stats.num_initial_go_ids_c = len(set_initial_ids_c)
-            self.stats.num_initial_experimental_go_ids_c = self._get_module_initial_num(
+            self.stats.set_initial_experimental_go_ids_c = self._get_module_initial_set(
                 aspect="C", additional_qualifier="colocalizes_with", sentence_generator=sentence_generator_exp_only)
-            self.stats.set_initial_go_ids.extend(set_initial_ids_c)
         elif module == Module.GO_PROCESS:
-            set_initial_ids_p = self._get_module_initial_set(aspect="P", sentence_generator=sentence_generator)
-            self.stats.num_initial_go_ids_p = len(set_initial_ids_p)
-            self.stats.num_initial_experimental_go_ids_p = self._get_module_initial_num(
+            self.stats.set_initial_go_ids_p = self._get_module_initial_set(
+                aspect="P", sentence_generator=sentence_generator)
+            self.stats.set_initial_experimental_go_ids_p = self._get_module_initial_set(
                 aspect="P", sentence_generator=sentence_generator_exp_only)
-            self.stats.set_initial_go_ids.extend(set_initial_ids_p)
         elif module == Module.EXPRESSION:
             self.stats.set_initial_expression_ids = self._get_module_initial_set(
                 aspect="A", main_qualifier="Verified", sentence_generator=sentence_generator)
-            self.stats.num_initial_expression_ids = len(self.stats.set_initial_expression_ids)
         elif module == Module.DO_EXPERIMENTAL:
             self.stats.total_number_do_exp_bio_annotations += len(sentence_generator.annotations)
             self.stats.set_initial_do_ids = self._get_merged_ids(

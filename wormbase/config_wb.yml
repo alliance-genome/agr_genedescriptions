@@ -1,11 +1,13 @@
 generic:
   cache_location: "gene_descriptions_cache"
   output_dir: "./generated_descriptions"
+  modules_delimiter: "."
+  terms_delimiter: ";"
   # set 'data_fetcher' to 'agr_data_fetcher' to generate descriptions for AGR or 'wb_data_fetcher' for WormBase
 
 # options for WormBase gene description generation - used when data_fetcher is set to 'wb_data_fetcher'
 wb_options:
-  release: "WS270"
+  release: "WS271"
   raw_files_source: "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases"
   agr_human_go_associations: "http://download.alliancegenome.org/GO/ANNOT/gene_association_1.7.1.human.gz"
   agr_go_ontology: "http://download.alliancegenome.org/GO/go_1.7.obo"
@@ -105,6 +107,7 @@ go_sentences_options:
     - "GO:0005488"
     - "GO:0005515"
     - "GO:0044877"
+    - "GO:0043229"
   rename_terms:
     "(.*)molting cycle, collagen and cuticulin-based cuticle(.*)": "\\1molting cycle\\2"
     "(.*)molting cycle, chitin-based cuticle(.*)": "\\1molting cycle\\2"

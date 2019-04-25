@@ -62,8 +62,9 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
         self.assertTrue("several processes" not in sentences.get_description())
-        self.assertTrue("dauer larval development, determination of adult lifespan, and insulin receptor "
-                        "signaling pathway" in sentences.get_description())
+        self.assertTrue("dauer larval development" + self.conf_parser.get_terms_delimiter() +
+                        " determination of adult lifespan" + self.conf_parser.get_terms_delimiter() +
+                        " and insulin receptor signaling pathway" in sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00002335", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='F',
@@ -82,16 +83,19 @@ class TestDescriptionsGenerator(unittest.TestCase):
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including axo-dendritic transport, establishment of mitotic '
-                        'spindle orientation, and positive regulation of extent of heterochromatin assembly',
-                        sentences.get_description())
+        self.assertTrue('involved in several processes, including axo-dendritic transport' +
+                        self.conf_parser.get_terms_delimiter() + ' establishment of mitotic spindle orientation' +
+                        self.conf_parser.get_terms_delimiter() +
+                        ' and positive regulation of extent of heterochromatin assembly' == sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="FB:FBgn0045035", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including DNA metabolic process, chromatin organization, '
-                        'and negative regulation of cell death', sentences.get_description())
+        self.assertTrue('involved in several processes, including DNA metabolic process' +
+                        self.conf_parser.get_terms_delimiter() + ' chromatin organization' +
+                        self.conf_parser.get_terms_delimiter() + ' and negative regulation of cell death' in
+                        sentences.get_description())
 
     def test_generate_sentence_human(self):
         self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
@@ -104,39 +108,47 @@ class TestDescriptionsGenerator(unittest.TestCase):
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including positive regulation of autophagy, regulation of '
-                        'phosphate metabolic process, and regulation of signal transduction',
+        self.assertTrue('involved in several processes, including positive regulation of autophagy' +
+                        self.conf_parser.get_terms_delimiter() + ' regulation of phosphate metabolic process' +
+                        self.conf_parser.get_terms_delimiter() + ' and regulation of signal transduction' in
                         sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="RGD:HGNC:1884", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including anion transport, cellular response to forskolin, '
-                        'and positive regulation of transport', sentences.get_description())
+        self.assertTrue('involved in several processes, including anion transport' +
+                        self.conf_parser.get_terms_delimiter() + ' cellular response to forskolin' +
+                        self.conf_parser.get_terms_delimiter() + ' and positive regulation of transport' in
+                        sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="RGD:HGNC:795", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including cellular protein modification process, negative '
-                        'regulation of cell cycle, and regulation of nucleobase-containing compound metabolic process',
+        self.assertTrue('involved in several processes, including cellular protein modification process' +
+                        self.conf_parser.get_terms_delimiter() + ' cellular response to ionizing radiation' +
+                        self.conf_parser.get_terms_delimiter() +
+                        ' and regulation of organelle organization' ==
                         sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="RGD:HGNC:11291", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including cell migration involved in sprouting '
-                        'angiogenesis, cellular senescence, and regulation of cellular biosynthetic process',
+        self.assertTrue('involved in several processes, including cell migration involved in sprouting '
+                        'angiogenesis' + self.conf_parser.get_terms_delimiter() + ' cellular senescence' +
+                        self.conf_parser.get_terms_delimiter() + ' and regulation of cellular biosynthetic process' ==
                         sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="RGD:HGNC:348", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including cAMP-mediated signaling, cellular response to '
-                        'organic cyclic compound, and regulation of B cell proliferation', sentences.get_description())
+        self.assertTrue('involved in several processes, including cAMP-mediated signaling' +
+                        self.conf_parser.get_terms_delimiter() + ' cellular response to '
+                        'organic cyclic compound' + self.conf_parser.get_terms_delimiter() +
+                        ' and regulation of B cell proliferation' == sentences.get_description())
 
     def test_generate_sentence_mgi(self):
         self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
@@ -144,35 +156,42 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                             associations_cache_path=os.path.join(self.this_dir, "cache",
                                                                                  "gene_association_1.7.mgi.partial"),
                                             config=self.conf_parser)
-        go_sent_generator = OntologySentenceGenerator(gene_id="MGI:MGI:96067", module=Module.GO,
+        go_sent_generator = OntologySentenceGenerator(gene_id="MGI:96067", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including carboxylic acid metabolic process, '
-                        'cytoskeleton-dependent intracellular transport, and nervous system development',
+        self.assertTrue('involved in several processes, including carboxylic acid metabolic process' +
+                        self.conf_parser.get_terms_delimiter() + ' cytoskeleton-dependent intracellular transport' +
+                        self.conf_parser.get_terms_delimiter() + ' and nervous system development' ==
                         sentences.get_description())
-        go_sent_generator = OntologySentenceGenerator(gene_id="MGI:MGI:88388", module=Module.GO,
+        go_sent_generator = OntologySentenceGenerator(gene_id="MGI:88388", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including cellular response to cAMP, ion homeostasis, and '
-                        'positive regulation of transport', sentences.get_description())
-        go_sent_generator = OntologySentenceGenerator(gene_id="MGI:MGI:107202", module=Module.GO,
+        self.assertTrue('involved in several processes, including cellular response to cAMP' +
+                        self.conf_parser.get_terms_delimiter() + ' chloride transmembrane transport' +
+                        self.conf_parser.get_terms_delimiter() + ' and positive regulation of transport' ==
+                        sentences.get_description())
+        go_sent_generator = OntologySentenceGenerator(gene_id="MGI:107202", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including DNA metabolic process, animal organ development, '
-                        'and meiotic nuclear division', sentences.get_description())
-        go_sent_generator = OntologySentenceGenerator(gene_id="MGI:MGI:106658", module=Module.GO,
+        self.assertTrue('involved in several processes, including DNA metabolic process' +
+                        self.conf_parser.get_terms_delimiter() + ' animal organ development' +
+                        self.conf_parser.get_terms_delimiter() + ' and meiotic nuclear division' ==
+                        sentences.get_description())
+        go_sent_generator = OntologySentenceGenerator(gene_id="MGI:106658", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including actin cytoskeleton organization, animal organ '
-                        'development, and morphogenesis of an epithelium', sentences.get_description())
+        self.assertTrue('involved in several processes, including actin cytoskeleton organization' +
+                        self.conf_parser.get_terms_delimiter() + ' animal organ development' +
+                        self.conf_parser.get_terms_delimiter() + ' and morphogenesis of an epithelium' ==
+                        sentences.get_description())
 
     def test_generate_sentence_zfin(self):
         self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
@@ -198,45 +217,55 @@ class TestDescriptionsGenerator(unittest.TestCase):
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including central nervous system development, mRNA '
-                        'transport, and negative regulation of cysteine-type endopeptidase activity',
+        self.assertTrue('involved in several processes, including central nervous system development' +
+                        self.conf_parser.get_terms_delimiter() + ' mRNA transport' +
+                        self.conf_parser.get_terms_delimiter() + ' and negative regulation of cysteine-type '
+                                                                 'endopeptidase activity' in
                         sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="RGD:2332", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including animal organ development, anion transport, and '
-                        'regulation of cell development', sentences.get_description())
+        self.assertTrue('involved in several processes, including animal organ development' +
+                        self.conf_parser.get_terms_delimiter() + ' anion transport' +
+                        self.conf_parser.get_terms_delimiter() + ' and regulation of cell development' in
+                        sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="RGD:1593265", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including apoptotic process, cellular response to DNA '
-                        'damage stimulus, and positive regulation of cellular metabolic process',
-                        sentences.get_description())
+        self.assertTrue('involved in several processes, including apoptotic process' +
+                        self.conf_parser.get_terms_delimiter() + ' cellular response to DNA damage stimulus' +
+                        self.conf_parser.get_terms_delimiter() + ' and positive regulation of cellular metabolic '
+                                                                 'process' in sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="RGD:1559787", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including cellular response to glucose stimulus, '
-                        'long-term memory, and negative regulation of cell migration', sentences.get_description())
+        self.assertTrue('involved in several processes, including cellular response to glucose stimulus' +
+                        self.conf_parser.get_terms_delimiter() + ' long-term memory' +
+                        self.conf_parser.get_terms_delimiter() + ' and negative regulation of cell migration' in
+                        sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="RGD:61995", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including cellular response to hormone stimulus, '
-                        'dephosphorylation, and negative regulation of transport', sentences.get_description())
+        self.assertTrue('involved in several processes, including cellular response to hormone stimulus' +
+                        self.conf_parser.get_terms_delimiter() + ' dephosphorylation' +
+                        self.conf_parser.get_terms_delimiter() + ' and negative regulation of transport' in
+                        sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="RGD:2074", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including cellular response to organic cyclic compound, '
-                        'ovarian follicle development, and regulation of transcription, DNA-templated',
+        self.assertTrue('involved in several processes, including cellular response to organic cyclic compound' +
+                        self.conf_parser.get_terms_delimiter() + ' ovarian follicle development' +
+                        self.conf_parser.get_terms_delimiter() + ' and regulation of transcription, DNA-templated' in
                         sentences.get_description())
 
     def test_generate_sentence_sgd(self):
@@ -250,119 +279,131 @@ class TestDescriptionsGenerator(unittest.TestCase):
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in cellular protein-containing complex assembly and signal peptide processing',
+        self.assertTrue('involved in cellular protein-containing complex assembly and signal peptide processing' ==
                         sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="SGD:S000004916", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in iron import into the mitochondrion and iron-sulfur cluster assembly',
+        self.assertTrue('involved in iron import into the mitochondrion and iron-sulfur cluster assembly' ==
                         sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="SGD:S000004646", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in DNA replication initiation, regulation of cellular biosynthetic process, and '
-                        'regulation of mating type switching', sentences.get_description())
+        self.assertTrue('involved in DNA replication initiation' + self.conf_parser.get_terms_delimiter() +
+                        ' regulation of cellular biosynthetic process' + self.conf_parser.get_terms_delimiter() +
+                        ' and regulation of mating type switching' == sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="SGD:S000000253", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in regulation of transcription by RNA polymerase II, termination of RNA '
-                        'polymerase II transcription, and transcriptional start site selection at RNA polymerase II '
-                        'promoter', sentences.get_description())
+        self.assertTrue('involved in regulation of transcription by RNA polymerase II' +
+                        self.conf_parser.get_terms_delimiter() + ' termination of RNA polymerase II transcription' +
+                        self.conf_parser.get_terms_delimiter() + ' and transcriptional start site selection at RNA '
+                                                                 'polymerase II promoter' ==
+                        sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="SGD:S000000364", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including cellular protein metabolic process, negative '
-                        'regulation of cell cycle, and regulation of nucleobase-containing compound metabolic process',
-                        sentences.get_description())
+        self.assertTrue('involved in several processes, including cellular protein metabolic process' +
+                        self.conf_parser.get_terms_delimiter() + ' negative regulation of cell cycle' +
+                        self.conf_parser.get_terms_delimiter() + ' and regulation of nucleobase-containing compound '
+                                                                 'metabolic process' == sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="SGD:S000002284", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including SCF complex disassembly in response to cadmium '
-                        'stress, cellular macromolecule catabolic process, and cellular protein complex disassembly',
-                        sentences.get_description())
+        self.assertTrue('involved in several processes, including SCF complex disassembly in response to cadmium '
+                        'stress' + self.conf_parser.get_terms_delimiter() +
+                        ' cellular macromolecule catabolic process' + self.conf_parser.get_terms_delimiter() +
+                        ' and cellular protein complex disassembly' == sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="SGD:S000004603", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including exit from mitosis, meiotic nuclear division, and '
-                        'regulation of organelle organization', sentences.get_description())
+        self.assertTrue('involved in several processes, including exit from mitosis' +
+                        self.conf_parser.get_terms_delimiter() + ' meiotic nuclear division' +
+                        self.conf_parser.get_terms_delimiter() + ' and regulation of organelle organization' ==
+                        sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="SGD:S000004802", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including DNA metabolic process, meiotic chromosome '
-                        'segregation, and negative regulation of cell cycle', sentences.get_description())
+        self.assertTrue('involved in several processes, including DNA metabolic process' +
+                        self.conf_parser.get_terms_delimiter() + ' meiotic chromosome segregation' +
+                        self.conf_parser.get_terms_delimiter() + ' and negative regulation of cell cycle' ==
+                        sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="SGD:S000005707", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in actin cortical patch localization and positive regulation of cellular '
+        self.assertTrue('involved in actin cortical patch localization and positive regulation of cellular '
                         'component organization', sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="SGD:S000001596", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in nucleic acid metabolic process and replicative cell aging',
+        self.assertTrue('involved in nucleic acid metabolic process and replicative cell aging' ==
                         sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="SGD:S000004777", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in meiotic heteroduplex formation, meiotic mismatch repair, and reciprocal '
-                        'meiotic recombination', sentences.get_description())
+        self.assertTrue('involved in meiotic heteroduplex formation' + self.conf_parser.get_terms_delimiter() +
+                        ' meiotic mismatch repair' + self.conf_parser.get_terms_delimiter() + ' and reciprocal '
+                        'meiotic recombination' == sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="SGD:S000006074", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in several processes, including DNA damage checkpoint, DNA metabolic process, '
-                        'and deoxyribonucleoside triphosphate biosynthetic process', sentences.get_description())
+        self.assertTrue('involved in several processes, including DNA damage checkpoint' +
+                        self.conf_parser.get_terms_delimiter() + ' DNA metabolic process' +
+                        self.conf_parser.get_terms_delimiter() + ' and deoxyribonucleoside triphosphate biosynthetic '
+                                                                 'process' == sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="SGD:S000002678", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in cellular iron ion homeostasis and copper ion export',
+        self.assertTrue('involved in cellular iron ion homeostasis and copper ion export' in
                         sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="SGD:S000003487", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in ubiquinone biosynthetic process',
-                        sentences.get_description())
+        self.assertTrue('involved in ubiquinone biosynthetic process' == sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="SGD:S000000458", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in cellular protein-containing complex assembly and endoplasmic reticulum to '
-                        'Golgi vesicle-mediated transport', sentences.get_description())
+        self.assertTrue('involved in cellular protein-containing complex assembly and endoplasmic reticulum to '
+                        'Golgi vesicle-mediated transport' == sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="SGD:S000006068", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(config=self.conf_parser, aspect='P',
                                                            qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
-        self.assertTrue('is involved in fatty acid transport', sentences.get_description())
+        self.assertTrue('involved in fatty acid transport' == sentences.get_description())
         gene = Gene(id="SGD:S000000482", name="DPB3", dead=False, pseudo=False)
-        gene_desc = GeneDescription(gene_id=gene.id, gene_name=gene.name, add_gene_name=True)
+        gene_desc = GeneDescription(gene_id=gene.id, gene_name=gene.name, add_gene_name=True, config=self.conf_parser)
         set_gene_ontology_module(dm=self.df, conf_parser=self.conf_parser, gene_desc=gene_desc, gene=gene)
-        self.assertTrue('is involved in fatty acid transport', gene_desc.description)
+        self.assertTrue('Involved in cellular macromolecule biosynthetic process; heterochromatin organization '
+                        'involved in chromatin silencing; and replicative senescence.' in gene_desc.description)
 
     def test_information_content_sentence_generation(self):
         self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "ic"
