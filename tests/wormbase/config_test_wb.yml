@@ -107,6 +107,7 @@ go_sentences_options:
     - "GO:0005488"
     - "GO:0005515"
     - "GO:0044877"
+    - "GO:0043229"
   rename_terms:
     "(.*)molting cycle, collagen and cuticulin-based cuticle(.*)": "\\1molting cycle\\2"
     "(.*)molting cycle, chitin-based cuticle(.*)": "\\1molting cycle\\2"
