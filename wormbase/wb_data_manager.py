@@ -203,9 +203,9 @@ class WBDataManager(DataManager):
                                 gene_ids = ["WB:" + linearr[3]]
                                 if linearr[1] == "allele":
                                     gene_ids = linearr[4].split(",")
-                                if linearr[9] == "is_marker_for":
+                                if linearr[8] == "is_marker_for":
                                     linearr[16] = "BMK"
-                                elif linearr[9] == "is_implicated_in":
+                                elif linearr[8] == "is_implicated_in" or linearr[8] == "is_model_of":
                                     linearr[16] = "IMP"
                                 for gene_id in gene_ids:
                                     associations.append(DataManager.create_annotation_record(
