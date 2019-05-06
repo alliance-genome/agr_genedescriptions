@@ -49,8 +49,9 @@ class GeneDescription(object):
             return desc[0].upper() + desc[1:] + "."
 
     def _merge_descriptions(self, desc_list: List[str]):
-        desc = (self.config.get_modules_delimiter() + " ").join([sent[0].lower() + sent[1:].rstrip(".") for sent in
-                                                                 desc_list if sent])
+        desc = (self.config.get_modules_delimiter() + " ").join(
+            [sent[0].lower() + sent[1:].rstrip(".") if self.config.get_modules_delimiter() != "." else sent.rstrip(".")
+             for sent in desc_list if sent])
         return desc[0].upper() + desc[1:] + "."
 
     @staticmethod
@@ -97,11 +98,11 @@ class GeneDescription(object):
         if desc:
             if self.description and self.description != self.gene_name:
                 if self.config.get_modules_delimiter() == ".":
-                    desc = desc.capitalize()
+                    desc = desc[0].upper() + desc[1:]
                 self.description = self.description[0:-1] + self.config.get_modules_delimiter() + " " + desc + "."
             else:
                 if not self.add_gene_name or not self.gene_name:
-                    desc = desc.capitalize()
+                    desc = desc[0].upper() + desc[1:]
                 self.description = self.gene_name + " " + desc + "." if self.add_gene_name else desc + "."
             if module == Module.GO_FUNCTION:
                 self.go_function_description = self._concatenate_description(desc, self.go_function_description)

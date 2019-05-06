@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str], postfix: str,
                      config: GenedescConfigParser, ancestors_with_multiple_children: Set[str] = None,
-                     rename_cell: bool = False) -> str:
+                     rename_cell: bool = False, put_anatomy_male_at_end: bool = False) -> str:
     """compose the text of a sentence given its prefix, terms, and postfix
 
     Args:
@@ -22,8 +22,11 @@ def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str],
         additional_prefix (str): an additional prefix to be used for special cases
         ancestors_with_multiple_children (Set[str]): set containing labels of terms that cover more than one children
             term in the original set and which will appear with the label '(multiple)'
+        rename_cell (bool): rename 'cell' into 'the cell'
+        put_anatomy_male_at_end (bool): move 'the male' to the end of the sentence (for anatomy), and change it to
+            'in the male'
     Returns:
-        str: the text of the go sentence
+        str: the text of the sentence
     """
     new_prefix = prefix + additional_prefix + " "
     term_names = [term_name + " (multiple)" if term_name in ancestors_with_multiple_children else term_name for
@@ -40,6 +43,9 @@ def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str],
                 if not additional_prefix:
                     new_prefix += "several tissues including "
                 term_names = [term for term in term_names if term != "the cell" and term != "the Cell"]
+    if put_anatomy_male_at_end and "the male" in term_names and len(term_names) > 1:
+        term_names = [term for term in term_names if term != "the male"]
+        term_names.append("in the male")
     return new_prefix + concatenate_words_with_oxford_comma(term_names,
                                                             separator=config.get_terms_delimiter()) + postfix
 
@@ -49,8 +55,8 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
                          config: GenedescConfigParser, terms_merged: bool = False, add_others: bool = False,
                          truncate_others_generic_word: str = "several",
                          truncate_others_aspect_words: Dict[str, str] = None,
-                         ancestors_with_multiple_children: Set[str] = None,
-                         rename_cell: bool = False, trimmed: bool = False) -> Union[Sentence, None]:
+                         ancestors_with_multiple_children: Set[str] = None, rename_cell: bool = False,
+                         trimmed: bool = False, put_anatomy_male_at_end: bool = False) -> Union[Sentence, None]:
     """build a sentence object
 
     Args:
@@ -89,7 +95,8 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
                         text=compose_sentence(prefix=prefix, term_names=term_labels, postfix=postfix,
                                               additional_prefix=additional_prefix,
                                               ancestors_with_multiple_children=ancestors_with_multiple_children,
-                                              rename_cell=rename_cell, config=config),
+                                              rename_cell=rename_cell, config=config,
+                                              put_anatomy_male_at_end=put_anatomy_male_at_end),
                         aspect=aspect, evidence_group=evidence_group, terms_merged=terms_merged,
                         additional_prefix=additional_prefix, qualifier=qualifier,
                         ancestors_covering_multiple_terms=ancestors_with_multiple_children, trimmed=trimmed)

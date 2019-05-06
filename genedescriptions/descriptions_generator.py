@@ -145,13 +145,13 @@ class OntologySentenceGenerator(object):
                         truncate_others_generic_word=cutoff_final_word,
                         truncate_others_aspect_words=cat_several_words,
                         ancestors_with_multiple_children=ancestors_covering_multiple_children, rename_cell=rename_cell,
-                        config=self.config))
+                        config=self.config, put_anatomy_male_at_end = True if aspect == 'A' else False))
                 if keep_only_best_group:
                     return ModuleSentences(sentences)
         if merge_groups_with_same_prefix:
             sentences = self.merge_sentences_with_same_prefix(
                 sentences=sentences, remove_parent_terms=remove_parents, rename_cell=rename_cell,
-                high_priority_term_ids=high_priority_term_ids)
+                high_priority_term_ids=high_priority_term_ids, put_anatomy_male_at_end=True if aspect == 'A' else False)
         return ModuleSentences(sentences)
 
     def reduce_terms(self, terms, max_num_terms, aspect, del_overlap: bool = False,
@@ -288,7 +288,8 @@ class OntologySentenceGenerator(object):
             return terms
 
     def merge_sentences_with_same_prefix(self, sentences: List[Sentence], remove_parent_terms: bool = True,
-                                         rename_cell: bool = False, high_priority_term_ids: List[str] = None):
+                                         rename_cell: bool = False, high_priority_term_ids: List[str] = None,
+                                         put_anatomy_male_at_end: bool = False):
         """merge sentences with the same prefix
 
         Args:
@@ -339,7 +340,8 @@ class OntologySentenceGenerator(object):
                                                    sent_merger.postfix_list),
                                                additional_prefix=sent_merger.additional_prefix,
                                                ancestors_with_multiple_children=sent_merger.ancestors_covering_multiple_terms,
-                                               rename_cell=rename_cell, config=self.config),
+                                               rename_cell=rename_cell, config=self.config,
+                                               put_anatomy_male_at_end=put_anatomy_male_at_end),
                          aspect=sent_merger.aspect, evidence_group=", ".join(sent_merger.evidence_groups),
                          terms_merged=True, trimmed=sent_merger.any_trimmed,
                          additional_prefix=sent_merger.additional_prefix, qualifier=sent_merger.qualifier,
