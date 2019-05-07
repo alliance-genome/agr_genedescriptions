@@ -186,7 +186,7 @@ class TestOntologyTools(unittest.TestCase):
         generator = OntologySentenceGenerator(gene_id="MGI:88452", module=Module.DO_ORTHOLOGY,
                                               data_manager=self.df, config=self.conf_parser)
         sentences = generator.get_module_sentences(
-            config=self.conf_parser, aspect='D', qualifier='', merge_groups_with_same_prefix=True,
-            keep_only_best_group=True, high_priority_term_ids=["DOID:0080028", "DOID:0080056", "DOID:14789",
-                                                               "DOID:0080026", "DOID:14415", "DOID:0080045"])
+            aspect='D', qualifier='', merge_groups_with_same_prefix=True, keep_only_best_group=True,
+            high_priority_term_ids=["DOID:0080028", "DOID:0080056", "DOID:14789", "DOID:0080026", "DOID:14415",
+                                    "DOID:0080045"])
         print(sentences.get_description())

@@ -303,7 +303,7 @@ def get_best_nodes(terms, trimming_algorithm, max_terms, ontology, terms_already
             nodeids_blacklist=nodeids_blacklist)
     elif trimming_algorithm == "lca":
         add_others, merged_terms_coverset = get_best_nodes_lca(
-            node_ids=list(terms), ontology=ontology, min_distance_from_root=min_dist_from_root,
+            node_ids=list(terms), ontology=ontology, min_distance_from_root=min_dist_from_root, max_num_nodes=max_terms,
             nodeids_blacklist=nodeids_blacklist)
     if ancestors_covering_multiple_children is not None:
         ancestors_covering_multiple_children.update({ontology.label(term_id, id_if_null=True) for
