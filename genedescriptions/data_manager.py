@@ -151,7 +151,6 @@ class DataManager(object):
         elif ontology_type == DataType.EXPR:
             logger.info("Setting Expression ontology")
             self.expression_ontology = ontology.subontology()
-            DataManager.add_article_to_expression_nodes(self.expression_ontology)
             new_ontology = self.expression_ontology
             module = Module.EXPRESSION
         terms_replacement_regex = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_TERMS)
