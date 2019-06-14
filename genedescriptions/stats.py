@@ -27,7 +27,6 @@ class SingleDescStats(object):
         self.set_final_go_ids_p = []
         self.set_final_go_ids_c = []
         self.set_initial_do_ids = []
-        self.set_initial_go_ids = []
         self.set_initial_expression_ids = []
         self.set_final_do_ids = []
         self.set_best_orthologs = []
@@ -52,6 +51,8 @@ class SingleDescStats(object):
         if data_manager:
             set_final_go_ids = [*self.set_final_go_ids_c, *self.set_final_go_ids_f,
                                 *self.set_final_go_ids_p]
+            set_initial_go_ids = [*self.set_initial_go_ids_c, *self.set_initial_go_ids_f,
+                                  *self.set_initial_go_ids_p]
             go_levels = [data_manager.go_ontology.node(term)["depth"] for term in set_final_go_ids]
             do_levels = [data_manager.do_ontology.node(term)["depth"] for term in self.set_final_do_ids]
             expression_levels = [data_manager.expression_ontology.node(term)["depth"] for term in
@@ -59,7 +60,7 @@ class SingleDescStats(object):
             terms_levels = [*go_levels, *do_levels, *expression_levels]
             self.average_terms_level = np.average(terms_levels) if len(terms_levels) > 0 else 0
             go_num_covered_terms = self._get_num_covered_nodes(
-                set_initial_terms=self.set_initial_go_ids, set_final_terms=set_final_go_ids,
+                set_initial_terms=set_initial_go_ids, set_final_terms=set_final_go_ids,
                 ontology=data_manager.go_ontology)
             do_num_covered_terms = self._get_num_covered_nodes(
                 set_initial_terms=self.set_initial_do_ids, set_final_terms=self.set_final_do_ids,
@@ -67,10 +68,10 @@ class SingleDescStats(object):
             exp_num_covered_terms = self._get_num_covered_nodes(
                 set_initial_terms=self.set_initial_expression_ids, set_final_terms=self.set_final_expression_ids,
                 ontology=data_manager.expression_ontology)
-            num_initial_terms = len(self.set_initial_go_ids) + len(self.set_initial_do_ids) + \
-                                len(self.set_initial_expression_ids)
+            num_initial_terms = len(set_initial_go_ids) + len(self.set_initial_do_ids) + len(
+                self.set_initial_expression_ids)
             self.coverage_percentage = (go_num_covered_terms + do_num_covered_terms + exp_num_covered_terms) / \
-                                       num_initial_terms if num_initial_terms > 0 else 0
+                                        num_initial_terms if num_initial_terms > 0 else 0
 
     def delete_extra_info(self):
         pass
