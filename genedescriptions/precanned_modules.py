@@ -91,7 +91,7 @@ def set_expression_module(df: DataManager, conf_parser: GenedescConfigParser, ge
     expr_sentence_generator = OntologySentenceGenerator(gene_id=gene.id, module=Module.EXPRESSION, data_manager=df,
                                                         config=conf_parser)
     expression_module_sentences = expr_sentence_generator.get_module_sentences(
-        aspect='A', qualifier="", merge_groups_with_same_prefix=True, keep_only_best_group=False)
+        aspect='A', qualifier="Verified", merge_groups_with_same_prefix=True, keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=expression_module_sentences,
                                                                module=Module.EXPRESSION)
     gene_desc.set_initial_stats(module=Module.EXPRESSION, sentence_generator=expr_sentence_generator)
