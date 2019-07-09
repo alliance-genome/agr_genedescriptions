@@ -156,8 +156,6 @@ class DataManager(object):
         terms_replacement_regex = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_TERMS)
         if terms_replacement_regex:
             self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
-        if ontology_type == DataType.EXPR:
-            DataManager.add_article_to_expression_nodes(self.expression_ontology)
         for root_id in new_ontology.get_roots():
             set_all_depths_in_subgraph(ontology=new_ontology, root_id=root_id, relations=None)
         if slim_cache_path:
@@ -165,7 +163,7 @@ class DataManager(object):
             self.load_slim(module=module, slim_url=slim_url, slim_cache_path=slim_cache_path)
 
     @staticmethod
-    def add_article_to_expression_nodes(ontology):
+    def add_article_to_nodes(ontology):
         inflect_engine = inflect.engine()
         for term in ontology.nodes():
             if "label" in ontology.node(term) and \
@@ -351,9 +349,9 @@ class DataManager(object):
             ontology = self.expression_ontology
         if dataset is not None and ontology is not None:
             priority_map = dict(zip(priority_list, reversed(range(len(list(priority_list))))))
-            annotations = [annotation for annotation in dataset.associations(gene_id) if (include_obsolete or
-                                                                                          not ontology.is_obsolete(
-                                                                                              annotation["object"]["id"]))
+            annotations = [annotation for annotation in dataset.associations(gene_id) if
+                           ontology.has_node(annotation["object"]["id"]) and (
+                               include_obsolete or not ontology.is_obsolete(annotation["object"]["id"]))
                            and (include_negative_results or ("NOT" not in annotation["qualifiers"] and
                                                              not annotation["negated"]))]
             id_selected_annotation = {}
