@@ -209,8 +209,6 @@ class DataManager(object):
         terms_replacement_regex = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_TERMS)
         if terms_replacement_regex:
             self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
-        if ontology_type == DataType.EXPR:
-            DataManager.add_article_to_expression_nodes(self.expression_ontology)
         for root_id in new_ontology.get_roots():
             set_all_depths_in_subgraph(ontology=new_ontology, root_id=root_id, relations=None)
         slim_url = config.get_module_property(module=module, prop=ConfigModuleProperty.SLIM_URL)
