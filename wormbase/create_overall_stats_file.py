@@ -107,11 +107,17 @@ def main():
                 print()
 
     print()
-    print("Total number of gene descriptions is " + str(len(genes_with_automated_desc.union(
+    print("Total number of genes with either automated or manual description: " + str(len(genes_with_automated_desc.union(
         genes_with_manual_desc))))
-    print("Total number of genes that have automated descriptions only is " + str(len(
+    print("Total number of genes with only automated description: " + str(len(
         genes_with_automated_desc.difference(genes_with_manual_desc))))
-    print("Total number of genes that have both manually curated and automated descriptions is " + str(len(
+    print("Total number of genes with automated description (with or without manual description): " + str(len(
+        genes_with_automated_desc)))
+    print("Total number of genes with only manual description: " + str(len(
+        genes_with_manual_desc.difference(genes_with_automated_desc))))
+    print("Total number of genes with manual description (with or without automated description): " + str(len(
+        genes_with_manual_desc)))
+    print("Total number of genes with both manual and automated description: " + str(len(
         genes_with_manual_desc.intersection(genes_with_automated_desc))))
 
 
