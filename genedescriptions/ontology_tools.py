@@ -339,7 +339,10 @@ def _set_num_leaves_in_subgraph(ontology: Ontology, root_id: str, relations: Lis
 
 def _set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxleaves: int, relations: List[str] = None):
     node = ontology.node(root_id)
-    node["IC"] = -math.log((float(node["num_leaves"]) / node["num_subsumers"] + 1) / (maxleaves + 1))
+    if root_id.startswith("ARTIFICIAL_NODE:"):
+        node["IC"] = 0
+    else:
+        node["IC"] = -math.log((float(node["num_leaves"]) / node["num_subsumers"] + 1) / (maxleaves + 1))
     for child_id in ontology.children(node=root_id, relations=relations):
         _set_information_content_in_subgraph(ontology=ontology, root_id=child_id, maxleaves=maxleaves,
                                              relations=relations)
