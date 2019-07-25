@@ -528,7 +528,7 @@ expression_sentences_options:
 
   truncate_others_aggregation_word: several
   truncate_others_terms:
-    A: "tissues"
+    A: "structures"
   remove_parents_if_children_are_present: false
   remove_children_if_parent_is_present: true
   trim_terms_by_common_ancestors: true
