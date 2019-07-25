@@ -41,7 +41,7 @@ def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str],
                 term_names = ["widely"]
             else:
                 if not additional_prefix:
-                    new_prefix += "several structures including "
+                    new_prefix += "several structures, including "
                 term_names = [term for term in term_names if term != "cell" and term != "Cell"]
     if put_anatomy_male_at_end and "male" in term_names and len(term_names) > 1:
         term_names = [term for term in term_names if term != "male"]
