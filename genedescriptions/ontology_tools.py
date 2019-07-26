@@ -317,13 +317,10 @@ def _set_num_subsumers_in_subgraph(ontology: Ontology, root_id: str, relations: 
                                    follow_children: bool = True):
     if "num_subsumers" not in ontology.node(root_id):
         parents = ontology.parents(root_id)
-        ontology.node(root_id)["num_subsumers"] = sum([ontology.node(parent_id)["num_subsumers"]
-                                                       if "num_subsumers" in ontology.node(parent_id)
-                                                       else _set_num_subsumers_in_subgraph(ontology=ontology,
-                                                                                           root_id=parent_id,
-                                                                                           relations=relations,
-                                                                                           follow_children=False)
-                                                       for parent_id in parents]) + 1 if parents else 1
+        ontology.node(root_id)["num_subsumers"] = sum(
+            [ontology.node(parent_id)["num_subsumers"] if "num_subsumers" in ontology.node(parent_id)
+             else _set_num_subsumers_in_subgraph(ontology=ontology, root_id=parent_id, relations=relations,
+                                                 follow_children=False) for parent_id in parents]) + 1 if parents else 1
     if follow_children:
         for child_id in ontology.children(node=root_id, relations=relations):
             _set_num_subsumers_in_subgraph(ontology=ontology, root_id=child_id, relations=relations)
