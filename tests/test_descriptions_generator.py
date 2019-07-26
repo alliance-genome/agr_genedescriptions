@@ -551,7 +551,7 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                               data_manager=self.df, config=self.conf_parser, humans=False)
         sentences = generator.get_module_sentences(
             aspect='D', qualifier='', merge_groups_with_same_prefix=True, keep_only_best_group=True)
-        self.assertTrue("spinocerebellar ataxia type 6" not in sentences.get_description())
+        self.assertTrue("spinocerebellar ataxia type 6" in sentences.get_description())
 
         associations = [DataManager.create_annotation_record(source_line="", gene_id="HGNC:2888",
                                                              gene_symbol="", gene_type="gene", taxon_id="",

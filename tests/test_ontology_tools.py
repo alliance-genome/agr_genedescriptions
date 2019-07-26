@@ -1,8 +1,9 @@
+import datetime
 import logging
 import unittest
 import os
 
-from ontobio import AssociationSetFactory
+from ontobio import AssociationSetFactory, OntologyFactory
 
 from genedescriptions.commons import Module
 from genedescriptions.config_parser import GenedescConfigParser
@@ -81,11 +82,53 @@ class TestOntologyTools(unittest.TestCase):
         self.assertTrue("GO:0040024" not in common_ancestors, "Common ancestors contain blacklisted term")
 
     def test_information_content(self):
+
+        #              0                   ic(0) = 0
+        #            /| |\
+        #           / | | \
+        #          1  2 3  4               ic(1) = 0.301029996, ic(2) = 0.204119983, ic(3) = 0.425968732
+        #         /\ /\/ \/
+        #        /  5 6  7
+        #       /  /\  \/
+        #      /  8  9 10                  ic(8) = 0.455931956, ic(9) = 0.522878745
+        #      \ / \/   \
+        #      11  12   13                 ic(11) = 0.535113202
+        start_time = datetime.datetime.now()
+        ontology = OntologyFactory().create()
+        for i in range(16):
+            ontology.add_node(i, 'node' + str(i))
+        ontology.add_parent(1, 0)
+        ontology.add_parent(2, 0)
+        ontology.add_parent(3, 0)
+        ontology.add_parent(4, 0)
+        ontology.add_parent(5, 1)
+        ontology.add_parent(5, 2)
+        ontology.add_parent(6, 2)
+        ontology.add_parent(6, 3)
+        ontology.add_parent(7, 3)
+        ontology.add_parent(7, 4)
+        ontology.add_parent(8, 5)
+        ontology.add_parent(9, 5)
+        ontology.add_parent(10, 6)
+        ontology.add_parent(10, 7)
+        ontology.add_parent(11, 1)
+        ontology.add_parent(11, 8)
+        ontology.add_parent(12, 8)
+        ontology.add_parent(12, 9)
+        ontology.add_parent(13, 10)
+        ontology.add_parent(14, 12)
+        ontology.add_parent(15, 13)
+        set_all_information_content_values(ontology=ontology)
+        self.assertTrue(ontology.node(0)["IC"] == 0, "Root IC not equal to 0")
+        self.assertTrue(ontology.node(1)["IC"], 0.301029996)
+        self.assertTrue(ontology.node(2)["IC"], 0.204119983)
+        self.assertTrue(ontology.node(3)["IC"], 0.425968732)
+        self.assertTrue(ontology.node(8)["IC"], 0.455931956)
+        self.assertTrue(ontology.node(8)["IC"], 0.522878745)
+        self.assertTrue(ontology.node(11)["IC"], 0.535113202)
         self.load_go_ontology()
         set_all_information_content_values(ontology=self.df.go_ontology)
-        roots = self.df.go_ontology.get_roots()
-        for root_id in roots:
-            self.assertTrue(self.df.go_ontology.node(root_id)["IC"] == 0, "Root IC not equal to 0")
+        print(datetime.datetime.now() - start_time)
 
     def test_find_set_covering(self):
         subsets = [("1", "1", {"A", "B", "C"}), ("2", "2", {"A", "B"}), ("3", "3", {"C"}), ("4", "4", {"A"}),
@@ -581,4 +624,4 @@ class TestOntologyTools(unittest.TestCase):
                                               data_manager=self.df, config=self.conf_parser)
         sentences = generator.get_module_sentences(
             aspect='A', qualifier='Verified', merge_groups_with_same_prefix=True, keep_only_best_group=True)
-        self.assertTrue(sentences.get_description() == "is expressed in the embryo")
+        self.assertTrue(sentences.get_description() == "is expressed in embryo")
