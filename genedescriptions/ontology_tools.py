@@ -32,10 +32,10 @@ def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List
 
 
 def set_all_information_content_values(ontology: Ontology, relations: List[str] = None):
-    logger.info("calculating information content for all terms in ontology")
     roots = ontology.get_roots(relations=relations)
     for root_id in roots:
-        _set_num_subsumers_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
+        if "num_subsumers" not in ontology.node(root_id):
+            _set_num_subsumers_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
     for root_id in roots:
         if "num_leaves" not in ontology.node(root_id):
             _set_num_leaves_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
@@ -313,30 +313,32 @@ def get_best_nodes(terms, trimming_algorithm, max_terms, ontology, terms_already
     return terms, add_others
 
 
-def _set_num_subsumers_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None,
-                                   follow_children: bool = True):
+def _set_num_subsumers_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
     if "num_subsumers" not in ontology.node(root_id):
         parents = ontology.parents(root_id)
-        ontology.node(root_id)["num_subsumers"] = sum(
-            [ontology.node(parent_id)["num_subsumers"] if "num_subsumers" in ontology.node(parent_id)
-             else _set_num_subsumers_in_subgraph(ontology=ontology, root_id=parent_id, relations=relations,
-                                                 follow_children=False) for parent_id in parents]) + 1 if parents else 1
-    if follow_children:
-        for child_id in ontology.children(node=root_id, relations=relations):
-            _set_num_subsumers_in_subgraph(ontology=ontology, root_id=child_id, relations=relations)
-    return ontology.node(root_id)["num_subsumers"]
+        if not parents or all(["set_subsumers" in ontology.node(parent) for parent in parents]):
+            subsumers = {subsumer for parent in parents for subsumer in ontology.node(parent)["set_subsumers"]} | \
+                        {root_id}
+            ontology.node(root_id)["num_subsumers"] = len(subsumers)
+            ontology.node(root_id)["set_subsumers"] = subsumers
+            for child_id in ontology.children(node=root_id):
+                _set_num_subsumers_in_subgraph(ontology, child_id, relations)
 
 
 def _set_num_leaves_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
-    num_leaves = 0
-    for child_id in ontology.children(node=root_id):
-        if "num_leaves" not in ontology.node(child_id):
-            _set_num_leaves_in_subgraph(ontology=ontology, root_id=child_id, relations=relations)
-        if ontology.node(child_id)["num_leaves"] == 0:
-            num_leaves += 1
-        else:
-            num_leaves += ontology.node(child_id)["num_leaves"]
+    if "set_leaves" in ontology.node(root_id):
+        return ontology.node(root_id)["set_leaves"]
+    children = ontology.children(node=root_id)
+    if not children:
+        leaves = {root_id}
+        num_leaves = 0
+    else:
+        leaves = {leaf for child_id in children for leaf in
+                  _set_num_leaves_in_subgraph(ontology=ontology, root_id=child_id, relations=relations)}
+        num_leaves = len(leaves)
     ontology.node(root_id)["num_leaves"] = num_leaves
+    ontology.node(root_id)["set_leaves"] = leaves
+    return leaves
 
 
 def _set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxleaves: int, relations: List[str] = None):

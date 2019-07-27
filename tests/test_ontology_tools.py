@@ -86,16 +86,16 @@ class TestOntologyTools(unittest.TestCase):
         #              0                   ic(0) = 0
         #            /| |\
         #           / | | \
-        #          1  2 3  4               ic(1) = 0.301029996, ic(2) = 0.204119983, ic(3) = 0.425968732
+        #          1  2 3  4               ic(1) = 0.693147181, ic(2) = 0.470003629, ic(3) = 0.980829253
         #         /\ /\/ \/
-        #        /  5 6  7
+        #        /  5 6  7                 ic(5) = 0.980829253, ic(6) = 1.16315081, ic(7) = 1.16315081
         #       /  /\  \/
-        #      /  8  9 10                  ic(8) = 0.455931956, ic(9) = 0.522878745
+        #      /  8  9 10                  ic(8) = 1.049822124, ic(10) = 1.252762968
         #      \ / \/   \
-        #      11  12   13                 ic(11) = 0.535113202
-        start_time = datetime.datetime.now()
+        #      11  12   13                 ic(11) = 1.386294361, ic(12) = 1.386294361, ic(13) = 1.386294361
+
         ontology = OntologyFactory().create()
-        for i in range(16):
+        for i in range(14):
             ontology.add_node(i, 'node' + str(i))
         ontology.add_parent(1, 0)
         ontology.add_parent(2, 0)
@@ -116,19 +116,17 @@ class TestOntologyTools(unittest.TestCase):
         ontology.add_parent(12, 8)
         ontology.add_parent(12, 9)
         ontology.add_parent(13, 10)
-        ontology.add_parent(14, 12)
-        ontology.add_parent(15, 13)
         set_all_information_content_values(ontology=ontology)
         self.assertTrue(ontology.node(0)["IC"] == 0, "Root IC not equal to 0")
-        self.assertTrue(ontology.node(1)["IC"], 0.301029996)
-        self.assertTrue(ontology.node(2)["IC"], 0.204119983)
-        self.assertTrue(ontology.node(3)["IC"], 0.425968732)
-        self.assertTrue(ontology.node(8)["IC"], 0.455931956)
-        self.assertTrue(ontology.node(8)["IC"], 0.522878745)
-        self.assertTrue(ontology.node(11)["IC"], 0.535113202)
-        self.load_go_ontology()
-        set_all_information_content_values(ontology=self.df.go_ontology)
-        print(datetime.datetime.now() - start_time)
+        self.assertAlmostEqual(ontology.node(1)["IC"], 0.693147181)
+        self.assertAlmostEqual(ontology.node(2)["IC"], 0.470003629)
+        self.assertAlmostEqual(ontology.node(3)["IC"], 0.980829253)
+        self.assertAlmostEqual(ontology.node(5)["IC"], 0.980829253)
+        self.assertAlmostEqual(ontology.node(6)["IC"], 1.16315081)
+        self.assertAlmostEqual(ontology.node(7)["IC"], 1.16315081)
+        self.assertAlmostEqual(ontology.node(8)["IC"], 1.049822124)
+        self.assertAlmostEqual(ontology.node(10)["IC"], 1.252762968)
+        self.assertAlmostEqual(ontology.node(11)["IC"], 1.386294361)
 
     def test_find_set_covering(self):
         subsets = [("1", "1", {"A", "B", "C"}), ("2", "2", {"A", "B"}), ("3", "3", {"C"}), ("4", "4", {"A"}),
