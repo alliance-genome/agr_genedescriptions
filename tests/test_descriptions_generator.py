@@ -626,7 +626,7 @@ class TestDescriptionsGenerator(unittest.TestCase):
                         ]
         self.df.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
                                                                              ontology=self.df.do_ontology)
-        self.conf_parser.config["do_exp_sentences_options"]["trimming_algorithm"] = "naive"
+        self.conf_parser.config["do_exp_sentences_options"]["trimming_algorithm"] = "ic"
         generator = OntologySentenceGenerator(gene_id="MGI:107718", module=Module.DO_EXPERIMENTAL,
                                               data_manager=self.df, config=self.conf_parser, humans=True)
         sentences = generator.get_module_sentences(
