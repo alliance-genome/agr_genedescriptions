@@ -7,9 +7,9 @@ generic:
 
 # options for WormBase gene description generation - used when data_fetcher is set to 'wb_data_fetcher'
 wb_options:
-  release: "WS272"
+  release: "WS273"
   raw_files_source: "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases"
-  agr_human_go_associations: "http://download.alliancegenome.org/1.0.0.8/GAF/HUMAN/1.0.0.8_GAF_HUMAN_8.gaf"
+  agr_human_go_associations: "http://download.alliancegenome.org/1.0.0.9/GAF/HUMAN/1.0.0.9_GAF_HUMAN_2.gaf"
   agr_go_ontology: "http://download.alliancegenome.org/GO/go_1.7.obo"
   organisms_to_process:
     # add the species to be processed to the following list. Entries must have the same text as in 'organisms'
@@ -502,12 +502,12 @@ expression_sentences_options:
     - "WBbt:0007849" # hermaphrodite
     - "WBbt:0005738" # body region
   rename_terms:
-    "^neuron$": "nervous system"
+    "^neuron$": "neurons"
     "(.*)([a-z]+ )neuron$": "\\1\\2neurons"
-    "^germ cell$": "germ cells"
-    "^hypodermis$": "the hypodermis"
     "(.*)hermaphrodite-specific$": "\\1hermaphrodite"
     "(.*)male-specific$": "\\1male"
+    "^ganglion$": "ganglia"
+    "^neuroblast$": "neuroblasts"
   evidence_codes:
     IDA:
       group: EXPERIMENTAL
@@ -530,12 +530,12 @@ expression_sentences_options:
   truncate_others_terms:
     A: "structures"
   remove_parents_if_children_are_present: false
-  remove_children_if_parent_is_present: true
+  remove_children_if_parent_is_present: false
   trim_terms_by_common_ancestors: true
   trimming_algorithm: ic
   max_num_terms: 5
   trim_min_distance_from_root:
-    A: 3
+    A: 4
   add_multiple_if_covers_more_children: false
   rename_cell: true
   slim_url: ''
