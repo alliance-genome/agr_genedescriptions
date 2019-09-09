@@ -147,7 +147,7 @@ class DataManager(object):
             logger.info("Setting DO ontology")
             self.do_ontology = ontology.subontology(relations=self.do_relations)
             new_ontology = self.do_ontology
-            module = Module.DO
+            module = Module.DO_EXPERIMENTAL
         elif ontology_type == DataType.EXPR:
             logger.info("Setting Expression ontology")
             self.expression_ontology = ontology.subontology()
