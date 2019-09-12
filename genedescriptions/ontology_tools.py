@@ -9,6 +9,13 @@ from ontobio.ontol import Ontology
 logger = logging.getLogger(__name__)
 
 
+def set_all_depths(ontology: Ontology, relations: List[str] = None, comparison_func=max):
+    for root_id in ontology.get_roots():
+        if ontology.node_type(root_id) == "CLASS":
+            set_all_depths_in_subgraph(ontology=ontology, root_id=root_id, relations=relations,
+                                       comparison_func=comparison_func)
+
+
 def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None, comparison_func=max,
                                current_depth: int = 0):
     """calculate and set max_depth and min_depth (maximum and minimum distances from root terms in the ontology)
@@ -34,17 +41,18 @@ def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List
 def set_all_information_content_values(ontology: Ontology, relations: List[str] = None):
     roots = ontology.get_roots(relations=relations)
     for root_id in roots:
-        if "num_subsumers" not in ontology.node(root_id):
+        if "num_subsumers" not in ontology.node(root_id) and ontology.node_type(root_id) == "CLASS":
             _set_num_subsumers_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
     for root_id in roots:
-        if "num_leaves" not in ontology.node(root_id):
+        if "num_leaves" not in ontology.node(root_id) and ontology.node_type(root_id) == "CLASS":
             _set_num_leaves_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
     for root_id in roots:
-        if "depth" not in ontology.node(root_id):
+        if "depth" not in ontology.node(root_id) and ontology.node_type(root_id) == "CLASS":
             set_all_depths_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
     for root_id in roots:
-        _set_information_content_in_subgraph(ontology=ontology, root_id=root_id,
-                                             maxleaves=ontology.node(root_id)["num_leaves"], relations=relations)
+        if ontology.node_type(root_id) == "CLASS":
+            _set_information_content_in_subgraph(ontology=ontology, root_id=root_id,
+                                                 maxleaves=ontology.node(root_id)["num_leaves"], relations=relations)
 
 
 def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_root: int = 0,

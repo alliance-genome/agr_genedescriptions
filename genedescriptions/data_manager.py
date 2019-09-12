@@ -17,7 +17,7 @@ from ontobio.assocmodel import AssociationSet
 from ontobio.io.gafparser import GafParser
 from genedescriptions.commons import Gene, DataType, Module
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
-from genedescriptions.ontology_tools import set_all_depths_in_subgraph
+from genedescriptions.ontology_tools import set_all_depths
 
 
 class ExpressionClusterType(Enum):
@@ -156,8 +156,7 @@ class DataManager(object):
         terms_replacement_regex = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_TERMS)
         if terms_replacement_regex:
             self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
-        for root_id in new_ontology.get_roots():
-            set_all_depths_in_subgraph(ontology=new_ontology, root_id=root_id, relations=None)
+        set_all_depths(ontology=new_ontology, relations=None)
         if slim_cache_path:
             slim_url = config.get_module_property(module=module, prop=ConfigModuleProperty.SLIM_URL)
             self.load_slim(module=module, slim_url=slim_url, slim_cache_path=slim_cache_path)
@@ -209,8 +208,7 @@ class DataManager(object):
         terms_replacement_regex = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_TERMS)
         if terms_replacement_regex:
             self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
-        for root_id in new_ontology.get_roots():
-            set_all_depths_in_subgraph(ontology=new_ontology, root_id=root_id, relations=None)
+        set_all_depths(ontology=new_ontology, relations=None)
         slim_url = config.get_module_property(module=module, prop=ConfigModuleProperty.SLIM_URL)
         self.load_slim(module=module, slim_url=slim_url, slim_cache_path=slim_cache_path)
 
