@@ -41,16 +41,19 @@ def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List
 def set_all_information_content_values(ontology: Ontology, relations: List[str] = None):
     roots = ontology.get_roots(relations=relations)
     for root_id in roots:
-        if "num_subsumers" not in ontology.node(root_id) and ontology.node_type(root_id) == "CLASS":
+        if "num_subsumers" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
+                                                              ontology.node_type(root_id) == "CLASS"):
             _set_num_subsumers_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
     for root_id in roots:
-        if "num_leaves" not in ontology.node(root_id) and ontology.node_type(root_id) == "CLASS":
+        if "num_leaves" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
+                                                           ontology.node_type(root_id) == "CLASS"):
             _set_num_leaves_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
     for root_id in roots:
-        if "depth" not in ontology.node(root_id) and ontology.node_type(root_id) == "CLASS":
+        if "depth" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
+                                                      ontology.node_type(root_id) == "CLASS"):
             set_all_depths_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
     for root_id in roots:
-        if ontology.node_type(root_id) == "CLASS":
+        if "type" not in ontology.node(root_id) or ontology.node_type(root_id) == "CLASS":
             _set_information_content_in_subgraph(ontology=ontology, root_id=root_id,
                                                  maxleaves=ontology.node(root_id)["num_leaves"], relations=relations)
 
