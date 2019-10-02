@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def set_all_depths(ontology: Ontology, relations: List[str] = None, comparison_func=max):
     for root_id in ontology.get_roots():
-        if ontology.node_type(root_id) == "CLASS":
+        if "type" not in ontology.node(root_id) or ontology.node_type(root_id) == "CLASS":
             set_all_depths_in_subgraph(ontology=ontology, root_id=root_id, relations=relations,
                                        comparison_func=comparison_func)
 
