@@ -140,17 +140,23 @@ class DataManager(object):
         module = None
         if ontology_type == DataType.GO:
             logger.info("Setting GO ontology")
-            self.go_ontology = ontology.subontology(relations=self.go_relations)
+            if self.go_relations:
+                self.go_ontology = ontology.subontology(relations=self.go_relations)
+            else:
+                self.go_ontology = ontology
             new_ontology = self.go_ontology
             module = Module.GO
         elif ontology_type == DataType.DO:
             logger.info("Setting DO ontology")
-            self.do_ontology = ontology.subontology(relations=self.do_relations)
+            if self.do_relations:
+                self.do_ontology = ontology.subontology(relations=self.do_relations)
+            else:
+                self.do_ontology = ontology
             new_ontology = self.do_ontology
             module = Module.DO_EXPERIMENTAL
         elif ontology_type == DataType.EXPR:
             logger.info("Setting Expression ontology")
-            self.expression_ontology = ontology.subontology()
+            self.expression_ontology = ontology
             new_ontology = self.expression_ontology
             module = Module.EXPRESSION
         terms_replacement_regex = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_TERMS)
