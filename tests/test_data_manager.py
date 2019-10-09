@@ -46,4 +46,5 @@ class TestGOModule(unittest.TestCase):
             self.conf_parser.get_module_property(module=Module.GO, prop=ConfigModuleProperty.RENAME_TERMS).keys())))
 
     def test_exclude_terms(self):
-        pass
+        test_annot = self.df.get_annotations_for_gene("WB:WBGene00000001", annot_type=DataType.GO)
+        self.assertTrue(all([annot["object"]["id"] != "GO:0008286" for annot in test_annot]))
