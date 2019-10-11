@@ -1,12 +1,72 @@
 """set of functions to manipulate ontology graphs"""
 import logging
 import math
-from typing import List, Set
+from collections import defaultdict
+from typing import List, Union
 from ontobio.ontol import Ontology
 
-from genedescriptions.trimming import TrimmingAlgorithmLCA, TrimmingAlgorithmIC, TrimmingAlgorithmNaive
+from genedescriptions.commons import CommonAncestor
 
 logger = logging.getLogger(__name__)
+
+
+def nodes_have_same_root(node_ids: List[str], ontology: Ontology) -> Union[bool, str]:
+    """
+    Check whether all provided nodes are connected to the same root only
+
+    Args:
+        node_ids (List[str]): List of nodes to be checked
+        ontology (Ontology): the ontology to which the provided nodes belong
+
+    Returns:
+        Union[bool, str]: the ID of the common root if all nodes are connected to the same and only root,
+                          False otherwise
+    """
+    common_root = None
+    for node_id in node_ids:
+        onto_node = ontology.node(node_id)
+        if "meta" in onto_node and "basicPropertyValues" in onto_node["meta"]:
+            for basic_prop_val in onto_node["meta"]["basicPropertyValues"]:
+                if basic_prop_val["pred"] == "OIO:hasOBONamespace":
+                    if common_root and common_root != basic_prop_val["val"]:
+                        return False
+                    common_root = basic_prop_val["val"]
+    return common_root
+
+
+def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 0,
+                             nodeids_blacklist: List[str] = None):
+    """
+    Retrieve all common ancestors for the provided list of nodes
+
+    Args:
+        node_ids (List[str]): list of starting nodes
+        ontology (Ontology): the ontology to which the provided nodes belong
+        min_distance_from_root (int): minimum distance from root node
+        nodeids_blacklist (List[str]): node ids to be excluded from the result
+
+    Returns:
+        List[CommonAncestor]: list of common ancestors
+    """
+    common_root = nodes_have_same_root(node_ids=node_ids, ontology=ontology)
+    if not common_root:
+        raise ValueError("Cannot get common ancestors of nodes connected to different roots")
+    ancestors = defaultdict(list)
+    for node_id in node_ids:
+        for ancestor in ontology.ancestors(node=node_id, reflexive=True):
+            onto_anc = ontology.node(ancestor)
+            onto_anc_root = None
+            if "meta" in onto_anc and "basicPropertyValues" in onto_anc["meta"]:
+                for basic_prop_val in onto_anc["meta"]["basicPropertyValues"]:
+                    if basic_prop_val["pred"] == "OIO:hasOBONamespace":
+                        onto_anc_root = basic_prop_val["val"]
+            if onto_anc["depth"] >= min_distance_from_root and (
+                not onto_anc_root or onto_anc_root == common_root) and (not nodeids_blacklist or ancestor not in
+                                                                        nodeids_blacklist):
+                ancestors[ancestor].append(node_id)
+    return [CommonAncestor(node_id=ancestor, node_label=ontology.label(ancestor),
+                           covered_starting_nodes=set(covered_nodes)) for ancestor, covered_nodes in
+            ancestors.items() if len(covered_nodes) > 1 or ancestor == covered_nodes[0]]
 
 
 def set_all_depths(ontology: Ontology, relations: List[str] = None, comparison_func=max):
@@ -56,32 +116,6 @@ def set_all_information_content_values(ontology: Ontology, relations: List[str] 
         if "type" not in ontology.node(root_id) or ontology.node_type(root_id) == "CLASS":
             _set_information_content_in_subgraph(ontology=ontology, root_id=root_id,
                                                  maxleaves=ontology.node(root_id)["num_leaves"], relations=relations)
-
-
-def get_best_nodes(terms, trimming_algorithm, max_terms, ontology, terms_already_covered,
-                   ancestors_covering_multiple_children: Set = None, slim_bonus_perc: int = None,
-                   min_dist_from_root: int = 0, slim_set=None, nodeids_blacklist: List[str] = None):
-    if trimming_algorithm == "ic":
-        if "IC" not in ontology.node(terms[0]):
-            logger.warning("ontology terms do not have information content values set")
-            set_all_information_content_values(ontology=ontology)
-        tr_algo = TrimmingAlgorithmIC(ontology=ontology, min_distance_from_root=min_dist_from_root,
-                                      nodeids_blacklist=nodeids_blacklist, slim_terms_ic_bonus_perc=slim_bonus_perc,
-                                      slim_set=slim_set)
-    elif trimming_algorithm == "lca":
-        tr_algo = TrimmingAlgorithmLCA(ontology=ontology, min_distance_from_root=min_dist_from_root,
-                                       nodeids_blacklist=nodeids_blacklist)
-    else:
-        tr_algo = TrimmingAlgorithmNaive(ontology=ontology, min_distance_from_root=min_dist_from_root,
-                                         nodeids_blacklist=nodeids_blacklist)
-    add_others, merged_terms_coverset = tr_algo.trim(node_ids=list(terms), max_num_nodes=max_terms)
-    if ancestors_covering_multiple_children is not None:
-        ancestors_covering_multiple_children.update({ontology.label(term_id, id_if_null=True) for
-                                                     term_id, covered_nodes in merged_terms_coverset if
-                                                     len(covered_nodes) > 1})
-    terms_already_covered.update([e for term_id, covered_nodes in merged_terms_coverset for e in covered_nodes])
-    terms = [term_id for term_id, covered_nodes in merged_terms_coverset]
-    return terms, add_others
 
 
 def _set_num_subsumers_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):

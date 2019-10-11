@@ -1,19 +1,15 @@
 import logging
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
-from dataclasses import dataclass
 from typing import List, Set, Union, Tuple
 
 from ontobio import Ontology
 
+from genedescriptions.commons import CommonAncestor
+from genedescriptions.ontology_tools import get_all_common_ancestors
+from genedescriptions.optimization import find_set_covering
+
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class TrimmingCandidate:
-    node_id: str
-    node_label: str
-    covered_starting_nodes: Set[str]
 
 
 class TrimmingAlgorithm(metaclass=ABCMeta):
@@ -27,101 +23,6 @@ class TrimmingAlgorithm(metaclass=ABCMeta):
     def trim(self, node_ids: List[str], max_num_nodes: int = 3):
         pass
 
-    def nodes_have_same_root(self, node_ids: List[str]) -> Union[bool, str]:
-        """
-        Check whether all provided nodes are connected to the same root only
-
-        Args:
-            node_ids (List[str]): List of nodes to be checked
-
-        Returns:
-            Union[bool, str]: the ID of the common root if all nodes are connected to the same and only root,
-                              False otherwise
-        """
-        common_root = None
-        for node_id in node_ids:
-            onto_node = self.ontology.node(node_id)
-            if "meta" in onto_node and "basicPropertyValues" in onto_node["meta"]:
-                for basic_prop_val in onto_node["meta"]["basicPropertyValues"]:
-                    if basic_prop_val["pred"] == "OIO:hasOBONamespace":
-                        if common_root and common_root != basic_prop_val["val"]:
-                            return False
-                        common_root = basic_prop_val["val"]
-        return common_root
-
-    def get_all_trimming_candidates(self, node_ids: List[str], min_distance_from_root: int = 0):
-        """
-        Retrieve all common ancestors for the provided list of nodes
-
-        Args:
-            node_ids (List[str]): list of starting nodes
-            min_distance_from_root (int): minimum distance from root node
-
-        Returns:
-            List[TrimmingCandidate]: list of common ancestors
-        """
-        common_root = self.nodes_have_same_root(node_ids=node_ids)
-        if not common_root:
-            raise ValueError("Cannot get common ancestors of nodes connected to different roots")
-        ancestors = defaultdict(list)
-        for node_id in node_ids:
-            for ancestor in self.ontology.ancestors(node=node_id, reflexive=True):
-                onto_anc = self.ontology.node(ancestor)
-                onto_anc_root = None
-                if "meta" in onto_anc and "basicPropertyValues" in onto_anc["meta"]:
-                    for basic_prop_val in onto_anc["meta"]["basicPropertyValues"]:
-                        if basic_prop_val["pred"] == "OIO:hasOBONamespace":
-                            onto_anc_root = basic_prop_val["val"]
-                if onto_anc["depth"] >= min_distance_from_root and (not onto_anc_root or onto_anc_root ==
-                                                                         common_root) and (not self.nodeids_blacklist
-                                                                                           or ancestor not in
-                                                                                           self.nodeids_blacklist):
-                    ancestors[ancestor].append(node_id)
-        return [TrimmingCandidate(node_id=ancestor, node_label=self.ontology.label(ancestor),
-                                  covered_starting_nodes=set(covered_nodes)) for ancestor, covered_nodes in
-                ancestors.items() if len(covered_nodes) > 1 or ancestor == covered_nodes[0]]
-
-    @staticmethod
-    def find_set_covering(subsets: List[TrimmingCandidate], ontology: Ontology = None, value: List[float] = None,
-                          max_num_subsets: int = None) -> Union[None, List[Tuple[str, Set[str]]]]:
-        """greedy algorithm to solve set covering problem on subsets of trimming candidates
-
-        Args:
-            subsets (List[Tuple[str, str, Set[str]]]): list of subsets, each of which must contain a tuple with the first
-            element being the ID of the subset, the second being the name, and the third the actual set of elements
-            value (List[float]): list of costs of the subsets
-            max_num_subsets (int): maximum number of subsets in the final list
-        Returns:
-            Union[None, List[str]]: the list of IDs of the subsets that maximize coverage with respect to the elements
-                                    in the element universe
-        """
-        logger.debug("starting set covering optimization")
-        elem_to_process = {subset.node_id for subset in subsets}
-        if value and len(value) != len(elem_to_process):
-            return None
-        universe = set([e for subset in subsets for e in subset.covered_starting_nodes])
-        included_elmts = set()
-        included_sets = []
-        while len(elem_to_process) > 0 and included_elmts != universe and (not max_num_subsets or len(included_sets) <
-                                                                           max_num_subsets):
-            if value:
-                effect_sets = sorted([(v * len(s.covered_starting_nodes - included_elmts), s.covered_starting_nodes,
-                                       s.node_label, s.node_id) for s, v in zip(subsets, value) if s.node_id in
-                                      elem_to_process], key=lambda x: (- x[0], x[2]))
-            else:
-                effect_sets = sorted([(len(s.covered_starting_nodes - included_elmts), s.covered_starting_nodes,
-                                       s.node_label, s.node_id) for s in subsets if s.node_id in elem_to_process],
-                                     key=lambda x: (- x[0], x[2]))
-            elem_to_process.remove(effect_sets[0][3])
-            if ontology:
-                for elem in included_sets:
-                    if effect_sets[0][3] in ontology.ancestors(elem[0]):
-                        included_sets.remove(elem)
-            included_elmts |= effect_sets[0][1]
-            included_sets.append((effect_sets[0][3], effect_sets[0][1]))
-        logger.debug("finished set covering optimization")
-        return included_sets
-
 
 class TrimmingAlgorithmIC(TrimmingAlgorithm):
 
@@ -131,13 +32,13 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
         self.slim_terms_ic_bonus_perc = slim_terms_ic_bonus_perc
         self.slim_set = slim_set
 
-    def get_candidate_ic_value(self, candidate: TrimmingCandidate, node_ids: List[str],
+    def get_candidate_ic_value(self, candidate: CommonAncestor, node_ids: List[str],
                                slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
         """
         Calculate the information content value of a candidate node
 
         Args:
-            candidate (TrimmingCandidate): the candidate node
+            candidate (CommonAncestor): the candidate node
             node_ids (List[str]): the original set of nodes to be trimmed
             slim_terms_ic_bonus_perc (int): boost the IC value for terms that appear in the slim set by the provided
                                             percentage
@@ -165,7 +66,8 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
         Returns:
             Set[str]: the set of trimmed terms, together with the set of original terms that each of them covers
         """
-        common_ancestors = self.get_all_trimming_candidates(node_ids=node_ids)
+        common_ancestors = get_all_common_ancestors(node_ids=node_ids, ontology=self.ontology,
+                                                    nodeids_blacklist=self.nodeids_blacklist)
         values = [self.get_candidate_ic_value(candidate=candidate, node_ids=node_ids,
                                               slim_terms_ic_bonus_perc=self.slim_terms_ic_bonus_perc,
                                               slim_set=self.slim_set) for candidate in common_ancestors]
@@ -174,8 +76,8 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
         # remove ancestors with zero IC
         common_ancestors = [common_ancestor for common_ancestor, value in zip(common_ancestors, values) if value > 0]
         values = [value for value in values if value > 0]
-        best_terms = self.find_set_covering(subsets=common_ancestors, ontology=self.ontology,
-                                            max_num_subsets=max_num_nodes, value=values)
+        best_terms = find_set_covering(subsets=common_ancestors, ontology=self.ontology, max_num_subsets=max_num_nodes,
+                                       value=values)
         covered_terms = set([e for best_term_label, covered_terms in best_terms for e in covered_terms])
         return covered_terms != set(node_ids), best_terms
 
@@ -187,8 +89,9 @@ class TrimmingAlgorithmLCA(TrimmingAlgorithm):
 
     def trim(self, node_ids: List[str], max_num_nodes: int = 3):
         candidates_dict = {candidate.node_id: (candidate.node_label, candidate.covered_starting_nodes) for candidate in
-                           self.get_all_trimming_candidates(node_ids=node_ids,
-                                                            min_distance_from_root=self.min_distance_from_root)}
+                           get_all_common_ancestors(node_ids=node_ids, ontology=self.ontology,
+                                                    min_distance_from_root=self.min_distance_from_root,
+                                                    nodeids_blacklist=self.nodeids_blacklist)}
         cands_ids_to_process = set(candidates_dict.keys())
         selected_cands_ids = []
         node_to_cands_map = defaultdict(list)
@@ -223,8 +126,8 @@ class TrimmingAlgorithmLCA(TrimmingAlgorithm):
             return False, [(node_id, candidates_dict[node_id][1]) for node_id in selected_cands_ids]
 
         else:
-            best_terms = self.find_set_covering(
-                [TrimmingCandidate(node_id, self.ontology.label(node_id, id_if_null=True), candidates_dict[node_id][1])
+            best_terms = find_set_covering(
+                [CommonAncestor(node_id, self.ontology.label(node_id, id_if_null=True), candidates_dict[node_id][1])
                  for node_id in selected_cands_ids], ontology=self.ontology, max_num_subsets=max_num_nodes)
             covered_terms = set([e for best_term_label, covered_terms in best_terms for e in covered_terms])
             return covered_terms != set(node_ids), best_terms
@@ -292,8 +195,8 @@ class TrimmingAlgorithmNaive(TrimmingAlgorithm):
             return False, [(term_label, covered_terms) for term_label, covered_terms in final_terms_set.items()]
 
         else:
-            best_terms = self.find_set_covering(
-                [TrimmingCandidate(k, self.ontology.label(k, id_if_null=True), v) for k, v in final_terms_set.items()],
+            best_terms = find_set_covering(
+                [CommonAncestor(k, self.ontology.label(k, id_if_null=True), v) for k, v in final_terms_set.items()],
                 max_num_subsets=max_num_nodes)
             covered_terms = set([e for best_term_label, covered_terms in best_terms for e in covered_terms])
             return covered_terms != set(node_ids), best_terms

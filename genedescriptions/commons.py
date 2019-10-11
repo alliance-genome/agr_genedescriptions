@@ -1,5 +1,8 @@
 from collections import namedtuple
 from enum import Enum
+from typing import Set
+
+from dataclasses import dataclass
 from namedlist import namedlist
 
 Sentence = namedlist('Sentence', ['prefix', 'terms_ids', 'postfix', 'text', 'aspect', 'evidence_group', 'terms_merged',
@@ -33,3 +36,10 @@ class Module(Enum):
     PROTEIN_DOMAIN = 15
     GO = 16
     EXPRESSION_CLUSTER_GENEREG = 17
+
+
+@dataclass
+class CommonAncestor:
+    node_id: str
+    node_label: str
+    covered_starting_nodes: Set[str]
