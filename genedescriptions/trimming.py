@@ -56,12 +56,13 @@ class TrimmingAlgorithm(metaclass=ABCMeta):
                         common_root = basic_prop_val["val"]
         return common_root
 
-    def get_all_trimming_candidates(self, node_ids: List[str], min_distance_from_root: int = 3):
+    def get_all_trimming_candidates(self, node_ids: List[str], min_distance_from_root: int = 0):
         """
         Retrieve all common ancestors for the provided list of nodes
 
         Args:
             node_ids (List[str]): list of starting nodes
+            min_distance_from_root (int): minimum distance from root node
 
         Returns:
             List[TrimmingCandidate]: list of common ancestors

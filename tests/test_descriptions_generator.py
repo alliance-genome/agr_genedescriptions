@@ -59,9 +59,7 @@ class TestDescriptionsGenerator(unittest.TestCase):
         sentences = go_sent_generator.get_module_sentences(aspect='P', qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
         self.assertTrue("several processes" not in sentences.get_description())
-        self.assertTrue("dauer larval development" + self.conf_parser.get_terms_delimiter() +
-                        " determination of adult lifespan" + self.conf_parser.get_terms_delimiter() +
-                        " and insulin receptor signaling pathway" in sentences.get_description())
+        self.assertTrue("dauer larval development and determination of adult lifespan" in sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00002335", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(aspect='F', qualifier='', merge_groups_with_same_prefix=True,
