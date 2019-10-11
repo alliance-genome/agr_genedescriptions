@@ -9,8 +9,8 @@ from genedescriptions.commons import Module
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.data_manager import DataManager, DataType
 from genedescriptions.descriptions_generator import OntologySentenceGenerator
-from genedescriptions.ontology_tools import get_all_common_ancestors, find_set_covering, \
-    set_all_information_content_values
+from genedescriptions.ontology_tools import set_all_information_content_values
+from genedescriptions.trimming import TrimmingAlgorithm, TrimmingCandidate, TrimmingAlgorithmLCA
 
 logger = logging.getLogger("Gene Ontology Tools tests")
 
@@ -52,7 +52,8 @@ class TestOntologyTools(unittest.TestCase):
         generator = OntologySentenceGenerator(gene_id="WB:WBGene00000912", module=Module.GO,
                                               data_manager=self.df, config=self.conf_parser)
         node_ids = generator.terms_groups[('P', '')]["EXPERIMENTAL"]
-        common_ancestors = get_all_common_ancestors(node_ids, generator.ontology)
+        tr_algo = TrimmingAlgorithmLCA(ontology=generator.ontology)
+        common_ancestors = tr_algo.get_all_trimming_candidates(node_ids)
         self.assertTrue(len(common_ancestors) > 0, "Common ancestors not found")
         associations = [association for subj_associations in self.df.go_associations.associations_by_subj.values() for
                         association in subj_associations]
@@ -78,7 +79,8 @@ class TestOntologyTools(unittest.TestCase):
         generator = OntologySentenceGenerator(gene_id="WB:WBGene00003931", module=Module.GO,
                                               data_manager=self.df, config=self.conf_parser)
         node_ids = generator.terms_groups[('P', '')]["EXPERIMENTAL"]
-        common_ancestors = get_all_common_ancestors(node_ids, generator.ontology)
+        tr_algo = TrimmingAlgorithmLCA(ontology=generator.ontology)
+        common_ancestors = tr_algo.get_all_trimming_candidates(node_ids)
         self.assertTrue("GO:0040024" not in common_ancestors, "Common ancestors contain blacklisted term")
 
     def test_information_content(self):
@@ -129,11 +131,13 @@ class TestOntologyTools(unittest.TestCase):
         self.assertAlmostEqual(ontology.node(11)["IC"], 1.386294361)
 
     def test_find_set_covering(self):
-        subsets = [("1", "1", {"A", "B", "C"}), ("2", "2", {"A", "B"}), ("3", "3", {"C"}), ("4", "4", {"A"}),
-                   ("5", "5", {"B"}), ("6", "6", {"C"})]
+        subsets = [TrimmingCandidate("1", "1", {"A", "B", "C"}), TrimmingCandidate("2", "2", {"A", "B"}),
+                   TrimmingCandidate("3", "3", {"C"}), TrimmingCandidate("4", "4", {"A"}),
+                   TrimmingCandidate("5", "5", {"B"}), TrimmingCandidate("6", "6", {"C"})]
         values = [2, 12, 5, 20, 20, 20]
         # test with weights
-        set_covering = [best_set[0] for best_set in find_set_covering(subsets=subsets, value=values, max_num_subsets=3)]
+        set_covering = [best_set[0] for best_set in TrimmingAlgorithm.find_set_covering(subsets=subsets, value=values,
+                                                                                        max_num_subsets=3)]
         self.assertTrue("2" in set_covering)
         self.assertTrue("6" in set_covering)
         self.assertTrue("1" not in set_covering)
@@ -142,20 +146,23 @@ class TestOntologyTools(unittest.TestCase):
         self.assertTrue("5" not in set_covering)
         # test without weights
         set_covering_noweights = [best_set[0] for best_set in
-                                  find_set_covering(subsets=subsets, value=None, max_num_subsets=3)]
+                                  TrimmingAlgorithm.find_set_covering(subsets=subsets, value=None, max_num_subsets=3)]
         self.assertTrue("1" in set_covering_noweights and len(set_covering_noweights) == 1)
         # test wrong input
         costs_wrong = [1, 3]
-        set_covering_wrong = find_set_covering(subsets=subsets, value=costs_wrong, max_num_subsets=3)
+        set_covering_wrong = TrimmingAlgorithm.find_set_covering(subsets=subsets, value=costs_wrong, max_num_subsets=3)
         self.assertTrue(set_covering_wrong is None, "Cost vector with length different than subsets should return None")
 
-        subsets = [("1", "1", {"7"}), ("2", "2", {"7", "12", "13"}),
-                   ("3", "3", {"16", "17"}), ("4", "4", {"11"}), ("6", "6", {"12", "13"}), ("7", "7", {"7"}),
-                   ("9", "9", {"16", "17"}), ("11", "11", {"11"}), ("12", "12", {"12"}), ("13", "13", {"13"}),
-                   ("16", "16", {"16"}), ("17", "17", {"17"})]
+        subsets = [TrimmingCandidate("1", "1", {"7"}), TrimmingCandidate("2", "2", {"7", "12", "13"}),
+                   TrimmingCandidate("3", "3", {"16", "17"}), TrimmingCandidate("4", "4", {"11"}),
+                   TrimmingCandidate("6", "6", {"12", "13"}), TrimmingCandidate("7", "7", {"7"}),
+                   TrimmingCandidate("9", "9", {"16", "17"}), TrimmingCandidate("11", "11", {"11"}),
+                   TrimmingCandidate("12", "12", {"12"}), TrimmingCandidate("13", "13", {"13"}),
+                   TrimmingCandidate("16", "16", {"16"}), TrimmingCandidate("17", "17", {"17"})]
         values = [1, 1, 0.875061263, 1.301029996, 1.301029996, 1.602059991, 1.301029996, 1.698970004, 1.698970004,
                   1.698970004, 1.698970004, 1.698970004]
-        set_covering = [best_set[0] for best_set in find_set_covering(subsets=subsets, value=values, max_num_subsets=3)]
+        set_covering = [best_set[0] for best_set in TrimmingAlgorithm.find_set_covering(subsets=subsets, value=values,
+                                                                                        max_num_subsets=3)]
         self.assertTrue(all([num in set_covering for num in ["2", "9", "11"]]))
 
     def test_set_covering_with_ontology(self):

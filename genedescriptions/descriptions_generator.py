@@ -78,6 +78,33 @@ class OntologySentenceGenerator(object):
                                      limit_to_group is None or limit_to_group in ev_codes_groups_maps[evcode]}
         prepostfix_special_cases_sent_map = config.get_prepostfix_sentence_map(module=module, special_cases_only=True,
                                                                                humans=humans)
+        self.cat_several_words = config.get_module_property(module=self.module,
+                                                            prop=ConfigModuleProperty.CUTOFF_SEVERAL_CATEGORY_WORD)
+        if not self.cat_several_words:
+            self.cat_several_words = {'F': 'functions', 'P': 'processes', 'C': 'components', 'D': 'diseases',
+                                      'A': 'tissues'}
+        self.del_overlap = config.get_module_property(module=self.module, prop=ConfigModuleProperty.REMOVE_OVERLAP)
+        self.remove_parents = config.get_module_property(module=self.module,
+                                                         prop=ConfigModuleProperty.DEL_PARENTS_IF_CHILD)
+        self.remove_child_terms = config.get_module_property(module=self.module,
+                                                             prop=ConfigModuleProperty.DEL_CHILDREN_IF_PARENT)
+        self.max_terms = config.get_module_property(module=self.module,
+                                                    prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
+        self.exclude_terms = config.get_module_property(module=self.module, prop=ConfigModuleProperty.EXCLUDE_TERMS)
+        if not self.exclude_terms:
+            self.exclude_terms = []
+        self.cutoff_final_word = config.get_module_property(module=self.module,
+                                                            prop=ConfigModuleProperty.CUTOFF_SEVERAL_WORD)
+        self.rename_cell = config.get_module_property(module=self.module, prop=ConfigModuleProperty.RENAME_CELL)
+        self.terms_already_covered = set()
+        self.dist_root = config.get_module_property(module=self.module,
+                                                    prop=ConfigModuleProperty.DISTANCE_FROM_ROOT)
+        self.add_mul_common_anc = config.get_module_property(
+            module=self.module, prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
+        self.trimming_algorithm = config.get_module_property(module=self.module,
+                                                             prop=ConfigModuleProperty.TRIMMING_ALGORITHM)
+        self.slim_set = self.data_manager.get_slim(module=self.module)
+        self.slim_bonus_perc = config.get_module_property(module=self.module, prop=ConfigModuleProperty.SLIM_BONUS_PERC)
         self.config = config
         if len(annotations) > 0:
             for annotation in annotations:
@@ -114,77 +141,54 @@ class OntologySentenceGenerator(object):
         Returns:
             ModuleSentences: the module sentences
         """
-        cat_several_words = self.config.get_module_property(module=self.module,
-                                                            prop=ConfigModuleProperty.CUTOFF_SEVERAL_CATEGORY_WORD)
-        del_overlap = self.config.get_module_property(module=self.module, prop=ConfigModuleProperty.REMOVE_OVERLAP)
-        remove_parents = self.config.get_module_property(module=self.module,
-                                                         prop=ConfigModuleProperty.DEL_PARENTS_IF_CHILD)
-        remove_child_terms = self.config.get_module_property(module=self.module,
-                                                             prop=ConfigModuleProperty.DEL_CHILDREN_IF_PARENT)
-        max_terms = self.config.get_module_property(module=self.module,
-                                                    prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
-        exclude_terms = self.config.get_module_property(module=self.module, prop=ConfigModuleProperty.EXCLUDE_TERMS)
-        cutoff_final_word = self.config.get_module_property(module=self.module,
-                                                            prop=ConfigModuleProperty.CUTOFF_SEVERAL_WORD)
-        rename_cell = self.config.get_module_property(module=self.module, prop=ConfigModuleProperty.RENAME_CELL)
-        if not cat_several_words:
-            cat_several_words = {'F': 'functions', 'P': 'processes', 'C': 'components', 'D': 'diseases', 'A': 'tissues'}
         sentences = []
-        terms_already_covered = set()
         evidence_group_priority = {eg: p for p, eg in enumerate(self.evidence_groups_priority_list)}
         for terms, evidence_group, priority in sorted([(t, eg, evidence_group_priority[eg]) for eg, t in
                                                        self.terms_groups[(aspect, qualifier)].items()],
                                                       key=lambda x: x[2]):
             terms, trimmed, add_others, ancestors_covering_multiple_children = self.reduce_terms(
-                terms, max_terms, aspect, del_overlap, terms_already_covered, exclude_terms, remove_parents,
-                remove_child_terms, high_priority_term_ids)
+                terms, aspect, high_priority_term_ids)
             if (aspect, evidence_group, qualifier) in self.prepostfix_sentences_map and len(terms) > 0:
                 sentences.append(
                     _get_single_sentence(
                         node_ids=terms, ontology=self.ontology, aspect=aspect, evidence_group=evidence_group,
                         qualifier=qualifier, prepostfix_sentences_map=self.prepostfix_sentences_map,
                         terms_merged=False, trimmed=trimmed, add_others=add_others,
-                        truncate_others_generic_word=cutoff_final_word,
-                        truncate_others_aspect_words=cat_several_words,
-                        ancestors_with_multiple_children=ancestors_covering_multiple_children, rename_cell=rename_cell,
-                        config=self.config, put_anatomy_male_at_end = True if aspect == 'A' else False))
+                        truncate_others_generic_word=self.cutoff_final_word,
+                        truncate_others_aspect_words=self.cat_several_words,
+                        ancestors_with_multiple_children=ancestors_covering_multiple_children,
+                        rename_cell=self.rename_cell, config=self.config, put_anatomy_male_at_end=True if aspect == 'A'
+                        else False))
                 if keep_only_best_group:
                     return ModuleSentences(sentences)
         if merge_groups_with_same_prefix:
             sentences = self.merge_sentences_with_same_prefix(
-                sentences=sentences, remove_parent_terms=remove_parents, rename_cell=rename_cell,
+                sentences=sentences, remove_parent_terms=self.remove_parents, rename_cell=self.rename_cell,
                 high_priority_term_ids=high_priority_term_ids, put_anatomy_male_at_end=True if aspect == 'A' else False)
         return ModuleSentences(sentences)
 
-    def reduce_terms(self, terms, max_num_terms, aspect, del_overlap: bool = False,
-                     terms_already_covered: Set[str] = None, exclude_terms: List[str] = None,
-                     remove_parents: bool = False, remove_children: bool = False,
-                     high_priority_term_ids: List[str] = None):
+    def reduce_terms(self, terms, aspect, high_priority_term_ids: List[str] = None):
         add_mul_common_anc = self.config.get_module_property(module=self.module,
                                                              prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
-        if not terms_already_covered:
-            terms_already_covered = set()
-        if not exclude_terms:
-            exclude_terms = []
         ancestors_covering_multiple_children = set()
         trimmed = False
         add_others = False
-        if del_overlap:
-            terms -= terms_already_covered
-        if exclude_terms:
-            terms -= set(exclude_terms)
-        if remove_parents:
+        if self.del_overlap:
+            terms -= self.terms_already_covered
+        if self.exclude_terms:
+            terms -= set(self.exclude_terms)
+        if self.remove_parents:
             terms = OntologySentenceGenerator.remove_parents_if_child_present(
-                terms, self.ontology, terms_already_covered, high_priority_term_ids)
-        if 0 < max_num_terms < len(terms):
+                terms, self.ontology, self.terms_already_covered, high_priority_term_ids)
+        if 0 < self.max_terms < len(terms):
             trimmed = True
             terms, add_others, ancestors_covering_multiple_children = self.get_trimmed_terms_by_common_ancestor(
-                terms, terms_already_covered, aspect, high_priority_term_ids)
+                terms, self.terms_already_covered, aspect, high_priority_term_ids)
         else:
-            terms_already_covered.update(terms)
-        if remove_children:
+            self.terms_already_covered.update(terms)
+        if self.remove_child_terms:
             terms = self.remove_children_if_parents_present(
-                terms=terms, ontology=self.ontology, terms_already_covered=terms_already_covered,
+                terms=terms, ontology=self.ontology, terms_already_covered=self.terms_already_covered,
                 high_priority_terms=high_priority_term_ids,
                 ancestors_covering_multiple_children=ancestors_covering_multiple_children if add_mul_common_anc else
                 None)
@@ -192,44 +196,35 @@ class OntologySentenceGenerator(object):
 
     def get_trimmed_terms_by_common_ancestor(self, terms: Set[str], terms_already_covered, aspect: str,
                                              high_priority_terms: List[str] = None):
-        dist_root = self.config.get_module_property(module=self.module, prop=ConfigModuleProperty.DISTANCE_FROM_ROOT)
-        add_mul_common_anc = self.config.get_module_property(module=self.module,
-                                                             prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
-        max_terms = self.config.get_module_property(module=self.module,
-                                                    prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
-        trimming_algorithm = self.config.get_module_property(module=self.module,
-                                                             prop=ConfigModuleProperty.TRIMMING_ALGORITHM)
-        slim_set = self.data_manager.get_slim(module=self.module)
-        slim_bonus_perc = self.config.get_module_property(module=self.module, prop=ConfigModuleProperty.SLIM_BONUS_PERC)
         add_others_highp = False
         add_others_lowp = False
         ancestors_covering_multiple_children = set()
-        if not dist_root:
-            dist_root = {'F': 1, 'P': 1, 'C': 2, 'D': 3, 'A': 3}
+        if not self.dist_root:
+            self.dist_root = {'F': 1, 'P': 1, 'C': 2, 'D': 3, 'A': 3}
         terms_high_priority = [term for term in terms if high_priority_terms and term in high_priority_terms]
         if terms_high_priority is None:
             terms_high_priority = []
-        if len(terms_high_priority) > max_terms:
+        if len(terms_high_priority) > self.max_terms:
             terms_high_priority = self.remove_children_if_parents_present(
                 terms=terms_high_priority, ontology=self.ontology, terms_already_covered=terms_already_covered,
-                ancestors_covering_multiple_children=ancestors_covering_multiple_children if add_mul_common_anc else
+                ancestors_covering_multiple_children=ancestors_covering_multiple_children if self.add_mul_common_anc else
                 None)
-        if len(terms_high_priority) > max_terms:
+        if len(terms_high_priority) > self.max_terms:
             logger.debug("Reached maximum number of terms. Applying trimming to high priority terms")
             terms_high_priority, add_others_highp = get_best_nodes(
-                terms_high_priority, trimming_algorithm, max_terms, self.ontology, terms_already_covered,
-                ancestors_covering_multiple_children if add_mul_common_anc else None,
-                slim_bonus_perc, dist_root[aspect], slim_set, nodeids_blacklist=self.config.get_module_property(
+                terms_high_priority, self.trimming_algorithm, self.max_terms, self.ontology, terms_already_covered,
+                ancestors_covering_multiple_children if self.add_mul_common_anc else None,
+                self.slim_bonus_perc, self.dist_root[aspect], self.slim_set, nodeids_blacklist=self.config.get_module_property(
                     module=self.module, prop=ConfigModuleProperty.EXCLUDE_TERMS))
         else:
             terms_already_covered.update(terms_high_priority)
         terms_low_priority = [term for term in terms if not high_priority_terms or term not in high_priority_terms]
-        trimming_threshold = max_terms - len(terms_high_priority)
+        trimming_threshold = self.max_terms - len(terms_high_priority)
         if 0 < trimming_threshold < len(terms_low_priority):
             terms_low_priority, add_others_lowp = get_best_nodes(
-                terms_low_priority, trimming_algorithm, trimming_threshold, self.ontology, terms_already_covered,
-                ancestors_covering_multiple_children if add_mul_common_anc else None, slim_bonus_perc,
-                dist_root[aspect], slim_set, nodeids_blacklist=self.config.get_module_property(
+                terms_low_priority, self.trimming_algorithm, trimming_threshold, self.ontology, terms_already_covered,
+                ancestors_covering_multiple_children if self.add_mul_common_anc else None, self.slim_bonus_perc,
+                self.dist_root[aspect], self.slim_set, nodeids_blacklist=self.config.get_module_property(
                     module=self.module, prop=ConfigModuleProperty.EXCLUDE_TERMS))
 
         elif trimming_threshold <= 0 < len(terms_low_priority):
@@ -239,7 +234,7 @@ class OntologySentenceGenerator(object):
         terms_low_priority = list(set(terms_low_priority) - set(terms_high_priority))
         terms.extend(terms_low_priority)
         # cutoff terms - if number of terms with high priority is higher than max_num_terms
-        terms = terms[0:max_terms]
+        terms = terms[0:self.max_terms]
         return terms, add_others_highp or add_others_lowp, ancestors_covering_multiple_children
 
     @staticmethod

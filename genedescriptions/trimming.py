@@ -27,13 +27,6 @@ class TrimmingAlgorithm(metaclass=ABCMeta):
     def trim(self, node_ids: List[str], max_num_nodes: int = 3):
         pass
 
-    @classmethod
-    def __subclasshook__(cls, C):
-        if cls is TrimmingAlgorithm:
-            if any("trim" in B.__dict__ for B in C.__mro__):
-                return True
-        return NotImplemented
-
     def nodes_have_same_root(self, node_ids: List[str]) -> Union[bool, str]:
         """
         Check whether all provided nodes are connected to the same root only
@@ -88,7 +81,8 @@ class TrimmingAlgorithm(metaclass=ABCMeta):
                                   covered_starting_nodes=set(covered_nodes)) for ancestor, covered_nodes in
                 ancestors.items() if len(covered_nodes) > 1 or ancestor == covered_nodes[0]]
 
-    def find_set_covering(self, subsets: List[TrimmingCandidate], value: List[float] = None,
+    @staticmethod
+    def find_set_covering(subsets: List[TrimmingCandidate], ontology: Ontology = None, value: List[float] = None,
                           max_num_subsets: int = None) -> Union[None, List[Tuple[str, Set[str]]]]:
         """greedy algorithm to solve set covering problem on subsets of trimming candidates
 
@@ -119,9 +113,9 @@ class TrimmingAlgorithm(metaclass=ABCMeta):
                                        s.node_label, s.node_id) for s in subsets if s.node_id in elem_to_process],
                                      key=lambda x: (- x[0], x[2]))
             elem_to_process.remove(effect_sets[0][3])
-            if self.ontology:
+            if ontology:
                 for elem in included_sets:
-                    if effect_sets[0][3] in self.ontology.ancestors(elem[0]):
+                    if effect_sets[0][3] in ontology.ancestors(elem[0]):
                         included_sets.remove(elem)
             included_elmts |= effect_sets[0][1]
             included_sets.append((effect_sets[0][3], effect_sets[0][1]))
@@ -180,7 +174,8 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
         # remove ancestors with zero IC
         common_ancestors = [common_ancestor for common_ancestor, value in zip(common_ancestors, values) if value > 0]
         values = [value for value in values if value > 0]
-        best_terms = self.find_set_covering(subsets=common_ancestors, max_num_subsets=max_num_nodes, value=values)
+        best_terms = self.find_set_covering(subsets=common_ancestors, ontology=self.ontology,
+                                            max_num_subsets=max_num_nodes, value=values)
         covered_terms = set([e for best_term_label, covered_terms in best_terms for e in covered_terms])
         return covered_terms != set(node_ids), best_terms
 
@@ -230,7 +225,7 @@ class TrimmingAlgorithmLCA(TrimmingAlgorithm):
         else:
             best_terms = self.find_set_covering(
                 [TrimmingCandidate(node_id, self.ontology.label(node_id, id_if_null=True), candidates_dict[node_id][1])
-                 for node_id in selected_cands_ids], max_num_subsets=max_num_nodes)
+                 for node_id in selected_cands_ids], ontology=self.ontology, max_num_subsets=max_num_nodes)
             covered_terms = set([e for best_term_label, covered_terms in best_terms for e in covered_terms])
             return covered_terms != set(node_ids), best_terms
 
