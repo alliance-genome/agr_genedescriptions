@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import inflect
 import re
 
@@ -192,11 +194,11 @@ class OntologySentenceGenerator(object):
                                              high_priority_terms: List[str] = None):
         dist_root = self.config.get_module_property(module=self.module, prop=ConfigModuleProperty.DISTANCE_FROM_ROOT)
         add_mul_common_anc = self.config.get_module_property(module=self.module,
-                                                        prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
+                                                             prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
         max_terms = self.config.get_module_property(module=self.module,
-                                               prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
+                                                    prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
         trimming_algorithm = self.config.get_module_property(module=self.module,
-                                                        prop=ConfigModuleProperty.TRIMMING_ALGORITHM)
+                                                             prop=ConfigModuleProperty.TRIMMING_ALGORITHM)
         slim_set = self.data_manager.get_slim(module=self.module)
         slim_bonus_perc = self.config.get_module_property(module=self.module, prop=ConfigModuleProperty.SLIM_BONUS_PERC)
         add_others_highp = False
