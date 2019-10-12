@@ -5,7 +5,7 @@ from typing import List, Set, Union, Tuple
 
 from ontobio import Ontology
 
-from genedescriptions.commons import CommonAncestor
+from genedescriptions.commons import CommonAncestor, TrimmingResult
 from genedescriptions.ontology_tools import get_all_common_ancestors, set_all_information_content_values
 from genedescriptions.optimization import find_set_covering
 
@@ -29,8 +29,27 @@ class TrimmingAlgorithm(metaclass=ABCMeta):
     def _pre_process(self):
         pass
 
+    def get_trimming_result_from_set_covering(self, initial_node_ids: List[str],
+                                              set_covering_res: List[Tuple[str, Set[str]]]) -> TrimmingResult:
+        covered_terms = set([e for best_term_id, covered_terms in set_covering_res for e in covered_terms])
+        final_terms = [best_term_id for best_term_id, covered_terms in set_covering_res]
+        multicover_nodes = {self.ontology.label(term_id, id_if_null=True) for term_id, covered_nodes
+                            in set_covering_res if len(covered_nodes) > 1}
+        return TrimmingResult(final_terms=final_terms, partial_coverage=covered_terms != set(initial_node_ids),
+                              covered_nodes=covered_terms, trimming_applied=final_terms != initial_node_ids,
+                              multicovering_nodes=multicover_nodes)
+
     @abstractmethod
-    def _trim(self, node_ids: List[str], max_num_nodes: int):
+    def _trim(self, node_ids: List[str], max_num_nodes: int) -> TrimmingResult:
+        """
+        Trim the provided list of nodes
+        Args:
+            node_ids: the list of node ids
+            max_num_nodes: max number of nodes in the final list after trimming
+
+        Returns:
+            TrimmingResult: the result of the trimming operation
+        """
         pass
 
 
@@ -68,7 +87,7 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
             logger.warning("ontology terms do not have information content values set")
             set_all_information_content_values(ontology=self.ontology)
 
-    def _trim(self, node_ids: List[str], max_num_nodes: int = 3):
+    def _trim(self, node_ids: List[str], max_num_nodes: int = 3) -> TrimmingResult:
         """trim the list of terms by selecting the best combination of terms from the initial list or their common
         ancestors based on information content
 
@@ -91,8 +110,7 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
         values = [value for value in values if value > 0]
         best_terms = find_set_covering(subsets=common_ancestors, ontology=self.ontology, max_num_subsets=max_num_nodes,
                                        value=values)
-        covered_terms = set([e for best_term_label, covered_terms in best_terms for e in covered_terms])
-        return covered_terms != set(node_ids), best_terms
+        return self.get_trimming_result_from_set_covering(initial_node_ids=node_ids, set_covering_res=best_terms)
 
 
 class TrimmingAlgorithmLCA(TrimmingAlgorithm):
@@ -133,14 +151,17 @@ class TrimmingAlgorithmLCA(TrimmingAlgorithm):
             else:
                 selected_cands_ids.append(cand_id)
         if len(selected_cands_ids) <= max_num_nodes:
-            return False, [(node_id, candidates_dict[node_id][1]) for node_id in selected_cands_ids]
-
+            multicover_nodes = {self.ontology.label(term_id, id_if_null=True) for term_id, candidate_info
+                                in candidates_dict.items() if len(candidate_info[1]) > 1}
+            return TrimmingResult(final_terms=selected_cands_ids, trimming_applied=True, partial_coverage=False,
+                                  covered_nodes=set([covered_node for node_id in selected_cands_ids for covered_node in
+                                                     candidates_dict[node_id][1]]),
+                                  multicovering_nodes=multicover_nodes)
         else:
             best_terms = find_set_covering(
                 [CommonAncestor(node_id, self.ontology.label(node_id, id_if_null=True), candidates_dict[node_id][1])
                  for node_id in selected_cands_ids], ontology=self.ontology, max_num_subsets=max_num_nodes)
-            covered_terms = set([e for best_term_label, covered_terms in best_terms for e in covered_terms])
-            return covered_terms != set(node_ids), best_terms
+            return self.get_trimming_result_from_set_covering(initial_node_ids=node_ids, set_covering_res=best_terms)
 
 
 class TrimmingAlgorithmNaive(TrimmingAlgorithm):
@@ -199,14 +220,18 @@ class TrimmingAlgorithmNaive(TrimmingAlgorithm):
                 else:
                     break
         if len(list(final_terms_set.keys())) <= max_num_nodes:
-            return False, [(term_label, covered_terms) for term_label, covered_terms in final_terms_set.items()]
-
+            multicover_nodes = {self.ontology.label(term_id, id_if_null=True) for term_id, covered_terms
+                                in final_terms_set.items() if len(covered_terms) > 1}
+            return TrimmingResult(final_terms=list(final_terms_set.keys()), trimming_applied=True,
+                                  partial_coverage=False,
+                                  covered_nodes=set([covered_node for covered_set in final_terms_set.values() for
+                                                     covered_node in covered_set]),
+                                  multicovering_nodes=multicover_nodes)
         else:
             best_terms = find_set_covering(
                 [CommonAncestor(k, self.ontology.label(k, id_if_null=True), v) for k, v in final_terms_set.items()],
                 max_num_subsets=max_num_nodes)
-            covered_terms = set([e for best_term_label, covered_terms in best_terms for e in covered_terms])
-            return covered_terms != set(node_ids), best_terms
+            return self.get_trimming_result_from_set_covering(initial_node_ids=node_ids, set_covering_res=best_terms)
 
     @staticmethod
     def get_all_paths_to_root(node_id: str, ontology: Ontology, min_distance_from_root: int = 0,

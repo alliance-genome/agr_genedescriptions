@@ -1,8 +1,8 @@
 from collections import namedtuple
 from enum import Enum
-from typing import Set
+from typing import Set, List
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from namedlist import namedlist
 
 Sentence = namedlist('Sentence', ['prefix', 'terms_ids', 'postfix', 'text', 'aspect', 'evidence_group', 'terms_merged',
@@ -43,3 +43,12 @@ class CommonAncestor:
     node_id: str
     node_label: str
     covered_starting_nodes: Set[str]
+
+
+@dataclass
+class TrimmingResult:
+    final_terms: List[str] = field(default_factory=list)
+    trimming_applied: bool = False
+    partial_coverage: bool = False
+    multicovering_nodes: Set[str] = field(default_factory=set)
+    covered_nodes: Set[str] = field(default_factory=set)

@@ -1,12 +1,10 @@
-from collections import defaultdict, ChainMap
+from collections import ChainMap
 from typing import Set
 
 import inflect
 import re
 
-from dataclasses import dataclass, field
-
-from genedescriptions.commons import Sentence, Module, DataType
+from genedescriptions.commons import Sentence, Module, DataType, TrimmingResult
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import DataManager
 from genedescriptions.ontology_tools import *
@@ -18,14 +16,6 @@ logger = logging.getLogger(__name__)
 
 
 CONF_TO_TRIMMING_CLASS = ChainMap(CONF_TO_TRIMMING_CLASS_DEFAULT, CONF_TO_TRIMMING_CLASS_CUSTOM)
-
-
-@dataclass
-class TrimmingResult:
-    final_terms: List[str] = None
-    trimming_applied: bool = False
-    partial_coverage: bool = False
-    multicovering_nodes: Set[str] = field(default_factory=set)
 
 
 class ModuleSentences(object):
@@ -179,8 +169,8 @@ class OntologySentenceGenerator(object):
                         truncate_others_generic_word=self.cutoff_final_word,
                         truncate_others_aspect_words=self.cat_several_words,
                         ancestors_with_multiple_children=trimming_result.multicovering_nodes,
-                        rename_cell=self.rename_cell, config=self.config, put_anatomy_male_at_end=True if aspect == 'A'
-                        else False))
+                        rename_cell=self.rename_cell, config=self.config,
+                        put_anatomy_male_at_end=True if aspect == 'A' else False))
                 if keep_only_best_group:
                     return ModuleSentences(sentences)
         if merge_groups_with_same_prefix:
@@ -265,18 +255,14 @@ class OntologySentenceGenerator(object):
         comb_trim_res.final_terms = comb_trim_res.final_terms[0:self.max_terms]
         if self.add_mul_common_anc:
             comb_trim_res.multicovering_nodes = trim_res_hp.multicovering_nodes | trim_res_lp.multicovering_nodes
+        comb_trim_res.trimming_applied = trim_res_hp.trimming_applied or trim_res_lp.trimming_applied
         return comb_trim_res
 
     def trim_terms(self, terms: List[str], min_dist_from_root: int = 0) -> TrimmingResult:
-        tr_algo = CONF_TO_TRIMMING_CLASS[self.trimming_algorithm](
+        return CONF_TO_TRIMMING_CLASS[self.trimming_algorithm](
             ontology=self.ontology, min_distance_from_root=min_dist_from_root, nodeids_blacklist=self.nodeids_blacklist,
-            slim_terms_ic_bonus_perc=self.slim_bonus_perc, slim_set=self.slim_set)
-        add_others, merged_terms_coverset = tr_algo.process(node_ids=list(terms), max_num_nodes=self.max_terms)
-        multicover_nodes = {self.ontology.label(term_id, id_if_null=True) for term_id, covered_nodes
-                            in merged_terms_coverset if len(covered_nodes) > 1}
-        self.terms_already_covered.update([e for term_id, covered_nodes in merged_terms_coverset for e in covered_nodes])
-        terms = [term_id for term_id, covered_nodes in merged_terms_coverset]
-        return TrimmingResult(final_terms=terms, partial_coverage=add_others, multicovering_nodes=multicover_nodes)
+            slim_terms_ic_bonus_perc=self.slim_bonus_perc, slim_set=self.slim_set).process(node_ids=list(terms),
+                                                                                           max_num_nodes=self.max_terms)
 
     @staticmethod
     def remove_children_if_parents_present(terms, ontology, terms_already_covered: Set[str] = None,
