@@ -37,16 +37,6 @@ class TestDescriptionsGenerator(unittest.TestCase):
         logging.basicConfig(filename=None, level="ERROR",
                             format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
 
-    def test_trimming_with_high_priority(self):
-        generator = OntologySentenceGenerator(gene_id="WB:WBGene00000912", module=Module.GO,
-                                              data_manager=self.df, config=self.conf_parser)
-        sentences = generator.get_module_sentences(aspect='P', qualifier='', merge_groups_with_same_prefix=True,
-                                                   keep_only_best_group=True, high_priority_term_ids=['GO:0007568',
-                                                                                                      'GO:1900426'])
-        self.assertTrue("several processes" in sentences.get_description())
-        self.assertTrue("aging" in sentences.get_description())
-        self.assertTrue("positive regulation of defense response to bacterium" in sentences.get_description())
-
     def test_generate_sentence_wb(self):
         go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00000018", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)

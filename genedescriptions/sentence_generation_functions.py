@@ -29,9 +29,10 @@ def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str],
         str: the text of the sentence
     """
     new_prefix = prefix + additional_prefix + " "
-    term_names = [term_name + " (multiple)" if term_name in ancestors_with_multiple_children else term_name for
-                  term_name in sorted(term_names)]
-
+    term_names = sorted(term_names)
+    if ancestors_with_multiple_children:
+        term_names = [term_name + " (multiple)" if term_name in ancestors_with_multiple_children else term_name for
+                      term_name in term_names]
     if postfix != "":
         postfix = " " + postfix
     if rename_cell:
