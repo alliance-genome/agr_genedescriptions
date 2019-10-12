@@ -6,7 +6,7 @@ from typing import List, Set, Union, Tuple
 from ontobio import Ontology
 
 from genedescriptions.commons import CommonAncestor
-from genedescriptions.ontology_tools import get_all_common_ancestors
+from genedescriptions.ontology_tools import get_all_common_ancestors, set_all_information_content_values
 from genedescriptions.optimization import find_set_covering
 
 logger = logging.getLogger(__name__)
@@ -14,13 +14,23 @@ logger = logging.getLogger(__name__)
 
 class TrimmingAlgorithm(metaclass=ABCMeta):
 
-    def __init__(self, ontology: Ontology, min_distance_from_root: int = 3, nodeids_blacklist: List[str] = None):
+    def __init__(self, ontology: Ontology, min_distance_from_root: int = 3, nodeids_blacklist: List[str] = None,
+                 slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
         self.ontology = ontology
         self.min_distance_from_root = min_distance_from_root
         self.nodeids_blacklist = nodeids_blacklist
+        self.slim_terms_ic_bonus_perc = slim_terms_ic_bonus_perc
+        self.slim_set = slim_set
+
+    def process(self, node_ids: List[str], max_num_nodes: int = 3):
+        self._pre_process()
+        return self._trim(node_ids=node_ids, max_num_nodes=max_num_nodes)
+
+    def _pre_process(self):
+        pass
 
     @abstractmethod
-    def trim(self, node_ids: List[str], max_num_nodes: int = 3):
+    def _trim(self, node_ids: List[str], max_num_nodes: int):
         pass
 
 
@@ -28,9 +38,7 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
 
     def __init__(self, ontology: Ontology, min_distance_from_root: int = 3, nodeids_blacklist: List[str] = None,
                  slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
-        super().__init__(ontology, min_distance_from_root, nodeids_blacklist)
-        self.slim_terms_ic_bonus_perc = slim_terms_ic_bonus_perc
-        self.slim_set = slim_set
+        super().__init__(ontology, min_distance_from_root, nodeids_blacklist, slim_terms_ic_bonus_perc, slim_set)
 
     def get_candidate_ic_value(self, candidate: CommonAncestor, node_ids: List[str],
                                slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
@@ -55,7 +63,12 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
         else:
             return candidate_node["IC"]
 
-    def trim(self, node_ids: List[str], max_num_nodes: int = 3):
+    def _pre_process(self):
+        if "IC" not in list(self.ontology.nodes())[0]:
+            logger.warning("ontology terms do not have information content values set")
+            set_all_information_content_values(ontology=self.ontology)
+
+    def _trim(self, node_ids: List[str], max_num_nodes: int = 3):
         """trim the list of terms by selecting the best combination of terms from the initial list or their common
         ancestors based on information content
 
@@ -84,10 +97,7 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
 
 class TrimmingAlgorithmLCA(TrimmingAlgorithm):
 
-    def __init__(self, ontology: Ontology, min_distance_from_root: int = 3, nodeids_blacklist: List[str] = None):
-        super().__init__(ontology, min_distance_from_root, nodeids_blacklist)
-
-    def trim(self, node_ids: List[str], max_num_nodes: int = 3):
+    def _trim(self, node_ids: List[str], max_num_nodes: int = 3):
         candidates_dict = {candidate.node_id: (candidate.node_label, candidate.covered_starting_nodes) for candidate in
                            get_all_common_ancestors(node_ids=node_ids, ontology=self.ontology,
                                                     min_distance_from_root=self.min_distance_from_root,
@@ -135,10 +145,7 @@ class TrimmingAlgorithmLCA(TrimmingAlgorithm):
 
 class TrimmingAlgorithmNaive(TrimmingAlgorithm):
 
-    def __init__(self, ontology: Ontology, min_distance_from_root: int = 3, nodeids_blacklist: List[str] = None):
-        super().__init__(ontology, min_distance_from_root, nodeids_blacklist)
-
-    def trim(self, node_ids: List[str], max_num_nodes: int = 3):
+    def _trim(self, node_ids: List[str], max_num_nodes: int = 3):
         logger.debug("applying trimming through naive algorithm")
         final_terms_set = {}
         ancestor_paths = defaultdict(list)
@@ -254,3 +261,9 @@ class TrimmingAlgorithmNaive(TrimmingAlgorithm):
             return {(node_id,)}
         else:
             return {tuple(new_path)}
+
+
+CONF_TO_TRIMMING_CLASS_DEFAULT = {
+    "lca": TrimmingAlgorithmLCA,
+    "ic": TrimmingAlgorithmIC,
+    "naive": TrimmingAlgorithmNaive}

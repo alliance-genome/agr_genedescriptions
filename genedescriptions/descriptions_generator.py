@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, ChainMap
 from typing import Set
 
 import inflect
@@ -11,9 +11,14 @@ from genedescriptions.config_parser import GenedescConfigParser, ConfigModulePro
 from genedescriptions.data_manager import DataManager
 from genedescriptions.ontology_tools import *
 from genedescriptions.sentence_generation_functions import _get_single_sentence, compose_sentence
-from genedescriptions.trimming import TrimmingAlgorithmIC, TrimmingAlgorithmLCA, TrimmingAlgorithmNaive
+from genedescriptions.trimming import TrimmingAlgorithmIC, TrimmingAlgorithmLCA, TrimmingAlgorithmNaive, \
+    CONF_TO_TRIMMING_CLASS_DEFAULT
+from genedescriptions.trimming_custom import CONF_TO_TRIMMING_CLASS_CUSTOM
 
 logger = logging.getLogger(__name__)
+
+
+CONF_TO_TRIMMING_CLASS = ChainMap(CONF_TO_TRIMMING_CLASS_DEFAULT, CONF_TO_TRIMMING_CLASS_CUSTOM)
 
 
 @dataclass
@@ -267,20 +272,10 @@ class OntologySentenceGenerator(object):
 
     def trim_terms(self, terms: List[str], ancestors_covering_multiple_children: Set[str] = None,
                    min_dist_from_root: int = 0) -> TrimmingResult:
-        if self.trimming_algorithm == "ic":
-            if "IC" not in self.ontology.node(terms[0]):
-                logger.warning("ontology terms do not have information content values set")
-                set_all_information_content_values(ontology=self.ontology)
-            tr_algo = TrimmingAlgorithmIC(ontology=self.ontology, min_distance_from_root=min_dist_from_root,
-                                          nodeids_blacklist=self.nodeids_blacklist,
-                                          slim_terms_ic_bonus_perc=self.slim_bonus_perc, slim_set=self.slim_set)
-        elif self.trimming_algorithm == "lca":
-            tr_algo = TrimmingAlgorithmLCA(ontology=self.ontology, min_distance_from_root=min_dist_from_root,
-                                           nodeids_blacklist=self.nodeids_blacklist)
-        else:
-            tr_algo = TrimmingAlgorithmNaive(ontology=self.ontology, min_distance_from_root=min_dist_from_root,
-                                             nodeids_blacklist=self.nodeids_blacklist)
-        add_others, merged_terms_coverset = tr_algo.trim(node_ids=list(terms), max_num_nodes=self.max_terms)
+        tr_algo = CONF_TO_TRIMMING_CLASS[self.trimming_algorithm](
+            ontology=self.ontology, min_distance_from_root=min_dist_from_root, nodeids_blacklist=self.nodeids_blacklist,
+            slim_terms_ic_bonus_perc=self.slim_bonus_perc, slim_set=self.slim_set)
+        add_others, merged_terms_coverset = tr_algo.process(node_ids=list(terms), max_num_nodes=self.max_terms)
         if ancestors_covering_multiple_children is not None:
             ancestors_covering_multiple_children.update({self.ontology.label(term_id, id_if_null=True) for
                                                          term_id, covered_nodes in merged_terms_coverset if
