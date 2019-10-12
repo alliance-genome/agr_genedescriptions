@@ -234,40 +234,40 @@ class OntologySentenceGenerator(object):
         Returns:
             TrimmingResult: the trimmed terms, with their additional information
         """
-        trimming_result = TrimmingResult()
-        terms_high_priority = [term for term in terms if high_priority_terms and term in high_priority_terms]
-        if terms_high_priority is None:
-            terms_high_priority = []
-        if len(terms_high_priority) > self.max_terms:
-            terms_high_priority = self.remove_children_if_parents_present(
-                terms=terms_high_priority, ontology=self.ontology, terms_already_covered=self.terms_already_covered,
-                ancestors_covering_multiple_children=trimming_result.nodes_covering_multiple_children
+        comb_trim_res = TrimmingResult()
+        trim_res_hp = TrimmingResult()
+        trim_res_hp.final_terms = [term for term in terms if high_priority_terms and term in high_priority_terms]
+        if trim_res_hp.final_terms is None:
+            trim_res_hp.final_terms = []
+        if len(trim_res_hp.final_terms) > self.max_terms:
+            trim_res_hp.final_terms = self.remove_children_if_parents_present(
+                terms=trim_res_hp.final_terms, ontology=self.ontology, terms_already_covered=self.terms_already_covered,
+                ancestors_covering_multiple_children=comb_trim_res.nodes_covering_multiple_children
                 if self.add_mul_common_anc else None)
-        if len(terms_high_priority) > self.max_terms:
+        if len(trim_res_hp.final_terms) > self.max_terms:
             logger.debug("Reached maximum number of terms. Applying trimming to high priority terms")
-            trimming_result_hp = self.trim_terms(terms_high_priority, trimming_result.nodes_covering_multiple_children
+            trim_res_hp = self.trim_terms(trim_res_hp.final_terms, comb_trim_res.nodes_covering_multiple_children
                                                  if self.add_mul_common_anc else None, min_distance_from_root)
-            if trimming_result_hp.partial_coverage:
-                trimming_result.partial_coverage = True
-            terms_high_priority = trimming_result_hp.final_terms
+            if trim_res_hp.partial_coverage:
+                comb_trim_res.partial_coverage = True
         else:
-            self.terms_already_covered.update(terms_high_priority)
+            self.terms_already_covered.update(trim_res_hp.final_terms)
         terms_low_priority = [term for term in terms if not high_priority_terms or term not in high_priority_terms]
-        trimming_threshold = self.max_terms - len(terms_high_priority)
+        trimming_threshold = self.max_terms - len(trim_res_hp.final_terms)
         if 0 < trimming_threshold < len(terms_low_priority):
-            trimming_result_lp = self.trim_terms(terms_low_priority, trimming_result.nodes_covering_multiple_children
+            trimming_result_lp = self.trim_terms(terms_low_priority, comb_trim_res.nodes_covering_multiple_children
                                                  if self.add_mul_common_anc else None, min_distance_from_root)
             if trimming_result_lp.partial_coverage:
-                trimming_result.partial_coverage = True
+                comb_trim_res.partial_coverage = True
             terms_low_priority = trimming_result_lp.final_terms
         elif trimming_threshold <= 0 < len(terms_low_priority):
-            trimming_result.partial_coverage = True
-        trimming_result.final_terms = terms_high_priority
+            comb_trim_res.partial_coverage = True
+        comb_trim_res.final_terms = trim_res_hp.final_terms
         # remove exact overlap
-        trimming_result.final_terms.extend(list(set(terms_low_priority) - set(terms_high_priority)))
+        comb_trim_res.final_terms.extend(list(set(terms_low_priority) - set(trim_res_hp.final_terms)))
         # cutoff terms - if number of terms with high priority is higher than max_num_terms
-        trimming_result.final_terms = trimming_result.final_terms[0:self.max_terms]
-        return trimming_result
+        comb_trim_res.final_terms = comb_trim_res.final_terms[0:self.max_terms]
+        return comb_trim_res
 
     def trim_terms(self, terms: List[str], ancestors_covering_multiple_children: Set[str] = None,
                    min_dist_from_root: int = 0) -> TrimmingResult:
