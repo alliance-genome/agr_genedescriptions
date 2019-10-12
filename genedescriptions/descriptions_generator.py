@@ -4,6 +4,8 @@ from typing import Set
 import inflect
 import re
 
+from dataclasses import dataclass, field
+
 from genedescriptions.commons import Sentence, Module, DataType
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import DataManager
@@ -12,6 +14,14 @@ from genedescriptions.sentence_generation_functions import _get_single_sentence,
 from genedescriptions.trimming import TrimmingAlgorithmIC, TrimmingAlgorithmLCA, TrimmingAlgorithmNaive
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class TrimmingResult:
+    final_terms: List[str] = None
+    trimming_applied: bool = False
+    partial_coverage: bool = False
+    nodes_covering_multiple_children: Set[str] = field(default_factory=set)
 
 
 class ModuleSentences(object):
@@ -152,17 +162,19 @@ class OntologySentenceGenerator(object):
         for terms, evidence_group, priority in sorted([(t, eg, evidence_group_priority[eg]) for eg, t in
                                                        self.terms_groups[(aspect, qualifier)].items()],
                                                       key=lambda x: x[2]):
-            terms, trimmed, add_others, ancestors_covering_multiple_children = self.reduce_num_terms(
-                terms, aspect, high_priority_term_ids)
+            trimming_result = self.reduce_num_terms(terms=terms, min_distance_from_root=self.dist_root[aspect],
+                                                    high_priority_term_ids=high_priority_term_ids)
             if (aspect, evidence_group, qualifier) in self.prepostfix_sentences_map and len(terms) > 0:
                 sentences.append(
                     _get_single_sentence(
-                        node_ids=terms, ontology=self.ontology, aspect=aspect, evidence_group=evidence_group,
-                        qualifier=qualifier, prepostfix_sentences_map=self.prepostfix_sentences_map,
-                        terms_merged=False, trimmed=trimmed, add_others=add_others,
+                        node_ids=trimming_result.final_terms, ontology=self.ontology, aspect=aspect,
+                        evidence_group=evidence_group, qualifier=qualifier,
+                        prepostfix_sentences_map=self.prepostfix_sentences_map,
+                        terms_merged=False, trimmed=trimming_result.trimming_applied,
+                        add_others=trimming_result.partial_coverage,
                         truncate_others_generic_word=self.cutoff_final_word,
                         truncate_others_aspect_words=self.cat_several_words,
-                        ancestors_with_multiple_children=ancestors_covering_multiple_children,
+                        ancestors_with_multiple_children=trimming_result.nodes_covering_multiple_children,
                         rename_cell=self.rename_cell, config=self.config, put_anatomy_male_at_end=True if aspect == 'A'
                         else False))
                 if keep_only_best_group:
@@ -173,10 +185,21 @@ class OntologySentenceGenerator(object):
                 high_priority_term_ids=high_priority_term_ids, put_anatomy_male_at_end=True if aspect == 'A' else False)
         return ModuleSentences(sentences)
 
-    def reduce_num_terms(self, terms, aspect, high_priority_term_ids: List[str] = None):
-        ancestors_covering_multiple_children = set()
-        trimmed = False
-        add_others = False
+    def reduce_num_terms(self, terms: Set[str], min_distance_from_root: int = 0,
+                         high_priority_term_ids: List[str] = None) -> TrimmingResult:
+        """
+        Reduce the initial set of terms by resolving parent child relationships, deleting overlap with previous
+        sections, and trimming, if needed, the final set of terms
+
+        Args:
+            terms (Set[str]): initial set of terms to reduce
+            min_distance_from_root (int): minimum distance from root to use for trimming
+            high_priority_term_ids (List[str]): list of terms with high priority to be treated separately
+
+        Returns:
+            TrimmingResult: the reduced set of terms with additional information on the nature of the terms
+        """
+        trimming_result = TrimmingResult()
         if self.del_overlap:
             terms -= self.terms_already_covered
         if self.exclude_terms:
@@ -185,60 +208,69 @@ class OntologySentenceGenerator(object):
             terms = OntologySentenceGenerator.remove_parents_if_child_present(
                 terms, self.ontology, self.terms_already_covered, high_priority_term_ids)
         if 0 < self.max_terms < len(terms):
-            trimmed = True
-            terms, add_others, ancestors_covering_multiple_children = self.trim_with_priority(
-                terms, self.terms_already_covered, aspect, high_priority_term_ids)
+            trimming_result = self.trim_with_priority(terms, min_distance_from_root, high_priority_term_ids)
         else:
+            trimming_result.final_terms = terms
             self.terms_already_covered.update(terms)
         if self.remove_child_terms:
-            terms = self.remove_children_if_parents_present(
-                terms=terms, ontology=self.ontology, terms_already_covered=self.terms_already_covered,
-                high_priority_terms=high_priority_term_ids,
-                ancestors_covering_multiple_children=ancestors_covering_multiple_children if self.add_mul_common_anc
-                else None)
-        return terms, trimmed, add_others, ancestors_covering_multiple_children
+            trimming_result.final_terms = self.remove_children_if_parents_present(
+                terms=trimming_result.final_terms, ontology=self.ontology,
+                terms_already_covered=self.terms_already_covered, high_priority_terms=high_priority_term_ids,
+                ancestors_covering_multiple_children=trimming_result.nodes_covering_multiple_children if
+                self.add_mul_common_anc else None)
+        return trimming_result
 
-    def trim_with_priority(self, terms: Set[str], terms_already_covered, aspect: str,
-                           high_priority_terms: List[str] = None):
-        add_others_highp = False
-        add_others_lowp = False
-        ancestors_covering_multiple_children = set()
+    def trim_with_priority(self, terms: Set[str], min_distance_from_root: int = 0,
+                           high_priority_terms: List[str] = None) -> TrimmingResult:
+        """
+        Trim terms based on common ancestors and keep terms with high priority in a separate set, to be trimmed
+        separately
+
+        Args:
+            terms (Set[str]): the set of terms to trim
+            min_distance_from_root (int): minimum distance from root for selecting common ancestors
+            high_priority_terms (List[str]): list of term IDs with higher priority
+
+        Returns:
+            TrimmingResult: the trimmed terms, with their additional information
+        """
+        trimming_result = TrimmingResult()
         terms_high_priority = [term for term in terms if high_priority_terms and term in high_priority_terms]
         if terms_high_priority is None:
             terms_high_priority = []
         if len(terms_high_priority) > self.max_terms:
             terms_high_priority = self.remove_children_if_parents_present(
-                terms=terms_high_priority, ontology=self.ontology, terms_already_covered=terms_already_covered,
-                ancestors_covering_multiple_children=ancestors_covering_multiple_children if self.add_mul_common_anc else
-                None)
+                terms=terms_high_priority, ontology=self.ontology, terms_already_covered=self.terms_already_covered,
+                ancestors_covering_multiple_children=trimming_result.nodes_covering_multiple_children
+                if self.add_mul_common_anc else None)
         if len(terms_high_priority) > self.max_terms:
             logger.debug("Reached maximum number of terms. Applying trimming to high priority terms")
-            terms_high_priority, add_others_highp = self.trim_terms(
-                terms_high_priority, terms_already_covered,
-                ancestors_covering_multiple_children if self.add_mul_common_anc else None,
-                self.dist_root[aspect])
+            trimming_result_hp = self.trim_terms(terms_high_priority, trimming_result.nodes_covering_multiple_children
+                                                 if self.add_mul_common_anc else None, min_distance_from_root)
+            if trimming_result_hp.partial_coverage:
+                trimming_result.partial_coverage = True
+            terms_high_priority = trimming_result_hp.final_terms
         else:
-            terms_already_covered.update(terms_high_priority)
+            self.terms_already_covered.update(terms_high_priority)
         terms_low_priority = [term for term in terms if not high_priority_terms or term not in high_priority_terms]
         trimming_threshold = self.max_terms - len(terms_high_priority)
         if 0 < trimming_threshold < len(terms_low_priority):
-            terms_low_priority, add_others_lowp = self.trim_terms(
-                terms_low_priority, terms_already_covered,
-                ancestors_covering_multiple_children if self.add_mul_common_anc else None,
-                self.dist_root[aspect])
-
+            trimming_result_lp = self.trim_terms(terms_low_priority, trimming_result.nodes_covering_multiple_children
+                                                 if self.add_mul_common_anc else None, min_distance_from_root)
+            if trimming_result_lp.partial_coverage:
+                trimming_result.partial_coverage = True
+            terms_low_priority = trimming_result_lp.final_terms
         elif trimming_threshold <= 0 < len(terms_low_priority):
-            add_others_lowp = True
-        terms = terms_high_priority
+            trimming_result.partial_coverage = True
+        trimming_result.final_terms = terms_high_priority
         # remove exact overlap
-        terms_low_priority = list(set(terms_low_priority) - set(terms_high_priority))
-        terms.extend(terms_low_priority)
+        trimming_result.final_terms.extend(list(set(terms_low_priority) - set(terms_high_priority)))
         # cutoff terms - if number of terms with high priority is higher than max_num_terms
-        terms = terms[0:self.max_terms]
-        return terms, add_others_highp or add_others_lowp, ancestors_covering_multiple_children
+        trimming_result.final_terms = trimming_result.final_terms[0:self.max_terms]
+        return trimming_result
 
-    def trim_terms(self, terms, terms_already_covered, ancestors_covering_multiple_children: Set = None,
-                   min_dist_from_root: int = 0):
+    def trim_terms(self, terms: List[str], ancestors_covering_multiple_children: Set[str] = None,
+                   min_dist_from_root: int = 0) -> TrimmingResult:
         if self.trimming_algorithm == "ic":
             if "IC" not in self.ontology.node(terms[0]):
                 logger.warning("ontology terms do not have information content values set")
@@ -257,9 +289,9 @@ class OntologySentenceGenerator(object):
             ancestors_covering_multiple_children.update({self.ontology.label(term_id, id_if_null=True) for
                                                          term_id, covered_nodes in merged_terms_coverset if
                                                          len(covered_nodes) > 1})
-        terms_already_covered.update([e for term_id, covered_nodes in merged_terms_coverset for e in covered_nodes])
+        self.terms_already_covered.update([e for term_id, covered_nodes in merged_terms_coverset for e in covered_nodes])
         terms = [term_id for term_id, covered_nodes in merged_terms_coverset]
-        return terms, add_others
+        return TrimmingResult(final_terms=terms, partial_coverage=add_others)
 
     @staticmethod
     def remove_children_if_parents_present(terms, ontology, terms_already_covered: Set[str] = None,
