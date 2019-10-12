@@ -231,17 +231,15 @@ class OntologySentenceGenerator(object):
         comb_trim_res = TrimmingResult()
         trim_res_hp = TrimmingResult()
         trim_res_lp = TrimmingResult()
+        add_multicover_nodes = set()
         trim_res_hp.final_terms = [t for t in terms if t in high_priority_terms] if high_priority_terms else []
         if len(trim_res_hp.final_terms) > self.max_terms:
             trim_res_hp.final_terms = self.remove_children_if_parents_present(
                 terms=trim_res_hp.final_terms, ontology=self.ontology, terms_already_covered=self.terms_already_covered,
-                ancestors_covering_multiple_children=comb_trim_res.multicovering_nodes
-                if self.add_mul_common_anc else None)
+                ancestors_covering_multiple_children=add_multicover_nodes if self.add_mul_common_anc else None)
         if len(trim_res_hp.final_terms) > self.max_terms:
             logger.debug("Reached maximum number of terms. Applying trimming to high priority terms")
             trim_res_hp = self.trim_terms(trim_res_hp.final_terms, min_distance_from_root)
-        else:
-            self.terms_already_covered.update(trim_res_hp.final_terms)
         trim_res_lp.final_terms = [t for t in terms if t not in high_priority_terms] if high_priority_terms else terms
         trimming_threshold = self.max_terms - len(trim_res_hp.final_terms)
         if 0 < trimming_threshold < len(trim_res_lp.final_terms):
@@ -254,8 +252,10 @@ class OntologySentenceGenerator(object):
         # cutoff terms - if number of terms with high priority is higher than max_num_terms
         comb_trim_res.final_terms = comb_trim_res.final_terms[0:self.max_terms]
         if self.add_mul_common_anc:
-            comb_trim_res.multicovering_nodes = trim_res_hp.multicovering_nodes | trim_res_lp.multicovering_nodes
+            comb_trim_res.multicovering_nodes = trim_res_hp.multicovering_nodes | trim_res_lp.multicovering_nodes | \
+                                                add_multicover_nodes
         comb_trim_res.trimming_applied = trim_res_hp.trimming_applied or trim_res_lp.trimming_applied
+        comb_trim_res.covered_nodes = trim_res_hp.covered_nodes | trim_res_lp.covered_nodes
         return comb_trim_res
 
     def trim_terms(self, terms: List[str], min_dist_from_root: int = 0) -> TrimmingResult:
