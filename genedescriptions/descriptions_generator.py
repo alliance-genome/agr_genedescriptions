@@ -236,6 +236,7 @@ class OntologySentenceGenerator(object):
         """
         comb_trim_res = TrimmingResult()
         trim_res_hp = TrimmingResult()
+        trim_res_lp = TrimmingResult()
         trim_res_hp.final_terms = [term for term in terms if high_priority_terms and term in high_priority_terms]
         if trim_res_hp.final_terms is None:
             trim_res_hp.final_terms = []
@@ -247,24 +248,19 @@ class OntologySentenceGenerator(object):
         if len(trim_res_hp.final_terms) > self.max_terms:
             logger.debug("Reached maximum number of terms. Applying trimming to high priority terms")
             trim_res_hp = self.trim_terms(trim_res_hp.final_terms, comb_trim_res.nodes_covering_multiple_children
-                                                 if self.add_mul_common_anc else None, min_distance_from_root)
-            if trim_res_hp.partial_coverage:
-                comb_trim_res.partial_coverage = True
+                                          if self.add_mul_common_anc else None, min_distance_from_root)
         else:
             self.terms_already_covered.update(trim_res_hp.final_terms)
-        terms_low_priority = [term for term in terms if not high_priority_terms or term not in high_priority_terms]
+        trim_res_lp.final_terms = [term for term in terms if not high_priority_terms or term not in high_priority_terms]
         trimming_threshold = self.max_terms - len(trim_res_hp.final_terms)
-        if 0 < trimming_threshold < len(terms_low_priority):
-            trimming_result_lp = self.trim_terms(terms_low_priority, comb_trim_res.nodes_covering_multiple_children
-                                                 if self.add_mul_common_anc else None, min_distance_from_root)
-            if trimming_result_lp.partial_coverage:
-                comb_trim_res.partial_coverage = True
-            terms_low_priority = trimming_result_lp.final_terms
-        elif trimming_threshold <= 0 < len(terms_low_priority):
-            comb_trim_res.partial_coverage = True
+        if 0 < trimming_threshold < len(trim_res_lp.final_terms):
+            trim_res_lp = self.trim_terms(trim_res_lp.final_terms, comb_trim_res.nodes_covering_multiple_children
+                                          if self.add_mul_common_anc else None, min_distance_from_root)
+        comb_trim_res.partial_coverage = trim_res_hp.partial_coverage or trim_res_lp.partial_coverage or \
+                                         trimming_threshold <= 0 < len(trim_res_lp.final_terms)
         comb_trim_res.final_terms = trim_res_hp.final_terms
         # remove exact overlap
-        comb_trim_res.final_terms.extend(list(set(terms_low_priority) - set(trim_res_hp.final_terms)))
+        comb_trim_res.final_terms.extend(list(set(trim_res_lp.final_terms) - set(trim_res_hp.final_terms)))
         # cutoff terms - if number of terms with high priority is higher than max_num_terms
         comb_trim_res.final_terms = comb_trim_res.final_terms[0:self.max_terms]
         return comb_trim_res
