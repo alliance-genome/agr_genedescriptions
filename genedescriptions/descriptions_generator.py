@@ -9,13 +9,9 @@ from genedescriptions.config_parser import GenedescConfigParser, ConfigModulePro
 from genedescriptions.data_manager import DataManager
 from genedescriptions.ontology_tools import *
 from genedescriptions.sentence_generation_functions import _get_single_sentence, compose_sentence
-from genedescriptions.trimming import CONF_TO_TRIMMING_CLASS_DEFAULT
-from genedescriptions.trimming_custom import CONF_TO_TRIMMING_CLASS_CUSTOM
+from genedescriptions.trimming import CONF_TO_TRIMMING_CLASS
 
 logger = logging.getLogger(__name__)
-
-
-CONF_TO_TRIMMING_CLASS = ChainMap(CONF_TO_TRIMMING_CLASS_DEFAULT, CONF_TO_TRIMMING_CLASS_CUSTOM)
 
 
 class ModuleSentences(object):

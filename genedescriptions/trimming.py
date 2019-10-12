@@ -288,7 +288,7 @@ class TrimmingAlgorithmNaive(TrimmingAlgorithm):
             return {tuple(new_path)}
 
 
-CONF_TO_TRIMMING_CLASS_DEFAULT = {
+CONF_TO_TRIMMING_CLASS = {
     "lca": TrimmingAlgorithmLCA,
     "ic": TrimmingAlgorithmIC,
     "naive": TrimmingAlgorithmNaive}
