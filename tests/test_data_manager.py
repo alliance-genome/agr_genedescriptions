@@ -2,7 +2,7 @@ import logging
 import unittest
 import os
 
-from genedescriptions.commons import Module
+from genedescriptions.commons import Module, Gene
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import DataManager, DataType
 
@@ -48,3 +48,30 @@ class TestGOModule(unittest.TestCase):
     def test_exclude_terms(self):
         test_annot = self.df.get_annotations_for_gene("WB:WBGene00000001", annot_type=DataType.GO)
         self.assertTrue(all([annot["object"]["id"] != "GO:0008286" for annot in test_annot]))
+
+    def test_download_gz_file(self):
+        test_file = self.df._get_cached_file(cache_path=os.path.join(self.this_dir, "cache",
+                                                                     "c_elegans.PRJNA13758.WS273.geneIDs.txt.gz"),
+                                             file_source_url="file://" + os.path.join(
+                                                 self.this_dir, "data", "c_elegans.PRJNA13758.WS273.geneIDs.txt.gz"))
+        self.assertTrue(test_file == os.path.join(self.this_dir, "cache", "c_elegans.PRJNA13758.WS273.geneIDs.txt"))
+
+    def test_gene_data_functions(self):
+        self.df.set_gene_data(gene_data=[Gene("1", "gene1", True, False), Gene("2", "gene2", False, True),
+                                         Gene("3", "gene3", False, False), Gene("4", "gene4", True, True)])
+        self.assertTrue(len([g for g in self.df.get_gene_data(include_dead_genes=False,
+                                                              include_pseudo_genes=False)]) == 1)
+        self.assertTrue(len([g for g in self.df.get_gene_data(include_dead_genes=True,
+                                                              include_pseudo_genes=False)]) == 2)
+        self.assertTrue(len([g for g in self.df.get_gene_data(include_dead_genes=False,
+                                                              include_pseudo_genes=True)]) == 2)
+        self.assertTrue(len([g for g in self.df.get_gene_data(include_dead_genes=True,
+                                                              include_pseudo_genes=True)]) == 4)
+
+    def test_get_human_gene_props(self):
+        human_gene_props = self.df.get_human_gene_props()
+        self.assertTrue(len(human_gene_props) > 0)
+
+    def test_get_ensembl_hgnc_ids_map(self):
+        ensembl_hgnc_ids_map = self.df.get_ensembl_hgnc_ids_map()
+        self.assertTrue(len(ensembl_hgnc_ids_map) > 0)
