@@ -49,7 +49,7 @@ class DataManager(object):
         self.go_ontology = None
         self.do_ontology = None
         self.do_associations = None
-        self.gene_data = None
+        self.gene_data = {}
         self.expression_ontology = None
         self.expression_associations = None
         self.go_relations = go_relations
