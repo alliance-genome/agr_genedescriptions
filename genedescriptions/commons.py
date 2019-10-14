@@ -1,7 +1,6 @@
 from collections import namedtuple
 from enum import Enum
-from typing import Set, List
-
+from typing import Set, List, Any
 from dataclasses import dataclass, field
 from namedlist import namedlist
 
@@ -40,7 +39,7 @@ class Module(Enum):
 
 @dataclass
 class CommonAncestor:
-    node_id: str
+    node_id: Any
     node_label: str
     covered_starting_nodes: Set[str]
 

@@ -1,4 +1,3 @@
-import datetime
 import logging
 import unittest
 import os
@@ -10,8 +9,6 @@ from genedescriptions.config_parser import GenedescConfigParser, ConfigModulePro
 from genedescriptions.data_manager import DataManager, DataType
 from genedescriptions.descriptions_generator import OntologySentenceGenerator
 from genedescriptions.ontology_tools import set_all_information_content_values, get_all_common_ancestors
-from genedescriptions.optimization import find_set_covering
-from genedescriptions.trimming import TrimmingAlgorithm, CommonAncestor, TrimmingAlgorithmLCA
 
 logger = logging.getLogger("Gene Ontology Tools tests")
 
@@ -130,43 +127,6 @@ class TestOntologyTools(unittest.TestCase):
         self.assertAlmostEqual(ontology.node(8)["IC"], 1.049822124)
         self.assertAlmostEqual(ontology.node(10)["IC"], 1.252762968)
         self.assertAlmostEqual(ontology.node(11)["IC"], 1.386294361)
-
-    def test_find_set_covering(self):
-        subsets = [CommonAncestor("1", "1", {"A", "B", "C"}), CommonAncestor("2", "2", {"A", "B"}),
-                   CommonAncestor("3", "3", {"C"}), CommonAncestor("4", "4", {"A"}),
-                   CommonAncestor("5", "5", {"B"}), CommonAncestor("6", "6", {"C"})]
-        values = [2, 12, 5, 20, 20, 20]
-        # test with weights
-        set_covering = [best_set[0] for best_set in find_set_covering(subsets=subsets, value=values, max_num_subsets=3)]
-        self.assertTrue("2" in set_covering)
-        self.assertTrue("6" in set_covering)
-        self.assertTrue("1" not in set_covering)
-        self.assertTrue("3" not in set_covering)
-        self.assertTrue("4" not in set_covering)
-        self.assertTrue("5" not in set_covering)
-        # test without weights
-        set_covering_noweights = [best_set[0] for best_set in find_set_covering(subsets=subsets, value=None,
-                                                                                max_num_subsets=3)]
-        self.assertTrue("1" in set_covering_noweights and len(set_covering_noweights) == 1)
-        # test wrong input
-        costs_wrong = [1, 3]
-        set_covering_wrong = find_set_covering(subsets=subsets, value=costs_wrong, max_num_subsets=3)
-        self.assertTrue(set_covering_wrong is None, "Cost vector with length different than subsets should return None")
-
-        subsets = [CommonAncestor("1", "1", {"7"}), CommonAncestor("2", "2", {"7", "12", "13"}),
-                   CommonAncestor("3", "3", {"16", "17"}), CommonAncestor("4", "4", {"11"}),
-                   CommonAncestor("6", "6", {"12", "13"}), CommonAncestor("7", "7", {"7"}),
-                   CommonAncestor("9", "9", {"16", "17"}), CommonAncestor("11", "11", {"11"}),
-                   CommonAncestor("12", "12", {"12"}), CommonAncestor("13", "13", {"13"}),
-                   CommonAncestor("16", "16", {"16"}), CommonAncestor("17", "17", {"17"})]
-        values = [1, 1, 0.875061263, 1.301029996, 1.301029996, 1.602059991, 1.301029996, 1.698970004, 1.698970004,
-                  1.698970004, 1.698970004, 1.698970004]
-        set_covering = [best_set[0] for best_set in find_set_covering(subsets=subsets, value=values, max_num_subsets=3)]
-        self.assertTrue(all([num in set_covering for num in ["2", "9", "11"]]))
-
-    def test_set_covering_with_ontology(self):
-        # TODO: implement test
-        pass
 
     def test_depth(self):
         self.this_dir = os.path.split(__file__)[0]

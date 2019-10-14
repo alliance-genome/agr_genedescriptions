@@ -14,6 +14,7 @@ def find_set_covering(subsets: List[CommonAncestor], ontology: Ontology = None, 
     """greedy algorithm to solve set covering problem on subsets of trimming candidates
 
     Args:
+        ontology: optional ontology to avoid parent-child relationships in the final result
         subsets (List[Tuple[str, str, Set[str]]]): list of subsets, each of which must contain a tuple with the first
         element being the ID of the subset, the second being the name, and the third the actual set of elements
         value (List[float]): list of costs of the subsets
