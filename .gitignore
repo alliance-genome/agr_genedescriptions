@@ -6,3 +6,4 @@ docs/_build/*
 .coveragerc
 venv/*
 generated_descriptions/*
+tests/cache/*
