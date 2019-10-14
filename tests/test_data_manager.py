@@ -2,6 +2,8 @@ import logging
 import unittest
 import os
 
+from ontobio import OntologyFactory, AssociationSetFactory
+
 from genedescriptions.commons import Module, Gene
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import DataManager, DataType
@@ -75,3 +77,23 @@ class TestGOModule(unittest.TestCase):
     def test_get_ensembl_hgnc_ids_map(self):
         ensembl_hgnc_ids_map = self.df.get_ensembl_hgnc_ids_map()
         self.assertTrue(len(ensembl_hgnc_ids_map) > 0)
+
+    def test_set_ontology(self):
+        ontology = OntologyFactory().create()
+        for i in range(4):
+            ontology.add_node(i, 'node' + str(i))
+        ontology.add_parent(1, 0)
+        ontology.add_parent(2, 0)
+        ontology.add_parent(3, 0)
+        self.df.set_ontology(ontology_type=DataType.GO, ontology=ontology, config=self.conf_parser)
+        self.assertTrue(list(self.df.go_ontology.nodes()) == list(ontology.nodes()))
+
+    def test_set_associations(self):
+        associations = []
+        associations.append(DataManager.create_annotation_record("", "1", "a", "protein_coding", "001", "GO:0019901",
+                                                                 "", "F", "EXP", None, "WB", ""))
+        associations.append(DataManager.create_annotation_record("", "2", "b", "protein_coding", "001", "GO:0005515",
+                                                                 "", "F", "EXP", None, "WB", ""))
+        assocs = AssociationSetFactory().create_from_assocs(assocs=associations, ontology=self.df.go_ontology)
+        self.df.set_associations(associations_type=DataType.GO, associations=assocs, config=self.conf_parser)
+        self.assertTrue(self.df.go_associations)
