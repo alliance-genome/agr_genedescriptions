@@ -1,4 +1,3 @@
-from collections import ChainMap
 from typing import Set
 
 import inflect
@@ -141,7 +140,6 @@ class OntologySentenceGenerator(object):
             keep_only_best_group (bool): whether to get only the evidence group with highest priority and discard
                 the other evidence groups
             merge_groups_with_same_prefix (bool): whether to merge the phrases for evidence groups with the same prefix
-            high_priority_term_ids (List[str]): list of ids for terms that must always appear in the sentence with
                 higher priority than the other terms. Trimming is not applied to these terms
         Returns:
             ModuleSentences: the module sentences
