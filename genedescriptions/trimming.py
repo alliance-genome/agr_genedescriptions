@@ -83,7 +83,7 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
             return candidate_node["IC"]
 
     def _pre_process(self):
-        if "IC" not in list(self.ontology.nodes())[0]:
+        if "IC" not in self.ontology.node(list(self.ontology.nodes())[0]):
             logger.warning("ontology terms do not have information content values set")
             set_all_information_content_values(ontology=self.ontology)
 
