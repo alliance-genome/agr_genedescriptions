@@ -7,3 +7,4 @@ docs/_build/*
 venv/*
 generated_descriptions/*
 tests/cache/*
+/wormbase/generated_descriptions/
