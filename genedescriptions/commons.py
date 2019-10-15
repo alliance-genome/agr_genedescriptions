@@ -2,10 +2,21 @@ from collections import namedtuple
 from enum import Enum
 from typing import Set, List, Any
 from dataclasses import dataclass, field
-from namedlist import namedlist
 
-Sentence = namedlist('Sentence', ['prefix', 'terms_ids', 'postfix', 'text', 'aspect', 'evidence_group', 'terms_merged',
-                                  'additional_prefix', 'qualifier', 'ancestors_covering_multiple_terms', "trimmed"])
+
+@dataclass
+class Sentence:
+    prefix: str
+    terms_ids: List[str]
+    postfix: str
+    text: str
+    aspect: str
+    evidence_group: str
+    terms_merged: bool
+    additional_prefix: str
+    qualifier: str
+    ancestors_covering_multiple_terms: Set[str]
+    trimmed: bool
 
 
 Gene = namedtuple('Gene', ['id', 'name', 'dead', 'pseudo'])
