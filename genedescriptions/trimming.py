@@ -4,9 +4,10 @@ from collections import defaultdict
 from typing import List, Set, Union, Tuple
 
 from ontobio import Ontology
+from ontobio.assocmodel import AssociationSet
 
 from genedescriptions.commons import CommonAncestor, TrimmingResult
-from genedescriptions.ontology_tools import get_all_common_ancestors, set_all_information_content_values
+from genedescriptions.ontology_tools import get_all_common_ancestors, set_ic_ontology_struct
 from genedescriptions.optimization import find_set_covering
 
 logger = logging.getLogger(__name__)
@@ -14,9 +15,11 @@ logger = logging.getLogger(__name__)
 
 class TrimmingAlgorithm(metaclass=ABCMeta):
 
-    def __init__(self, ontology: Ontology, min_distance_from_root: int = 3, nodeids_blacklist: List[str] = None,
+    def __init__(self, ontology: Ontology, annotations: AssociationSet = None, min_distance_from_root: int = 3,
+                 nodeids_blacklist: List[str] = None,
                  slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
         self.ontology = ontology
+        self.annotations = annotations
         self.min_distance_from_root = min_distance_from_root
         self.nodeids_blacklist = nodeids_blacklist
         self.slim_terms_ic_bonus_perc = slim_terms_ic_bonus_perc
@@ -55,10 +58,6 @@ class TrimmingAlgorithm(metaclass=ABCMeta):
 
 class TrimmingAlgorithmIC(TrimmingAlgorithm):
 
-    def __init__(self, ontology: Ontology, min_distance_from_root: int = 3, nodeids_blacklist: List[str] = None,
-                 slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
-        super().__init__(ontology, min_distance_from_root, nodeids_blacklist, slim_terms_ic_bonus_perc, slim_set)
-
     def get_candidate_ic_value(self, candidate: CommonAncestor, node_ids: List[str],
                                slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
         """
@@ -85,7 +84,7 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
     def _pre_process(self):
         if "IC" not in self.ontology.node(list(self.ontology.nodes())[0]):
             logger.warning("ontology terms do not have information content values set")
-            set_all_information_content_values(ontology=self.ontology)
+            set_ic_ontology_struct(ontology=self.ontology)
 
     def _trim(self, node_ids: List[str], max_num_nodes: int = 3) -> TrimmingResult:
         """trim the list of terms by selecting the best combination of terms from the initial list or their common
@@ -111,6 +110,14 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
         best_terms = find_set_covering(subsets=common_ancestors, ontology=self.ontology, max_num_subsets=max_num_nodes,
                                        value=values)
         return self.get_trimming_result_from_set_covering(initial_node_ids=node_ids, set_covering_res=best_terms)
+
+
+class TrimmingAlgorithmICGO(TrimmingAlgorithmIC):
+
+    def _pre_process(self):
+        if "IC" not in self.ontology.node(list(self.ontology.nodes())[0]):
+            logger.warning("ontology terms do not have information content values set")
+            set_ic_ontology_struct(ontology=self.ontology)
 
 
 class TrimmingAlgorithmLCA(TrimmingAlgorithm):
@@ -291,4 +298,5 @@ class TrimmingAlgorithmNaive(TrimmingAlgorithm):
 CONF_TO_TRIMMING_CLASS = {
     "lca": TrimmingAlgorithmLCA,
     "ic": TrimmingAlgorithmIC,
-    "naive": TrimmingAlgorithmNaive}
+    "naive": TrimmingAlgorithmNaive,
+    "icGO": TrimmingAlgorithmICGO}

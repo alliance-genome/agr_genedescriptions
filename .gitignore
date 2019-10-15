@@ -8,3 +8,4 @@ venv/*
 generated_descriptions/*
 tests/cache/*
 /wormbase/generated_descriptions/
+/wormbase/gene_descriptions_cache/

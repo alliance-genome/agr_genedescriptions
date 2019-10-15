@@ -3,6 +3,8 @@ import logging
 import math
 from collections import defaultdict
 from typing import List, Union
+
+from ontobio.assocmodel import AssociationSet
 from ontobio.ontol import Ontology
 
 from genedescriptions.commons import CommonAncestor
@@ -101,7 +103,7 @@ def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List
                                    comparison_func=comparison_func, current_depth=current_depth + 1)
 
 
-def set_all_information_content_values(ontology: Ontology, relations: List[str] = None):
+def set_ic_ontology_struct(ontology: Ontology, relations: List[str] = None):
     roots = ontology.get_roots(relations=relations)
     for root_id in roots:
         if "num_subsumers" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
@@ -125,6 +127,32 @@ def set_all_information_content_values(ontology: Ontology, relations: List[str] 
             node_content["num_subsumers"] = 0
             node_content["num_leaves"] = 0
             node_content["depth"] = 0
+
+
+def reset_ic_annot_freq(ontology: Ontology):
+    for node_prop in ontology.nodes().values():
+        del node_prop["rel_annots"]
+        del node_prop["tot_annots"]
+        del node_prop["IC"]
+
+
+def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
+    for node_id, node_props in ontology.nodes().items():
+        node_props["rel_annots"] = len(annotations.objects_for_subject(subject_id=node_id))
+    for root in ontology.get_roots():
+        _set_and_ret_tot_annots(ontology, root)
+    tot_annots = len([annot for annots in annotations.associations_by_subj_obj for annot in annots])
+    for node_prop in ontology.nodes().values():
+        node_prop["IC"] = node_prop["tot_annots"] / tot_annots
+
+
+def _set_and_ret_tot_annots(ontology: Ontology, node_id: str):
+    if "tot_annots" in ontology.node(node_id):
+        return ontology.node(node_id)["tot_annots"]
+    else:
+        ontology.node(node_id)["tot_annots"] = ontology.node(node_id)["rel_annots"] + \
+                                               sum([_set_and_ret_tot_annots(ontology=ontology, node_id=child_id) for
+                                                    child_id in ontology.children(node_id)])
 
 
 def _set_num_subsumers_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):

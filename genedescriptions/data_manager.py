@@ -17,7 +17,7 @@ from ontobio.assocmodel import AssociationSet
 from ontobio.io.gafparser import GafParser
 from genedescriptions.commons import Gene, DataType, Module
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
-from genedescriptions.ontology_tools import set_all_depths
+from genedescriptions.ontology_tools import set_all_depths, reset_ic_annot_freq
 
 
 class ExpressionClusterType(Enum):
@@ -262,16 +262,22 @@ class DataManager(object):
             self.go_associations = self.remove_blacklisted_annotations(
                 association_set=associations, ontology=self.go_ontology, terms_blacklist=config.get_module_property(
                     module=Module.GO, prop=ConfigModuleProperty.EXCLUDE_TERMS))
+            if config.get_module_property(module=Module.GO, prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "icGO":
+                reset_ic_annot_freq(self.go_ontology)
         elif associations_type == DataType.DO:
             logger.info("Setting DO associations")
             self.do_associations = self.remove_blacklisted_annotations(
                 association_set=associations, ontology=self.do_ontology, terms_blacklist=config.get_module_property(
                     module=Module.DO_EXPERIMENTAL, prop=ConfigModuleProperty.EXCLUDE_TERMS))
+            if config.get_module_property(module=Module.DO_EXPERIMENTAL, prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "icGO":
+                reset_ic_annot_freq(self.do_ontology)
         elif associations_type == DataType.EXPR:
             logger.info("Setting Expression associations")
             self.expression_associations = self.remove_blacklisted_annotations(
                 association_set=associations, ontology=self.do_ontology, terms_blacklist=config.get_module_property(
                     module=Module.EXPRESSION, prop=ConfigModuleProperty.EXCLUDE_TERMS))
+            if config.get_module_property(module=Module.EXPRESSION, prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "icGO":
+                reset_ic_annot_freq(self.expression_ontology)
 
     def load_associations_from_file(self, associations_type: DataType, associations_url: str,
                                     associations_cache_path: str, config: GenedescConfigParser) -> None:
@@ -293,6 +299,8 @@ class DataManager(object):
             self.go_associations = self.remove_blacklisted_annotations(
                 association_set=self.go_associations, ontology=self.go_ontology,
                 terms_blacklist=config.get_module_property(module=Module.GO, prop=ConfigModuleProperty.EXCLUDE_TERMS))
+            if config.get_module_property(module=Module.GO, prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "icGO":
+                reset_ic_annot_freq(self.go_ontology)
         elif associations_type == DataType.DO:
             logger.info("Loading DO associations from file")
             self.do_associations = AssociationSetFactory().create_from_assocs(
@@ -303,6 +311,9 @@ class DataManager(object):
                 association_set=self.do_associations, ontology=self.do_ontology,
                 terms_blacklist=config.get_module_property(module=Module.DO_EXP_AND_BIO,
                                                            prop=ConfigModuleProperty.EXCLUDE_TERMS))
+            if config.get_module_property(module=Module.DO_EXPERIMENTAL,
+                                          prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "icGO":
+                reset_ic_annot_freq(self.do_ontology)
         elif associations_type == DataType.EXPR:
             logger.info("Loading Expression associations from file")
             self.expression_associations = AssociationSetFactory().create_from_assocs(
@@ -313,6 +324,9 @@ class DataManager(object):
                 association_set=self.expression_associations, ontology=self.expression_ontology,
                 terms_blacklist=config.get_module_property(module=Module.EXPRESSION,
                                                            prop=ConfigModuleProperty.EXCLUDE_TERMS))
+            if config.get_module_property(module=Module.EXPRESSION,
+                                          prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "icGO":
+                reset_ic_annot_freq(self.expression_ontology)
 
     def get_annotations_for_gene(self, gene_id: str, annot_type: DataType = DataType.GO,
                                  include_obsolete: bool = False, include_negative_results: bool = False,

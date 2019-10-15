@@ -8,7 +8,7 @@ from genedescriptions.commons import Module
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import DataManager, DataType
 from genedescriptions.descriptions_generator import OntologySentenceGenerator
-from genedescriptions.ontology_tools import set_all_information_content_values, get_all_common_ancestors
+from genedescriptions.ontology_tools import set_ic_ontology_struct, get_all_common_ancestors
 
 logger = logging.getLogger("Gene Ontology Tools tests")
 
@@ -116,7 +116,7 @@ class TestOntologyTools(unittest.TestCase):
         ontology.add_parent(12, 8)
         ontology.add_parent(12, 9)
         ontology.add_parent(13, 10)
-        set_all_information_content_values(ontology=ontology)
+        set_ic_ontology_struct(ontology=ontology)
         self.assertTrue(ontology.node(0)["IC"] == 0, "Root IC not equal to 0")
         self.assertAlmostEqual(ontology.node(1)["IC"], 0.693147181)
         self.assertAlmostEqual(ontology.node(2)["IC"], 0.470003629)

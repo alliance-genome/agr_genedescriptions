@@ -206,9 +206,9 @@ class OntologySentenceGenerator(object):
 
     def trim_terms(self, terms: List[str], min_dist_from_root: int = 0) -> TrimmingResult:
         return CONF_TO_TRIMMING_CLASS[self.trimming_algorithm](
-            ontology=self.ontology, min_distance_from_root=min_dist_from_root, nodeids_blacklist=self.nodeids_blacklist,
-            slim_terms_ic_bonus_perc=self.slim_bonus_perc, slim_set=self.slim_set).process(node_ids=list(terms),
-                                                                                           max_num_nodes=self.max_terms)
+            ontology=self.ontology, annotations=self.annotations, min_distance_from_root=min_dist_from_root,
+            nodeids_blacklist=self.nodeids_blacklist, slim_terms_ic_bonus_perc=self.slim_bonus_perc,
+            slim_set=self.slim_set).process(node_ids=list(terms), max_num_nodes=self.max_terms)
 
     @staticmethod
     def remove_children_if_parents_present(terms, ontology, terms_already_covered: Set[str] = None,
