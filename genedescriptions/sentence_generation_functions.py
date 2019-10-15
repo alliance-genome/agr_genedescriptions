@@ -92,6 +92,8 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
             additional_prefix += " the"
         postfix = prepostfix_sentences_map[(aspect, evidence_group, qualifier)][1]
         term_labels = [ontology.label(node_id, id_if_null=True) for node_id in node_ids]
+        if ancestors_with_multiple_children is None:
+            ancestors_with_multiple_children = set()
         return Sentence(prefix=prefix, terms_ids=node_ids, postfix=postfix,
                         text=compose_sentence(prefix=prefix, term_names=term_labels, postfix=postfix,
                                               additional_prefix=additional_prefix,
