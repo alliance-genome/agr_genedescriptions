@@ -3,7 +3,6 @@ import unittest
 from ontobio import OntologyFactory
 
 from genedescriptions.commons import CommonAncestor
-from genedescriptions.ontology_tools import set_all_information_content_values
 from genedescriptions.optimization import find_set_covering
 
 
