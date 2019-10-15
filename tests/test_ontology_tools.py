@@ -519,3 +519,5 @@ class TestOntologyTools(unittest.TestCase):
         sentences = generator.get_module_sentences(
             aspect='A', qualifier='Verified', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         self.assertTrue(sentences.get_description() == "is expressed in embryo")
+        self.assertTrue(all(["depth" in node_properties for node_properties in
+                             self.df.expression_ontology.nodes().values()]))
