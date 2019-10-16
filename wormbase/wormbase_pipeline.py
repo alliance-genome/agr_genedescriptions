@@ -22,15 +22,18 @@ from genedescriptions.sentence_generation_functions import concatenate_words_wit
 from wormbase.wb_data_manager import WBDataManager
 
 
+USE_CACHE = True
+
+
 def load_data(organism, conf_parser: GenedescConfigParser):
     logger = logging.getLogger("WB Gene Description Pipeline - Data loader")
     sister_df = None
     df_agr = None
     organisms_info = conf_parser.get_wb_organisms_info()
     df = WBDataManager(species=organism, do_relations=None, go_relations=["subClassOf", "BFO:0000050"],
-                       config=conf_parser)
+                       config=conf_parser, use_cache=USE_CACHE)
     if organism == "c_elegans":
-        df_agr = DataManager(go_relations=["subClassOf", "BFO:0000050"], do_relations=None)
+        df_agr = DataManager(go_relations=["subClassOf", "BFO:0000050"], do_relations=None, use_cache=USE_CACHE)
         df_agr.load_ontology_from_file(ontology_type=DataType.GO,
                                        ontology_url=conf_parser.get_wb_human_orthologs_go_ontology(),
                                        ontology_cache_path=os.path.join(conf_parser.get_cache_dir(),
@@ -43,7 +46,8 @@ def load_data(organism, conf_parser: GenedescConfigParser):
                                            config=conf_parser)
     if "main_sister_species" in organisms_info[organism] and organisms_info[organism]["main_sister_species"]:
         sister_df = WBDataManager(species=organisms_info[organism]["main_sister_species"],
-                                  do_relations=None, go_relations=["subClassOf", "BFO:0000050"], config=conf_parser)
+                                  do_relations=None, go_relations=["subClassOf", "BFO:0000050"], config=conf_parser,
+                                  use_cache=USE_CACHE)
         logger.info("Loading GO data for sister species")
         sister_df.load_ontology_from_file(ontology_type=DataType.GO, ontology_url=sister_df.go_ontology_url,
                                           ontology_cache_path=sister_df.go_ontology_cache_path,
