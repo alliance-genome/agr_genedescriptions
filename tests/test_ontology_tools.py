@@ -8,7 +8,7 @@ from genedescriptions.commons import Module
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import DataManager, DataType
 from genedescriptions.descriptions_generator import OntologySentenceGenerator
-from genedescriptions.ontology_tools import set_ic_ontology_struct, get_all_common_ancestors
+from genedescriptions.ontology_tools import set_ic_ontology_struct, get_all_common_ancestors, set_ic_annot_freq
 
 logger = logging.getLogger("Gene Ontology Tools tests")
 
@@ -116,6 +116,7 @@ class TestOntologyTools(unittest.TestCase):
         ontology.add_parent(12, 8)
         ontology.add_parent(12, 9)
         ontology.add_parent(13, 10)
+        # IC struct
         set_ic_ontology_struct(ontology=ontology)
         self.assertTrue(ontology.node(0)["IC"] == 0, "Root IC not equal to 0")
         self.assertAlmostEqual(ontology.node(1)["IC"], 0.693147181)
@@ -127,6 +128,39 @@ class TestOntologyTools(unittest.TestCase):
         self.assertAlmostEqual(ontology.node(8)["IC"], 1.049822124)
         self.assertAlmostEqual(ontology.node(10)["IC"], 1.252762968)
         self.assertAlmostEqual(ontology.node(11)["IC"], 1.386294361)
+
+        #IC annotations
+        annotations = [DataManager.create_annotation_record(source_line="", gene_id="a", gene_symbol="a",
+                                                            gene_type="", taxon_id="", object_id=12, qualifiers="",
+                                                            aspect="", ecode="", references="", prvdr="", date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="a", gene_symbol="a",
+                                                            gene_type="", taxon_id="", object_id=2, qualifiers="",
+                                                            aspect="", ecode="", references="", prvdr="", date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="b", gene_symbol="b",
+                                                            gene_type="", taxon_id="", object_id=13, qualifiers="",
+                                                            aspect="", ecode="", references="", prvdr="", date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="b", gene_symbol="b",
+                                                            gene_type="", taxon_id="", object_id=4, qualifiers="",
+                                                            aspect="", ecode="", references="", prvdr="", date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="c", gene_symbol="c",
+                                                            gene_type="", taxon_id="", object_id=8, qualifiers="",
+                                                            aspect="", ecode="", references="", prvdr="", date="")]
+        associations = AssociationSetFactory().create_from_assocs(assocs=annotations, ontology=ontology)
+        set_ic_annot_freq(ontology=ontology, annotations=associations)
+        self.assertAlmostEqual(ontology.node(0)["IC"], 0)
+        self.assertAlmostEqual(ontology.node(1)["IC"], 0.40546510810816444)
+        self.assertAlmostEqual(ontology.node(2)["IC"], 0)
+        self.assertAlmostEqual(ontology.node(3)["IC"], 1.0986122886681098)
+        self.assertAlmostEqual(ontology.node(4)["IC"], 1.0986122886681098)
+        self.assertAlmostEqual(ontology.node(5)["IC"], 0.40546510810816444)
+        self.assertAlmostEqual(ontology.node(6)["IC"], 1.0986122886681098)
+        self.assertAlmostEqual(ontology.node(7)["IC"], 1.0986122886681098)
+        self.assertAlmostEqual(ontology.node(8)["IC"], 0.40546510810816444)
+        self.assertAlmostEqual(ontology.node(9)["IC"], 1.0986122886681098)
+        self.assertAlmostEqual(ontology.node(10)["IC"], 1.0986122886681098)
+        self.assertAlmostEqual(ontology.node(11)["IC"], 1.3862943611198906)
+        self.assertAlmostEqual(ontology.node(12)["IC"], 1.0986122886681098)
+        self.assertAlmostEqual(ontology.node(13)["IC"], 1.0986122886681098)
 
     def test_depth(self):
         self.this_dir = os.path.split(__file__)[0]

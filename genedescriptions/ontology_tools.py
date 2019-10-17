@@ -137,22 +137,16 @@ def reset_ic_annot_freq(ontology: Ontology):
 
 
 def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
-    for node_id, node_props in ontology.nodes().items():
-        node_props["rel_annots"] = len(annotations.objects_for_subject(subject_id=node_id))
-    for root in ontology.get_roots():
-        _set_and_ret_tot_annots(ontology, root)
-    tot_annots = len([annot for annots in annotations.associations_by_subj_obj for annot in annots])
+    for node_id, node_pr in ontology.nodes().items():
+        node_pr["num_annots"] = len(annotations.query(terms=[node_id]))
+    tot_annots = len(annotations.subjects)
+    min_annots = min([node["num_annots"] for node in ontology.nodes().values() if "num_annots" in node and
+                      node["num_annots"] > 0])
+    if not min_annots:
+        min_annots = 1
     for node_prop in ontology.nodes().values():
-        node_prop["IC"] = node_prop["tot_annots"] / tot_annots
-
-
-def _set_and_ret_tot_annots(ontology: Ontology, node_id: str):
-    if "tot_annots" in ontology.node(node_id):
-        return ontology.node(node_id)["tot_annots"]
-    else:
-        ontology.node(node_id)["tot_annots"] = ontology.node(node_id)["rel_annots"] + \
-                                               sum([_set_and_ret_tot_annots(ontology=ontology, node_id=child_id) for
-                                                    child_id in ontology.children(node_id)])
+        node_prop["IC"] = -math.log(node_prop["num_annots"] / tot_annots) if node_prop["num_annots"] > 0 else -math.log(
+            min_annots / (tot_annots + 1))
 
 
 def _set_num_subsumers_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
