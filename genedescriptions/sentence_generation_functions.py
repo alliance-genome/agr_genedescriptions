@@ -23,11 +23,13 @@ def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str],
         ancestors_with_multiple_children (Set[str]): set containing labels of terms that cover more than one children
             term in the original set and which will appear with the label '(multiple)'
         rename_cell (bool): rename 'cell' into 'the cell'
-        put_anatomy_male_at_end (bool): move 'the male' to the end of the sentence (for anatomy), and change it to
-            'in the male'
+        put_anatomy_male_at_end (bool): move 'male' to the end of the sentence (for anatomy), and change it to
+            'in male'
     Returns:
         str: the text of the sentence
     """
+    if additional_prefix:
+        additional_prefix = " " + additional_prefix
     new_prefix = prefix + additional_prefix + " "
     term_names = sorted(term_names)
     if ancestors_with_multiple_children:
@@ -87,9 +89,7 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
         if aspect in truncate_others_aspect_words:
             others_word = truncate_others_aspect_words[aspect]
         if add_others:
-            additional_prefix += " " + truncate_others_generic_word + " " + others_word + ", including"
-        if aspect == "C":
-            additional_prefix += " the"
+            additional_prefix += truncate_others_generic_word + " " + others_word + ", including"
         postfix = prepostfix_sentences_map[(aspect, evidence_group, qualifier)][1]
         term_labels = [ontology.label(node_id, id_if_null=True) for node_id in node_ids]
         if ancestors_with_multiple_children is None:
