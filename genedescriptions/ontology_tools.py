@@ -131,8 +131,7 @@ def set_ic_ontology_struct(ontology: Ontology, relations: List[str] = None):
 
 def reset_ic_annot_freq(ontology: Ontology):
     for node_prop in ontology.nodes().values():
-        del node_prop["rel_annots"]
-        del node_prop["tot_annots"]
+        del node_prop["num_annots"]
         del node_prop["IC"]
 
 
