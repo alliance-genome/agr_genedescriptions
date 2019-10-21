@@ -37,12 +37,14 @@ logger = logging.getLogger(__name__)
 class DataManager(object):
     """retrieve data for gene descriptions from different sources"""
 
-    def __init__(self, go_relations: List[str] = None, do_relations: List[str] = None, use_cache: bool = False):
+    def __init__(self, go_relations: List[str] = None, do_relations: List[str] = None, expr_relations: List[str] = None,
+                 use_cache: bool = False):
         """create a new a data fetcher
 
         Args:
             go_relations (List[str]): list of ontology relations to be used for GO
             do_relations (List[str]): list of ontology relations to be used for DO
+            expr_relations (List[str]): list of ontology relations to be used for EXPRESSION
             use_cache (bool): whether to use cached files
         """
         self.go_associations = None
@@ -54,6 +56,7 @@ class DataManager(object):
         self.expression_associations = None
         self.go_relations = go_relations
         self.do_relations = do_relations
+        self.expr_relations = expr_relations
         self.go_slim = set()
         self.do_slim = set()
         self.exp_slim = set()
@@ -156,7 +159,10 @@ class DataManager(object):
             module = Module.DO_EXPERIMENTAL
         elif ontology_type == DataType.EXPR:
             logger.info("Setting Expression ontology")
-            self.expression_ontology = ontology
+            if self.expr_relations:
+                self.expression_ontology = ontology.subontology(relations=self.expr_relations)
+            else:
+                self.expression_ontology = ontology
             new_ontology = self.expression_ontology
             module = Module.EXPRESSION
         terms_replacement_regex = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_TERMS)
@@ -207,7 +213,8 @@ class DataManager(object):
         elif ontology_type == DataType.EXPR:
             logger.info("Loading Expression ontology data from file")
             self.expression_ontology = OntologyFactory().create(self._get_cached_file(
-                file_source_url=ontology_url, cache_path=ontology_cache_path)).subontology()
+                file_source_url=ontology_url, cache_path=ontology_cache_path)).subontology(
+                relations=self.expr_relations)
             new_ontology = self.expression_ontology
             module = Module.EXPRESSION
             slim_cache_path = os.path.join(os.path.dirname(os.path.normpath(ontology_cache_path)), "exp_slim.obo")

@@ -14,7 +14,7 @@ from genedescriptions.config_parser import GenedescConfigParser, ConfigModulePro
 from genedescriptions.data_manager import ExpressionClusterFeature, DataManager, ExpressionClusterType
 
 
-logger = logging.getLogger("WB Data Manager")
+logger = logging.getLogger(__name__)
 
 
 class WBDataManager(DataManager):

@@ -17,7 +17,8 @@ class TestDescriptionsGenerator(unittest.TestCase):
         logger.info("Starting Ontology Tools tests")
         self.this_dir = os.path.split(__file__)[0]
         self.conf_parser = GenedescConfigParser(os.path.join(self.this_dir, os.path.pardir, "tests", "config_test.yml"))
-        self.df = DataManager(do_relations=None, go_relations=["subClassOf", "BFO:0000050"])
+        self.df = DataManager(do_relations=None, go_relations=["subClassOf", "BFO:0000050"],
+                              expr_relations=["subClassOf", "BFO:0000050"])
         logger.info("Loading go ontology from file")
         logging.basicConfig(filename=None, level="ERROR", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
         self.df.load_ontology_from_file(ontology_type=DataType.GO, ontology_url="file://" + os.path.join(
