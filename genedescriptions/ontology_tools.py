@@ -33,7 +33,7 @@ def nodes_have_same_root(node_ids: List[str], ontology: Ontology) -> Union[bool,
                     if common_root and common_root != basic_prop_val["val"]:
                         return False
                     common_root = basic_prop_val["val"]
-    return common_root
+    return True
 
 
 def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distance_from_root: int = 0,
