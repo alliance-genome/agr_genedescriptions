@@ -3,12 +3,10 @@ import unittest
 import os
 
 from ontobio import AssociationSetFactory
-from genedescriptions.commons import Module, Gene
+from genedescriptions.commons import Module
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.data_manager import DataManager, DataType
 from genedescriptions.descriptions_generator import OntologySentenceGenerator
-from genedescriptions.gene_description import GeneDescription
-from genedescriptions.precanned_modules import set_gene_ontology_module
 
 logger = logging.getLogger("Gene Ontology Module tests")
 
@@ -660,4 +658,18 @@ class TestDescriptionsGenerator(unittest.TestCase):
         sentences = generator.get_module_sentences(
             aspect='F', qualifier='', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         self.assertTrue("process" not in sentences.get_description())
+
+    def test_generate_descriptions_with_icGO(self):
+        self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "icGO"
+        logger.info("Loading go associations from file")
+        self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
+            self.this_dir, "data", "gene_association_1.7.wb.partial"),
+                                            associations_cache_path=os.path.join(self.this_dir, "cache",
+                                                                                 "gene_association_1.7.wb.partial"),
+                                            config=self.conf_parser)
+        generator = OntologySentenceGenerator(gene_id="WB:WBGene00000912", module=Module.GO,
+                                              data_manager=self.df, config=self.conf_parser)
+        sentences = generator.get_module_sentences(
+            aspect='F', qualifier='', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+        self.assertTrue("several" in sentences.get_description())
 
