@@ -7,7 +7,7 @@ from ontobio import Ontology
 from ontobio.assocmodel import AssociationSet
 
 from genedescriptions.commons import CommonAncestor, TrimmingResult
-from genedescriptions.ontology_tools import get_all_common_ancestors, set_ic_ontology_struct
+from genedescriptions.ontology_tools import get_all_common_ancestors, set_ic_ontology_struct, set_ic_annot_freq
 from genedescriptions.optimization import find_set_covering
 
 logger = logging.getLogger(__name__)
@@ -117,7 +117,7 @@ class TrimmingAlgorithmICGO(TrimmingAlgorithmIC):
     def _pre_process(self):
         if "IC" not in self.ontology.node(list(self.ontology.nodes())[0]):
             logger.warning("ontology terms do not have information content values set")
-            set_ic_ontology_struct(ontology=self.ontology)
+            set_ic_annot_freq(ontology=self.ontology, annotations=self.annotations)
 
 
 class TrimmingAlgorithmLCA(TrimmingAlgorithm):
