@@ -33,8 +33,6 @@ def nodes_have_same_root(node_ids: List[str], ontology: Ontology) -> Union[bool,
                     if common_root and common_root != basic_prop_val["val"]:
                         return False
                     common_root = basic_prop_val["val"]
-    if common_root is None:
-        common_root = node_ids[0]
     return common_root
 
 
@@ -53,7 +51,7 @@ def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distan
         List[CommonAncestor]: list of common ancestors
     """
     common_root = nodes_have_same_root(node_ids=node_ids, ontology=ontology)
-    if not common_root:
+    if common_root is False:
         raise ValueError("Cannot get common ancestors of nodes connected to different roots")
     ancestors = defaultdict(list)
     for node_id in node_ids:
