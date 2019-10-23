@@ -114,10 +114,21 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
 
 class TrimmingAlgorithmICGO(TrimmingAlgorithmIC):
 
+    def __init__(self, ontology: Ontology, annotations: AssociationSet = None, min_distance_from_root: int = 3,
+                 nodeids_blacklist: List[str] = None, slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
+        super().__init__(ontology, annotations, min_distance_from_root, nodeids_blacklist, slim_terms_ic_bonus_perc,
+                         slim_set)
+        node_id_set_genes_map = defaultdict(set)
+        for subj, obj in annotations.associations_by_subj_obj.keys():
+            node_id_set_genes_map[obj].add(subj)
+        self.node_id_num_genes_map = defaultdict(int)
+        for key, val in node_id_set_genes_map.items():
+            self.node_id_num_genes_map[key] = len(val)
+
     def _pre_process(self):
         if "IC" not in self.ontology.node(list(self.ontology.nodes())[0]):
             logger.warning("ontology terms do not have information content values set")
-            set_ic_annot_freq(ontology=self.ontology, annotations=self.annotations)
+            set_ic_annot_freq(ontology=self.ontology, node_id_num_genes_map=self.node_id_num_genes_map)
 
 
 class TrimmingAlgorithmLCA(TrimmingAlgorithm):
