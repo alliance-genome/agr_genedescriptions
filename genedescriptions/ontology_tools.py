@@ -4,6 +4,7 @@ import math
 from collections import defaultdict
 from typing import List, Union, Dict, Any
 
+from ontobio.assocmodel import AssociationSet
 from ontobio.ontol import Ontology
 
 from genedescriptions.commons import CommonAncestor
@@ -136,10 +137,10 @@ def reset_ic_annot_freq(ontology: Ontology):
             del node_prop["IC"]
 
 
-def set_ic_annot_freq(ontology: Ontology, node_id_num_genes_map: Dict[Any, int]):
+def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
     for node_id, node_pr in ontology.nodes().items():
-        node_pr["num_annots"] = node_id_num_genes_map[node_id]
-    tot_annots = sum(node_id_num_genes_map.values())
+        node_pr["num_annots"] = len(annotations.query(terms=[node_id]))
+    tot_annots = len(annotations.subjects)
     min_annots = min([node["num_annots"] for node in ontology.nodes().values() if "num_annots" in node and
                       node["num_annots"] > 0])
     if not min_annots:

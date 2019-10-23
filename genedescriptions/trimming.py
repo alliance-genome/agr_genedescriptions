@@ -1,7 +1,7 @@
 import logging
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
-from typing import List, Set, Union, Tuple
+from typing import List, Set, Union, Tuple, Any
 
 from ontobio import Ontology
 from ontobio.assocmodel import AssociationSet
@@ -15,21 +15,27 @@ logger = logging.getLogger(__name__)
 
 class TrimmingAlgorithm(metaclass=ABCMeta):
 
-    def __init__(self, ontology: Ontology, annotations: AssociationSet = None, min_distance_from_root: int = 3,
-                 nodeids_blacklist: List[str] = None,
+    def __init__(self, ontology: Ontology, annotations: AssociationSet = None, nodeids_blacklist: List[str] = None,
                  slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
         self.ontology = ontology
         self.annotations = annotations
-        self.min_distance_from_root = min_distance_from_root
         self.nodeids_blacklist = nodeids_blacklist
         self.slim_terms_ic_bonus_perc = slim_terms_ic_bonus_perc
         self.slim_set = slim_set
 
-    def process(self, node_ids: List[str], max_num_nodes: int = 3):
-        self._pre_process()
-        return self._trim(node_ids=node_ids, max_num_nodes=max_num_nodes)
+    @abstractmethod
+    def trim(self, node_ids: List[Any], max_num_nodes: int = 5, min_distance_from_root: int = 0) -> TrimmingResult:
+        """
+        Trim the provided list of nodes
 
-    def _pre_process(self):
+        Args:
+            min_distance_from_root (int): minimum distance from root for terms to be included into the final result
+            node_ids: the list of node ids
+            max_num_nodes: max number of nodes in the final list after trimming
+
+        Returns:
+            TrimmingResult: the result of the trimming operation
+        """
         pass
 
     def get_trimming_result_from_set_covering(self, initial_node_ids: List[str],
@@ -42,28 +48,24 @@ class TrimmingAlgorithm(metaclass=ABCMeta):
                               covered_nodes=covered_terms, trimming_applied=final_terms != initial_node_ids,
                               multicovering_nodes=multicover_nodes)
 
-    @abstractmethod
-    def _trim(self, node_ids: List[str], max_num_nodes: int) -> TrimmingResult:
-        """
-        Trim the provided list of nodes
-        Args:
-            node_ids: the list of node ids
-            max_num_nodes: max number of nodes in the final list after trimming
-
-        Returns:
-            TrimmingResult: the result of the trimming operation
-        """
-        pass
-
 
 class TrimmingAlgorithmIC(TrimmingAlgorithm):
 
-    def get_candidate_ic_value(self, candidate: CommonAncestor, node_ids: List[str],
+    def __init__(self, ontology: Ontology, annotations: AssociationSet = None, nodeids_blacklist: List[str] = None,
+                 slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
+        super().__init__(ontology, annotations, nodeids_blacklist, slim_terms_ic_bonus_perc, slim_set)
+        if "IC" not in self.ontology.node(list(self.ontology.nodes())[0]):
+            logger.warning("ontology terms do not have information content values set")
+            set_ic_ontology_struct(ontology=self.ontology)
+
+    def get_candidate_ic_value(self, candidate: CommonAncestor, node_ids: List[str], min_distance_from_root: int = 3,
                                slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
         """
         Calculate the information content value of a candidate node
 
         Args:
+            min_distance_from_root (int): minimum distance from root for IC computation. If terms is within the limit,
+                its IC will be zero
             candidate (CommonAncestor): the candidate node
             node_ids (List[str]): the original set of nodes to be trimmed
             slim_terms_ic_bonus_perc (int): boost the IC value for terms that appear in the slim set by the provided
@@ -74,23 +76,19 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
             float: the information content value of the candidate node
         """
         candidate_node = self.ontology.node(candidate.node_id)
-        if candidate.node_id not in node_ids and candidate_node["depth"] < self.min_distance_from_root:
+        if candidate.node_id not in node_ids and candidate_node["depth"] < min_distance_from_root:
             return 0
         elif slim_set and candidate.node_id in slim_set:
             return candidate_node["IC"] * (1 + slim_terms_ic_bonus_perc)
         else:
             return candidate_node["IC"]
 
-    def _pre_process(self):
-        if "IC" not in self.ontology.node(list(self.ontology.nodes())[0]):
-            logger.warning("ontology terms do not have information content values set")
-            set_ic_ontology_struct(ontology=self.ontology)
-
-    def _trim(self, node_ids: List[str], max_num_nodes: int = 3) -> TrimmingResult:
+    def trim(self, node_ids: List[str], max_num_nodes: int = 3, min_distance_from_root: int = 0) -> TrimmingResult:
         """trim the list of terms by selecting the best combination of terms from the initial list or their common
         ancestors based on information content
 
         Args:
+            min_distance_from_root (int): minimum distance from root for nodes to be included into the final result
             node_ids (List[str]): the list of nodes to merge by common ancestor
             max_num_nodes (int): maximum number of nodes to be included in the trimmed set. This also represents the
                                  minimum number of terms above which the merge operation is performed
@@ -100,6 +98,7 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
         common_ancestors = get_all_common_ancestors(node_ids=node_ids, ontology=self.ontology,
                                                     nodeids_blacklist=self.nodeids_blacklist)
         values = [self.get_candidate_ic_value(candidate=candidate, node_ids=node_ids,
+                                              min_distance_from_root=min_distance_from_root,
                                               slim_terms_ic_bonus_perc=self.slim_terms_ic_bonus_perc,
                                               slim_set=self.slim_set) for candidate in common_ancestors]
         if self.slim_set and any([node.node_id in self.slim_set for node in common_ancestors]):
@@ -114,29 +113,20 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
 
 class TrimmingAlgorithmICGO(TrimmingAlgorithmIC):
 
-    def __init__(self, ontology: Ontology, annotations: AssociationSet = None, min_distance_from_root: int = 3,
-                 nodeids_blacklist: List[str] = None, slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
-        super().__init__(ontology, annotations, min_distance_from_root, nodeids_blacklist, slim_terms_ic_bonus_perc,
-                         slim_set)
-        node_id_set_genes_map = defaultdict(set)
-        for subj, obj in annotations.associations_by_subj_obj.keys():
-            node_id_set_genes_map[obj].add(subj)
-        self.node_id_num_genes_map = defaultdict(int)
-        for key, val in node_id_set_genes_map.items():
-            self.node_id_num_genes_map[key] = len(val)
-
-    def _pre_process(self):
+    def __init__(self, ontology: Ontology, annotations: AssociationSet = None, nodeids_blacklist: List[str] = None,
+                 slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
+        super().__init__(ontology, annotations, nodeids_blacklist, slim_terms_ic_bonus_perc, slim_set)
         if "IC" not in self.ontology.node(list(self.ontology.nodes())[0]):
             logger.warning("ontology terms do not have information content values set")
-            set_ic_annot_freq(ontology=self.ontology, node_id_num_genes_map=self.node_id_num_genes_map)
+            set_ic_annot_freq(ontology=self.ontology, annotations=annotations)
 
 
 class TrimmingAlgorithmLCA(TrimmingAlgorithm):
 
-    def _trim(self, node_ids: List[str], max_num_nodes: int = 3):
+    def trim(self, node_ids: List[str], max_num_nodes: int = 3, min_distance_from_root: int = 0):
         candidates_dict = {candidate.node_id: (candidate.node_label, candidate.covered_starting_nodes) for candidate in
                            get_all_common_ancestors(node_ids=node_ids, ontology=self.ontology,
-                                                    min_distance_from_root=self.min_distance_from_root,
+                                                    min_distance_from_root=min_distance_from_root,
                                                     nodeids_blacklist=self.nodeids_blacklist)}
         cands_ids_to_process = set(candidates_dict.keys())
         selected_cands_ids = []
@@ -184,7 +174,7 @@ class TrimmingAlgorithmLCA(TrimmingAlgorithm):
 
 class TrimmingAlgorithmNaive(TrimmingAlgorithm):
 
-    def _trim(self, node_ids: List[str], max_num_nodes: int = 3):
+    def trim(self, node_ids: List[str], max_num_nodes: int = 3, min_distance_from_root: int = 0):
         logger.debug("applying trimming through naive algorithm")
         final_terms_set = {}
         ancestor_paths = defaultdict(list)
@@ -198,7 +188,7 @@ class TrimmingAlgorithmNaive(TrimmingAlgorithm):
                     if basic_prop_val["pred"] == "OIO:hasOBONamespace":
                         node_root = basic_prop_val["val"]
             paths = self.get_all_paths_to_root(node_id=node_id, ontology=self.ontology,
-                                               min_distance_from_root=self.min_distance_from_root, relations=None,
+                                               min_distance_from_root=min_distance_from_root, relations=None,
                                                nodeids_blacklist=self.nodeids_blacklist, root_node=node_root)
             for path in paths:
                 term_paths[node_id].add(path)

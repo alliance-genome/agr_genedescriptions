@@ -350,7 +350,7 @@ go_sentences_options:
   remove_parents_if_children_are_present: true
   remove_children_if_parent_is_present: false
   trim_terms_by_common_ancestors: true
-  trimming_algorithm: ic
+  trimming_algorithm: icGO
   max_num_terms: 3
   trim_min_distance_from_root:
     F: 3
@@ -406,7 +406,7 @@ do_exp_sentences_options:
   remove_parents_if_children_are_present: true
   remove_children_if_parent_is_present: false
   trim_terms_by_common_ancestors: true
-  trimming_algorithm: ic
+  trimming_algorithm: icGO
   max_num_terms: 3
   trim_min_distance_from_root:
     D: 4
@@ -440,7 +440,7 @@ do_biomarker_sentences_options:
   remove_parents_if_children_are_present: true
   remove_children_if_parent_is_present: false
   trim_terms_by_common_ancestors: true
-  trimming_algorithm: ic
+  trimming_algorithm: icGO
   max_num_terms: 3
   trim_min_distance_from_root:
     D: 4
@@ -486,7 +486,7 @@ do_via_orth_sentences_options:
   remove_parents_if_children_are_present: true
   remove_children_if_parent_is_present: false
   trim_terms_by_common_ancestors: true
-  trimming_algorithm: ic
+  trimming_algorithm: icGO
   max_num_terms: 3
   trim_min_distance_from_root:
     D: 4
@@ -532,7 +532,7 @@ expression_sentences_options:
   remove_parents_if_children_are_present: false
   remove_children_if_parent_is_present: false
   trim_terms_by_common_ancestors: true
-  trimming_algorithm: ic
+  trimming_algorithm: icGO
   max_num_terms: 5
   trim_min_distance_from_root:
     A: 4

@@ -54,15 +54,19 @@ class OntologySentenceGenerator(object):
             limit_to_group (str): limit the evidence codes to the specified group
         """
         annot_type = None
+        assocset = None
         if module == Module.DO_ORTHOLOGY or module == Module.DO_EXPERIMENTAL or module == module.DO_BIOMARKER:
             self.ontology = data_manager.do_ontology
             annot_type = DataType.DO
+            assocset = data_manager.do_associations
         elif module == Module.GO:
             self.ontology = data_manager.go_ontology
             annot_type = DataType.GO
+            assocset = data_manager.go_associations
         elif module == Module.EXPRESSION:
             self.ontology = data_manager.expression_ontology
             annot_type = DataType.EXPR
+            assocset = data_manager.expression_associations
         self.evidence_groups_priority_list = config.get_evidence_groups_priority_list(module=module)
         self.prepostfix_sentences_map = config.get_prepostfix_sentence_map(module=module, humans=humans)
         self.terms_groups = defaultdict(lambda: defaultdict(set))
@@ -71,46 +75,46 @@ class OntologySentenceGenerator(object):
                                                             priority_list=config.get_annotations_priority(
                                                                 module=module))
         self.annotations = annotations
-        self.module = module
-        self.data_manager = data_manager
-        self.annot_type = annot_type
         evidence_codes_groups_map = {evcode: group for evcode, group in ev_codes_groups_maps.items() if
                                      limit_to_group is None or limit_to_group in ev_codes_groups_maps[evcode]}
         prepostfix_special_cases_sent_map = config.get_prepostfix_sentence_map(module=module, special_cases_only=True,
                                                                                humans=humans)
-        self.cat_several_words = config.get_module_property(module=self.module,
+        self.cat_several_words = config.get_module_property(module=module,
                                                             prop=ConfigModuleProperty.CUTOFF_SEVERAL_CATEGORY_WORD)
         if not self.cat_several_words:
             self.cat_several_words = {'F': 'functions', 'P': 'processes', 'C': 'components', 'D': 'diseases',
                                       'A': 'tissues'}
-        self.del_overlap = config.get_module_property(module=self.module, prop=ConfigModuleProperty.REMOVE_OVERLAP)
-        self.remove_parents = config.get_module_property(module=self.module,
+        self.del_overlap = config.get_module_property(module=module, prop=ConfigModuleProperty.REMOVE_OVERLAP)
+        self.remove_parents = config.get_module_property(module=module,
                                                          prop=ConfigModuleProperty.DEL_PARENTS_IF_CHILD)
-        self.remove_child_terms = config.get_module_property(module=self.module,
+        self.remove_child_terms = config.get_module_property(module=module,
                                                              prop=ConfigModuleProperty.DEL_CHILDREN_IF_PARENT)
-        self.max_terms = config.get_module_property(module=self.module,
+        self.max_terms = config.get_module_property(module=module,
                                                     prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
-        self.exclude_terms = config.get_module_property(module=self.module, prop=ConfigModuleProperty.EXCLUDE_TERMS)
+        self.exclude_terms = config.get_module_property(module=module, prop=ConfigModuleProperty.EXCLUDE_TERMS)
         if not self.exclude_terms:
             self.exclude_terms = []
-        self.cutoff_final_word = config.get_module_property(module=self.module,
+        self.cutoff_final_word = config.get_module_property(module=module,
                                                             prop=ConfigModuleProperty.CUTOFF_SEVERAL_WORD)
-        self.rename_cell = config.get_module_property(module=self.module, prop=ConfigModuleProperty.RENAME_CELL)
+        self.rename_cell = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_CELL)
         self.terms_already_covered = set()
-        self.dist_root = config.get_module_property(module=self.module,
+        self.dist_root = config.get_module_property(module=module,
                                                     prop=ConfigModuleProperty.DISTANCE_FROM_ROOT)
         if not self.dist_root:
             self.dist_root = {'F': 1, 'P': 1, 'C': 2, 'D': 3, 'A': 3}
         self.add_mul_common_anc = config.get_module_property(
-            module=self.module, prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
-        self.trimming_algorithm = config.get_module_property(module=self.module,
+            module=module, prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
+        self.trimming_algorithm = config.get_module_property(module=module,
                                                              prop=ConfigModuleProperty.TRIMMING_ALGORITHM)
-        self.slim_set = self.data_manager.get_slim(module=self.module)
-        self.slim_bonus_perc = config.get_module_property(module=self.module, prop=ConfigModuleProperty.SLIM_BONUS_PERC)
-        self.add_mul_common_anc = config.get_module_property(module=self.module,
+        self.add_mul_common_anc = config.get_module_property(module=module,
                                                              prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
-        self.nodeids_blacklist = config.get_module_property(module=self.module, prop=ConfigModuleProperty.EXCLUDE_TERMS)
         self.config = config
+        self.trimmer = CONF_TO_TRIMMING_CLASS[self.trimming_algorithm](
+            ontology=self.ontology, annotations=assocset,
+            nodeids_blacklist=config.get_module_property(module=module, prop=ConfigModuleProperty.EXCLUDE_TERMS),
+            slim_terms_ic_bonus_perc=config.get_module_property(module=module, prop=ConfigModuleProperty.SLIM_BONUS_PERC),
+            slim_set=data_manager.get_slim(module=module))
+
         if len(annotations) > 0:
             for annotation in annotations:
                 if annotation["evidence"]["type"] in evidence_codes_groups_map:
@@ -192,7 +196,7 @@ class OntologySentenceGenerator(object):
             terms = OntologySentenceGenerator.remove_parents_if_child_present(terms, self.ontology,
                                                                               self.terms_already_covered)
         if 0 < self.max_terms < len(terms):
-            trimming_result = self.trim_terms(terms, min_distance_from_root)
+            trimming_result = self.trimmer.trim(terms, self.max_terms, min_distance_from_root)
         else:
             trimming_result.final_terms = terms
             trimming_result.covered_nodes = terms
@@ -203,20 +207,6 @@ class OntologySentenceGenerator(object):
                 terms_already_covered=self.terms_already_covered,
                 ancestors_covering_multiple_children=trimming_result.multicovering_nodes)
         return trimming_result
-
-    def trim_terms(self, terms: List[str], min_dist_from_root: int = 0) -> TrimmingResult:
-        annotations = None
-        if self.module == Module.GO:
-            annotations = self.data_manager.go_associations
-        elif self.module == Module.DO_BIOMARKER or self.module == Module.DO_EXPERIMENTAL or self.module == \
-                            Module.DO_ORTHOLOGY:
-            annotations = self.data_manager.do_associations
-        elif self.module == Module.EXPRESSION:
-            annotations = self.data_manager.expression_associations
-        return CONF_TO_TRIMMING_CLASS[self.trimming_algorithm](
-            ontology=self.ontology, annotations=annotations, min_distance_from_root=min_dist_from_root,
-            nodeids_blacklist=self.nodeids_blacklist, slim_terms_ic_bonus_perc=self.slim_bonus_perc,
-            slim_set=self.slim_set).process(node_ids=list(terms), max_num_nodes=self.max_terms)
 
     @staticmethod
     def remove_children_if_parents_present(terms, ontology, terms_already_covered: Set[str] = None,
