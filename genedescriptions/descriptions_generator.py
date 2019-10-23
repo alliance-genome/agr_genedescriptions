@@ -205,8 +205,16 @@ class OntologySentenceGenerator(object):
         return trimming_result
 
     def trim_terms(self, terms: List[str], min_dist_from_root: int = 0) -> TrimmingResult:
+        annotations = None
+        if self.module == Module.GO:
+            annotations = self.data_manager.go_associations
+        elif self.module == Module.DO_BIOMARKER or self.module == Module.DO_EXPERIMENTAL or self.module == \
+                            Module.DO_ORTHOLOGY:
+            annotations = self.data_manager.do_associations
+        elif self.module == Module.EXPRESSION:
+            annotations = self.data_manager.expression_associations
         return CONF_TO_TRIMMING_CLASS[self.trimming_algorithm](
-            ontology=self.ontology, annotations=self.annotations, min_distance_from_root=min_dist_from_root,
+            ontology=self.ontology, annotations=annotations, min_distance_from_root=min_dist_from_root,
             nodeids_blacklist=self.nodeids_blacklist, slim_terms_ic_bonus_perc=self.slim_bonus_perc,
             slim_set=self.slim_set).process(node_ids=list(terms), max_num_nodes=self.max_terms)
 
