@@ -376,7 +376,8 @@ class DataManager(object):
                            ontology.has_node(annotation["object"]["id"]) and (
                                include_obsolete or not ontology.is_obsolete(annotation["object"]["id"]))
                            and (include_negative_results or ("NOT" not in annotation["qualifiers"] and
-                                                             not annotation["negated"]))]
+                                                             not annotation["negated"]))
+                           and ontology.label(annotation["object"]["id"])]
             id_selected_annotation = {}
             for annotation in annotations:
                 if annotation["evidence"]["type"] in priority_map.keys():
