@@ -374,7 +374,8 @@ class DataManager(object):
             priority_map = dict(zip(priority_list, reversed(range(len(list(priority_list))))))
             annotations = [annotation for annotation in dataset.associations(gene_id) if
                            ontology.has_node(annotation["object"]["id"]) and (
-                               include_obsolete or not ontology.is_obsolete(annotation["object"]["id"]))
+                               include_obsolete or ("deprecated" not in ontology.node(annotation["object"]["id"]) or
+                                                    not ontology.node(annotation["object"]["id"])["deprecated"]))
                            and (include_negative_results or ("NOT" not in annotation["qualifiers"] and
                                                              not annotation["negated"]))
                            and ontology.label(annotation["object"]["id"])]
