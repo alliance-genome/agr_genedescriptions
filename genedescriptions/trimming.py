@@ -117,8 +117,9 @@ class TrimmingAlgorithmICGO(TrimmingAlgorithmIC):
                  slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
         super().__init__(ontology, annotations, nodeids_blacklist, slim_terms_ic_bonus_perc, slim_set)
         if "IC" not in self.ontology.node(list(self.ontology.nodes())[0]):
-            logger.warning("ontology terms do not have information content values set")
+            logger.info("started setting information content values")
             set_ic_annot_freq(ontology=self.ontology, annotations=annotations)
+            logger.info("finished setting information content values")
 
 
 class TrimmingAlgorithmLCA(TrimmingAlgorithm):
