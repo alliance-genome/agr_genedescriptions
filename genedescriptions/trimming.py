@@ -54,9 +54,9 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
     def __init__(self, ontology: Ontology, annotations: AssociationSet = None, nodeids_blacklist: List[str] = None,
                  slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
         super().__init__(ontology, annotations, nodeids_blacklist, slim_terms_ic_bonus_perc, slim_set)
-        if "IC" not in self.ontology.node(list(self.ontology.nodes())[0]):
+        if "IC" not in ontology.node(list(ontology.nodes())[0]):
             logger.warning("started setting information content values based on ontology structure")
-            set_ic_ontology_struct(ontology=self.ontology)
+            set_ic_ontology_struct(ontology=ontology)
             logger.info("finished setting information content values")
 
     def get_candidate_ic_value(self, candidate: CommonAncestor, node_ids: List[str], min_distance_from_root: int = 3,
@@ -116,9 +116,9 @@ class TrimmingAlgorithmICGO(TrimmingAlgorithmIC):
 
     def __init__(self, ontology: Ontology, annotations: AssociationSet = None, nodeids_blacklist: List[str] = None,
                  slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
-        if "IC" not in self.ontology.node(list(self.ontology.nodes())[0]):
+        if "IC" not in ontology.node(list(ontology.nodes())[0]):
             logger.info("started setting information content values based on frequency of annotations")
-            set_ic_annot_freq(ontology=self.ontology, annotations=annotations)
+            set_ic_annot_freq(ontology=ontology, annotations=annotations)
             logger.info("finished setting information content values")
         super().__init__(ontology, annotations, nodeids_blacklist, slim_terms_ic_bonus_perc, slim_set)
 
