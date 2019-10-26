@@ -121,12 +121,6 @@ def set_ic_ontology_struct(ontology: Ontology, relations: List[str] = None):
         if "type" not in ontology.node(root_id) or ontology.node_type(root_id) == "CLASS":
             _set_information_content_in_subgraph(ontology=ontology, root_id=root_id,
                                                  maxleaves=ontology.node(root_id)["num_leaves"], relations=relations)
-    for node_id, node_content in ontology.nodes().items():
-        if "IC" not in node_content:
-            node_content["IC"] = 0
-            node_content["num_subsumers"] = 0
-            node_content["num_leaves"] = 0
-            node_content["depth"] = 0
 
 
 def reset_ic_annot_freq(ontology: Ontology):
