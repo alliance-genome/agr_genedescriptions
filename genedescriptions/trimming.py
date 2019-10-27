@@ -51,14 +51,6 @@ class TrimmingAlgorithm(metaclass=ABCMeta):
 
 class TrimmingAlgorithmIC(TrimmingAlgorithm):
 
-    def __init__(self, ontology: Ontology, annotations: AssociationSet = None, nodeids_blacklist: List[str] = None,
-                 slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
-        super().__init__(ontology, annotations, nodeids_blacklist, slim_terms_ic_bonus_perc, slim_set)
-        if "IC" not in ontology.node(list(ontology.nodes())[0]):
-            logger.warning("started setting information content values based on ontology structure")
-            set_ic_ontology_struct(ontology=ontology)
-            logger.info("finished setting information content values")
-
     def get_candidate_ic_value(self, candidate: CommonAncestor, node_ids: List[str], min_distance_from_root: int = 3,
                                slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
         """
@@ -110,17 +102,6 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
         best_terms = find_set_covering(subsets=common_ancestors, ontology=self.ontology, max_num_subsets=max_num_nodes,
                                        value=values)
         return self.get_trimming_result_from_set_covering(initial_node_ids=node_ids, set_covering_res=best_terms)
-
-
-class TrimmingAlgorithmICGO(TrimmingAlgorithmIC):
-
-    def __init__(self, ontology: Ontology, annotations: AssociationSet = None, nodeids_blacklist: List[str] = None,
-                 slim_terms_ic_bonus_perc: int = 0, slim_set: set = None):
-        if "IC" not in ontology.node(list(ontology.nodes())[0]):
-            logger.info("started setting information content values based on frequency of annotations")
-            set_ic_annot_freq(ontology=ontology, annotations=annotations)
-            logger.info("finished setting information content values")
-        super().__init__(ontology, annotations, nodeids_blacklist, slim_terms_ic_bonus_perc, slim_set)
 
 
 class TrimmingAlgorithmLCA(TrimmingAlgorithm):
@@ -302,4 +283,4 @@ CONF_TO_TRIMMING_CLASS = {
     "lca": TrimmingAlgorithmLCA,
     "ic": TrimmingAlgorithmIC,
     "naive": TrimmingAlgorithmNaive,
-    "icGO": TrimmingAlgorithmICGO}
+    "icGO": TrimmingAlgorithmIC}

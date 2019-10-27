@@ -17,7 +17,8 @@ from ontobio.assocmodel import AssociationSet
 from ontobio.io.gafparser import GafParser
 from genedescriptions.commons import Gene, DataType, Module
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
-from genedescriptions.ontology_tools import set_all_depths, reset_ic_annot_freq
+from genedescriptions.ontology_tools import set_all_depths, reset_ic_annot_freq, set_ic_ontology_struct, \
+    set_ic_annot_freq
 
 
 class ExpressionClusterType(Enum):
@@ -149,6 +150,9 @@ class DataManager(object):
                 self.go_ontology = ontology
             new_ontology = self.go_ontology
             module = Module.GO
+            if config.get_module_property(module=Module.EXPRESSION,
+                                          prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "ic":
+                set_ic_ontology_struct(ontology=new_ontology, relations=self.go_relations)
         elif ontology_type == DataType.DO:
             logger.info("Setting DO ontology")
             if self.do_relations:
@@ -157,6 +161,9 @@ class DataManager(object):
                 self.do_ontology = ontology
             new_ontology = self.do_ontology
             module = Module.DO_EXPERIMENTAL
+            if config.get_module_property(module=Module.EXPRESSION,
+                                          prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "ic":
+                set_ic_ontology_struct(ontology=new_ontology, relations=self.do_relations)
         elif ontology_type == DataType.EXPR:
             logger.info("Setting Expression ontology")
             if self.expr_relations:
@@ -165,6 +172,9 @@ class DataManager(object):
                 self.expression_ontology = ontology
             new_ontology = self.expression_ontology
             module = Module.EXPRESSION
+            if config.get_module_property(module=Module.EXPRESSION,
+                                          prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "ic":
+                set_ic_ontology_struct(ontology=new_ontology, relations=self.expr_relations)
         terms_replacement_regex = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_TERMS)
         if terms_replacement_regex:
             self.rename_ontology_terms(ontology=new_ontology, terms_replacement_regex=terms_replacement_regex)
@@ -201,6 +211,9 @@ class DataManager(object):
                                                         ).subontology(relations=self.go_relations)
             new_ontology = self.go_ontology
             module = Module.GO
+            if config.get_module_property(module=Module.EXPRESSION,
+                                          prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "ic":
+                set_ic_ontology_struct(ontology=new_ontology, relations=self.go_relations)
             slim_cache_path = os.path.join(os.path.dirname(os.path.normpath(ontology_cache_path)), "go_slim.obo")
         elif ontology_type == DataType.DO:
             logger.info("Loading DO ontology data from file")
@@ -209,6 +222,9 @@ class DataManager(object):
                                                         ).subontology(relations=self.do_relations)
             new_ontology = self.do_ontology
             module = Module.DO_EXPERIMENTAL
+            if config.get_module_property(module=Module.EXPRESSION,
+                                          prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "ic":
+                set_ic_ontology_struct(ontology=new_ontology, relations=self.do_relations)
             slim_cache_path = os.path.join(os.path.dirname(os.path.normpath(ontology_cache_path)), "do_slim.obo")
         elif ontology_type == DataType.EXPR:
             logger.info("Loading Expression ontology data from file")
@@ -217,6 +233,9 @@ class DataManager(object):
                 relations=self.expr_relations)
             new_ontology = self.expression_ontology
             module = Module.EXPRESSION
+            if config.get_module_property(module=Module.EXPRESSION,
+                                          prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "ic":
+                set_ic_ontology_struct(ontology=new_ontology, relations=self.expr_relations)
             slim_cache_path = os.path.join(os.path.dirname(os.path.normpath(ontology_cache_path)), "exp_slim.obo")
         terms_replacement_regex = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_TERMS)
         if terms_replacement_regex:
@@ -271,6 +290,7 @@ class DataManager(object):
                     module=Module.GO, prop=ConfigModuleProperty.EXCLUDE_TERMS))
             if config.get_module_property(module=Module.GO, prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "icGO":
                 reset_ic_annot_freq(self.go_ontology)
+                set_ic_annot_freq(ontology=self.go_ontology, annotations=self.go_associations)
         elif associations_type == DataType.DO:
             logger.info("Setting DO associations")
             self.do_associations = self.remove_blacklisted_annotations(
@@ -278,6 +298,7 @@ class DataManager(object):
                     module=Module.DO_EXPERIMENTAL, prop=ConfigModuleProperty.EXCLUDE_TERMS))
             if config.get_module_property(module=Module.DO_EXPERIMENTAL, prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "icGO":
                 reset_ic_annot_freq(self.do_ontology)
+                set_ic_annot_freq(ontology=self.do_ontology, annotations=self.do_associations)
         elif associations_type == DataType.EXPR:
             logger.info("Setting Expression associations")
             self.expression_associations = self.remove_blacklisted_annotations(
@@ -285,6 +306,7 @@ class DataManager(object):
                     module=Module.EXPRESSION, prop=ConfigModuleProperty.EXCLUDE_TERMS))
             if config.get_module_property(module=Module.EXPRESSION, prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "icGO":
                 reset_ic_annot_freq(self.expression_ontology)
+                set_ic_annot_freq(ontology=self.expression_ontology, annotations=self.expression_associations)
 
     def load_associations_from_file(self, associations_type: DataType, associations_url: str,
                                     associations_cache_path: str, config: GenedescConfigParser) -> None:
