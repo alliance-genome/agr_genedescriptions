@@ -7,6 +7,7 @@ from genedescriptions.commons import Module
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.data_manager import DataManager, DataType
 from genedescriptions.descriptions_generator import OntologySentenceGenerator
+from genedescriptions.ontology_tools import set_ic_ontology_struct
 
 logger = logging.getLogger("Gene Ontology Module tests")
 
@@ -353,6 +354,7 @@ class TestDescriptionsGenerator(unittest.TestCase):
         self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "ic"
         go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00000912", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
+        set_ic_ontology_struct(ontology=self.df.go_ontology)
         sentences = go_sent_generator.get_module_sentences(aspect='P', qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
         self.assertTrue(sentences.get_description() != "", "Description is empty")
@@ -414,6 +416,7 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                                            keep_only_best_group=True)
         self.assertTrue("dauer larval development" not in sentences.get_description(), "Blacklist not working")
         self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "ic"
+        set_ic_ontology_struct(ontology=self.df.go_ontology)
         go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00003931", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(aspect='P', qualifier='', merge_groups_with_same_prefix=True,
@@ -461,6 +464,7 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                                              ecode="IAGP", references="", prvdr="RGD", date="")]
         self.df.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
                                                                              ontology=self.df.do_ontology)
+        set_ic_ontology_struct(ontology=self.df.do_ontology)
         generator = OntologySentenceGenerator(gene_id="RGD:HGNC:7225", module=Module.DO_EXPERIMENTAL,
                                               data_manager=self.df, config=self.conf_parser, humans=True)
         sentences = generator.get_module_sentences(
@@ -670,6 +674,7 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                             config=self.conf_parser)
         generator = OntologySentenceGenerator(gene_id="WB:WBGene00000912", module=Module.GO,
                                               data_manager=self.df, config=self.conf_parser)
+        set_ic_ontology_struct(ontology=self.df.go_ontology)
         sentences = generator.get_module_sentences(
             aspect='F', qualifier='', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         self.assertTrue("several" in sentences.get_description())
