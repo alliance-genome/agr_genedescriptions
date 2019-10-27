@@ -124,7 +124,8 @@ def set_ic_ontology_struct(ontology: Ontology, relations: List[str] = None):
 
 
 def reset_ic_annot_freq(ontology: Ontology):
-    for node_prop in ontology.nodes().values():
+    for node_id in ontology.nodes():
+        node_prop = ontology.node(node_id)
         if "num_annots" in node_prop:
             del node_prop["num_annots"]
         if "IC" in node_prop:
@@ -136,7 +137,8 @@ def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
         if "depth" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
                                                       ontology.node_type(root_id) == "CLASS"):
             set_all_depths_in_subgraph(ontology=ontology, root_id=root_id)
-    for node_id, node_pr in ontology.nodes().items():
+    for node_id in ontology.nodes():
+        node_pr = ontology.node(node_id)
         node_pr["num_annots"] = len(annotations.query(terms=[node_id]))
     tot_annots = len(annotations.subjects)
     min_annots = min([node["num_annots"] for node in ontology.nodes().values() if "num_annots" in node and
