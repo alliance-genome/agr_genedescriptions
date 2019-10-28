@@ -123,13 +123,14 @@ def set_ic_ontology_struct(ontology: Ontology, relations: List[str] = None):
                                                  maxleaves=ontology.node(root_id)["num_leaves"], relations=relations)
 
 
-def reset_ic_annot_freq(ontology: Ontology):
+def reset_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
     for node_id in ontology.nodes():
         node_prop = ontology.node(node_id)
         if "num_annots" in node_prop:
             del node_prop["num_annots"]
         if "IC" in node_prop:
             del node_prop["IC"]
+    set_ic_annot_freq(ontology, annotations)
 
 
 def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
