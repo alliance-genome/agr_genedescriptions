@@ -123,17 +123,14 @@ def set_ic_ontology_struct(ontology: Ontology, relations: List[str] = None):
                                                  maxleaves=ontology.node(root_id)["num_leaves"], relations=relations)
 
 
-def reset_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
+def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
+    logger.info("Setting information content values based on annotation frequency")
     for node_id in ontology.nodes():
         node_prop = ontology.node(node_id)
         if "num_annots" in node_prop:
             del node_prop["num_annots"]
         if "IC" in node_prop:
             del node_prop["IC"]
-    set_ic_annot_freq(ontology, annotations)
-
-
-def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
     for root_id in ontology.get_roots():
         if "depth" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
                                                       ontology.node_type(root_id) == "CLASS"):
@@ -149,6 +146,7 @@ def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
     for node_prop in ontology.nodes().values():
         node_prop["IC"] = -math.log(node_prop["num_annots"] / tot_annots) if node_prop["num_annots"] > 0 else -math.log(
             min_annots / (tot_annots + 1))
+    logger.info("Finished setting information content values")
 
 
 def _set_num_subsumers_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
