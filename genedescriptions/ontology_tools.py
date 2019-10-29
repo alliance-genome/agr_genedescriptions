@@ -135,18 +135,34 @@ def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
         if "depth" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
                                                       ontology.node_type(root_id) == "CLASS"):
             set_all_depths_in_subgraph(ontology=ontology, root_id=root_id)
+    node_gene_map = defaultdict(set)
+    for subj, obj in annotations.associations_by_subj_obj.keys():
+        node_gene_map[obj].add(subj)
     for node_id in ontology.nodes():
         node_pr = ontology.node(node_id)
-        node_pr["num_annots"] = len(annotations.query(terms=[node_id]))
-    tot_annots = len(annotations.subjects)
-    min_annots = min([node["num_annots"] for node in ontology.nodes().values() if "num_annots" in node and
-                      node["num_annots"] > 0])
+        node_pr["rel_annot_genes"] = node_gene_map[node_id]
+    for root_id in ontology.get_roots():
+        _set_tot_annots_in_subgraph(ontology, root_id)
+    for node_prop in ontology.nodes().values():
+        if "tot_annot_genes" not in node_prop:
+            node_prop["tot_annot_genes"] = set()
+    tot_annots = len(set([gene for set_genes in node_gene_map.values() for gene in set_genes]))
+    min_annots = min([len(node["tot_annot_genes"]) for node in ontology.nodes().values() if "tot_annot_genes" in node
+                      and len(node["tot_annot_genes"]) > 0])
     if not min_annots:
         min_annots = 1
     for node_prop in ontology.nodes().values():
-        node_prop["IC"] = -math.log(node_prop["num_annots"] / tot_annots) if node_prop["num_annots"] > 0 else -math.log(
-            min_annots / (tot_annots + 1))
+        node_prop["IC"] = -math.log(len(node_prop["tot_annot_genes"]) / tot_annots) if \
+            len(node_prop["tot_annot_genes"]) > 0 else -math.log(min_annots / (tot_annots + 1))
     logger.info("Finished setting information content values")
+
+
+def _set_tot_annots_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
+    if "tot_annot_genes" not in ontology.node(root_id):
+        ontology.node(root_id)["tot_annot_genes"] = ontology.node(root_id)["rel_annot_genes"] | set(
+            [annot_gene for child_id in ontology.children(root_id, relations=relations) for annot_gene in
+             _set_tot_annots_in_subgraph(ontology, child_id)])
+    return ontology.node(root_id)["tot_annot_genes"]
 
 
 def _set_num_subsumers_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
