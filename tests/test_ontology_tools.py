@@ -15,13 +15,13 @@ logger = logging.getLogger("Gene Ontology Tools tests")
 
 class TestOntologyTools(unittest.TestCase):
 
-    def load_go_ontology(self):
-        logger.info("Starting Ontology Tools tests")
+    def setUp(self):
         self.this_dir = os.path.split(__file__)[0]
         self.conf_parser = GenedescConfigParser(os.path.join(self.this_dir, os.path.pardir, "tests", "config_test.yml"))
         self.df = DataManager(do_relations=None, go_relations=["subClassOf", "BFO:0000050"])
-        logger.info("Loading go ontology from file")
         logging.basicConfig(filename=None, level="ERROR", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
+
+    def load_go_ontology(self):
         self.df.load_ontology_from_file(ontology_type=DataType.GO, ontology_url="file://" + os.path.join(
             self.this_dir, "data", "go_gd_test.obo"),
                                         ontology_cache_path=os.path.join(self.this_dir, "cache", "go_gd_test.obo"),
@@ -34,12 +34,6 @@ class TestOntologyTools(unittest.TestCase):
                                             config=self.conf_parser)
 
     def load_do_ontology(self):
-        logger.info("Starting Ontology Tools tests")
-        self.this_dir = os.path.split(__file__)[0]
-        self.conf_parser = GenedescConfigParser(os.path.join(self.this_dir, os.path.pardir, "tests", "config_test.yml"))
-        self.df = DataManager(do_relations=None)
-        logger.info("Loading do ontology from file")
-        logging.basicConfig(filename=None, level="ERROR", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
         self.df.load_ontology_from_file(ontology_type=DataType.DO, ontology_url="file://" + os.path.join(
             self.this_dir, "data", "doid.obo"),
                                         ontology_cache_path=os.path.join(self.this_dir, "cache", "doid.obo"),
@@ -162,10 +156,59 @@ class TestOntologyTools(unittest.TestCase):
         self.assertAlmostEqual(ontology.node(12)["IC"], 1.0986122886681098)
         self.assertAlmostEqual(ontology.node(13)["IC"], 1.0986122886681098)
 
+        self.load_do_ontology()
+        annotations = [DataManager.create_annotation_record(source_line="", gene_id="a", gene_symbol="a",
+                                                            gene_type="", taxon_id="", object_id="DOID:1579",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="b", gene_symbol="b",
+                                                            gene_type="", taxon_id="", object_id="DOID:1579",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="c", gene_symbol="c",
+                                                            gene_type="", taxon_id="", object_id="DOID:1579",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="d", gene_symbol="d",
+                                                            gene_type="", taxon_id="", object_id="DOID:1579",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="e", gene_symbol="e",
+                                                            gene_type="", taxon_id="", object_id="DOID:1579",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="e", gene_symbol="e",
+                                                            gene_type="", taxon_id="", object_id="DOID:0060056",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="f", gene_symbol="f",
+                                                            gene_type="", taxon_id="", object_id="DOID:0060056",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="g", gene_symbol="g",
+                                                            gene_type="", taxon_id="", object_id="DOID:2841",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="a", gene_symbol="a",
+                                                            gene_type="", taxon_id="", object_id="DOID:2841",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="h", gene_symbol="h",
+                                                            gene_type="", taxon_id="", object_id="DOID:0040048",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date="")]
+        self.df.set_associations(associations_type=DataType.DO,
+                                 associations=AssociationSetFactory().create_from_assocs(assocs=annotations,
+                                                                                         ontology=self.df.do_ontology),
+                                 config=self.conf_parser)
+        set_ic_annot_freq(ontology=self.df.do_ontology, annotations=self.df.do_associations)
+        self.assertTrue(len(self.df.do_ontology.node("DOID:0040048")["tot_annot_genes"]) == 1)
+        self.assertTrue(len(self.df.do_ontology.node("DOID:1579")["rel_annot_genes"]) == 5)
+        self.assertTrue(len(self.df.do_ontology.node("DOID:1579")["tot_annot_genes"]) == 7)
+        self.assertTrue("IC" in self.df.do_ontology.node("DOID:0040048"))
+        self.assertTrue("IC" in self.df.do_ontology.node("DOID:4"))
+
     def test_depth(self):
-        self.this_dir = os.path.split(__file__)[0]
-        self.conf_parser = GenedescConfigParser(os.path.join(self.this_dir, os.path.pardir, "tests", "config_test.yml"))
-        self.df = DataManager(do_relations=None, go_relations=["subClassOf", "BFO:0000050"])
         self.df.load_ontology_from_file(ontology_type=DataType.EXPR, ontology_url="file://" + os.path.join(
             self.this_dir, "data", "mgi_expr.obo"),
                                         ontology_cache_path=os.path.join(self.this_dir, "cache", "mgi_expr.obo"),
