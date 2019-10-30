@@ -127,8 +127,10 @@ def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
     logger.info("Setting information content values based on annotation frequency")
     for node_id in ontology.nodes():
         node_prop = ontology.node(node_id)
-        if "num_annots" in node_prop:
-            del node_prop["num_annots"]
+        if "rel_annot_genes" in node_prop:
+            del node_prop["rel_annot_genes"]
+        if "tot_annot_genes" in node_prop:
+            del node_prop["tot_annot_genes"]
         if "IC" in node_prop:
             del node_prop["IC"]
     for root_id in ontology.get_roots():
