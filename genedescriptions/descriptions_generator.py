@@ -120,7 +120,8 @@ class OntologySentenceGenerator(object):
                                                        self.terms_groups[(aspect, qualifier)].items()],
                                                       key=lambda x: x[2]):
             trimming_result = self.reduce_num_terms(terms=terms, min_distance_from_root=dist_root[aspect])
-            if (aspect, evidence_group, qualifier) in self.prepostfix_sentences_map and len(terms) > 0:
+            if (aspect, evidence_group, qualifier) in self.prepostfix_sentences_map \
+                    and len(trimming_result.final_terms) > 0:
                 sentences.append(
                     _get_single_sentence(
                         node_ids=trimming_result.final_terms, ontology=self.ontology, aspect=aspect,
