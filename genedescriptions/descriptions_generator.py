@@ -3,7 +3,7 @@ from typing import Set
 import inflect
 import re
 
-from genedescriptions.commons import Sentence, Module, DataType, TrimmingResult
+from genedescriptions.commons import Sentence, Module, DataType, TrimmingResult, get_data_type_from_module
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import DataManager
 from genedescriptions.ontology_tools import *
@@ -53,76 +53,38 @@ class OntologySentenceGenerator(object):
             config (GenedescConfigParser): an optional config object from which to read the options
             limit_to_group (str): limit the evidence codes to the specified group
         """
-        annot_type = None
-        assocset = None
-        if module == Module.DO_ORTHOLOGY or module == Module.DO_EXPERIMENTAL or module == module.DO_BIOMARKER:
-            self.ontology = data_manager.do_ontology
-            annot_type = DataType.DO
-            assocset = data_manager.do_associations
-        elif module == Module.GO:
-            self.ontology = data_manager.go_ontology
-            annot_type = DataType.GO
-            assocset = data_manager.go_associations
-        elif module == Module.EXPRESSION:
-            self.ontology = data_manager.expression_ontology
-            annot_type = DataType.EXPR
-            assocset = data_manager.expression_associations
+        self.ontology = data_manager.get_ontology(get_data_type_from_module(module))
+        self.config = config
+        self.module = module
+        self.terms_already_covered = set()
+        self.terms_groups = defaultdict(lambda: defaultdict(set))
         self.evidence_groups_priority_list = config.get_evidence_groups_priority_list(module=module)
         self.prepostfix_sentences_map = config.get_prepostfix_sentence_map(module=module, humans=humans)
-        self.terms_groups = defaultdict(lambda: defaultdict(set))
+        self.gene_annots = data_manager.get_annotations_for_gene(
+            gene_id=gene_id, annot_type=get_data_type_from_module(module),
+            priority_list=config.get_annotations_priority(module=module))
+        self.trimmer = CONF_TO_TRIMMING_CLASS[config.get_module_property(
+            module=module, prop=ConfigModuleProperty.TRIMMING_ALGORITHM)](
+            ontology=self.ontology, annotations=data_manager.get_associations(get_data_type_from_module(module)),
+            nodeids_blacklist=config.get_module_property(module=module, prop=ConfigModuleProperty.EXCLUDE_TERMS),
+            slim_terms_ic_bonus_perc=config.get_module_property(module=module, prop=ConfigModuleProperty.SLIM_BONUS_PERC),
+            slim_set=data_manager.get_slim(module=module))
+        self.set_terms_groups(module, config, limit_to_group, humans)
+
+    def set_terms_groups(self, module, config, limit_to_group, humans):
         ev_codes_groups_maps = config.get_evidence_codes_groups_map(module=module)
-        annotations = data_manager.get_annotations_for_gene(gene_id=gene_id, annot_type=annot_type,
-                                                            priority_list=config.get_annotations_priority(
-                                                                module=module))
-        self.annotations = annotations
         evidence_codes_groups_map = {evcode: group for evcode, group in ev_codes_groups_maps.items() if
                                      limit_to_group is None or limit_to_group in ev_codes_groups_maps[evcode]}
         prepostfix_special_cases_sent_map = config.get_prepostfix_sentence_map(module=module, special_cases_only=True,
                                                                                humans=humans)
-        self.cat_several_words = config.get_module_property(module=module,
-                                                            prop=ConfigModuleProperty.CUTOFF_SEVERAL_CATEGORY_WORD)
-        if not self.cat_several_words:
-            self.cat_several_words = {'F': 'functions', 'P': 'processes', 'C': 'components', 'D': 'diseases',
-                                      'A': 'tissues'}
-        self.del_overlap = config.get_module_property(module=module, prop=ConfigModuleProperty.REMOVE_OVERLAP)
-        self.remove_parents = config.get_module_property(module=module,
-                                                         prop=ConfigModuleProperty.DEL_PARENTS_IF_CHILD)
-        self.remove_child_terms = config.get_module_property(module=module,
-                                                             prop=ConfigModuleProperty.DEL_CHILDREN_IF_PARENT)
-        self.max_terms = config.get_module_property(module=module,
-                                                    prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
-        self.exclude_terms = config.get_module_property(module=module, prop=ConfigModuleProperty.EXCLUDE_TERMS)
-        if not self.exclude_terms:
-            self.exclude_terms = []
-        self.cutoff_final_word = config.get_module_property(module=module,
-                                                            prop=ConfigModuleProperty.CUTOFF_SEVERAL_WORD)
-        self.rename_cell = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_CELL)
-        self.terms_already_covered = set()
-        self.dist_root = config.get_module_property(module=module,
-                                                    prop=ConfigModuleProperty.DISTANCE_FROM_ROOT)
-        if not self.dist_root:
-            self.dist_root = {'F': 1, 'P': 1, 'C': 2, 'D': 3, 'A': 3}
-        self.add_mul_common_anc = config.get_module_property(
-            module=module, prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
-        self.trimming_algorithm = config.get_module_property(module=module,
-                                                             prop=ConfigModuleProperty.TRIMMING_ALGORITHM)
-        self.add_mul_common_anc = config.get_module_property(module=module,
-                                                             prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
-        self.config = config
-        self.trimmer = CONF_TO_TRIMMING_CLASS[self.trimming_algorithm](
-            ontology=self.ontology, annotations=assocset,
-            nodeids_blacklist=config.get_module_property(module=module, prop=ConfigModuleProperty.EXCLUDE_TERMS),
-            slim_terms_ic_bonus_perc=config.get_module_property(module=module, prop=ConfigModuleProperty.SLIM_BONUS_PERC),
-            slim_set=data_manager.get_slim(module=module))
-
-        if len(annotations) > 0:
-            for annotation in annotations:
+        if len(self.gene_annots) > 0:
+            for annotation in self.gene_annots:
                 if annotation["evidence"]["type"] in evidence_codes_groups_map:
                     aspect = annotation["aspect"]
                     ev_group = evidence_codes_groups_map[annotation["evidence"]["type"]]
                     qualifier = "_".join(sorted(annotation["qualifiers"])) if "qualifiers" in annotation else ""
                     if prepostfix_special_cases_sent_map and (aspect, ev_group, qualifier) in \
-                            prepostfix_special_cases_sent_map:
+                        prepostfix_special_cases_sent_map:
                         for special_case in prepostfix_special_cases_sent_map[(aspect, ev_group, qualifier)]:
                             if re.match(re.escape(special_case[1]), self.ontology.label(annotation["object"]["id"],
                                                                                         id_if_null=True)):
@@ -150,10 +112,14 @@ class OntologySentenceGenerator(object):
         """
         sentences = []
         evidence_group_priority = {eg: p for p, eg in enumerate(self.evidence_groups_priority_list)}
+        rename_cell = self.config.get_module_property(module=self.module, prop=ConfigModuleProperty.RENAME_CELL)
+        dist_root = self.config.get_module_property(module=self.module, prop=ConfigModuleProperty.DISTANCE_FROM_ROOT)
+        add_mul_comanc = self.config.get_module_property(module=self.module,
+                                                         prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
         for terms, evidence_group, priority in sorted([(t, eg, evidence_group_priority[eg]) for eg, t in
                                                        self.terms_groups[(aspect, qualifier)].items()],
                                                       key=lambda x: x[2]):
-            trimming_result = self.reduce_num_terms(terms=terms, min_distance_from_root=self.dist_root[aspect])
+            trimming_result = self.reduce_num_terms(terms=terms, min_distance_from_root=dist_root[aspect])
             if (aspect, evidence_group, qualifier) in self.prepostfix_sentences_map and len(terms) > 0:
                 sentences.append(
                     _get_single_sentence(
@@ -162,16 +128,20 @@ class OntologySentenceGenerator(object):
                         prepostfix_sentences_map=self.prepostfix_sentences_map,
                         terms_merged=False, trimmed=trimming_result.trimming_applied,
                         add_others=trimming_result.partial_coverage,
-                        truncate_others_generic_word=self.cutoff_final_word,
-                        truncate_others_aspect_words=self.cat_several_words,
-                        ancestors_with_multiple_children=trimming_result.multicovering_nodes if self.add_mul_common_anc
-                        else None, rename_cell=self.rename_cell, config=self.config,
+                        truncate_others_generic_word=self.config.get_module_property(
+                            module=self.module, prop=ConfigModuleProperty.CUTOFF_SEVERAL_WORD),
+                        truncate_others_aspect_words=self.config.get_module_property(
+                            module=self.module, prop=ConfigModuleProperty.CUTOFF_SEVERAL_CATEGORY_WORD),
+                        ancestors_with_multiple_children=trimming_result.multicovering_nodes if add_mul_comanc else
+                        None, rename_cell=rename_cell, config=self.config,
                         put_anatomy_male_at_end=True if aspect == 'A' else False))
                 if keep_only_best_group:
                     return ModuleSentences(sentences)
         if merge_groups_with_same_prefix:
+            remove_parents = self.config.get_module_property(module=self.module,
+                                                             prop=ConfigModuleProperty.DEL_PARENTS_IF_CHILD)
             sentences = self.merge_sentences_with_same_prefix(
-                sentences=sentences, remove_parent_terms=self.remove_parents, rename_cell=self.rename_cell,
+                sentences=sentences, remove_parent_terms=remove_parents, rename_cell=rename_cell,
                 put_anatomy_male_at_end=True if aspect == 'A' else False)
         return ModuleSentences(sentences)
 
@@ -188,20 +158,23 @@ class OntologySentenceGenerator(object):
             TrimmingResult: the reduced set of terms with additional information on the nature of the terms
         """
         trimming_result = TrimmingResult()
-        if self.del_overlap:
+        if self.config.get_module_property(module=self.module, prop=ConfigModuleProperty.REMOVE_OVERLAP):
             terms -= self.terms_already_covered
-        if self.exclude_terms:
-            terms -= set(self.exclude_terms)
-        if self.remove_parents:
+        exclude_terms = self.config.get_module_property(module=self.module, prop=ConfigModuleProperty.EXCLUDE_TERMS)
+        if exclude_terms:
+            terms -= set(exclude_terms)
+        if self.config.get_module_property(module=self.module, prop=ConfigModuleProperty.DEL_PARENTS_IF_CHILD):
             terms = OntologySentenceGenerator.remove_parents_if_child_present(terms, self.ontology,
                                                                               self.terms_already_covered)
-        if 0 < self.max_terms < len(terms):
-            trimming_result = self.trimmer.trim(terms, self.max_terms, min_distance_from_root)
+        max_terms = self.config.get_module_property(module=self.module,
+                                                    prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
+        if 0 < max_terms < len(terms):
+            trimming_result = self.trimmer.trim(terms, max_terms, min_distance_from_root)
         else:
             trimming_result.final_terms = terms
             trimming_result.covered_nodes = terms
             self.terms_already_covered.update(terms)
-        if self.remove_child_terms:
+        if self.config.get_module_property(module=self.module, prop=ConfigModuleProperty.DEL_CHILDREN_IF_PARENT):
             trimming_result.final_terms = self.remove_children_if_parents_present(
                 terms=trimming_result.final_terms, ontology=self.ontology,
                 terms_already_covered=self.terms_already_covered,
@@ -243,6 +216,7 @@ class OntologySentenceGenerator(object):
         """merge sentences with the same prefix
 
         Args:
+            put_anatomy_male_at_end (bool): move 'male' at the end of the term list
             sentences (List[Sentence]): a list of sentences
             remove_parent_terms (bool): whether to remove parent terms if present in the merged set of terms
             rename_cell (bool): whether to rename the term 'cell'
@@ -335,5 +309,3 @@ class OntologySentenceGenerator(object):
                 return postfix_phrases[0]
         else:
             return ""
-
-

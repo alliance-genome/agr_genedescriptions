@@ -48,6 +48,26 @@ class Module(Enum):
     EXPRESSION_CLUSTER_GENEREG = 17
 
 
+def get_data_type_from_module(module):
+    if module == Module.DO_ORTHOLOGY or module == Module.DO_EXPERIMENTAL or module == module.DO_BIOMARKER:
+        return DataType.DO
+    elif module == Module.GO:
+        return DataType.GO
+    elif module == Module.EXPRESSION:
+        return DataType.EXPR
+    return None
+
+
+def get_module_from_data_type(data_type: DataType):
+    if data_type == DataType.GO:
+        return Module.GO
+    elif data_type == DataType.DO:
+        return Module.DO_EXPERIMENTAL
+    elif data_type == DataType.EXPR:
+        return Module.EXPRESSION
+    return None
+
+
 @dataclass
 class CommonAncestor:
     node_id: Any
