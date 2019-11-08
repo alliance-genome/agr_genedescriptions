@@ -14,7 +14,7 @@ from genedescriptions.config_parser import GenedescConfigParser, ConfigModulePro
 from genedescriptions.data_manager import ExpressionClusterFeature, DataManager, ExpressionClusterType
 
 
-logger = logging.getLogger("WB Data Manager")
+logger = logging.getLogger(__name__)
 
 
 class WBDataManager(DataManager):
@@ -317,7 +317,6 @@ class WBDataManager(DataManager):
         return new_terms
 
     def _load_expression_cluster_file(self, file_cache_path, file_url, load_into_data,
-                                      add_article_to_terms: bool = False,
                                       add_to_expression_ontology_annotations: bool = False):
         expr_clust_file = self._get_cached_file(cache_path=file_cache_path, file_source_url=file_url)
         header = True
@@ -335,9 +334,6 @@ class WBDataManager(DataManager):
                 load_into_data[linearr[0]] = linearr[1:]
                 load_into_data[linearr[0]][2] = WBDataManager.get_replaced_terms_arr(
                     load_into_data[linearr[0]][2].split(","), terms_replacement_regex)
-                if add_article_to_terms:
-                    load_into_data[linearr[0]][2] = WBDataManager.transform_expression_cluster_terms(
-                        load_into_data[linearr[0]][2])
                 if load_into_data[linearr[0]] and load_into_data[linearr[0]][3]:
                     load_into_data[linearr[0]][3] = [word.replace(" study", "").replace(" analysis", "") for word in
                                                      load_into_data[linearr[0]][3].split(",")]
@@ -365,16 +361,16 @@ class WBDataManager(DataManager):
         if self.expression_cluster_anatomy_data is not None:
             self._load_expression_cluster_file(self.expression_cluster_anatomy_cache_path,
                                                self.expression_cluster_anatomy_url,
-                                               self.expression_cluster_anatomy_data, add_article_to_terms=True,
+                                               self.expression_cluster_anatomy_data,
                                                add_to_expression_ontology_annotations=True)
         if self.expression_cluster_molreg_data is not None:
             self._load_expression_cluster_file(self.expression_cluster_molreg_cache_path,
                                                self.expression_cluster_molreg_url,
-                                               self.expression_cluster_molreg_data, add_article_to_terms=False)
+                                               self.expression_cluster_molreg_data)
         if self.expression_cluster_genereg_data is not None:
             self._load_expression_cluster_file(self.expression_cluster_genereg_cache_path,
                                                self.expression_cluster_genereg_url,
-                                               self.expression_cluster_genereg_data, add_article_to_terms=False)
+                                               self.expression_cluster_genereg_data)
 
     def get_expression_cluster_feature(self, gene_id, expression_cluster_type: ExpressionClusterType,
                                        feature: ExpressionClusterFeature):
@@ -402,12 +398,6 @@ class WBDataManager(DataManager):
         if target and gene_id in target and target[gene_id][idx]:
             return target[gene_id][idx]
         return None
-
-    @staticmethod
-    def transform_expression_cluster_terms(terms_list: List[str]):
-        inflect_engine = inflect.engine()
-        return ["the " + term if inflect_engine.singular_noun(term.split(" ")[-1]) is False else
-                term for term in terms_list]
 
     def load_all_data_from_file(self) -> None:
         """load all data types from pre-set file locations"""

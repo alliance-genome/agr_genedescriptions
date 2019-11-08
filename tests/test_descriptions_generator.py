@@ -3,12 +3,11 @@ import unittest
 import os
 
 from ontobio import AssociationSetFactory
-from genedescriptions.commons import Module, Gene
+from genedescriptions.commons import Module
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.data_manager import DataManager, DataType
 from genedescriptions.descriptions_generator import OntologySentenceGenerator
-from genedescriptions.gene_description import GeneDescription
-from genedescriptions.precanned_modules import set_gene_ontology_module
+from genedescriptions.ontology_tools import set_ic_ontology_struct
 
 logger = logging.getLogger("Gene Ontology Module tests")
 
@@ -19,7 +18,8 @@ class TestDescriptionsGenerator(unittest.TestCase):
         logger.info("Starting Ontology Tools tests")
         self.this_dir = os.path.split(__file__)[0]
         self.conf_parser = GenedescConfigParser(os.path.join(self.this_dir, os.path.pardir, "tests", "config_test.yml"))
-        self.df = DataManager(do_relations=None, go_relations=["subClassOf", "BFO:0000050"])
+        self.df = DataManager(do_relations=None, go_relations=["subClassOf", "BFO:0000050"],
+                              expr_relations=["subClassOf", "BFO:0000050"])
         logger.info("Loading go ontology from file")
         logging.basicConfig(filename=None, level="ERROR", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
         self.df.load_ontology_from_file(ontology_type=DataType.GO, ontology_url="file://" + os.path.join(
@@ -37,16 +37,6 @@ class TestDescriptionsGenerator(unittest.TestCase):
         logging.basicConfig(filename=None, level="ERROR",
                             format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
 
-    def test_trimming_with_high_priority(self):
-        generator = OntologySentenceGenerator(gene_id="WB:WBGene00000912", module=Module.GO,
-                                              data_manager=self.df, config=self.conf_parser)
-        sentences = generator.get_module_sentences(aspect='P', qualifier='', merge_groups_with_same_prefix=True,
-                                                   keep_only_best_group=True, high_priority_term_ids=['GO:0007568',
-                                                                                                      'GO:1900426'])
-        self.assertTrue("several processes" in sentences.get_description())
-        self.assertTrue("aging" in sentences.get_description())
-        self.assertTrue("positive regulation of defense response to bacterium" in sentences.get_description())
-
     def test_generate_sentence_wb(self):
         go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00000018", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
@@ -59,9 +49,7 @@ class TestDescriptionsGenerator(unittest.TestCase):
         sentences = go_sent_generator.get_module_sentences(aspect='P', qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
         self.assertTrue("several processes" not in sentences.get_description())
-        self.assertTrue("dauer larval development" + self.conf_parser.get_terms_delimiter() +
-                        " determination of adult lifespan" + self.conf_parser.get_terms_delimiter() +
-                        " and insulin receptor signaling pathway" in sentences.get_description())
+        self.assertTrue("dauer larval development and determination of adult lifespan" in sentences.get_description())
         go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00002335", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(aspect='F', qualifier='', merge_groups_with_same_prefix=True,
@@ -366,6 +354,7 @@ class TestDescriptionsGenerator(unittest.TestCase):
         self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "ic"
         go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00000912", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
+        set_ic_ontology_struct(ontology=self.df.go_ontology)
         sentences = go_sent_generator.get_module_sentences(aspect='P', qualifier='', merge_groups_with_same_prefix=True,
                                                            keep_only_best_group=True)
         self.assertTrue(sentences.get_description() != "", "Description is empty")
@@ -427,6 +416,7 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                                            keep_only_best_group=True)
         self.assertTrue("dauer larval development" not in sentences.get_description(), "Blacklist not working")
         self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "ic"
+        set_ic_ontology_struct(ontology=self.df.go_ontology)
         go_sent_generator = OntologySentenceGenerator(gene_id="WB:WBGene00003931", module=Module.GO,
                                                       data_manager=self.df, config=self.conf_parser)
         sentences = go_sent_generator.get_module_sentences(aspect='P', qualifier='', merge_groups_with_same_prefix=True,
@@ -474,6 +464,7 @@ class TestDescriptionsGenerator(unittest.TestCase):
                                                              ecode="IAGP", references="", prvdr="RGD", date="")]
         self.df.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
                                                                              ontology=self.df.do_ontology)
+        set_ic_ontology_struct(ontology=self.df.do_ontology)
         generator = OntologySentenceGenerator(gene_id="RGD:HGNC:7225", module=Module.DO_EXPERIMENTAL,
                                               data_manager=self.df, config=self.conf_parser, humans=True)
         sentences = generator.get_module_sentences(
@@ -672,4 +663,19 @@ class TestDescriptionsGenerator(unittest.TestCase):
         sentences = generator.get_module_sentences(
             aspect='F', qualifier='', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         self.assertTrue("process" not in sentences.get_description())
+
+    def test_generate_descriptions_with_icGO(self):
+        self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "icGO"
+        logger.info("Loading go associations from file")
+        self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
+            self.this_dir, "data", "gene_association_1.7.wb.partial"),
+                                            associations_cache_path=os.path.join(self.this_dir, "cache",
+                                                                                 "gene_association_1.7.wb.partial"),
+                                            config=self.conf_parser)
+        generator = OntologySentenceGenerator(gene_id="WB:WBGene00000912", module=Module.GO,
+                                              data_manager=self.df, config=self.conf_parser)
+        set_ic_ontology_struct(ontology=self.df.go_ontology)
+        sentences = generator.get_module_sentences(
+            aspect='F', qualifier='', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+        self.assertTrue("several" in sentences.get_description())
 

@@ -1,4 +1,3 @@
-import datetime
 import logging
 import unittest
 import os
@@ -6,24 +5,23 @@ import os
 from ontobio import AssociationSetFactory, OntologyFactory
 
 from genedescriptions.commons import Module
-from genedescriptions.config_parser import GenedescConfigParser
+from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import DataManager, DataType
 from genedescriptions.descriptions_generator import OntologySentenceGenerator
-from genedescriptions.ontology_tools import get_all_common_ancestors, find_set_covering, \
-    set_all_information_content_values
+from genedescriptions.ontology_tools import set_ic_ontology_struct, get_all_common_ancestors, set_ic_annot_freq
 
 logger = logging.getLogger("Gene Ontology Tools tests")
 
 
 class TestOntologyTools(unittest.TestCase):
 
-    def load_go_ontology(self):
-        logger.info("Starting Ontology Tools tests")
+    def setUp(self):
         self.this_dir = os.path.split(__file__)[0]
         self.conf_parser = GenedescConfigParser(os.path.join(self.this_dir, os.path.pardir, "tests", "config_test.yml"))
         self.df = DataManager(do_relations=None, go_relations=["subClassOf", "BFO:0000050"])
-        logger.info("Loading go ontology from file")
         logging.basicConfig(filename=None, level="ERROR", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
+
+    def load_go_ontology(self):
         self.df.load_ontology_from_file(ontology_type=DataType.GO, ontology_url="file://" + os.path.join(
             self.this_dir, "data", "go_gd_test.obo"),
                                         ontology_cache_path=os.path.join(self.this_dir, "cache", "go_gd_test.obo"),
@@ -36,12 +34,6 @@ class TestOntologyTools(unittest.TestCase):
                                             config=self.conf_parser)
 
     def load_do_ontology(self):
-        logger.info("Starting Ontology Tools tests")
-        self.this_dir = os.path.split(__file__)[0]
-        self.conf_parser = GenedescConfigParser(os.path.join(self.this_dir, os.path.pardir, "tests", "config_test.yml"))
-        self.df = DataManager(do_relations=None)
-        logger.info("Loading do ontology from file")
-        logging.basicConfig(filename=None, level="ERROR", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
         self.df.load_ontology_from_file(ontology_type=DataType.DO, ontology_url="file://" + os.path.join(
             self.this_dir, "data", "doid.obo"),
                                         ontology_cache_path=os.path.join(self.this_dir, "cache", "doid.obo"),
@@ -52,7 +44,7 @@ class TestOntologyTools(unittest.TestCase):
         generator = OntologySentenceGenerator(gene_id="WB:WBGene00000912", module=Module.GO,
                                               data_manager=self.df, config=self.conf_parser)
         node_ids = generator.terms_groups[('P', '')]["EXPERIMENTAL"]
-        common_ancestors = get_all_common_ancestors(node_ids, generator.ontology)
+        common_ancestors = get_all_common_ancestors(node_ids, ontology=generator.ontology)
         self.assertTrue(len(common_ancestors) > 0, "Common ancestors not found")
         associations = [association for subj_associations in self.df.go_associations.associations_by_subj.values() for
                         association in subj_associations]
@@ -78,7 +70,9 @@ class TestOntologyTools(unittest.TestCase):
         generator = OntologySentenceGenerator(gene_id="WB:WBGene00003931", module=Module.GO,
                                               data_manager=self.df, config=self.conf_parser)
         node_ids = generator.terms_groups[('P', '')]["EXPERIMENTAL"]
-        common_ancestors = get_all_common_ancestors(node_ids, generator.ontology)
+        common_ancestors = get_all_common_ancestors(node_ids, ontology=generator.ontology,
+                                                    nodeids_blacklist=self.conf_parser.get_module_property(
+                                                        module=Module.GO, prop=ConfigModuleProperty.EXCLUDE_TERMS))
         self.assertTrue("GO:0040024" not in common_ancestors, "Common ancestors contain blacklisted term")
 
     def test_information_content(self):
@@ -116,7 +110,8 @@ class TestOntologyTools(unittest.TestCase):
         ontology.add_parent(12, 8)
         ontology.add_parent(12, 9)
         ontology.add_parent(13, 10)
-        set_all_information_content_values(ontology=ontology)
+        # IC struct
+        set_ic_ontology_struct(ontology=ontology)
         self.assertTrue(ontology.node(0)["IC"] == 0, "Root IC not equal to 0")
         self.assertAlmostEqual(ontology.node(1)["IC"], 0.693147181)
         self.assertAlmostEqual(ontology.node(2)["IC"], 0.470003629)
@@ -128,114 +123,92 @@ class TestOntologyTools(unittest.TestCase):
         self.assertAlmostEqual(ontology.node(10)["IC"], 1.252762968)
         self.assertAlmostEqual(ontology.node(11)["IC"], 1.386294361)
 
-    def test_find_set_covering(self):
-        subsets = [("1", "1", {"A", "B", "C"}), ("2", "2", {"A", "B"}), ("3", "3", {"C"}), ("4", "4", {"A"}),
-                   ("5", "5", {"B"}), ("6", "6", {"C"})]
-        values = [2, 12, 5, 20, 20, 20]
-        # test with weights
-        set_covering = [best_set[0] for best_set in find_set_covering(subsets=subsets, value=values, max_num_subsets=3)]
-        self.assertTrue("2" in set_covering)
-        self.assertTrue("6" in set_covering)
-        self.assertTrue("1" not in set_covering)
-        self.assertTrue("3" not in set_covering)
-        self.assertTrue("4" not in set_covering)
-        self.assertTrue("5" not in set_covering)
-        # test without weights
-        set_covering_noweights = [best_set[0] for best_set in
-                                  find_set_covering(subsets=subsets, value=None, max_num_subsets=3)]
-        self.assertTrue("1" in set_covering_noweights and len(set_covering_noweights) == 1)
-        # test wrong input
-        costs_wrong = [1, 3]
-        set_covering_wrong = find_set_covering(subsets=subsets, value=costs_wrong, max_num_subsets=3)
-        self.assertTrue(set_covering_wrong is None, "Cost vector with length different than subsets should return None")
+        #IC annotations
+        annotations = [DataManager.create_annotation_record(source_line="", gene_id="a", gene_symbol="a",
+                                                            gene_type="", taxon_id="", object_id=12, qualifiers="",
+                                                            aspect="", ecode="", references="", prvdr="", date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="a", gene_symbol="a",
+                                                            gene_type="", taxon_id="", object_id=2, qualifiers="",
+                                                            aspect="", ecode="", references="", prvdr="", date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="b", gene_symbol="b",
+                                                            gene_type="", taxon_id="", object_id=13, qualifiers="",
+                                                            aspect="", ecode="", references="", prvdr="", date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="b", gene_symbol="b",
+                                                            gene_type="", taxon_id="", object_id=4, qualifiers="",
+                                                            aspect="", ecode="", references="", prvdr="", date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="c", gene_symbol="c",
+                                                            gene_type="", taxon_id="", object_id=8, qualifiers="",
+                                                            aspect="", ecode="", references="", prvdr="", date="")]
+        associations = AssociationSetFactory().create_from_assocs(assocs=annotations, ontology=ontology)
+        set_ic_annot_freq(ontology=ontology, annotations=associations)
+        self.assertAlmostEqual(ontology.node(0)["IC"], 0)
+        self.assertAlmostEqual(ontology.node(1)["IC"], 0.40546510810816444)
+        self.assertAlmostEqual(ontology.node(2)["IC"], 0)
+        self.assertAlmostEqual(ontology.node(3)["IC"], 1.0986122886681098)
+        self.assertAlmostEqual(ontology.node(4)["IC"], 1.0986122886681098)
+        self.assertAlmostEqual(ontology.node(5)["IC"], 0.40546510810816444)
+        self.assertAlmostEqual(ontology.node(6)["IC"], 1.0986122886681098)
+        self.assertAlmostEqual(ontology.node(7)["IC"], 1.0986122886681098)
+        self.assertAlmostEqual(ontology.node(8)["IC"], 0.40546510810816444)
+        self.assertAlmostEqual(ontology.node(9)["IC"], 1.0986122886681098)
+        self.assertAlmostEqual(ontology.node(10)["IC"], 1.0986122886681098)
+        self.assertAlmostEqual(ontology.node(11)["IC"], 1.3862943611198906)
+        self.assertAlmostEqual(ontology.node(12)["IC"], 1.0986122886681098)
+        self.assertAlmostEqual(ontology.node(13)["IC"], 1.0986122886681098)
 
-        subsets = [("1", "1", {"7"}), ("2", "2", {"7", "12", "13"}),
-                   ("3", "3", {"16", "17"}), ("4", "4", {"11"}), ("6", "6", {"12", "13"}), ("7", "7", {"7"}),
-                   ("9", "9", {"16", "17"}), ("11", "11", {"11"}), ("12", "12", {"12"}), ("13", "13", {"13"}),
-                   ("16", "16", {"16"}), ("17", "17", {"17"})]
-        values = [1, 1, 0.875061263, 1.301029996, 1.301029996, 1.602059991, 1.301029996, 1.698970004, 1.698970004,
-                  1.698970004, 1.698970004, 1.698970004]
-        set_covering = [best_set[0] for best_set in find_set_covering(subsets=subsets, value=values, max_num_subsets=3)]
-        self.assertTrue(all([num in set_covering for num in ["2", "9", "11"]]))
-
-    def test_set_covering_with_ontology(self):
         self.load_do_ontology()
-        self.conf_parser.config["do_via_orth_sentences_options"]["trimming_algorithm"] = "ic"
-        self.conf_parser.config["do_via_orth_sentences_options"]["max_num_terms"] = 5
-        associations = [DataManager.create_annotation_record(source_line="", gene_id="MGI:88452",
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="DOID:0080028", qualifiers="", aspect="D",
-                                                             ecode="ISS", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id="MGI:88452",
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="DOID:0080056", qualifiers="", aspect="D",
-                                                             ecode="ISS", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id="MGI:88452",
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="DOID:14789", qualifiers="", aspect="D",
-                                                             ecode="ISS", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id="MGI:88452",
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="DOID:0080026", qualifiers="", aspect="D",
-                                                             ecode="ISS", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id="MGI:88452",
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="DOID:14415", qualifiers="", aspect="D",
-                                                             ecode="ISS", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id="MGI:88452",
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="DOID:0080045", qualifiers="", aspect="D",
-                                                             ecode="ISS", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id="MGI:88452",
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="DOID:3371", qualifiers="", aspect="D",
-                                                             ecode="ISS", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id="MGI:88452",
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="DOID:8886", qualifiers="", aspect="D",
-                                                             ecode="ISS", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id="MGI:88452",
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="DOID:674", qualifiers="", aspect="D",
-                                                             ecode="ISS", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id="MGI:88452",
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="DOID:5614", qualifiers="", aspect="D",
-                                                             ecode="ISS", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id="MGI:88452",
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="DOID:11830", qualifiers="", aspect="D",
-                                                             ecode="ISS", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id="MGI:88452",
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="DOID:8398", qualifiers="", aspect="D",
-                                                             ecode="ISS", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id="MGI:88452",
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="DOID:2256", qualifiers="", aspect="D",
-                                                             ecode="ISS", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id="MGI:88452",
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="DOID:5327", qualifiers="", aspect="D",
-                                                             ecode="ISS", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id="MGI:88452",
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="DOID:1123", qualifiers="", aspect="D",
-                                                             ecode="ISS", references="", prvdr="WB", date="")]
-        self.df.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
-                                                                             ontology=self.df.do_ontology)
-        generator = OntologySentenceGenerator(gene_id="MGI:88452", module=Module.DO_ORTHOLOGY,
-                                              data_manager=self.df, config=self.conf_parser)
-        sentences = generator.get_module_sentences(
-            aspect='D', qualifier='', merge_groups_with_same_prefix=True, keep_only_best_group=True,
-            high_priority_term_ids=["DOID:0080028", "DOID:0080056", "DOID:14789", "DOID:0080026", "DOID:14415",
-                                    "DOID:0080045"])
-        print(sentences.get_description())
+        annotations = [DataManager.create_annotation_record(source_line="", gene_id="a", gene_symbol="a",
+                                                            gene_type="", taxon_id="", object_id="DOID:1579",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="b", gene_symbol="b",
+                                                            gene_type="", taxon_id="", object_id="DOID:1579",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="c", gene_symbol="c",
+                                                            gene_type="", taxon_id="", object_id="DOID:1579",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="d", gene_symbol="d",
+                                                            gene_type="", taxon_id="", object_id="DOID:1579",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="e", gene_symbol="e",
+                                                            gene_type="", taxon_id="", object_id="DOID:1579",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="e", gene_symbol="e",
+                                                            gene_type="", taxon_id="", object_id="DOID:0060056",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="f", gene_symbol="f",
+                                                            gene_type="", taxon_id="", object_id="DOID:0060056",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="g", gene_symbol="g",
+                                                            gene_type="", taxon_id="", object_id="DOID:2841",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="a", gene_symbol="a",
+                                                            gene_type="", taxon_id="", object_id="DOID:2841",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date=""),
+                       DataManager.create_annotation_record(source_line="", gene_id="h", gene_symbol="h",
+                                                            gene_type="", taxon_id="", object_id="DOID:0040048",
+                                                            qualifiers="", aspect="", ecode="", references="", prvdr="",
+                                                            date="")]
+        self.df.set_associations(associations_type=DataType.DO,
+                                 associations=AssociationSetFactory().create_from_assocs(assocs=annotations,
+                                                                                         ontology=self.df.do_ontology),
+                                 config=self.conf_parser)
+        set_ic_annot_freq(ontology=self.df.do_ontology, annotations=self.df.do_associations)
+        self.assertTrue(len(self.df.do_ontology.node("DOID:0040048")["tot_annot_genes"]) == 1)
+        self.assertTrue(len(self.df.do_ontology.node("DOID:1579")["rel_annot_genes"]) == 5)
+        self.assertTrue(len(self.df.do_ontology.node("DOID:1579")["tot_annot_genes"]) == 7)
+        self.assertTrue("IC" in self.df.do_ontology.node("DOID:0040048"))
+        self.assertTrue("IC" in self.df.do_ontology.node("DOID:4"))
 
     def test_depth(self):
-        self.this_dir = os.path.split(__file__)[0]
-        self.conf_parser = GenedescConfigParser(os.path.join(self.this_dir, os.path.pardir, "tests", "config_test.yml"))
-        self.df = DataManager(do_relations=None, go_relations=["subClassOf", "BFO:0000050"])
         self.df.load_ontology_from_file(ontology_type=DataType.EXPR, ontology_url="file://" + os.path.join(
             self.this_dir, "data", "mgi_expr.obo"),
                                         ontology_cache_path=os.path.join(self.this_dir, "cache", "mgi_expr.obo"),
@@ -623,3 +596,5 @@ class TestOntologyTools(unittest.TestCase):
         sentences = generator.get_module_sentences(
             aspect='A', qualifier='Verified', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         self.assertTrue(sentences.get_description() == "is expressed in embryo")
+        self.assertTrue(all(["depth" in node_properties for node_properties in
+                             self.df.expression_ontology.nodes().values()]))

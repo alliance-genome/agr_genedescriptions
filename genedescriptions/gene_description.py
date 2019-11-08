@@ -216,21 +216,21 @@ class GeneDescription(object):
             self.stats.set_initial_expression_ids = self._get_module_initial_set(
                 aspect="A", main_qualifier="Verified", sentence_generator=sentence_generator)
         elif module == Module.DO_EXPERIMENTAL:
-            self.stats.total_number_do_exp_bio_annotations += len(sentence_generator.annotations)
+            self.stats.total_number_do_exp_bio_annotations += len(sentence_generator.gene_annots)
             self.stats.set_initial_do_ids = self._get_merged_ids(
                 [term_id for terms in sentence_generator.terms_groups.values() for tvalues in terms.values() for
                  term_id in tvalues], self.stats.set_initial_do_ids)
         elif module == Module.DO_BIOMARKER:
-            self.stats.total_number_do_exp_bio_annotations += len(sentence_generator.annotations)
+            self.stats.total_number_do_exp_bio_annotations += len(sentence_generator.gene_annots)
             self.stats.set_initial_do_ids = self._get_merged_ids(
                 [term_id for terms in sentence_generator.terms_groups.values() for tvalues in terms.values() for term_id
                  in tvalues], self.stats.set_initial_do_ids)
         elif module == Module.DO_ORTHOLOGY:
-            self.stats.total_number_do_via_orth_annotations = len(sentence_generator.annotations)
+            self.stats.total_number_do_via_orth_annotations = len(sentence_generator.gene_annots)
             self.stats.set_initial_do_ids = self._get_merged_ids(
                 [term_id for terms in sentence_generator.terms_groups.values() for tvalues in terms.values() for term_id
                  in tvalues], self.stats.set_initial_do_ids)
         self.stats.total_number_do_annotations = self.stats.total_number_do_exp_bio_annotations + \
                                                  self.stats.total_number_do_via_orth_annotations
         if module == Module.GO_PROCESS or module == Module.GO_FUNCTION or module == Module.GO_COMPONENT:
-            self.stats.total_number_go_annotations = len(sentence_generator.annotations)
+            self.stats.total_number_go_annotations = len(sentence_generator.gene_annots)
