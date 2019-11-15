@@ -121,3 +121,23 @@ class TestOntologyTools(unittest.TestCase):
         set_expression_module(self.df, self.conf_parser, gene_desc_ic, gene)
         gene_desc_ic.stats.calculate_stats(data_manager=self.df)
         self.assertTrue(gene_desc_lca.stats.coverage_percentage >= gene_desc_ic.stats.coverage_percentage)
+
+        self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "lca"
+        self.conf_parser.config["expression_sentences_options"]["trimming_algorithm"] = "lca"
+        gene = Gene(id="SGD:S000007393", name="acr-5", dead=False, pseudo=False)
+        associations = self.get_associations(gene.id, ['GO:0003723', 'GO:0003887', 'GO:0003964', 'GO:0004540',
+                                                       'GO:0008233'], [""], "F", "ISS")
+        self.df.go_associations = AssociationSetFactory().create_from_assocs(
+            assocs=associations, ontology=self.df.go_ontology)
+        gene_desc_lca = GeneDescription(gene_id=gene.id, config=self.conf_parser, gene_name="YDR210W-B",
+                                        add_gene_name=False)
+        set_gene_ontology_module(dm=self.df, conf_parser=self.conf_parser, gene_desc=gene_desc_lca, gene=gene)
+        gene_desc_lca.stats.calculate_stats(data_manager=self.df)
+        self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "ic"
+        self.conf_parser.config["expression_sentences_options"]["trimming_algorithm"] = "ic"
+        gene_desc_ic = GeneDescription(gene_id=gene.id, config=self.conf_parser, gene_name="YDR210W-B",
+                                       add_gene_name=False)
+        set_gene_ontology_module(dm=self.df, conf_parser=self.conf_parser, gene_desc=gene_desc_ic, gene=gene)
+        gene_desc_ic.stats.calculate_stats(data_manager=self.df)
+        self.assertTrue(gene_desc_lca.stats.coverage_percentage >= gene_desc_ic.stats.coverage_percentage)
+

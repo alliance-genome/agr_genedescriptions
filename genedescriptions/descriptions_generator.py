@@ -21,8 +21,12 @@ class ModuleSentences(object):
         return " and ".join([sentence.text for sentence in self.sentences])
 
     def get_ids(self, experimental_only: bool = False):
-        return [term_id for sentence in self.sentences for term_id in sentence.terms_ids if not experimental_only or
-                sentence.evidence_group.startswith("EXPERIMENTAL")]
+        return list({term_id for sentence in self.sentences for term_id in sentence.terms_ids if not experimental_only or
+                     sentence.evidence_group.startswith("EXPERIMENTAL")})
+
+    def get_initial_ids(self, experimental_only: bool = False):
+        return list({term_id for sentence in self.sentences for term_id in sentence.initial_terms_ids if not
+                     experimental_only or sentence.evidence_group.startswith("EXPERIMENTAL")})
 
     def contains_sentences(self):
         return len(self.sentences) > 0
@@ -30,6 +34,7 @@ class ModuleSentences(object):
 
 class SentenceMerger(object):
     def __init__(self):
+        self.initial_terms_ids = set()
         self.postfix_list = []
         self.terms_ids = set()
         self.term_postfix_dict = {}
@@ -124,6 +129,7 @@ class OntologySentenceGenerator(object):
                     and len(trimming_result.final_terms) > 0:
                 sentences.append(
                     _get_single_sentence(
+                        initial_terms_ids=list(terms),
                         node_ids=trimming_result.final_terms, ontology=self.ontology, aspect=aspect,
                         evidence_group=evidence_group, qualifier=qualifier,
                         prepostfix_sentences_map=self.prepostfix_sentences_map,
@@ -233,6 +239,7 @@ class OntologySentenceGenerator(object):
             merged_sentences[prefix].aspect = sentence.aspect
             merged_sentences[prefix].qualifier = sentence.qualifier
             merged_sentences[prefix].terms_ids.update(sentence.terms_ids)
+            merged_sentences[prefix].initial_terms_ids.update(sentence.initial_terms_ids)
             for term in sentence.terms_ids:
                 merged_sentences[prefix].term_postfix_dict[term] = self.prepostfix_sentences_map[
                     (sentence.aspect, sentence.evidence_group, sentence.qualifier)][1]
@@ -252,7 +259,8 @@ class OntologySentenceGenerator(object):
                     logger.debug("Removed " + str(len(sent_merger.terms_ids) - len(terms_no_ancestors)) +
                                  " parents from terms while merging sentences with same prefix")
                     sent_merger.terms_ids = terms_no_ancestors
-        return [Sentence(prefix=prefix, terms_ids=list(sent_merger.terms_ids),
+        return [Sentence(prefix=prefix, initial_terms_ids=list(sent_merger.initial_terms_ids),
+                         terms_ids=list(sent_merger.terms_ids),
                          postfix=OntologySentenceGenerator.merge_postfix_phrases(sent_merger.postfix_list),
                          text=compose_sentence(prefix=prefix,
                                                term_names=[self.ontology.label(node, id_if_null=True) for node in

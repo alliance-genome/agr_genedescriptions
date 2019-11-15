@@ -50,12 +50,16 @@ def set_gene_ontology_module(dm: DataManager, conf_parser: GenedescConfigParser,
             module_sentences=comp_module_sentences, module=Module.GO_COMPONENT)
     gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=colocalizes_with_module_sentences,
                                                                module=Module.GO_COMPONENT)
-    gene_desc.set_initial_stats(module=Module.GO_FUNCTION, sentence_generator=go_sent_generator,
-                                sentence_generator_exp_only=go_sent_generator_exp)
-    gene_desc.set_initial_stats(module=Module.GO_PROCESS, sentence_generator=go_sent_generator,
-                                sentence_generator_exp_only=go_sent_generator_exp)
-    gene_desc.set_initial_stats(module=Module.GO_COMPONENT, sentence_generator=go_sent_generator,
-                                sentence_generator_exp_only=go_sent_generator_exp)
+    gene_desc.set_or_update_initial_stats(module=Module.GO_FUNCTION, sent_generator=go_sent_generator,
+                                          module_sentences=contributes_to_module_sentences)
+    gene_desc.set_or_update_initial_stats(module=Module.GO_FUNCTION, sent_generator=go_sent_generator,
+                                          module_sentences=func_module_sentences)
+    gene_desc.set_or_update_initial_stats(module=Module.GO_PROCESS, sent_generator=go_sent_generator,
+                                          module_sentences=proc_module_sentences)
+    gene_desc.set_or_update_initial_stats(module=Module.GO_COMPONENT, sent_generator=go_sent_generator,
+                                          module_sentences=colocalizes_with_module_sentences)
+    gene_desc.set_or_update_initial_stats(module=Module.GO_COMPONENT, sent_generator=go_sent_generator,
+                                          module_sentences=comp_module_sentences)
 
 
 def set_disease_module(df: DataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription, gene: Gene,
@@ -81,9 +85,12 @@ def set_disease_module(df: DataManager, conf_parser: GenedescConfigParser, gene_
         aspect='D', merge_groups_with_same_prefix=True, keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module=Module.DO_ORTHOLOGY,
                                                                module_sentences=disease_via_orth_module_sentences)
-    gene_desc.set_initial_stats(module=Module.DO_EXPERIMENTAL, sentence_generator=do_sentence_exp_generator)
-    gene_desc.set_initial_stats(module=Module.DO_BIOMARKER, sentence_generator=do_sentence_bio_generator)
-    gene_desc.set_initial_stats(module=Module.DO_ORTHOLOGY, sentence_generator=do_via_orth_sentence_generator)
+    gene_desc.set_or_update_initial_stats(module=Module.DO_EXPERIMENTAL, sent_generator=do_sentence_exp_generator,
+                                          module_sentences=disease_exp_module_sentences)
+    gene_desc.set_or_update_initial_stats(module=Module.DO_BIOMARKER, sent_generator=do_sentence_bio_generator,
+                                          module_sentences=disease_bio_module_sentences)
+    gene_desc.set_or_update_initial_stats(module=Module.DO_ORTHOLOGY, sent_generator=do_via_orth_sentence_generator,
+                                          module_sentences=disease_via_orth_module_sentences)
 
 
 def set_expression_module(df: DataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription, gene: Gene):
@@ -93,7 +100,8 @@ def set_expression_module(df: DataManager, conf_parser: GenedescConfigParser, ge
         aspect='A', qualifier="Verified", merge_groups_with_same_prefix=True, keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=expression_module_sentences,
                                                                module=Module.EXPRESSION)
-    gene_desc.set_initial_stats(module=Module.EXPRESSION, sentence_generator=expr_sentence_generator)
+    gene_desc.set_or_update_initial_stats(module=Module.EXPRESSION, sent_generator=expr_sentence_generator,
+                                          module_sentences=expression_module_sentences)
 
 
 def set_alliance_human_orthology_module(orthologs: List[List[str]], gene_desc: GeneDescription,
