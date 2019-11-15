@@ -62,7 +62,7 @@ def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distan
                 for basic_prop_val in onto_anc["meta"]["basicPropertyValues"]:
                     if basic_prop_val["pred"] == "OIO:hasOBONamespace":
                         onto_anc_root = basic_prop_val["val"]
-            if (node_id == ancestor or onto_anc["depth"] >= min_distance_from_root) and (
+            if (ancestor in node_ids or onto_anc["depth"] >= min_distance_from_root) and (
                 not onto_anc_root or onto_anc_root == common_root) and (not nodeids_blacklist or ancestor not in
                                                                         nodeids_blacklist):
                 ancestors[ancestor].append(node_id)
