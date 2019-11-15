@@ -34,6 +34,13 @@ class TestOntologyTools(unittest.TestCase):
                                                                                  "gene_association_1.7.wb.partial"),
                                             config=self.conf_parser)
 
+    @staticmethod
+    def get_associations(gene_id, term_ids, qualifiers, aspect, ecode):
+        return [DataManager.create_annotation_record(source_line="", gene_id=gene_id, gene_symbol="", gene_type="gene",
+                                                     taxon_id="", object_id=term_id, qualifiers=qualifiers,
+                                                     aspect=aspect, ecode=ecode, references="", prvdr="WB",
+                                                     date="") for term_id in term_ids]
+
     def test_trimming_lca(self):
         gene = Gene(id="WB:WBGene00000018", name="abl-1", dead=False, pseudo=False)
         self.df.load_ontology_from_file(ontology_type=DataType.EXPR, ontology_url="file://" + os.path.join(
@@ -45,44 +52,9 @@ class TestOntologyTools(unittest.TestCase):
         self.conf_parser.config["expression_sentences_options"]["max_num_terms"] = 5
         self.conf_parser.config["expression_sentences_options"]["trim_min_distance_from_root"]["A"] = 4
         self.conf_parser.config["expression_sentences_options"]["remove_children_if_parent_is_present"] = False
-        associations = [DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0006796", qualifiers=["Verified"],
-                                                             aspect="A", ecode="IDA", references="", prvdr="WB",
-                                                             date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0006759", qualifiers=["Verified"], aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0005300", qualifiers=["Verified"], aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0008598", qualifiers=["Verified"], aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0003681", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0005829", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0003927", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0006751", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        ]
+        associations = self.get_associations(gene.id, ["WBbt:0006796", "WBbt:0006759", "WBbt:0005300", "WBbt:0008598",
+                                                       "WBbt:0003681", "WBbt:0005829", "WBbt:0003927", "WBbt:0006751"],
+                                             ["Verified"], "A", "IDA")
         self.df.expression_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
                                                                                      ontology=self.df.expression_ontology)
         self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "lca"
@@ -106,77 +78,11 @@ class TestOntologyTools(unittest.TestCase):
         self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "lca"
         self.conf_parser.config["expression_sentences_options"]["trimming_algorithm"] = "lca"
         gene = Gene(id="WB:WBGene00000022", name="aat-1", dead=False, pseudo=False)
-        associations = [DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0005828", qualifiers=["Verified"],
-                                                             aspect="A", ecode="IDA", references="", prvdr="WB",
-                                                             date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0006751", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0005439", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0005788", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0006749", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0005300", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0005735", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0005747", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0005772", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0005776", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0005812", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0005741", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0005799", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        DataManager.create_annotation_record(source_line="", gene_id=gene.id,
-                                                             gene_symbol="", gene_type="gene", taxon_id="",
-                                                             object_id="WBbt:0003681", qualifiers=["Verified"],
-                                                             aspect="A",
-                                                             ecode="IDA", references="", prvdr="WB", date=""),
-                        ]
+        associations = self.get_associations(gene.id, ["WBbt:0005828", "WBbt:0006751", "WBbt:0005439", "WBbt:0005788",
+                                                       "WBbt:0006749", "WBbt:0005300", "WBbt:0005735", "WBbt:0005747",
+                                                       "WBbt:0005772", "WBbt:0005776", "WBbt:0005812", "WBbt:0005741",
+                                                       "WBbt:0005799", "WBbt:0003681"],
+                                             ["Verified"], "A", "IDA")
         self.df.expression_associations = AssociationSetFactory().create_from_assocs(
             assocs=associations, ontology=self.df.expression_ontology)
         gene_desc_lca = GeneDescription(gene_id=gene.id, config=self.conf_parser, gene_name="aat-1",
@@ -187,6 +93,29 @@ class TestOntologyTools(unittest.TestCase):
         self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "ic"
         self.conf_parser.config["expression_sentences_options"]["trimming_algorithm"] = "ic"
         gene_desc_ic = GeneDescription(gene_id=gene.id, config=self.conf_parser, gene_name="aat-1",
+                                       add_gene_name=False)
+        set_gene_ontology_module(dm=self.df, conf_parser=self.conf_parser, gene_desc=gene_desc_ic, gene=gene)
+        set_expression_module(self.df, self.conf_parser, gene_desc_ic, gene)
+        gene_desc_ic.stats.calculate_stats(data_manager=self.df)
+        self.assertTrue(gene_desc_lca.stats.coverage_percentage >= gene_desc_ic.stats.coverage_percentage)
+
+        self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "lca"
+        self.conf_parser.config["expression_sentences_options"]["trimming_algorithm"] = "lca"
+        gene = Gene(id="WB:WBGene00000044", name="acr-5", dead=False, pseudo=False)
+        associations = self.get_associations(gene.id, ['WBbt:0003679', 'WBbt:0006759', 'WBbt:0005336', 'WBbt:0006751',
+                                                       'WBbt:0005300', 'WBbt:0005274', 'WBbt:0005741', 'WBbt:0006749',
+                                                       'WBbt:0005735'],
+                                             ["Verified"], "A", "IDA")
+        self.df.expression_associations = AssociationSetFactory().create_from_assocs(
+            assocs=associations, ontology=self.df.expression_ontology)
+        gene_desc_lca = GeneDescription(gene_id=gene.id, config=self.conf_parser, gene_name="acr-5",
+                                        add_gene_name=False)
+        set_gene_ontology_module(dm=self.df, conf_parser=self.conf_parser, gene_desc=gene_desc_lca, gene=gene)
+        set_expression_module(self.df, self.conf_parser, gene_desc_lca, gene)
+        gene_desc_lca.stats.calculate_stats(data_manager=self.df)
+        self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "ic"
+        self.conf_parser.config["expression_sentences_options"]["trimming_algorithm"] = "ic"
+        gene_desc_ic = GeneDescription(gene_id=gene.id, config=self.conf_parser, gene_name="acr-5",
                                        add_gene_name=False)
         set_gene_ontology_module(dm=self.df, conf_parser=self.conf_parser, gene_desc=gene_desc_ic, gene=gene)
         set_expression_module(self.df, self.conf_parser, gene_desc_ic, gene)
