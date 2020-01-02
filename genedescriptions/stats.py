@@ -38,11 +38,10 @@ class SingleDescStats(object):
     @staticmethod
     def _get_num_covered_nodes(set_initial_terms, set_final_terms, ontology):
         num_covered_nodes = 0
-        final_t_ancestors = {final_term: ontology.ancestors(final_term) for final_term in set_final_terms}
         for initial_term in set_initial_terms:
             initial_t_ancestors = set(ontology.ancestors(initial_term, reflexive=True))
             for final_term in set_final_terms:
-                if final_term in initial_t_ancestors or initial_term in final_t_ancestors[final_term]:
+                if final_term in initial_t_ancestors:
                     num_covered_nodes += 1
                     break
         return num_covered_nodes

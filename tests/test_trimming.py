@@ -24,8 +24,8 @@ class TestOntologyTools(unittest.TestCase):
         self.df = DataManager(do_relations=None, go_relations=["subClassOf", "BFO:0000050"])
         logging.basicConfig(filename=None, level="ERROR", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
         self.df.load_ontology_from_file(ontology_type=DataType.GO, ontology_url="file://" + os.path.join(
-            self.this_dir, "data", "go_gd_test.obo"),
-                                        ontology_cache_path=os.path.join(self.this_dir, "cache", "go_gd_test.obo"),
+            self.this_dir, "data", "go.obo"),
+                                        ontology_cache_path=os.path.join(self.this_dir, "cache", "go_test.obo"),
                                         config=self.conf_parser)
         logger.info("Loading go associations from file")
         self.df.load_associations_from_file(associations_type=DataType.GO, associations_url="file://" + os.path.join(
@@ -124,18 +124,20 @@ class TestOntologyTools(unittest.TestCase):
 
         self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "lca"
         self.conf_parser.config["expression_sentences_options"]["trimming_algorithm"] = "lca"
-        gene = Gene(id="SGD:S000007393", name="acr-5", dead=False, pseudo=False)
-        associations = self.get_associations(gene.id, ['GO:0003723', 'GO:0003887', 'GO:0003964', 'GO:0004540',
-                                                       'GO:0008233'], [""], "F", "ISS")
+        gene = Gene(id='HGNC:10301', name="RPL11", dead=False, pseudo=False)
+        associations = self.get_associations(gene.id, ['GO:1904667', 'GO:2000059', 'GO:0032092', 'GO:2000435',
+                                                       'GO:0010628', 'GO:0000027', 'GO:1901796', 'GO:0050821',
+                                                       'GO:0006364', 'GO:0002181', 'GO:0042273', 'GO:0006605'], [""],
+                                             "P", "EXP")
         self.df.go_associations = AssociationSetFactory().create_from_assocs(
             assocs=associations, ontology=self.df.go_ontology)
-        gene_desc_lca = GeneDescription(gene_id=gene.id, config=self.conf_parser, gene_name="YDR210W-B",
+        gene_desc_lca = GeneDescription(gene_id=gene.id, config=self.conf_parser, gene_name="RPL11",
                                         add_gene_name=False)
         set_gene_ontology_module(dm=self.df, conf_parser=self.conf_parser, gene_desc=gene_desc_lca, gene=gene)
         gene_desc_lca.stats.calculate_stats(data_manager=self.df)
         self.conf_parser.config["go_sentences_options"]["trimming_algorithm"] = "ic"
         self.conf_parser.config["expression_sentences_options"]["trimming_algorithm"] = "ic"
-        gene_desc_ic = GeneDescription(gene_id=gene.id, config=self.conf_parser, gene_name="YDR210W-B",
+        gene_desc_ic = GeneDescription(gene_id=gene.id, config=self.conf_parser, gene_name="RPL11",
                                        add_gene_name=False)
         set_gene_ontology_module(dm=self.df, conf_parser=self.conf_parser, gene_desc=gene_desc_ic, gene=gene)
         gene_desc_ic.stats.calculate_stats(data_manager=self.df)

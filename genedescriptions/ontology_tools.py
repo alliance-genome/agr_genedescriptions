@@ -104,6 +104,7 @@ def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List
 
 
 def set_ic_ontology_struct(ontology: Ontology, relations: List[str] = None):
+    logger.info("Setting information content values based on ontology structure")
     roots = ontology.get_roots(relations=relations)
     for root_id in roots:
         if "num_subsumers" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
@@ -121,6 +122,7 @@ def set_ic_ontology_struct(ontology: Ontology, relations: List[str] = None):
         if "type" not in ontology.node(root_id) or ontology.node_type(root_id) == "CLASS":
             _set_information_content_in_subgraph(ontology=ontology, root_id=root_id,
                                                  maxleaves=ontology.node(root_id)["num_leaves"], relations=relations)
+    logger.info("Finished setting information content values")
 
 
 def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
