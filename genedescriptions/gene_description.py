@@ -2,7 +2,7 @@ import inflect
 
 from typing import List
 
-from genedescriptions.commons import Module
+from genedescriptions.commons import Module, Sentence
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.descriptions_generator import OntologySentenceGenerator, ModuleSentences
 from genedescriptions.sentence_generation_functions import concatenate_words_with_oxford_comma
@@ -185,52 +185,49 @@ class GeneDescription(object):
                     (aspect, additional_qualifier)].items() for elem in sets if (aspect, key, additional_qualifier) in
                  sentence_generator.prepostfix_sentences_map]))
 
-    def set_initial_stats(self, module: Module, sentence_generator: OntologySentenceGenerator,
-                          sentence_generator_exp_only: OntologySentenceGenerator = None):
+    def set_or_update_initial_stats(self, module: Module, sent_generator: OntologySentenceGenerator,
+                                    module_sentences: ModuleSentences):
         """set initial stats for a specific module
 
         Args:
+            sent_generator: the main sentence generator
             module: the module
-            sentence_generator: the main sentence generator
-            sentence_generator_exp_only: sentence generator with experimental evidence codes only
+            module_sentences (ModuleSentences): the module sentences
 
         Returns:
 
         """
         if module == Module.GO_FUNCTION:
-            self.stats.set_initial_go_ids_f = self._get_module_initial_set(
-                aspect="F", additional_qualifier="contributes_to", sentence_generator=sentence_generator)
-            self.stats.set_initial_experimental_go_ids_f = self._get_module_initial_set(
-                aspect="F", additional_qualifier="contributes_to", sentence_generator=sentence_generator_exp_only)
+            self.stats.set_initial_go_ids_f = self._get_merged_ids(module_sentences.get_initial_ids(),
+                                                                   self.stats.set_initial_go_ids_f)
+            self.stats.set_initial_experimental_go_ids_f = self._get_merged_ids(
+                module_sentences.get_initial_ids(experimental_only=True), self.stats.set_initial_experimental_go_ids_f)
         elif module == Module.GO_COMPONENT:
-            self.stats.set_initial_go_ids_c = self._get_module_initial_set(
-                aspect="C", additional_qualifier="colocalizes_with", sentence_generator=sentence_generator)
-            self.stats.set_initial_experimental_go_ids_c = self._get_module_initial_set(
-                aspect="C", additional_qualifier="colocalizes_with", sentence_generator=sentence_generator_exp_only)
+            self.stats.set_initial_go_ids_c = self._get_merged_ids(module_sentences.get_initial_ids(),
+                                                                   self.stats.set_initial_go_ids_c)
+            self.stats.set_initial_experimental_go_ids_c = self._get_merged_ids(
+                module_sentences.get_initial_ids(experimental_only=True), self.stats.set_initial_experimental_go_ids_c)
         elif module == Module.GO_PROCESS:
-            self.stats.set_initial_go_ids_p = self._get_module_initial_set(
-                aspect="P", sentence_generator=sentence_generator)
-            self.stats.set_initial_experimental_go_ids_p = self._get_module_initial_set(
-                aspect="P", sentence_generator=sentence_generator_exp_only)
+            self.stats.set_initial_go_ids_p = self._get_merged_ids(module_sentences.get_initial_ids(),
+                                                                   self.stats.set_initial_go_ids_p)
+            self.stats.set_initial_experimental_go_ids_p = self._get_merged_ids(
+                module_sentences.get_initial_ids(experimental_only=True), self.stats.set_initial_experimental_go_ids_p)
         elif module == Module.EXPRESSION:
-            self.stats.set_initial_expression_ids = self._get_module_initial_set(
-                aspect="A", main_qualifier="Verified", sentence_generator=sentence_generator)
+            self.stats.set_initial_expression_ids = self._get_merged_ids(module_sentences.get_initial_ids(),
+                                                                         self.stats.set_initial_expression_ids)
         elif module == Module.DO_EXPERIMENTAL:
-            self.stats.total_number_do_exp_bio_annotations += len(sentence_generator.gene_annots)
-            self.stats.set_initial_do_ids = self._get_merged_ids(
-                [term_id for terms in sentence_generator.terms_groups.values() for tvalues in terms.values() for
-                 term_id in tvalues], self.stats.set_initial_do_ids)
+            self.stats.total_number_do_exp_bio_annotations += len(sent_generator.gene_annots)
+            self.stats.set_initial_do_ids = self._get_merged_ids(module_sentences.get_initial_ids(),
+                                                                 self.stats.set_initial_do_ids)
         elif module == Module.DO_BIOMARKER:
-            self.stats.total_number_do_exp_bio_annotations += len(sentence_generator.gene_annots)
-            self.stats.set_initial_do_ids = self._get_merged_ids(
-                [term_id for terms in sentence_generator.terms_groups.values() for tvalues in terms.values() for term_id
-                 in tvalues], self.stats.set_initial_do_ids)
+            self.stats.total_number_do_exp_bio_annotations += len(sent_generator.gene_annots)
+            self.stats.set_initial_do_ids = self._get_merged_ids(module_sentences.get_initial_ids(),
+                                                                 self.stats.set_initial_do_ids)
         elif module == Module.DO_ORTHOLOGY:
-            self.stats.total_number_do_via_orth_annotations = len(sentence_generator.gene_annots)
-            self.stats.set_initial_do_ids = self._get_merged_ids(
-                [term_id for terms in sentence_generator.terms_groups.values() for tvalues in terms.values() for term_id
-                 in tvalues], self.stats.set_initial_do_ids)
+            self.stats.total_number_do_via_orth_annotations += len(sent_generator.gene_annots)
+            self.stats.set_initial_do_ids = self._get_merged_ids(module_sentences.get_initial_ids(),
+                                                                 self.stats.set_initial_do_ids)
         self.stats.total_number_do_annotations = self.stats.total_number_do_exp_bio_annotations + \
                                                  self.stats.total_number_do_via_orth_annotations
         if module == Module.GO_PROCESS or module == Module.GO_FUNCTION or module == Module.GO_COMPONENT:
-            self.stats.total_number_go_annotations = len(sentence_generator.gene_annots)
+            self.stats.total_number_go_annotations = len(sent_generator.gene_annots)

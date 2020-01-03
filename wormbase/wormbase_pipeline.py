@@ -87,7 +87,7 @@ def set_tissue_expression_sentence(dm, gene, conf_parser, gene_desc):
         keep_only_best_group=False)
     gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=expression_module_sentences,
                                                                module=Module.EXPRESSION)
-    gene_desc.set_initial_stats(module=Module.EXPRESSION, sentence_generator=expr_sentence_generator)
+    gene_desc.set_or_update_initial_stats(module=Module.EXPRESSION, sentence_generator=expr_sentence_generator)
 
 
 def set_expression_cluster_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription,

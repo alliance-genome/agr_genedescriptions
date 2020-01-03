@@ -62,7 +62,7 @@ def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distan
                 for basic_prop_val in onto_anc["meta"]["basicPropertyValues"]:
                     if basic_prop_val["pred"] == "OIO:hasOBONamespace":
                         onto_anc_root = basic_prop_val["val"]
-            if onto_anc["depth"] >= min_distance_from_root and (
+            if (ancestor in node_ids or onto_anc["depth"] >= min_distance_from_root) and (
                 not onto_anc_root or onto_anc_root == common_root) and (not nodeids_blacklist or ancestor not in
                                                                         nodeids_blacklist):
                 ancestors[ancestor].append(node_id)
@@ -104,6 +104,7 @@ def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List
 
 
 def set_ic_ontology_struct(ontology: Ontology, relations: List[str] = None):
+    logger.info("Setting information content values based on ontology structure")
     roots = ontology.get_roots(relations=relations)
     for root_id in roots:
         if "num_subsumers" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
@@ -121,6 +122,7 @@ def set_ic_ontology_struct(ontology: Ontology, relations: List[str] = None):
         if "type" not in ontology.node(root_id) or ontology.node_type(root_id) == "CLASS":
             _set_information_content_in_subgraph(ontology=ontology, root_id=root_id,
                                                  maxleaves=ontology.node(root_id)["num_leaves"], relations=relations)
+    logger.info("Finished setting information content values")
 
 
 def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):

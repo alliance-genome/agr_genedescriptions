@@ -53,8 +53,9 @@ def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str],
                                                             separator=config.get_terms_delimiter()) + postfix
 
 
-def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, evidence_group: str, qualifier: str,
-                         prepostfix_sentences_map: Dict[Tuple[str, str, str], Tuple[str, str]],
+def _get_single_sentence(initial_terms_ids: List[str], node_ids: List[str], ontology: Ontology, aspect: str,
+                         evidence_group: str, qualifier: str, prepostfix_sentences_map: Dict[Tuple[str, str, str],
+                                                                                             Tuple[str, str]],
                          config: GenedescConfigParser, terms_merged: bool = False, add_others: bool = False,
                          truncate_others_generic_word: str = "several",
                          truncate_others_aspect_words: Dict[str, str] = None,
@@ -94,7 +95,7 @@ def _get_single_sentence(node_ids: List[str], ontology: Ontology, aspect: str, e
         term_labels = [ontology.label(node_id, id_if_null=True) for node_id in node_ids]
         if ancestors_with_multiple_children is None:
             ancestors_with_multiple_children = set()
-        return Sentence(prefix=prefix, terms_ids=node_ids, postfix=postfix,
+        return Sentence(prefix=prefix, initial_terms_ids=initial_terms_ids, terms_ids=node_ids, postfix=postfix,
                         text=compose_sentence(prefix=prefix, term_names=term_labels, postfix=postfix,
                                               additional_prefix=additional_prefix,
                                               ancestors_with_multiple_children=ancestors_with_multiple_children,

@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 @dataclass
 class Sentence:
     prefix: str
+    initial_terms_ids: List[str]
     terms_ids: List[str]
     postfix: str
     text: str

@@ -137,8 +137,8 @@ class TrimmingAlgorithmLCA(TrimmingAlgorithm):
                     best_cands = [(cand_id, candidates_dict[cand_id][1])]
                 for best_cand in best_cands:
                     selected_cands_ids.append(best_cand[0])
-                    for node_id in candidates_dict[best_cand[0]][1]:
-                        cands_ids_to_process -= set(node_to_cands_map[node_id])
+                    cands_ids_to_process = {cand_id for cand_id in cands_ids_to_process if best_cand[0] not in
+                                            self.ontology.ancestors(cand_id, reflexive=True)}
             else:
                 selected_cands_ids.append(cand_id)
         if len(selected_cands_ids) <= max_num_nodes:
