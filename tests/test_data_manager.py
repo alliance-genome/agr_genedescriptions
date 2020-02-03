@@ -97,3 +97,12 @@ class TestGOModule(unittest.TestCase):
         assocs = AssociationSetFactory().create_from_assocs(assocs=associations, ontology=self.df.go_ontology)
         self.df.set_associations(associations_type=DataType.GO, associations=assocs, config=self.conf_parser)
         self.assertTrue(self.df.go_associations)
+
+    def test_remap_associations(self):
+        associations = []
+        associations.append(DataManager.create_annotation_record("", "1", "a", "protein_coding", "001", "GO:0018996",
+                                                                 "", "F", "EXP", None, "WB", ""))
+        assocs = AssociationSetFactory().create_from_assocs(assocs=associations, ontology=self.df.go_ontology)
+        self.df.set_associations(associations_type=DataType.GO, associations=assocs, config=self.conf_parser)
+        self.assertEqual(self.df.go_associations.associations_by_subj["1"][0]["object"]["id"], "GO:0042303")
+

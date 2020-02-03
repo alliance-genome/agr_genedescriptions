@@ -25,6 +25,7 @@ class ConfigModuleProperty(Enum):
     TRIMMING_ALGORITHM = 14
     SLIM_URL = 15
     SLIM_BONUS_PERC = 16
+    REMAP_TERMS = 17
 
 
 class GenedescConfigParser(object):
@@ -101,6 +102,8 @@ class GenedescConfigParser(object):
             property_name = "slim_url"
         elif prop == ConfigModuleProperty.SLIM_BONUS_PERC:
             property_name = "slim_bonus_perc"
+        elif prop == ConfigModuleProperty.REMAP_TERMS:
+            property_name = "remap_terms"
         return property_name
 
     def get_prepostfix_sentence_map(self, module: Module, special_cases_only: bool = False, humans: bool = False):

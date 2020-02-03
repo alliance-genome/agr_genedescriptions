@@ -7,10 +7,10 @@ generic:
 
 # options for WormBase gene description generation - used when data_fetcher is set to 'wb_data_fetcher'
 wb_options:
-  release: "WS274"
+  release: "WS275"
   raw_files_source: "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases"
   agr_human_go_associations: "http://download.alliancegenome.org/2.3.0/GAF/HUMAN/GAF_HUMAN_2.gaf"
-  agr_go_ontology: "http://download.alliancegenome.org/GO/go_1.7.obo"
+  agr_go_ontology: "http://download.alliancegenome.org/2.3.0/ONTOLOGY/GO/ONTOLOGY_GO_0.obo"
   organisms_to_process:
     # add the species to be processed to the following list. Entries must have the same text as in 'organisms'
     # option
@@ -108,10 +108,24 @@ go_sentences_options:
     - "GO:0005515"
     - "GO:0044877"
     - "GO:0043229"
+    - "GO:0018996"
+    - "GO:0007591"
+    - "GO:0035264"
+    - "GO:0040014"
+    - "GO:0040015"
+    - "GO:0040018"
+  remap_terms:
+    "GO:0018996": "GO:0042303"
+    "GO:0007591": "GO:0042303"
+    "GO:0035264": "GO:0040007"
+    "GO:0040014": "GO:0040008"
+    "GO:0040015": "GO:0040008"
+    "GO:0040018": "GO:0040008"
   rename_terms:
-    "(.*)molting cycle, collagen and cuticulin-based cuticle(.*)": "\\1molting cycle\\2"
-    "(.*)molting cycle, chitin-based cuticle(.*)": "\\1molting cycle\\2"
-    "(.*)multicellular organism growth(.*)": "\\1growth\\2"
+    #"(.*)molting cycle, collagen and cuticulin-based cuticle(.*)": "\\1molting cycle\\2"
+    #"(.*)molting cycle, chitin-based cuticle(.*)": "\\1molting cycle\\2"
+    #"(.*)multicellular organism growth(.*)": "\\1growth\\2"
+    "(.*)transforming growth factor beta receptor signaling pathway involved in regulation of multicellular organism growth(.*)": "\\1transforming growth factor beta receptor signaling pathway involved in regulation of growth\\2"
     "(.*)embryo development ending in birth or egg hatching(.*)": "\\1embryo development\\2"
     "(.*)synaptic transmission, (\\w+)(.*)": "\\1\\2 synaptic transmission\\3"
     "(.*)postsynaptic synaptic(.*)": "\\1postsynaptic\\2"

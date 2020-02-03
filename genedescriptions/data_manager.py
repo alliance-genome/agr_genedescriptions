@@ -262,6 +262,18 @@ class DataManager(object):
         elif module == Module.EXPRESSION:
             return self.exp_slim
 
+    @staticmethod
+    def remap_associations(associations: AssociationSet, ontology: Ontology, associations_map: Dict[str, str]):
+        if not associations_map:
+            return associations
+        new_associations = []
+        for subj_associations in associations.associations_by_subj.values():
+            for association in subj_associations:
+                if association["object"]["id"] in associations_map:
+                    association["object"]["id"] = associations_map[association["object"]["id"]]
+                new_associations.append(association)
+        return AssociationSetFactory().create_from_assocs(assocs=new_associations, ontology=ontology)
+
     def set_associations(self, associations_type: DataType, associations: AssociationSet, config: GenedescConfigParser):
         """set the go annotations and remove blacklisted annotations
 
@@ -270,10 +282,15 @@ class DataManager(object):
             associations (AssociationSet): an association object to set as go annotations
             config (GenedescConfigParser): configuration object where to read properties
         """
+        assocs = self.remap_associations(associations=associations, ontology=self.get_ontology(associations_type),
+                                         associations_map=config.get_module_property(
+                                             module=get_module_from_data_type(associations_type),
+                                             prop=ConfigModuleProperty.REMAP_TERMS))
         assocs = self.remove_blacklisted_annotations(
-            association_set=associations, ontology=self.get_ontology(associations_type),
+            association_set=assocs, ontology=self.get_ontology(associations_type),
             terms_blacklist=config.get_module_property(module=get_module_from_data_type(associations_type),
                                                        prop=ConfigModuleProperty.EXCLUDE_TERMS))
+
         if associations_type == DataType.GO:
             logger.info("Setting GO associations")
             self.go_associations = assocs
