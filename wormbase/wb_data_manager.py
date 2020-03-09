@@ -239,7 +239,7 @@ class WBDataManager(DataManager):
                     header = False
                 else:
                     ortholog_arr = line.strip().split("\t")
-                    if not ortholog_arr[1].startswith("PRJEB28388"):
+                    if not ortholog_arr[1].startswith("PRJEB28388") and len(ortholog_arr[3].split(";")) > 2:
                         orthologs[ortholog_arr[0]].append(ortholog_arr[1:4])
 
     def get_best_orthologs_for_gene(self, gene_id: str, orth_species_full_name: List[str],
