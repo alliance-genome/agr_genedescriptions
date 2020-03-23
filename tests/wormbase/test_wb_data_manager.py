@@ -61,6 +61,12 @@ class TestGOModule(unittest.TestCase):
         df.load_orthology_from_file()
         self.assertTrue(len(df.orthologs) > 0)
 
+    def test_load_protein_domain_data(self):
+        df = WBDataManager(do_relations=None, go_relations=["subClassOf", "BFO:0000050"], config=self.conf_parser,
+                           species="c_elegans")
+        df.load_protein_domain_information()
+        self.assertTrue(True)
+
     def test_expression_the_cell_renaming_to_widely(self):
         self.df.load_ontology_from_file(ontology_type=DataType.EXPR, ontology_url=self.df.expression_ontology_url,
                                         ontology_cache_path=self.df.expression_ontology_cache_path,
