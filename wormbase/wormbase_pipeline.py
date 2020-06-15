@@ -61,11 +61,12 @@ def load_data(organism, conf_parser: GenedescConfigParser):
     return df, sister_df, df_agr
 
 
-def set_orthology_sentence(dm: WBDataManager, orth_fullnames: List[str], gene_desc: GeneDescription,
-                           human_genes_props, api_manager, config: GenedescConfigParser):
+def get_best_orthologs_and_sentence(dm: WBDataManager, orth_fullnames: List[str], gene_desc: GeneDescription,
+                                    human_genes_props, api_manager, config: GenedescConfigParser):
     best_orthologs, selected_orth_name = dm.get_best_orthologs_for_gene(gene_desc.gene_id,
                                                                         orth_species_full_name=orth_fullnames)
     selected_orthologs = []
+    orth_sent = ''
     if best_orthologs:
         gene_desc.stats.set_best_orthologs = [orth[0] for orth in best_orthologs]
         if len(orth_fullnames) == 1 and orth_fullnames[0] == "Homo sapiens":
@@ -75,8 +76,7 @@ def set_orthology_sentence(dm: WBDataManager, orth_fullnames: List[str], gene_de
         else:
             orth_sent = generate_ortholog_sentence_wormbase_non_c_elegans(best_orthologs, selected_orth_name,
                                                                           api_manager=api_manager, config=config)
-        gene_desc.set_or_extend_module_description_and_final_stats(module=Module.ORTHOLOGY, description=orth_sent)
-    return selected_orthologs
+    return selected_orthologs, orth_sent
 
 
 def set_tissue_expression_sentence(dm, gene, conf_parser, gene_desc):
@@ -250,9 +250,9 @@ def main():
         for gene in dm.get_gene_data():
             logger.debug("Generating description for gene " + gene.name)
             gene_desc = GeneDescription(gene_id=gene.id, config=conf_parser, gene_name=gene.name, add_gene_name=False)
-            selected_orthologs = set_orthology_sentence(dm=dm, orth_fullnames=dm.orth_fullnames,
-                                                        human_genes_props=human_genes_props, gene_desc=gene_desc,
-                                                        api_manager=api_manager, config=conf_parser)
+            selected_orthologs, orth_sent = get_best_orthologs_and_sentence(
+                dm=dm, orth_fullnames=dm.orth_fullnames, human_genes_props=human_genes_props, gene_desc=gene_desc,
+                api_manager=api_manager, config=conf_parser)
             set_gene_ontology_module(dm=dm, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene)
             set_tissue_expression_sentence(dm=dm, gene=gene, conf_parser=conf_parser, gene_desc=gene_desc)
             if not gene_desc.description:
@@ -264,6 +264,7 @@ def main():
                                               selected_orthologs=selected_orthologs,
                                               ensembl_hgnc_ids_map=ensembl_hgnc_ids_map, conf_parser=conf_parser,
                                               human_df_agr=df_agr, gene_desc=gene_desc, dm=dm, gene=gene)
+            gene_desc.set_or_extend_module_description_and_final_stats(module=Module.ORTHOLOGY, description=orth_sent)
             if "main_sister_species" in species[organism] and species[organism]["main_sister_species"] and \
                     dm.get_best_orthologs_for_gene(gene.id, orth_species_full_name=[dm.sister_sp_fullname],
                                                    sister_species_data_fetcher=sister_df,
