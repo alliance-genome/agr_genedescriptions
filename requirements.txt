@@ -3,5 +3,5 @@ namedlist
 inflect
 pyyaml>=4.2b1
 numpy
-ontobio
+ontobio==1.7.0
 num2words
