@@ -10,11 +10,9 @@ from enum import Enum
 from collections import defaultdict
 from typing import List, Iterable, Dict
 from ontobio import AssociationSetFactory
-from ontobio.io.assocparser import AssocParserConfig
 from ontobio.ontol_factory import OntologyFactory
 from ontobio.ontol import Ontology
 from ontobio.assocmodel import AssociationSet
-from ontobio.io.gafparser import GafParser
 from genedescriptions.commons import Gene, DataType, Module, get_module_from_data_type
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.ontology_tools import set_all_depths, set_ic_annot_freq, set_ic_ontology_struct
@@ -314,10 +312,9 @@ class DataManager(object):
             associations_cache_path (str): path to cache file for the associations
             config (GenedescConfigParser): configuration object where to read properties
         """
-        assoc_config = AssocParserConfig(remove_double_prefixes=True, paint=True)
-        assocs = AssociationSetFactory().create_from_assocs(assocs=GafParser(config=assoc_config).parse(
-            file=self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url),
-            skipheader=True), ontology=self.get_ontology(associations_type))
+        assocs = AssociationSetFactory().create_from_file(file=self._get_cached_file(
+            cache_path=associations_cache_path, file_source_url=associations_url),
+            ontology=self.get_ontology(associations_type), skim=False)
         self.set_associations(associations_type=associations_type, associations=assocs, config=config)
 
     def get_annotations_for_gene(self, gene_id: str, annot_type: DataType = DataType.GO,
@@ -386,10 +383,10 @@ class DataManager(object):
 
     @staticmethod
     def get_human_gene_props():
-        """ retrieve data for human genes, including Ensembl ID, symbol, name, and family symbol and name
+        """ retrieve data for human genes, including HGNC ID, symbol, and name
 
         Returns:
-            Dict[str, List[str]]: a dictionary of all human genes properties, indexed by Ensembl ID
+            Dict[str, List[str]]: a dictionary of all human genes properties, indexed by HGNC ID
 
         """
         human_genes_props = defaultdict(list)
@@ -401,7 +398,7 @@ class DataManager(object):
                 linearr = line.decode("utf-8").split("\t")
                 linearr[-1] = linearr[-1].strip()
                 if linearr[1] != "":
-                    human_genes_props[linearr[1]] = [linearr[0], linearr[2], linearr[3]]
+                    human_genes_props[linearr[0]] = [linearr[2], linearr[3]]
             else:
                 header = False
         return human_genes_props
