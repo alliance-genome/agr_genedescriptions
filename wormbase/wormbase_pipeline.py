@@ -72,7 +72,7 @@ def get_best_orthologs_and_sentence(dm: WBDataManager, orth_fullnames: List[str]
         if len(orth_fullnames) == 1 and orth_fullnames[0] == "Homo sapiens":
             sel_orthologs, orth_sent = generate_ortholog_sentence_wormbase_human(best_orthologs, human_genes_props,
                                                                                  config=config)
-            selected_orthologs = [orth for orth in best_orthologs if orth[1] in sel_orthologs]
+            selected_orthologs = [orth for orth in best_orthologs if orth[1].upper() in sel_orthologs]
         else:
             orth_sent = generate_ortholog_sentence_wormbase_non_c_elegans(best_orthologs, selected_orth_name,
                                                                           api_manager=api_manager, config=config)
@@ -158,11 +158,11 @@ def set_expression_cluster_sentence(dm: WBDataManager, conf_parser: GenedescConf
             additional_postfix_final_word="studies", use_single_form=True)
 
 
-def set_information_poor_sentence(orth_fullnames: List[str], selected_orthologs, ensembl_hgnc_ids_map,
+def set_information_poor_sentence(orth_fullnames: List[str], selected_orthologs,
                                   conf_parser: GenedescConfigParser, human_df_agr: DataManager,
                                   gene_desc: GeneDescription, dm: WBDataManager, gene: Gene):
     if len(orth_fullnames) == 1 and orth_fullnames[0] == "Homo sapiens":
-        best_orth = get_best_human_ortholog_for_info_poor(selected_orthologs, ensembl_hgnc_ids_map,
+        best_orth = get_best_human_ortholog_for_info_poor(selected_orthologs,
                                                           conf_parser.get_annotations_priority(module=Module.GO),
                                                           human_df_agr, config=conf_parser)
         if best_orth:
@@ -232,11 +232,10 @@ def main():
     args = parser.parse_args()
     conf_parser = GenedescConfigParser(args.config_file)
     logging.basicConfig(filename=args.log_file, level=args.log_level, format='%(asctime)s - %(name)s - %(levelname)s:'
-                                                                             '%(message)s')
+                                                                             '%(message)s', force=True)
     logger = logging.getLogger("WB Gene Description Pipeline")
     organisms_list = conf_parser.get_wb_organisms_to_process()
     human_genes_props = DataManager.get_human_gene_props()
-    ensembl_hgnc_ids_map = DataManager.get_ensembl_hgnc_ids_map()
     api_manager = APIManager(textpresso_api_token=args.textpresso_token)
     for organism in organisms_list:
         logger.info("Processing organism " + organism)
@@ -261,8 +260,7 @@ def main():
             set_disease_module(df=dm, conf_parser=conf_parser, gene=gene, gene_desc=gene_desc)
             if not gene_desc.go_description:
                 set_information_poor_sentence(orth_fullnames=dm.orth_fullnames,
-                                              selected_orthologs=selected_orthologs,
-                                              ensembl_hgnc_ids_map=ensembl_hgnc_ids_map, conf_parser=conf_parser,
+                                              selected_orthologs=selected_orthologs, conf_parser=conf_parser,
                                               human_df_agr=df_agr, gene_desc=gene_desc, dm=dm, gene=gene)
             gene_desc.set_or_extend_module_description_and_final_stats(module=Module.ORTHOLOGY, description=orth_sent)
             if "main_sister_species" in species[organism] and species[organism]["main_sister_species"] and \

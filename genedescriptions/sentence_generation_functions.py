@@ -138,23 +138,23 @@ def concatenate_words_with_oxford_comma(words: List[str], separator: str = ","):
         return " and ".join(words)
 
 
-def get_best_human_ortholog_for_info_poor(human_orthologs, ensembl_hgnc_ids_map, evidence_codes, human_df_agr, config):
+def get_best_human_ortholog_for_info_poor(human_orthologs, evidence_codes, human_df_agr, config):
     best_orth = ""
     if len(human_orthologs) > 0:
         ev_codes_group_map = config.get_evidence_codes_groups_map(module=Module.GO)
         exp_orthologs = defaultdict(int)
         predicted_orthologs = defaultdict(int)
         for ortholog in human_orthologs:
-            if ortholog[0] in ensembl_hgnc_ids_map and ensembl_hgnc_ids_map[ortholog[0]]:
-                ortholog_annotations = human_df_agr.get_annotations_for_gene(
-                    gene_id="RGD:" + ensembl_hgnc_ids_map[ortholog[0]], annot_type=DataType.GO,
-                    priority_list=evidence_codes)
-                for annotation in ortholog_annotations:
-                    if annotation['aspect'] == 'F':
-                        if "EXPERIMENTAL" in ev_codes_group_map[annotation["evidence"]['type']]:
-                            exp_orthologs[ensembl_hgnc_ids_map[ortholog[0]]] += 1
-                        else:
-                            predicted_orthologs[ensembl_hgnc_ids_map[ortholog[0]]] += 1
+            orth_id = ortholog[0]
+            ortholog_annotations = human_df_agr.get_annotations_for_gene(gene_id="RGD:" + orth_id,
+                                                                         annot_type=DataType.GO,
+                                                                         priority_list=evidence_codes)
+            for annotation in ortholog_annotations:
+                if annotation['aspect'] == 'F':
+                    if "EXPERIMENTAL" in ev_codes_group_map[annotation["evidence"]['type']]:
+                        exp_orthologs[ortholog[0]] += 1
+                    else:
+                        predicted_orthologs[ortholog[0]] += 1
         if len(exp_orthologs) > 0:
             best_orth = sorted([(key, value) for key, value in exp_orthologs.items()], key=lambda x: x[1],
                                reverse=True)[0][0]

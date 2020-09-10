@@ -142,12 +142,12 @@ def generate_ortholog_sentence_wormbase_human(orthologs: List[List[str]], human_
     if len(orthologs) > 3:
         orthologs = orthologs[0:3]
         prefix = "several human genes including "
-    symbol_name_arr = sorted([human_genes_props[best_orth[0]][1] + " (" + human_genes_props[best_orth[0]][2] +
+    symbol_name_arr = sorted([human_genes_props[best_orth[0]][0] + " (" + human_genes_props[best_orth[0]][1] +
                               ")" if best_orth[0] in human_genes_props and human_genes_props[best_orth[0]] else
                               best_orth[1] for best_orth in orthologs])
     orth_sentence = "is an ortholog of " + prefix + concatenate_words_with_oxford_comma(
         symbol_name_arr, separator=config.get_terms_delimiter())
-    return [human_genes_props[best_orth[0]][1] for best_orth in orthologs if best_orth[0] in human_genes_props and
+    return [human_genes_props[best_orth[0]][0] for best_orth in orthologs if best_orth[0] in human_genes_props and
             human_genes_props[best_orth[0]]], orth_sentence
 
 
