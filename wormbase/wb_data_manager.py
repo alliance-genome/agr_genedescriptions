@@ -181,10 +181,17 @@ class WBDataManager(DataManager):
                 terms_blacklist=config.get_module_property(module=Module.EXPRESSION,
                                                            prop=ConfigModuleProperty.EXCLUDE_TERMS))
         elif associations_type == DataType.DO:
-            self.do_associations = AssociationSetFactory().create_from_assocs(
-                assocs=GafParser(config=assoc_config).parse(file=self._get_cached_file(
-                    cache_path=associations_cache_path, file_source_url=associations_url), skipheader=True),
-                ontology=self.do_ontology)
+            file_path_wb = self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url)
+            associations_wb = []
+            for line in open(file_path_wb):
+                if not line.strip().startswith("!"):
+                    linearr = line.strip().split("\t")
+                    if self.do_ontology.has_node(linearr[4]):
+                        associations_wb.append(DataManager.create_annotation_record(
+                            line, "WB:" + linearr[1], linearr[2], linearr[11], linearr[12], linearr[4],
+                            "", "D", linearr[6], linearr[5], linearr[14], linearr[13]))
+            self.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations_wb,
+                                                                              ontology=self.do_ontology)
             if association_additional_cache_path and association_additional_url:
                 associations = []
                 for subj_associations in self.do_associations.associations_by_subj.values():
@@ -198,8 +205,8 @@ class WBDataManager(DataManager):
                     if not line.strip().startswith("!"):
                         if not header:
                             linearr = line.strip().split("\t")
-                            if self.do_ontology.node(linearr[10]) and "IEA" not in linearr[16] and \
-                                    linearr[1] in ["gene", "allele"]:
+                            if self.do_ontology.has_node(linearr[10]) and "IEA" not in linearr[16] and \
+                                linearr[1] in ["gene", "allele"]:
                                 gene_ids = ["WB:" + linearr[3]]
                                 if linearr[1] == "allele":
                                     gene_ids = linearr[4].split(",")
