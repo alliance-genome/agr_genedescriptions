@@ -31,7 +31,7 @@ def main():
     num_human_gene_function_sentences = 0
     num_sister_species_sentences = 0
 
-    for json_file_path in os.listdir(args.input_dir):
+    for json_file_path in sorted(os.listdir(args.input_dir)):
         if json_file_path.endswith(".json"):
             with open(os.path.join(args.input_dir, json_file_path)) as json_file:
                 json_data = json.load(json_file)
