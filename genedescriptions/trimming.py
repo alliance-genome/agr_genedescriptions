@@ -74,7 +74,12 @@ class TrimmingAlgorithmIC(TrimmingAlgorithm):
         elif slim_set and candidate.node_id in slim_set:
             return candidate_node["IC"] * (1 + slim_terms_ic_bonus_perc)
         else:
-            return candidate_node["IC"]
+            if "IC" in candidate_node:
+                return candidate_node["IC"]
+            else:
+                logger.warning(f"Annotation to a possibly obsolete node that doesn't have an IC value: "
+                               f"{candidate.node_id}")
+                return 0
 
     def trim(self, node_ids: List[str], max_num_nodes: int = 3, min_distance_from_root: int = 0) -> TrimmingResult:
         """trim the list of terms by selecting the best combination of terms from the initial list or their common
