@@ -21,33 +21,66 @@ def set_gene_ontology_module(dm: DataManager, conf_parser: GenedescConfigParser,
         keep_only_best_group=True)
     if contributes_to_module_sentences.contains_sentences():
         func_module_sentences = go_sent_generator_exp.get_module_sentences(
-            aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+            aspect='F', qualifier='enables', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=func_module_sentences,
                                                                    module=Module.GO_FUNCTION)
     else:
         func_module_sentences = go_sent_generator.get_module_sentences(
-            aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+            aspect='F', qualifier='enables', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(
             module_sentences=func_module_sentences, module=Module.GO_FUNCTION)
     gene_desc.set_or_extend_module_description_and_final_stats(
         module_sentences=contributes_to_module_sentences, module=Module.GO_FUNCTION)
     proc_module_sentences = go_sent_generator.get_module_sentences(
-        aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+        aspect='P', qualifier='involved_in', merge_groups_with_same_prefix=True, keep_only_best_group=True)
     gene_desc.set_or_extend_module_description_and_final_stats(
         module_sentences=proc_module_sentences, module=Module.GO_PROCESS)
+    proc_module_sentences_a1 = go_sent_generator.get_module_sentences(
+        aspect='P', qualifier='acts_upstream_of_positive_effect', merge_groups_with_same_prefix=True,
+        keep_only_best_group=True)
+    gene_desc.set_or_extend_module_description_and_final_stats(
+        module_sentences=proc_module_sentences_a1, module=Module.GO_PROCESS)
+    proc_module_sentences_a2 = go_sent_generator.get_module_sentences(
+        aspect='P', qualifier='acts_upstream_of_negative_effect', merge_groups_with_same_prefix=True,
+        keep_only_best_group=True)
+    gene_desc.set_or_extend_module_description_and_final_stats(
+        module_sentences=proc_module_sentences_a2, module=Module.GO_PROCESS)
+    proc_module_sentences_a3 = go_sent_generator.get_module_sentences(
+        aspect='P', qualifier='acts_upstream_of_or_within_positive_effect', merge_groups_with_same_prefix=True,
+        keep_only_best_group=True)
+    gene_desc.set_or_extend_module_description_and_final_stats(
+        module_sentences=proc_module_sentences_a3, module=Module.GO_PROCESS)
+    proc_module_sentences_a4 = go_sent_generator.get_module_sentences(
+        aspect='P', qualifier='acts_upstream_of_or_within_negative_effect', merge_groups_with_same_prefix=True,
+        keep_only_best_group=True)
+    gene_desc.set_or_extend_module_description_and_final_stats(
+        module_sentences=proc_module_sentences_a4, module=Module.GO_PROCESS)
+    proc_module_sentences_a5 = go_sent_generator.get_module_sentences(
+        aspect='P', qualifier='acts_upstream_of_or_within', merge_groups_with_same_prefix=True,
+        keep_only_best_group=True)
+    gene_desc.set_or_extend_module_description_and_final_stats(
+        module_sentences=proc_module_sentences_a5, module=Module.GO_PROCESS)
     colocalizes_with_module_sentences = go_sent_generator.get_module_sentences(
         aspect='C', qualifier='colocalizes_with', merge_groups_with_same_prefix=True,
         keep_only_best_group=True)
     if colocalizes_with_module_sentences.contains_sentences():
         comp_module_sentences = go_sent_generator_exp.get_module_sentences(
-            aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+            aspect='C', qualifier='located_in', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(
             module_sentences=comp_module_sentences, module=Module.GO_COMPONENT)
+        comp_module_sentences2 = go_sent_generator_exp.get_module_sentences(
+            aspect='C', qualifier='part_of', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+        gene_desc.set_or_extend_module_description_and_final_stats(
+            module_sentences=comp_module_sentences2, module=Module.GO_COMPONENT)
     else:
         comp_module_sentences = go_sent_generator.get_module_sentences(
-            aspect='C', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+            aspect='C', qualifier='located_in', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(
             module_sentences=comp_module_sentences, module=Module.GO_COMPONENT)
+        comp_module_sentences2 = go_sent_generator.get_module_sentences(
+            aspect='C', qualifier='part_of', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+        gene_desc.set_or_extend_module_description_and_final_stats(
+            module_sentences=comp_module_sentences2, module=Module.GO_COMPONENT)
     gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=colocalizes_with_module_sentences,
                                                                module=Module.GO_COMPONENT)
     gene_desc.set_or_update_initial_stats(module=Module.GO_FUNCTION, sent_generator=go_sent_generator,
@@ -56,10 +89,22 @@ def set_gene_ontology_module(dm: DataManager, conf_parser: GenedescConfigParser,
                                           module_sentences=func_module_sentences)
     gene_desc.set_or_update_initial_stats(module=Module.GO_PROCESS, sent_generator=go_sent_generator,
                                           module_sentences=proc_module_sentences)
+    gene_desc.set_or_update_initial_stats(module=Module.GO_PROCESS, sent_generator=go_sent_generator,
+                                          module_sentences=proc_module_sentences_a1)
+    gene_desc.set_or_update_initial_stats(module=Module.GO_PROCESS, sent_generator=go_sent_generator,
+                                          module_sentences=proc_module_sentences_a2)
+    gene_desc.set_or_update_initial_stats(module=Module.GO_PROCESS, sent_generator=go_sent_generator,
+                                          module_sentences=proc_module_sentences_a3)
+    gene_desc.set_or_update_initial_stats(module=Module.GO_PROCESS, sent_generator=go_sent_generator,
+                                          module_sentences=proc_module_sentences_a4)
+    gene_desc.set_or_update_initial_stats(module=Module.GO_PROCESS, sent_generator=go_sent_generator,
+                                          module_sentences=proc_module_sentences_a5)
     gene_desc.set_or_update_initial_stats(module=Module.GO_COMPONENT, sent_generator=go_sent_generator,
                                           module_sentences=colocalizes_with_module_sentences)
     gene_desc.set_or_update_initial_stats(module=Module.GO_COMPONENT, sent_generator=go_sent_generator,
                                           module_sentences=comp_module_sentences)
+    gene_desc.set_or_update_initial_stats(module=Module.GO_COMPONENT, sent_generator=go_sent_generator,
+                                          module_sentences=comp_module_sentences2)
 
 
 def set_disease_module(df: DataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription, gene: Gene,

@@ -2,13 +2,9 @@ import logging
 import os
 import re
 
-import inflect
-
 from collections import defaultdict
 from typing import List
 from ontobio import AssociationSetFactory
-from ontobio.io.assocparser import AssocParserConfig
-from ontobio.io.gafparser import GafParser
 from genedescriptions.commons import DataType, Gene, Module
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import ExpressionClusterFeature, DataManager, ExpressionClusterType
@@ -60,25 +56,22 @@ class WBDataManager(DataManager):
                                                    "gene_ontology." + release_version + ".obo")
         self.go_ontology_url = raw_files_source + '/' + release_version + '/ONTOLOGY/gene_ontology.' + \
                                release_version + '.obo'
-        self.go_associations_cache_path = os.path.join(cache_location, "wormbase", release_version, "species", species,
-                                                       project_id, "annotation", species + '.' + project_id + '.' +
-                                                       release_version + ".go_annotations.gaf.gz")
-        self.go_associations_url = raw_files_source + '/' + release_version + '/species/' + species + '/' + \
-                                   project_id + '/annotation/' + species + '.' + project_id + '.' + release_version + \
-                                   '.go_annotations.gaf.gz'
+        self.go_associations_cache_path = os.path.join(cache_location, "wormbase", release_version,
+                                                       "ONTOLOGY/gene_association." + release_version + ".wb." +
+                                                       species)
+        self.go_associations_url = raw_files_source + '/' + release_version + '/ONTOLOGY/gene_association.' + \
+                                   release_version + '.wb.' + species
         self.do_ontology_url = raw_files_source + '/' + release_version + '/ONTOLOGY/disease_ontology.' + \
                                release_version + '.obo'
         self.do_ontology_cache_path = os.path.join(cache_location, "wormbase", release_version, "ONTOLOGY",
                                                    "disease_ontology." + release_version + ".obo")
-        self.do_associations_cache_path = os.path.join(cache_location, "wormbase", release_version, "species", species,
-                                                       project_id, "annotation", species + '.' + project_id + '.' +
-                                                       release_version + ".do_annotations.wb")
-        self.do_associations_url = raw_files_source + '/' + release_version + '/ONTOLOGY/disease_association.' + \
-                                   release_version + '.wb'
-        self.do_associations_new_cache_path = os.path.join(cache_location, "wormbase", release_version, "species",
-                                                           species, project_id, "annotation", species + '.' +
-                                                           project_id + '.' + release_version +
-                                                          ".do_annotations.daf.txt")
+        self.do_associations_cache_path = os.path.join(cache_location, "wormbase", release_version, "ONTOLOGY",
+                                                       "disease_associations.by_orthology." + release_version +
+                                                       ".tsv.txt")
+        self.do_associations_url = raw_files_source + '/' + release_version + \
+                                   '/ONTOLOGY/disease_associations.by_orthology.' + release_version + '.tsv.txt'
+        self.do_associations_new_cache_path = os.path.join(cache_location, "wormbase", release_version, 'ONTOLOGY',
+                                                           'disease_association.' + release_version + '.daf.txt')
         self.do_associations_new_url = raw_files_source + '/' + release_version + '/ONTOLOGY/disease_association.' + \
                                        release_version + '.daf.txt'
         self.orthology_url = raw_files_source + '/' + release_version + '/species/' + species + '/' + project_id + \
@@ -156,7 +149,6 @@ class WBDataManager(DataManager):
                                     association_additional_url: str = None,
                                     association_additional_cache_path: str = None) -> None:
         logger.info("Loading associations from file")
-        assoc_config = AssocParserConfig(remove_double_prefixes=True, paint=True)
         if associations_type == DataType.GO:
             super().load_associations_from_file(associations_type=associations_type, associations_url=associations_url,
                                                 associations_cache_path=associations_cache_path, config=config)
@@ -186,10 +178,10 @@ class WBDataManager(DataManager):
             for line in open(file_path_wb):
                 if not line.strip().startswith("!"):
                     linearr = line.strip().split("\t")
-                    if self.do_ontology.has_node(linearr[4]):
+                    if self.do_ontology.has_node(linearr[1]) and len(linearr[4].split("|")) > 1:
                         associations_wb.append(DataManager.create_annotation_record(
-                            line, "WB:" + linearr[1], linearr[2], linearr[11], linearr[12], linearr[4],
-                            "", "D", linearr[6], linearr[5], linearr[14], linearr[13]))
+                            line, "WB:" + linearr[0], '', 'gene', '', linearr[1],
+                            "", "D", "IEA", "", "WB", ""))
             self.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations_wb,
                                                                               ontology=self.do_ontology)
             if association_additional_cache_path and association_additional_url:
@@ -206,7 +198,7 @@ class WBDataManager(DataManager):
                         if not header:
                             linearr = line.strip().split("\t")
                             if self.do_ontology.has_node(linearr[10]) and "IEA" not in linearr[16] and \
-                                linearr[1] in ["gene", "allele"]:
+                                linearr[1] == "gene":
                                 gene_ids = ["WB:" + linearr[3]]
                                 if linearr[1] == "allele":
                                     gene_ids = linearr[4].split(",")
@@ -246,8 +238,9 @@ class WBDataManager(DataManager):
                     header = False
                 else:
                     ortholog_arr = line.strip().split("\t")
-                    if not ortholog_arr[1].startswith("PRJEB28388") and len(ortholog_arr) > 3 and len(
-                                                                        ortholog_arr[3].split(";")) > 2:
+                    if not ortholog_arr[1].startswith("PRJEB28388") and (not ortholog_arr[1].startswith("PRJNA13758") or
+                                                                         len(ortholog_arr) > 3 and
+                                                                         len(ortholog_arr[3].split(";")) > 2):
                         orthologs[ortholog_arr[0]].append(ortholog_arr[1:4])
 
     def get_best_orthologs_for_gene(self, gene_id: str, orth_species_full_name: List[str],

@@ -172,13 +172,22 @@ def set_information_poor_sentence(orth_fullnames: List[str], selected_orthologs,
                                                                 data_manager=human_df_agr, config=conf_parser,
                                                                 humans=False, limit_to_group="EXPERIMENTAL")
             human_func_module_sentences = human_go_sent_generator.get_module_sentences(
-                aspect='F', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+                aspect='F', qualifier="contributes_to", merge_groups_with_same_prefix=True, keep_only_best_group=True)
             human_func_sent = human_func_module_sentences.get_description()
             if human_func_sent:
                 gene_desc.set_or_extend_module_description_and_final_stats(
                     module=Module.INFO_POOR_HUMAN_FUNCTION, description="human " +
                                                                         human_df_agr.go_associations.subject_label_map[
                                                                             best_orth] + " " + human_func_sent)
+            human_func_module_sentences = human_go_sent_generator.get_module_sentences(
+                aspect='F', qualifier="enables", merge_groups_with_same_prefix=True, keep_only_best_group=True)
+            human_func_sent = human_func_module_sentences.get_description()
+            if human_func_sent:
+                gene_desc.set_or_extend_module_description_and_final_stats(
+                    module=Module.INFO_POOR_HUMAN_FUNCTION, description="human " +
+                                                                        human_df_agr.go_associations.subject_label_map[
+                                                                            best_orth] + " " + human_func_sent)
+
 
     protein_domains = dm.protein_domains[gene_desc.gene_id[3:]]
     if protein_domains:
@@ -205,13 +214,12 @@ def set_sister_species_sentence(dm: WBDataManager, conf_parser: GenedescConfigPa
                                                            humans=sister_sp_fullname == "Homo sapiens",
                                                            limit_to_group="EXPERIMENTAL")
     sister_sp_module_sentences = sister_sentences_generator.get_module_sentences(
-        aspect='P', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+        aspect='P', qualifier="involved_in", merge_groups_with_same_prefix=True, keep_only_best_group=True)
     if sister_sp_module_sentences.contains_sentences():
         gene_desc.set_or_extend_module_description_and_final_stats(
             module=Module.SISTER_SP, description="in " + species[species[organism]["main_sister_species"]]["name"] +
                                                  ", " + best_ortholog[1] + " " +
                                                  sister_sp_module_sentences.get_description())
-
 
 def main():
     parser = argparse.ArgumentParser(description="Generate gene descriptions for wormbase")

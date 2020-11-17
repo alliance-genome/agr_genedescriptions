@@ -7,7 +7,7 @@ generic:
 
 # options for WormBase gene description generation - used when data_fetcher is set to 'wb_data_fetcher'
 wb_options:
-  release: "WS278"
+  release: "WS279"
   raw_files_source: "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases"
   agr_human_go_associations: "http://download.alliancegenome.org/3.1.0/GAF/HUMAN/GAF_HUMAN_3.gaf"
   agr_go_ontology: "http://download.alliancegenome.org/3.1.0/ONTOLOGY/GO/ONTOLOGY_GO_2.obo"
@@ -203,8 +203,8 @@ go_sentences_options:
   prepostfix_sentences_map:
     - aspect: F
       group: EXPERIMENTAL
-      qualifier: ""
-      prefix: "exhibits"
+      qualifier: "enables"
+      prefix: "enables"
       postfix: ""
       special_cases:
         - id: 1
@@ -223,8 +223,8 @@ go_sentences_options:
           postfix: ""
     - aspect: F
       group: HIGH_THROUGHPUT_EXPERIMENTAL
-      qualifier: ""
-      prefix: "exhibits"
+      qualifier: "enables"
+      prefix: "enables"
       postfix: ""
       special_cases:
         - id: 1
@@ -243,8 +243,8 @@ go_sentences_options:
           postfix: ""
     - aspect: F
       group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
-      qualifier: ""
-      prefix: "is predicted to have"
+      qualifier: "enables"
+      prefix: "is predicted to enable"
       postfix: ""
       special_cases:
         - id: 1
@@ -263,8 +263,8 @@ go_sentences_options:
           postfix: ""
     - aspect: F
       group: INFERRED_BY_CURATORS_AND_AUTHORS
-      qualifier: ""
-      prefix: "is predicted to have"
+      qualifier: "enables"
+      prefix: "is predicted to enable"
       postfix: ""
       special_cases:
         - id: 1
@@ -283,8 +283,8 @@ go_sentences_options:
           postfix: ""
     - aspect: F
       group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
-      qualifier: ""
-      prefix: "is predicted to have"
+      qualifier: "enables"
+      prefix: "is predicted to enable"
       postfix: ""
       special_cases:
         - id: 1
@@ -303,20 +303,80 @@ go_sentences_options:
           postfix: ""
     - aspect: P
       group: EXPERIMENTAL
-      qualifier: ""
+      qualifier: "involved_in"
       prefix: "is involved in"
       postfix: ""
       special_cases:
     - aspect: P
       group: HIGH_THROUGHPUT_EXPERIMENTAL
-      qualifier: ""
+      qualifier: "involved_in"
       prefix: "is involved in"
       postfix: ""
       special_cases:
+    - aspect: P
+      group: EXPERIMENTAL
+      qualifier: "acts_upstream_of_positive_effect"
+      prefix: "acts upstream of and positively affects"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: HIGH_THROUGHPUT_EXPERIMENTAL
+      qualifier: "acts_upstream_of_positive_effect"
+      prefix: "acts upstream of and positively affects"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: EXPERIMENTAL
+      qualifier: "acts_upstream_of_negative_effect"
+      prefix: "acts upstream of and negatively affects"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: HIGH_THROUGHPUT_EXPERIMENTAL
+      qualifier: "acts_upstream_of_negative_effect"
+      prefix: "acts upstream of and negatively affects"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: EXPERIMENTAL
+      qualifier: "acts_upstream_of_or_within"
+      prefix: "acts upstream of or within"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: HIGH_THROUGHPUT_EXPERIMENTAL
+      qualifier: "acts_upstream_of_or_within"
+      prefix: "acts upstream of or within"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: EXPERIMENTAL
+      qualifier: "acts_upstream_of_or_within_negative_effect"
+      prefix: "acts upstream of or within and negatively affects"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: HIGH_THROUGHPUT_EXPERIMENTAL
+      qualifier: "acts_upstream_of_or_within_negative_effect"
+      prefix: "acts upstream of or within and negatively affects"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: EXPERIMENTAL
+      qualifier: "acts_upstream_of_or_within_positive_effect"
+      prefix: "acts upstream of or within and positively affects"
+      postfix: ""
+      special_cases:
+    - aspect: P
+      group: HIGH_THROUGHPUT_EXPERIMENTAL
+      qualifier: "acts_upstream_of_or_within_positive_effect"
+      prefix: "acts upstream of or within and positively affects"
+      postfix: ""
+      special_cases:
     - aspect: C
       group: EXPERIMENTAL
-      qualifier: ""
-      prefix: "localizes to"
+      qualifier: "located_in"
+      prefix: "located in"
       postfix: ""
       special_cases:
         - id: 1
@@ -334,9 +394,19 @@ go_sentences_options:
           prefix: "is"
           postfix: ""
     - aspect: C
+      group: EXPERIMENTAL
+      qualifier: "part_of"
+      prefix: "part of"
+      postfix: ""
+      special_cases:
+        - id: 1
+          match_regex: "intracellular$"
+          prefix: "is"
+          postfix: ""
+    - aspect: C
       group: HIGH_THROUGHPUT_EXPERIMENTAL
-      qualifier: ""
-      prefix: "localizes to"
+      qualifier: "located_in"
+      prefix: "located in"
       postfix: ""
       special_cases:
         - id: 1
@@ -347,6 +417,16 @@ go_sentences_options:
       group: HIGH_THROUGHPUT_EXPERIMENTAL
       qualifier: "colocalizes_with"
       prefix: "colocalizes with"
+      postfix: ""
+      special_cases:
+        - id: 1
+          match_regex: "intracellular$"
+          prefix: "is"
+          postfix: ""
+    - aspect: C
+      group: HIGH_THROUGHPUT_EXPERIMENTAL
+      qualifier: "part_of"
+      prefix: "part of"
       postfix: ""
       special_cases:
         - id: 1
