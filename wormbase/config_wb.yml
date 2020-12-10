@@ -9,8 +9,8 @@ generic:
 wb_options:
   release: "WS279"
   raw_files_source: "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases"
-  agr_human_go_associations: "http://download.alliancegenome.org/3.1.0/GAF/HUMAN/GAF_HUMAN_3.gaf"
-  agr_go_ontology: "http://download.alliancegenome.org/3.1.0/ONTOLOGY/GO/ONTOLOGY_GO_2.obo"
+  agr_human_go_associations: "http://download.alliancegenome.org/3.2.0/GAF/HUMAN/GAF_HUMAN_1.gaf"
+  agr_go_ontology: "http://download.alliancegenome.org/3.2.0/ONTOLOGY/GO/ONTOLOGY_GO_2.obo"
   organisms_to_process:
     # add the species to be processed to the following list. Entries must have the same text as in 'organisms'
     # option
@@ -211,6 +211,10 @@ go_sentences_options:
           match_regex: "structural constituent"
           prefix: "is a"
           postfix: ""
+        - id: 2
+          match_regex: "^extracellular matrix structural constituent"
+          prefix: "is an"
+          postfix: ""
     - aspect: F
       group: EXPERIMENTAL
       qualifier: "contributes_to"
@@ -220,6 +224,10 @@ go_sentences_options:
         - id: 1
           match_regex: "structural constituent"
           prefix: "contributes as a"
+          postfix: ""
+        - id: 2
+          match_regex: "^extracellular matrix structural constituent"
+          prefix: "contributes as an"
           postfix: ""
     - aspect: F
       group: HIGH_THROUGHPUT_EXPERIMENTAL
@@ -231,6 +239,10 @@ go_sentences_options:
           match_regex: "structural constituent"
           prefix: "is a"
           postfix: ""
+        - id: 2
+          match_regex: "^extracellular matrix structural constituent"
+          prefix: "is an"
+          postfix: ""
     - aspect: F
       group: HIGH_THROUGHPUT_EXPERIMENTAL
       qualifier: "contributes_to"
@@ -239,7 +251,11 @@ go_sentences_options:
       special_cases:
         - id: 1
           match_regex: "structural constituent"
-          prefix: "is a"
+          prefix: "contributes as a"
+          postfix: ""
+        - id: 2
+          match_regex: "^extracellular matrix structural constituent"
+          prefix: "contributes as an"
           postfix: ""
     - aspect: F
       group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
@@ -251,6 +267,10 @@ go_sentences_options:
           match_regex: "structural constituent"
           prefix: "is predicted to be a"
           postfix: ""
+        - id: 2
+          match_regex: "^extracellular matrix structural constituent"
+          prefix: "is predicted to be an"
+          postfix: ""
     - aspect: F
       group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
       qualifier: "contributes_to"
@@ -261,6 +281,10 @@ go_sentences_options:
           match_regex: "structural constituent"
           prefix: "is predicted to contribute as a"
           postfix: ""
+        - id: 2
+          match_regex: "^extracellular matrix structural constituent"
+          prefix: "is an"
+          postfix: "is predicted to contribute as an"
     - aspect: F
       group: INFERRED_BY_CURATORS_AND_AUTHORS
       qualifier: "enables"
@@ -270,6 +294,10 @@ go_sentences_options:
         - id: 1
           match_regex: "structural constituent"
           prefix: "is predicted to be a"
+          postfix: ""
+        - id: 2
+          match_regex: "^extracellular matrix structural constituent"
+          prefix: "is predicted to be an"
           postfix: ""
     - aspect: F
       group: INFERRED_BY_CURATORS_AND_AUTHORS
@@ -281,6 +309,10 @@ go_sentences_options:
           match_regex: "structural constituent"
           prefix: "is predicted to contribute as a"
           postfix: ""
+        - id: 2
+          match_regex: "^extracellular matrix structural constituent"
+          prefix: "is predicted to contribute as an"
+          postfix: ""
     - aspect: F
       group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
       qualifier: "enables"
@@ -291,6 +323,10 @@ go_sentences_options:
           match_regex: "structural constituent"
           prefix: "is predicted to be a"
           postfix: ""
+        - id: 2
+          match_regex: "^extracellular matrix structural constituent"
+          prefix: "is predicted to be an"
+          postfix: ""
     - aspect: F
       group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
       qualifier: "contributes_to"
@@ -300,6 +336,10 @@ go_sentences_options:
         - id: 1
           match_regex: "structural constituent"
           prefix: "is predicted to contribute as a"
+          postfix: ""
+        - id: 2
+          match_regex: "^extracellular matrix structural constituent"
+          prefix: "is predicted to contribute as an"
           postfix: ""
     - aspect: P
       group: EXPERIMENTAL
@@ -316,25 +356,25 @@ go_sentences_options:
     - aspect: P
       group: EXPERIMENTAL
       qualifier: "acts_upstream_of_positive_effect"
-      prefix: "acts upstream of and positively affects"
+      prefix: "acts upstream of with a positive effect on"
       postfix: ""
       special_cases:
     - aspect: P
       group: HIGH_THROUGHPUT_EXPERIMENTAL
       qualifier: "acts_upstream_of_positive_effect"
-      prefix: "acts upstream of and positively affects"
+      prefix: "acts upstream of with a positive effect on"
       postfix: ""
       special_cases:
     - aspect: P
       group: EXPERIMENTAL
       qualifier: "acts_upstream_of_negative_effect"
-      prefix: "acts upstream of and negatively affects"
+      prefix: "acts upstream of with a negative effect on"
       postfix: ""
       special_cases:
     - aspect: P
       group: HIGH_THROUGHPUT_EXPERIMENTAL
       qualifier: "acts_upstream_of_negative_effect"
-      prefix: "acts upstream of and negatively affects"
+      prefix: "acts upstream of with a negative effect on"
       postfix: ""
       special_cases:
     - aspect: P
@@ -352,25 +392,25 @@ go_sentences_options:
     - aspect: P
       group: EXPERIMENTAL
       qualifier: "acts_upstream_of_or_within_negative_effect"
-      prefix: "acts upstream of or within and negatively affects"
+      prefix: "acts upstream of or within with a negative effect on"
       postfix: ""
       special_cases:
     - aspect: P
       group: HIGH_THROUGHPUT_EXPERIMENTAL
       qualifier: "acts_upstream_of_or_within_negative_effect"
-      prefix: "acts upstream of or within and negatively affects"
+      prefix: "acts upstream of or within with a negative effect on"
       postfix: ""
       special_cases:
     - aspect: P
       group: EXPERIMENTAL
       qualifier: "acts_upstream_of_or_within_positive_effect"
-      prefix: "acts upstream of or within and positively affects"
+      prefix: "acts upstream of or within with a positive effect on"
       postfix: ""
       special_cases:
     - aspect: P
       group: HIGH_THROUGHPUT_EXPERIMENTAL
       qualifier: "acts_upstream_of_or_within_positive_effect"
-      prefix: "acts upstream of or within and positively affects"
+      prefix: "acts upstream of or within with a positive effect on"
       postfix: ""
       special_cases:
     - aspect: C
@@ -383,6 +423,10 @@ go_sentences_options:
           match_regex: "intracellular$"
           prefix: "is"
           postfix: ""
+        - id: 2
+          match_regex: ".*component of.*"
+          prefix: "is"
+          postfix: ""
     - aspect: C
       group: EXPERIMENTAL
       qualifier: "colocalizes_with"
@@ -393,6 +437,10 @@ go_sentences_options:
           match_regex: "intracellular$"
           prefix: "is"
           postfix: ""
+        - id: 2
+          match_regex: ".*component of.*"
+          prefix: "is"
+          postfix: ""
     - aspect: C
       group: EXPERIMENTAL
       qualifier: "part_of"
@@ -401,6 +449,10 @@ go_sentences_options:
       special_cases:
         - id: 1
           match_regex: "intracellular$"
+          prefix: "is"
+          postfix: ""
+        - id: 2
+          match_regex: ".*component of.*"
           prefix: "is"
           postfix: ""
     - aspect: C
@@ -413,6 +465,10 @@ go_sentences_options:
           match_regex: "intracellular$"
           prefix: "is"
           postfix: ""
+        - id: 2
+          match_regex: ".*component of.*"
+          prefix: "is"
+          postfix: ""
     - aspect: C
       group: HIGH_THROUGHPUT_EXPERIMENTAL
       qualifier: "colocalizes_with"
@@ -423,6 +479,10 @@ go_sentences_options:
           match_regex: "intracellular$"
           prefix: "is"
           postfix: ""
+        - id: 2
+          match_regex: ".*component of.*"
+          prefix: "is"
+          postfix: ""
     - aspect: C
       group: HIGH_THROUGHPUT_EXPERIMENTAL
       qualifier: "part_of"
@@ -431,6 +491,10 @@ go_sentences_options:
       special_cases:
         - id: 1
           match_regex: "intracellular$"
+          prefix: "is"
+          postfix: ""
+        - id: 2
+          match_regex: ".*component of.*"
           prefix: "is"
           postfix: ""
 

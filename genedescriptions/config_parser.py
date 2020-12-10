@@ -109,19 +109,21 @@ class GenedescConfigParser(object):
     def get_prepostfix_sentence_map(self, module: Module, special_cases_only: bool = False, humans: bool = False):
         module_name = self._get_module_name(module)
         if special_cases_only:
-            return {(prepost["aspect"], prepost["group"], prepost["qualifier"]): [
+            return {prepost["aspect"] + "|" + prepost["group"] + "|" + prepost["qualifier"]: [
                 (sp_case["id"], sp_case["match_regex"], sp_case["prefix"], sp_case["postfix"])
                 for sp_case in prepost["special_cases"]]
                 for prepost in self.config[module_name]["prepostfix_sentences_map"] if
                 "special_cases" in prepost and prepost["special_cases"]}
         else:
-            prepost_map = {(prepost["aspect"], prepost["group"], prepost["qualifier"]): (
+            prepost_map = {prepost["aspect"] + "|" + prepost["group"] + "|" + prepost["qualifier"]: (
                 prepost["prefix"], prepost["postfix"]) for prepost in self.config[module_name][
                 "prepostfix_sentences_map_humans" if humans else "prepostfix_sentences_map"]}
             special_cases_only = self.get_prepostfix_sentence_map(module=module, special_cases_only=True, humans=humans)
             for key, scs in special_cases_only.items():
+                key_arr = key.split("|")
                 for special_case in scs:
-                    prepost_map[(key[0], key[1] + str(special_case[0]), key[2])] = (special_case[2], special_case[3])
+                    prepost_map[key_arr[0] + "|" + key_arr[1] + str(special_case[0]) + "|" + key_arr[2]] = \
+                        (special_case[2], special_case[3])
             return prepost_map
 
     def get_annotations_priority(self, module: Module) -> List[str]:

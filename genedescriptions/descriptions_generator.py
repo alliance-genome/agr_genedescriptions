@@ -18,7 +18,7 @@ class ModuleSentences(object):
         self.sentences = sentences
 
     def get_description(self):
-        return " and ".join([sentence.text for sentence in self.sentences])
+        return ". ".join([sentence.text[0].upper() + sentence.text[1:] for sentence in self.sentences])
 
     def get_ids(self, experimental_only: bool = False):
         return list({term_id for sentence in self.sentences for term_id in sentence.terms_ids if not experimental_only or
@@ -88,11 +88,10 @@ class OntologySentenceGenerator(object):
                     aspect = annotation["aspect"]
                     ev_group = evidence_codes_groups_map[annotation["evidence"]["type"]]
                     qualifier = "_".join(sorted(annotation["qualifiers"])) if "qualifiers" in annotation else ""
-                    if prepostfix_special_cases_sent_map and (aspect, ev_group, qualifier) in \
-                        prepostfix_special_cases_sent_map:
-                        for special_case in prepostfix_special_cases_sent_map[(aspect, ev_group, qualifier)]:
-                            if re.match(re.escape(special_case[1]), self.ontology.label(annotation["object"]["id"],
-                                                                                        id_if_null=True)):
+                    if prepostfix_special_cases_sent_map and aspect + "|" + ev_group + "|" + qualifier in \
+                       prepostfix_special_cases_sent_map:
+                        for special_case in prepostfix_special_cases_sent_map[aspect + "|" + ev_group + "|" + qualifier]:
+                            if re.match(special_case[1], self.ontology.label(annotation["object"]["id"], id_if_null=True)):
                                 ev_group = evidence_codes_groups_map[annotation["evidence"]["type"]] + \
                                            str(special_case[0])
                                 if ev_group not in self.evidence_groups_priority_list:
@@ -121,29 +120,31 @@ class OntologySentenceGenerator(object):
         dist_root = self.config.get_module_property(module=self.module, prop=ConfigModuleProperty.DISTANCE_FROM_ROOT)
         add_mul_comanc = self.config.get_module_property(module=self.module,
                                                          prop=ConfigModuleProperty.ADD_MULTIPLE_TO_COMMON_ANCEST)
+        best_group = ""
         for terms, evidence_group, priority in sorted([(t, eg, evidence_group_priority[eg]) for eg, t in
                                                        self.terms_groups[(aspect, qualifier)].items()],
                                                       key=lambda x: x[2]):
-            trimming_result = self.reduce_num_terms(terms=terms, min_distance_from_root=dist_root[aspect])
-            if (aspect, evidence_group, qualifier) in self.prepostfix_sentences_map \
-                    and len(trimming_result.final_terms) > 0:
-                sentences.append(
-                    _get_single_sentence(
-                        initial_terms_ids=list(terms),
-                        node_ids=trimming_result.final_terms, ontology=self.ontology, aspect=aspect,
-                        evidence_group=evidence_group, qualifier=qualifier,
-                        prepostfix_sentences_map=self.prepostfix_sentences_map,
-                        terms_merged=False, trimmed=trimming_result.trimming_applied,
-                        add_others=trimming_result.partial_coverage,
-                        truncate_others_generic_word=self.config.get_module_property(
-                            module=self.module, prop=ConfigModuleProperty.CUTOFF_SEVERAL_WORD),
-                        truncate_others_aspect_words=self.config.get_module_property(
-                            module=self.module, prop=ConfigModuleProperty.CUTOFF_SEVERAL_CATEGORY_WORD),
-                        ancestors_with_multiple_children=trimming_result.multicovering_nodes if add_mul_comanc else
-                        None, rename_cell=rename_cell, config=self.config,
-                        put_anatomy_male_at_end=True if aspect == 'A' else False))
-                if keep_only_best_group:
-                    return ModuleSentences(sentences)
+            if not best_group or re.match(best_group + r"([0-9]*)?", evidence_group):
+                trimming_result = self.reduce_num_terms(terms=terms, min_distance_from_root=dist_root[aspect])
+                if aspect + "|" + evidence_group + "|" + qualifier in self.prepostfix_sentences_map \
+                        and len(trimming_result.final_terms) > 0:
+                    sentences.append(
+                        _get_single_sentence(
+                            initial_terms_ids=list(terms),
+                            node_ids=trimming_result.final_terms, ontology=self.ontology, aspect=aspect,
+                            evidence_group=evidence_group, qualifier=qualifier,
+                            prepostfix_sentences_map=self.prepostfix_sentences_map,
+                            terms_merged=False, trimmed=trimming_result.trimming_applied,
+                            add_others=trimming_result.partial_coverage,
+                            truncate_others_generic_word=self.config.get_module_property(
+                                module=self.module, prop=ConfigModuleProperty.CUTOFF_SEVERAL_WORD),
+                            truncate_others_aspect_words=self.config.get_module_property(
+                                module=self.module, prop=ConfigModuleProperty.CUTOFF_SEVERAL_CATEGORY_WORD),
+                            ancestors_with_multiple_children=trimming_result.multicovering_nodes if add_mul_comanc else
+                            None, rename_cell=rename_cell, config=self.config,
+                            put_anatomy_male_at_end=True if aspect == 'A' else False))
+                    if keep_only_best_group and not best_group:
+                        best_group = evidence_group
         if merge_groups_with_same_prefix:
             remove_parents = self.config.get_module_property(module=self.module,
                                                              prop=ConfigModuleProperty.DEL_PARENTS_IF_CHILD)
@@ -232,17 +233,17 @@ class OntologySentenceGenerator(object):
         """
         merged_sentences = defaultdict(SentenceMerger)
         for sentence in sentences:
-            prefix = self.prepostfix_sentences_map[(sentence.aspect, sentence.evidence_group, sentence.qualifier)][0]
-            merged_sentences[prefix].postfix_list.append(self.prepostfix_sentences_map[(sentence.aspect,
-                                                                                        sentence.evidence_group,
-                                                                                        sentence.qualifier)][1])
+            prefix = self.prepostfix_sentences_map[sentence.aspect + "|" + sentence.evidence_group + "|" + sentence.qualifier][0]
+            merged_sentences[prefix].postfix_list.append(self.prepostfix_sentences_map[sentence.aspect + "|" +
+                                                                                       sentence.evidence_group + "|" +
+                                                                                       sentence.qualifier][1])
             merged_sentences[prefix].aspect = sentence.aspect
             merged_sentences[prefix].qualifier = sentence.qualifier
             merged_sentences[prefix].terms_ids.update(sentence.terms_ids)
             merged_sentences[prefix].initial_terms_ids.update(sentence.initial_terms_ids)
             for term in sentence.terms_ids:
                 merged_sentences[prefix].term_postfix_dict[term] = self.prepostfix_sentences_map[
-                    (sentence.aspect, sentence.evidence_group, sentence.qualifier)][1]
+                    sentence.aspect + "|" + sentence.evidence_group + "|" + sentence.qualifier][1]
             merged_sentences[prefix].evidence_groups.append(sentence.evidence_group)
             for term in sentence.terms_ids:
                 merged_sentences[prefix].term_evgroup_dict[term] = sentence.evidence_group

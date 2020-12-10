@@ -54,8 +54,7 @@ def compose_sentence(prefix: str, additional_prefix: str, term_names: List[str],
 
 
 def _get_single_sentence(initial_terms_ids: List[str], node_ids: List[str], ontology: Ontology, aspect: str,
-                         evidence_group: str, qualifier: str, prepostfix_sentences_map: Dict[Tuple[str, str, str],
-                                                                                             Tuple[str, str]],
+                         evidence_group: str, qualifier: str, prepostfix_sentences_map: Dict[str, Tuple[str, str]],
                          config: GenedescConfigParser, terms_merged: bool = False, add_others: bool = False,
                          truncate_others_generic_word: str = "several",
                          truncate_others_aspect_words: Dict[str, str] = None,
@@ -69,7 +68,7 @@ def _get_single_sentence(initial_terms_ids: List[str], node_ids: List[str], onto
         aspect (str): aspect
         evidence_group (str): evidence group
         qualifier (str): qualifier
-        prepostfix_sentences_map (Dict[Tuple[str, str, str], Tuple[str, str]]): map for prefix and postfix phrases
+        prepostfix_sentences_map (Dict[str, Tuple[str, str]]): map for prefix and postfix phrases
         config (GenedescConfigParser): a gene description configuration object
         terms_merged (bool): whether the terms set has been merged to reduce its size
         add_others (bool): whether to say that there are other terms which have been omitted from the sentence
@@ -84,14 +83,14 @@ def _get_single_sentence(initial_terms_ids: List[str], node_ids: List[str], onto
         Union[Sentence,None]: the combined go sentence
     """
     if len(node_ids) > 0:
-        prefix = prepostfix_sentences_map[(aspect, evidence_group, qualifier)][0]
+        prefix = prepostfix_sentences_map[aspect + "|" + evidence_group + "|" + qualifier][0]
         additional_prefix = ""
         others_word = "entities"
         if aspect in truncate_others_aspect_words:
             others_word = truncate_others_aspect_words[aspect]
         if add_others:
             additional_prefix += truncate_others_generic_word + " " + others_word + ", including"
-        postfix = prepostfix_sentences_map[(aspect, evidence_group, qualifier)][1]
+        postfix = prepostfix_sentences_map[aspect + "|" + evidence_group + "|" + qualifier][1]
         term_labels = [ontology.label(node_id, id_if_null=True) for node_id in node_ids]
         if ancestors_with_multiple_children is None:
             ancestors_with_multiple_children = set()
