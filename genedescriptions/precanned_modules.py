@@ -20,17 +20,29 @@ def set_gene_ontology_module(dm: DataManager, conf_parser: GenedescConfigParser,
         aspect='F', qualifier='contributes_to', merge_groups_with_same_prefix=True,
         keep_only_best_group=True)
     if contributes_to_module_sentences.contains_sentences():
+        func_module_sentences_noq = go_sent_generator_exp.get_module_sentences(
+            aspect='F', qualifier='', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+        gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=func_module_sentences_noq,
+                                                                   module=Module.GO_FUNCTION)
         func_module_sentences = go_sent_generator_exp.get_module_sentences(
             aspect='F', qualifier='enables', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=func_module_sentences,
                                                                    module=Module.GO_FUNCTION)
     else:
+        func_module_sentences_noq = go_sent_generator.get_module_sentences(
+            aspect='F', qualifier='', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+        gene_desc.set_or_extend_module_description_and_final_stats(
+            module_sentences=func_module_sentences_noq, module=Module.GO_FUNCTION)
         func_module_sentences = go_sent_generator.get_module_sentences(
             aspect='F', qualifier='enables', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(
             module_sentences=func_module_sentences, module=Module.GO_FUNCTION)
     gene_desc.set_or_extend_module_description_and_final_stats(
         module_sentences=contributes_to_module_sentences, module=Module.GO_FUNCTION)
+    proc_module_sentences_noq = go_sent_generator.get_module_sentences(
+        aspect='P', qualifier='', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+    gene_desc.set_or_extend_module_description_and_final_stats(
+        module_sentences=proc_module_sentences_noq, module=Module.GO_PROCESS)
     proc_module_sentences = go_sent_generator.get_module_sentences(
         aspect='P', qualifier='involved_in', merge_groups_with_same_prefix=True, keep_only_best_group=True)
     gene_desc.set_or_extend_module_description_and_final_stats(
@@ -64,6 +76,10 @@ def set_gene_ontology_module(dm: DataManager, conf_parser: GenedescConfigParser,
         aspect='C', qualifier='colocalizes_with', merge_groups_with_same_prefix=True,
         keep_only_best_group=True)
     if colocalizes_with_module_sentences.contains_sentences():
+        comp_module_sentences_noq = go_sent_generator_exp.get_module_sentences(
+            aspect='C', qualifier='', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+        gene_desc.set_or_extend_module_description_and_final_stats(
+            module_sentences=comp_module_sentences_noq, module=Module.GO_COMPONENT)
         comp_module_sentences = go_sent_generator_exp.get_module_sentences(
             aspect='C', qualifier='located_in', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(
@@ -73,6 +89,10 @@ def set_gene_ontology_module(dm: DataManager, conf_parser: GenedescConfigParser,
         gene_desc.set_or_extend_module_description_and_final_stats(
             module_sentences=comp_module_sentences2, module=Module.GO_COMPONENT)
     else:
+        comp_module_sentences_noq = go_sent_generator.get_module_sentences(
+            aspect='C', qualifier='', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+        gene_desc.set_or_extend_module_description_and_final_stats(
+            module_sentences=comp_module_sentences_noq, module=Module.GO_COMPONENT)
         comp_module_sentences = go_sent_generator.get_module_sentences(
             aspect='C', qualifier='located_in', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(
@@ -86,7 +106,11 @@ def set_gene_ontology_module(dm: DataManager, conf_parser: GenedescConfigParser,
     gene_desc.set_or_update_initial_stats(module=Module.GO_FUNCTION, sent_generator=go_sent_generator,
                                           module_sentences=contributes_to_module_sentences)
     gene_desc.set_or_update_initial_stats(module=Module.GO_FUNCTION, sent_generator=go_sent_generator,
+                                          module_sentences=func_module_sentences_noq)
+    gene_desc.set_or_update_initial_stats(module=Module.GO_FUNCTION, sent_generator=go_sent_generator,
                                           module_sentences=func_module_sentences)
+    gene_desc.set_or_update_initial_stats(module=Module.GO_PROCESS, sent_generator=go_sent_generator,
+                                          module_sentences=proc_module_sentences_noq)
     gene_desc.set_or_update_initial_stats(module=Module.GO_PROCESS, sent_generator=go_sent_generator,
                                           module_sentences=proc_module_sentences)
     gene_desc.set_or_update_initial_stats(module=Module.GO_PROCESS, sent_generator=go_sent_generator,
@@ -101,6 +125,8 @@ def set_gene_ontology_module(dm: DataManager, conf_parser: GenedescConfigParser,
                                           module_sentences=proc_module_sentences_a5)
     gene_desc.set_or_update_initial_stats(module=Module.GO_COMPONENT, sent_generator=go_sent_generator,
                                           module_sentences=colocalizes_with_module_sentences)
+    gene_desc.set_or_update_initial_stats(module=Module.GO_COMPONENT, sent_generator=go_sent_generator,
+                                          module_sentences=comp_module_sentences_noq)
     gene_desc.set_or_update_initial_stats(module=Module.GO_COMPONENT, sent_generator=go_sent_generator,
                                           module_sentences=comp_module_sentences)
     gene_desc.set_or_update_initial_stats(module=Module.GO_COMPONENT, sent_generator=go_sent_generator,
