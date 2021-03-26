@@ -69,7 +69,7 @@ class WBDataManager(DataManager):
                                                        "disease_associations.by_orthology." + release_version +
                                                        ".tsv.txt")
         self.do_associations_url = raw_files_source + '/' + release_version + \
-                                   '/ONTOLOGY/disease_associations.by_orthology.' + release_version + '.tsv.txt'
+                                   '/ONTOLOGY/disease_association.by_orthology.' + release_version + '.tsv.txt'
         self.do_associations_new_cache_path = os.path.join(cache_location, "wormbase", release_version, 'ONTOLOGY',
                                                            'disease_association.' + release_version + '.daf.txt')
         self.do_associations_new_url = raw_files_source + '/' + release_version + '/ONTOLOGY/disease_association.' + \

@@ -12,7 +12,7 @@ class APIManager(object):
         self.textpresso_api_token = textpresso_api_token
         self.tpc_cache = {}
         self.class_cache = {}
-        self.tpc_api_endpoint = "https://textpressocentral.org:18080/v1/textpresso/api/get_documents_count"
+        self.tpc_api_endpoint = "http://textpressocentral.org:9001/v1/textpresso/api/get_documents_count"
         if not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None):
             ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -29,7 +29,7 @@ class APIManager(object):
             return self.tpc_cache[keyword]
         else:
             data = json.dumps({"token": self.textpresso_api_token, "query": {
-                "keywords": keyword, "type": "document", "corpora": ["C. elegans"]}})
+                "keywords": keyword, "type": "document", "corpora": ["C. elegans and Suppl"]}})
             data = data.encode('utf-8')
             req = urllib.request.Request(self.tpc_api_endpoint, data, headers={'Content-type': 'application/json',
                                                                                'Accept': 'application/json'})

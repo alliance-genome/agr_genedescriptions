@@ -10,6 +10,8 @@ from enum import Enum
 from collections import defaultdict
 from typing import List, Iterable, Dict
 from ontobio import AssociationSetFactory
+from ontobio.io.assocparser import AssocParserConfig
+from ontobio.io.gafparser import GafParser
 from ontobio.ontol_factory import OntologyFactory
 from ontobio.ontol import Ontology
 from ontobio.assocmodel import AssociationSet
@@ -312,9 +314,10 @@ class DataManager(object):
             associations_cache_path (str): path to cache file for the associations
             config (GenedescConfigParser): configuration object where to read properties
         """
-        assocs = AssociationSetFactory().create_from_file(file=self._get_cached_file(
-            cache_path=associations_cache_path, file_source_url=associations_url),
-            ontology=self.get_ontology(associations_type), skim=False)
+        assoc_config = AssocParserConfig(remove_double_prefixes=True, paint=True)
+        assocs = AssociationSetFactory().create_from_assocs(assocs=GafParser(config=assoc_config).parse(
+            file=self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url),
+            skipheader=True), ontology=self.get_ontology(associations_type))
         self.set_associations(associations_type=associations_type, associations=assocs, config=config)
 
     def get_annotations_for_gene(self, gene_id: str, annot_type: DataType = DataType.GO,
