@@ -314,6 +314,7 @@ class DataManager(object):
             associations_cache_path (str): path to cache file for the associations
             config (GenedescConfigParser): configuration object where to read properties
         """
+        logger.info("Loading associations from file")
         assoc_config = AssocParserConfig(remove_double_prefixes=True, paint=True)
         assocs = AssociationSetFactory().create_from_assocs(assocs=GafParser(config=assoc_config).parse(
             file=self._get_cached_file(cache_path=associations_cache_path, file_source_url=associations_url),
