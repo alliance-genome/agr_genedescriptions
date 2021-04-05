@@ -208,4 +208,9 @@ def _set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxle
                                              relations=relations)
 
 
+def node_is_in_branch(ontology: Ontology, node_id: str, branch_root_ids: List[str]):
+    branch_root_ids = set(branch_root_ids)
+    return any([parent_id in branch_root_ids for parent_id in ontology.ancestors(node=node_id, reflexive=True)])
+
+
 

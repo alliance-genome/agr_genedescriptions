@@ -548,6 +548,9 @@ do_exp_sentences_options:
     - "DOID:0080015"
     - "DOID:0050117"
     - "DOID:0080014"
+  do_not_trim_branch_at:
+    - "DOID:10652"
+    - "DOID:9884"
   evidence_codes:
     IMP:
       group: EXPERIMENTAL
@@ -636,6 +639,9 @@ do_via_orth_sentences_options:
     - "DOID:0080015"
     - "DOID:0050117"
     - "DOID:0080014"
+  do_not_trim_branch_at:
+    - "DOID:10652"
+    - "DOID:9884"
   evidence_codes:
     ISS:
       group: ORTHOLOGY_BASED

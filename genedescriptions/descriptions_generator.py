@@ -153,6 +153,21 @@ class OntologySentenceGenerator(object):
                 put_anatomy_male_at_end=True if aspect == 'A' else False)
         return ModuleSentences(sentences)
 
+    def separate_do_not_trim_from_trim_terms(self, term_ids: List[str]):
+        branch_root_ids = self.config.get_module_property(module=self.module,
+                                                          prop=ConfigModuleProperty.DO_NOT_TRIM_BRANCH_AT)
+        if branch_root_ids:
+            do_not_trim_terms = []
+            trim_terms = []
+            for term_id in term_ids:
+                if node_is_in_branch(ontology=self.ontology, node_id=term_id, branch_root_ids=branch_root_ids):
+                    do_not_trim_terms.append(term_id)
+                else:
+                    trim_terms.append(term_id)
+            return do_not_trim_terms, trim_terms
+        else:
+            return [], term_ids
+
     def reduce_num_terms(self, terms: Set[str], min_distance_from_root: int = 0) -> TrimmingResult:
         """
         Reduce the initial set of terms by resolving parent child relationships, deleting overlap with previous
@@ -177,11 +192,15 @@ class OntologySentenceGenerator(object):
         max_terms = self.config.get_module_property(module=self.module,
                                                     prop=ConfigModuleProperty.MAX_NUM_TERMS_IN_SENTENCE)
         if 0 < max_terms < len(terms):
-            trimming_result = self.trimmer.trim(terms, max_terms, min_distance_from_root)
+            do_not_trim_terms, trim_terms = self.separate_do_not_trim_from_trim_terms(term_ids=terms)
+            trimming_result = self.trimmer.trim(trim_terms, max_terms, min_distance_from_root)
+            if do_not_trim_terms:
+                trimming_result.final_terms.extend(do_not_trim_terms)
+                trimming_result.covered_nodes.update(do_not_trim_terms)
         else:
             trimming_result.final_terms = terms
             trimming_result.covered_nodes = terms
-            self.terms_already_covered.update(terms)
+        self.terms_already_covered.update(terms)
         if self.config.get_module_property(module=self.module, prop=ConfigModuleProperty.DEL_CHILDREN_IF_PARENT):
             trimming_result.final_terms = self.remove_children_if_parents_present(
                 terms=trimming_result.final_terms, ontology=self.ontology,
