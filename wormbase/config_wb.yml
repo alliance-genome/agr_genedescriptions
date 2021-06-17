@@ -7,10 +7,10 @@ generic:
 
 # options for WormBase gene description generation - used when data_fetcher is set to 'wb_data_fetcher'
 wb_options:
-  release: "WS280"
+  release: "WS281"
   raw_files_source: "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases"
-  agr_human_go_associations: "http://download.alliancegenome.org/3.2.0/GAF/HUMAN/GAF_HUMAN_1.gaf"
-  agr_go_ontology: "http://download.alliancegenome.org/3.2.0/ONTOLOGY/GO/ONTOLOGY_GO_2.obo"
+  agr_human_go_associations: "https://fms.alliancegenome.org/download/GAF_HUMAN.gaf.gz"
+  agr_go_ontology: "https://fms.alliancegenome.org/download/ONTOLOGY_GO.obo.gz"
   organisms_to_process:
     # add the species to be processed to the following list. Entries must have the same text as in 'organisms'
     # option

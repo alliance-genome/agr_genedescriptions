@@ -56,11 +56,11 @@ class WBDataManager(DataManager):
                                                    "gene_ontology." + release_version + ".obo")
         self.go_ontology_url = raw_files_source + '/' + release_version + '/ONTOLOGY/gene_ontology.' + \
                                release_version + '.obo'
-        self.go_associations_cache_path = os.path.join(cache_location, "wormbase", release_version,
-                                                       "ONTOLOGY/gene_association." + release_version + ".wb." +
-                                                       species)
-        self.go_associations_url = raw_files_source + '/' + release_version + '/ONTOLOGY/gene_association.' + \
-                                   release_version + '.wb.' + species
+        self.go_associations_cache_path = os.path.join(cache_location, "wormbase", release_version, "species", species,
+                                                       project_id, "annotation", species + "." + project_id + "." + release_version +
+                                                       ".gene_association.wb.gz")
+        self.go_associations_url = raw_files_source + '/' + release_version + '/species/' + species + '/' + project_id + \
+                                   '/annotation/' + species + '.' + project_id + '.' + release_version + ".gene_association.wb.gz"
         self.do_ontology_url = raw_files_source + '/' + release_version + '/ONTOLOGY/disease_ontology.' + \
                                release_version + '.obo'
         self.do_ontology_cache_path = os.path.join(cache_location, "wormbase", release_version, "ONTOLOGY",
