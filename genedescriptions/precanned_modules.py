@@ -88,6 +88,10 @@ def set_gene_ontology_module(dm: DataManager, conf_parser: GenedescConfigParser,
             aspect='C', qualifier='part_of', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(
             module_sentences=comp_module_sentences2, module=Module.GO_COMPONENT)
+        comp_module_sentences3 = go_sent_generator_exp.get_module_sentences(
+            aspect='C', qualifier='is_active_in', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+        gene_desc.set_or_extend_module_description_and_final_stats(
+            module_sentences=comp_module_sentences3, module=Module.GO_COMPONENT)
     else:
         comp_module_sentences_noq = go_sent_generator.get_module_sentences(
             aspect='C', qualifier='', merge_groups_with_same_prefix=True, keep_only_best_group=True)
@@ -101,6 +105,10 @@ def set_gene_ontology_module(dm: DataManager, conf_parser: GenedescConfigParser,
             aspect='C', qualifier='part_of', merge_groups_with_same_prefix=True, keep_only_best_group=True)
         gene_desc.set_or_extend_module_description_and_final_stats(
             module_sentences=comp_module_sentences2, module=Module.GO_COMPONENT)
+        comp_module_sentences3 = go_sent_generator.get_module_sentences(
+            aspect='C', qualifier='is_active_in', merge_groups_with_same_prefix=True, keep_only_best_group=True)
+        gene_desc.set_or_extend_module_description_and_final_stats(
+            module_sentences=comp_module_sentences3, module=Module.GO_COMPONENT)
     gene_desc.set_or_extend_module_description_and_final_stats(module_sentences=colocalizes_with_module_sentences,
                                                                module=Module.GO_COMPONENT)
     gene_desc.set_or_update_initial_stats(module=Module.GO_FUNCTION, sent_generator=go_sent_generator,
@@ -131,6 +139,8 @@ def set_gene_ontology_module(dm: DataManager, conf_parser: GenedescConfigParser,
                                           module_sentences=comp_module_sentences)
     gene_desc.set_or_update_initial_stats(module=Module.GO_COMPONENT, sent_generator=go_sent_generator,
                                           module_sentences=comp_module_sentences2)
+    gene_desc.set_or_update_initial_stats(module=Module.GO_COMPONENT, sent_generator=go_sent_generator,
+                                          module_sentences=comp_module_sentences3)
 
 
 def set_disease_module(df: DataManager, conf_parser: GenedescConfigParser, gene_desc: GeneDescription, gene: Gene,
