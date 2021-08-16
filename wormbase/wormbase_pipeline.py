@@ -37,12 +37,12 @@ def load_data(organism, conf_parser: GenedescConfigParser):
         df_agr.load_ontology_from_file(ontology_type=DataType.GO,
                                        ontology_url=conf_parser.get_wb_human_orthologs_go_ontology(),
                                        ontology_cache_path=os.path.join(conf_parser.get_cache_dir(),
-                                                                        "wormbase_agr_human", "go_ontology.obo"),
+                                                                        "wormbase_agr_human", "go_ontology.obo.gz"),
                                        config=conf_parser)
         df_agr.load_associations_from_file(associations_type=DataType.GO,
                                            associations_url=conf_parser.get_wb_human_orthologs_go_associations(),
                                            associations_cache_path=os.path.join(
-                                               conf_parser.get_cache_dir(), "wormbase_agr_human", "go_assoc.gaf"),
+                                               conf_parser.get_cache_dir(), "wormbase_agr_human", "go_assoc.gaf.gz"),
                                            config=conf_parser)
     if "main_sister_species" in organisms_info[organism] and organisms_info[organism]["main_sister_species"]:
         sister_df = WBDataManager(species=organisms_info[organism]["main_sister_species"],
