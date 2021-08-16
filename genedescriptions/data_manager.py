@@ -394,7 +394,7 @@ class DataManager(object):
 
         """
         human_genes_props = defaultdict(list)
-        human_content_w_ensmbl = urllib.request.urlopen("https://www.genenames.org/cgi-bin/download/custom?col=gd_hgnc_id&col=gd_pub_ensembl_id&col=gd_app_sym&col=gd_app_name&status=Approved&status=Entry%20Withdrawn&hgnc_dbtag=on&order_by=gd_app_sym_sort&format=text&submit=submit")
+        human_content_w_ensmbl = urllib.request.urlopen("https://www.genenames.org/cgi-bin/download/custom?col=gd_hgnc_id&col=gd_pub_ensembl_id&col=gd_app_sym&col=gd_app_name&status=Approved&status=Entry%20Withdrawn&hgnc_dbtag=on&order_by=gd_app_sym_sort&format=text&submit=submit", timeout=60)
 
         header = True
         for line in human_content_w_ensmbl:
