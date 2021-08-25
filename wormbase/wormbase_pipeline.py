@@ -186,7 +186,9 @@ def set_information_poor_sentence(orth_fullnames: List[str], selected_orthologs,
                 gene_desc.set_or_extend_module_description_and_final_stats(
                     module=Module.INFO_POOR_HUMAN_FUNCTION, description="human " +
                                                                         human_df_agr.go_associations.subject_label_map[
-                                                                            best_orth] + " " + human_func_sent)
+                                                                            best_orth] + " " +
+                                                                        human_func_sent[0].lower() +
+                                                                        human_func_sent[1:])
 
     protein_domains = dm.protein_domains[gene_desc.gene_id[3:]]
     if protein_domains and len([ptdom[1] for ptdom in protein_domains if ptdom[1] != "" and ptdom[1] != " "]) > 0:
@@ -215,10 +217,12 @@ def set_sister_species_sentence(dm: WBDataManager, conf_parser: GenedescConfigPa
     sister_sp_module_sentences = sister_sentences_generator.get_module_sentences(
         aspect='P', qualifier="involved_in", merge_groups_with_same_prefix=True, keep_only_best_group=True)
     if sister_sp_module_sentences.contains_sentences():
+        sister_sp_sent = sister_sp_module_sentences.get_description()
         gene_desc.set_or_extend_module_description_and_final_stats(
             module=Module.SISTER_SP, description="in " + species[species[organism]["main_sister_species"]]["name"] +
-                                                 ", " + best_ortholog[1] + " " +
-                                                 sister_sp_module_sentences.get_description())
+                                                 ", " + best_ortholog[1] + (" is " if sister_sp_sent.startswith("Involved in") else " ") +
+                                                 sister_sp_sent[0].lower() + sister_sp_sent[1:])
+
 
 def main():
     parser = argparse.ArgumentParser(description="Generate gene descriptions for wormbase")
