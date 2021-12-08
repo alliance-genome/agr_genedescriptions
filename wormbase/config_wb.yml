@@ -839,7 +839,7 @@ go_sentences_options:
   add_multiple_if_covers_more_children: false
   remove_overlapped_terms: true
   slim_url: http://current.geneontology.org/ontology/subsets/goslim_generic.obo
-  slim_bonus_perc: 0.5
+  slim_bonus_perc: 0
 
 do_exp_sentences_options:
   exclude_terms:
