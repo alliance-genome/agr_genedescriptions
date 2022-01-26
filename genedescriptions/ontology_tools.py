@@ -202,7 +202,11 @@ def _set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxle
     if str(root_id) == root_id and "ARTIFICIAL_NODE:" in root_id:
         node["IC"] = 0
     else:
-        node["IC"] = -math.log((float(node["num_leaves"]) / node["num_subsumers"] + 1) / (maxleaves + 1))
+        if "num_leaves" in node and "num_subsumers" in node:
+            node["IC"] = -math.log((float(node["num_leaves"]) / node["num_subsumers"] + 1) / (maxleaves + 1))
+        else:
+            logger.warning("Disconnected node: " + root_id)
+            node["IC"] = 0
     for child_id in ontology.children(node=root_id, relations=relations):
         _set_information_content_in_subgraph(ontology=ontology, root_id=child_id, maxleaves=maxleaves,
                                              relations=relations)
