@@ -12,6 +12,7 @@ from typing import List, Iterable, Dict
 from ontobio import AssociationSetFactory
 from ontobio.io.assocparser import AssocParserConfig
 from ontobio.io.gafparser import GafParser
+from ontobio.model.association import GoAssociation
 from ontobio.ontol_factory import OntologyFactory
 from ontobio.ontol import Ontology
 from ontobio.assocmodel import AssociationSet
@@ -146,7 +147,7 @@ class DataManager(object):
                 for association in subj_associations:
                     if association["object"]["id"] not in terms_blacklist:
                         associations.append(association)
-            return AssociationSetFactory().create_from_assocs(assocs=associations, ontology=ontology)
+            return DataManager.create_annot_set_from_legacy_assocs(assocs=associations, ontology=ontology)
         else:
             return association_set
 
@@ -263,6 +264,28 @@ class DataManager(object):
             return self.exp_slim
 
     @staticmethod
+    def create_annot_set_from_legacy_assocs(assocs, **args):
+        amap = defaultdict(list)
+        subject_label_map = {}
+        for a in assocs:
+            subj = a['subject']
+            subj_id = subj['id']
+            subj_label = subj['label']
+            subject_label_map[subj_id] = subj_label
+            if not a['negated']:
+                amap[subj_id].append(a['object']['id'])
+
+        aset = AssociationSet(subject_label_map=subject_label_map, association_map=amap, **args)
+        aset.associations_by_subj = defaultdict(list)
+        aset.associations_by_subj_obj = defaultdict(list)
+        for a in assocs:
+            sub_id = a['subject']['id']
+            obj_id = a['object']['id']
+            aset.associations_by_subj[sub_id].append(a)
+            aset.associations_by_subj_obj[(sub_id, obj_id)].append(a)
+        return aset
+
+    @staticmethod
     def remap_associations(associations: AssociationSet, ontology: Ontology, associations_map: Dict[str, str]):
         if not associations_map:
             return associations
@@ -272,7 +295,7 @@ class DataManager(object):
                 if association["object"]["id"] in associations_map:
                     association["object"]["id"] = associations_map[association["object"]["id"]]
                 new_associations.append(association)
-        return AssociationSetFactory().create_from_assocs(assocs=new_associations, ontology=ontology)
+        return DataManager.create_annot_set_from_legacy_assocs(assocs=new_associations, ontology=ontology)
 
     def set_associations(self, associations_type: DataType, associations: AssociationSet, config: GenedescConfigParser):
         """set the go annotations and remove blacklisted annotations

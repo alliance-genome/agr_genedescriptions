@@ -166,8 +166,8 @@ class WBDataManager(DataManager):
                         associations.append(DataManager.create_annotation_record(
                             line, gene_id, linearr[2], linearr[11], linearr[12], linearr[4], qualifiers, linearr[8],
                             linearr[6], linearr[5].split("|"), linearr[14], linearr[13]))
-            self.expression_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
-                                                                                      ontology=self.expression_ontology)
+            self.expression_associations = DataManager.create_annot_set_from_legacy_assocs(
+                assocs=associations, ontology=self.expression_ontology)
             self.expression_associations = self.remove_blacklisted_annotations(
                 association_set=self.expression_associations, ontology=self.expression_ontology,
                 terms_blacklist=config.get_module_property(module=Module.EXPRESSION,
@@ -182,8 +182,8 @@ class WBDataManager(DataManager):
                         associations_wb.append(DataManager.create_annotation_record(
                             line, "WB:" + linearr[0], '', 'gene', '', linearr[1],
                             "", "D", "IEA", "", "WB", ""))
-            self.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations_wb,
-                                                                              ontology=self.do_ontology)
+            self.do_associations = DataManager.create_annot_set_from_legacy_assocs(assocs=associations_wb,
+                                                                                   ontology=self.do_ontology)
             if association_additional_cache_path and association_additional_url:
                 associations = []
                 for subj_associations in self.do_associations.associations_by_subj.values():
@@ -213,8 +213,8 @@ class WBDataManager(DataManager):
                                         linearr[20], linearr[19]))
                         else:
                             header = False
-                self.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
-                                                                                  ontology=self.do_ontology)
+                self.do_associations = DataManager.create_annot_set_from_legacy_assocs(assocs=associations,
+                                                                                       ontology=self.do_ontology)
             self.do_associations = self.remove_blacklisted_annotations(
                 association_set=self.do_associations, ontology=self.do_ontology,
                 terms_blacklist=config.get_module_property(module=Module.DO_EXPERIMENTAL,
@@ -353,7 +353,7 @@ class WBDataManager(DataManager):
             else:
                 header = False
         if add_to_expression_ontology_annotations:
-            self.set_associations(DataType.EXPR, associations=AssociationSetFactory().create_from_assocs(
+            self.set_associations(DataType.EXPR, associations=DataManager.create_annot_set_from_legacy_assocs(
                 assocs=associations, ontology=self.expression_ontology), config=self.config)
 
     def load_expression_cluster_data(self):
