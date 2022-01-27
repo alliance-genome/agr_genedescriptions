@@ -98,7 +98,10 @@ def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List
         ontology.node(root_id)["depth"] = current_depth
     else:
         ontology.node(root_id)["depth"] = comparison_func(ontology.node(root_id)["depth"], current_depth)
-    for child_id in ontology.children(node=root_id, relations=relations):
+    children = set(ontology.children(node=root_id, relations=relations))
+    children.discard(root_id)
+    children = list(children)
+    for child_id in children:
         set_all_depths_in_subgraph(ontology=ontology, root_id=child_id, relations=relations,
                                    comparison_func=comparison_func, current_depth=current_depth + 1)
 
@@ -163,15 +166,20 @@ def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
 
 def _set_tot_annots_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
     if "tot_annot_genes" not in ontology.node(root_id):
+        children = set(ontology.children(root_id, relations=relations))
+        children.discard(root_id)
+        children = list(children)
         ontology.node(root_id)["tot_annot_genes"] = ontology.node(root_id)["rel_annot_genes"] | set(
-            [annot_gene for child_id in ontology.children(root_id, relations=relations) for annot_gene in
+            [annot_gene for child_id in children for annot_gene in
              _set_tot_annots_in_subgraph(ontology, child_id)])
     return ontology.node(root_id)["tot_annot_genes"]
 
 
 def _set_num_subsumers_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
     if "num_subsumers" not in ontology.node(root_id):
-        parents = ontology.parents(root_id)
+        parents = set(ontology.parents(root_id))
+        parents.discard(root_id)
+        parents = list(parents)
         if not parents or all(["set_subsumers" in ontology.node(parent) for parent in parents]):
             subsumers = {subsumer for parent in parents for subsumer in ontology.node(parent)["set_subsumers"]} | \
                         {root_id}
@@ -184,7 +192,9 @@ def _set_num_subsumers_in_subgraph(ontology: Ontology, root_id: str, relations: 
 def _set_num_leaves_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
     if "set_leaves" in ontology.node(root_id):
         return ontology.node(root_id)["set_leaves"]
-    children = ontology.children(node=root_id)
+    children = set(ontology.children(node=root_id))
+    children.discard(root_id)
+    children = list(children)
     if not children:
         leaves = {root_id}
         num_leaves = 0
@@ -207,7 +217,10 @@ def _set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxle
         else:
             logger.warning("Disconnected node: " + root_id)
             node["IC"] = 0
-    for child_id in ontology.children(node=root_id, relations=relations):
+    children = set(ontology.children(node=root_id, relations=relations))
+    children.discard(root_id)
+    children = list(children)
+    for child_id in children:
         _set_information_content_in_subgraph(ontology=ontology, root_id=child_id, maxleaves=maxleaves,
                                              relations=relations)
 
