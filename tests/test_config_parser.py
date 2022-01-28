@@ -26,7 +26,7 @@ class TestConfigParser(unittest.TestCase):
 
     def test_rename_terms(self):
         self.assertTrue(len(self.conf_parser.get_module_property(module=Module.GO,
-                                                                 prop=ConfigModuleProperty.RENAME_TERMS)) == 4,
+                                                                 prop=ConfigModuleProperty.RENAME_TERMS)) == 5,
                         "GO term renaming list not loading")
         self.assertTrue(self.conf_parser.get_module_property(module=Module.DO_EXPERIMENTAL,
                                                              prop=ConfigModuleProperty.RENAME_TERMS) is None,
