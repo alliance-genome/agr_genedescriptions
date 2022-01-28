@@ -18,7 +18,8 @@ class TestOntologyTools(unittest.TestCase):
     def setUp(self):
         self.this_dir = os.path.split(__file__)[0]
         self.conf_parser = GenedescConfigParser(os.path.join(self.this_dir, os.path.pardir, "tests", "config_test.yml"))
-        self.df = DataManager(do_relations=None, go_relations=["subClassOf", "BFO:0000050"])
+        self.df = DataManager(do_relations=None, go_relations=["subClassOf", "BFO:0000050"],
+                              expr_relations=["subClassOf", "BFO:0000050"])
         logging.basicConfig(filename=None, level="ERROR", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
 
     def load_go_ontology(self):
@@ -38,6 +39,13 @@ class TestOntologyTools(unittest.TestCase):
             self.this_dir, "data", "doid.obo"),
                                         ontology_cache_path=os.path.join(self.this_dir, "cache", "doid.obo"),
                                         config=self.conf_parser)
+
+    def test_load_ontology_with_loop(self):
+        self.df.load_ontology_from_file(ontology_type=DataType.EXPR, ontology_url="file://" + os.path.join(
+            self.this_dir, "data", "ONTOLOGY_FBBT_loop.obo"),
+                                        ontology_cache_path=os.path.join(self.this_dir, "cache", "FBBT.obo"),
+                                        config=self.conf_parser)
+        set_ic_ontology_struct(self.df.expression_ontology)
 
     def test_get_common_ancestors(self):
         self.load_go_ontology()
@@ -95,6 +103,7 @@ class TestOntologyTools(unittest.TestCase):
         ontology.add_parent(2, 0)
         ontology.add_parent(3, 0)
         ontology.add_parent(4, 0)
+        ontology.add_parent(4, 4)
         ontology.add_parent(5, 1)
         ontology.add_parent(5, 2)
         ontology.add_parent(6, 2)
@@ -595,6 +604,6 @@ class TestOntologyTools(unittest.TestCase):
                                               data_manager=self.df, config=self.conf_parser)
         sentences = generator.get_module_sentences(
             aspect='A', qualifier='Verified', merge_groups_with_same_prefix=True, keep_only_best_group=True)
-        self.assertTrue(sentences.get_description() == "is expressed in embryo")
+        self.assertTrue(sentences.get_description() == "Is expressed in embryo")
         self.assertTrue(all(["depth" in node_properties for node_properties in
                              self.df.expression_ontology.nodes().values()]))
