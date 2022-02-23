@@ -117,7 +117,7 @@ class WBDataManager(DataManager):
     @staticmethod
     def _get_expression_cluster_url(prefix, ec_type, release_version):
         if prefix:
-            return "ftp://caltech.wormbase.org/pub/wormbase/ExprClusterSummary/" + release_version[0:2] + \
+            return "http://caltech.wormbase.org/pub/wormbase/ExprClusterSummary/" + release_version[0:2] + \
                    str(int(release_version[2:]) + 1) + "/" + prefix + "ECsummary_" + ec_type + "." + release_version + \
                    ".txt"
         else:
@@ -335,7 +335,7 @@ class WBDataManager(DataManager):
                 load_into_data[linearr[0]] = linearr[1:]
                 load_into_data[linearr[0]][2] = WBDataManager.get_replaced_terms_arr(
                     load_into_data[linearr[0]][2].split(","), terms_replacement_regex)
-                if load_into_data[linearr[0]] and load_into_data[linearr[0]][3]:
+                if load_into_data[linearr[0]] and len(load_into_data[linearr[0]]) > 3 and load_into_data[linearr[0]][3]:
                     load_into_data[linearr[0]][3] = [word.replace(" study", "").replace(" analysis", "") for word in
                                                      load_into_data[linearr[0]][3].split(",")]
                 if add_to_expression_ontology_annotations:
@@ -396,7 +396,7 @@ class WBDataManager(DataManager):
             idx = 2
         elif feature == ExpressionClusterFeature.STUDIES:
             idx = 3
-        if target and gene_id in target and target[gene_id][idx]:
+        if target and gene_id in target and len(target[gene_id]) > idx and target[gene_id][idx]:
             return target[gene_id][idx]
         return None
 
