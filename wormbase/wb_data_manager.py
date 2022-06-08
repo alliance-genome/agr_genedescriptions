@@ -117,7 +117,7 @@ class WBDataManager(DataManager):
     @staticmethod
     def _get_expression_cluster_url(prefix, ec_type, release_version):
         if prefix:
-            return "ftp://caltech.wormbase.org/pub/wormbase/ExprClusterSummary/" + release_version[0:2] + \
+            return "http://caltech.wormbase.org/pub/wormbase/ExprClusterSummary/" + release_version[0:2] + \
                    str(int(release_version[2:]) + 1) + "/" + prefix + "ECsummary_" + ec_type + "." + release_version + \
                    ".txt"
         else:
@@ -166,8 +166,8 @@ class WBDataManager(DataManager):
                         associations.append(DataManager.create_annotation_record(
                             line, gene_id, linearr[2], linearr[11], linearr[12], linearr[4], qualifiers, linearr[8],
                             linearr[6], linearr[5].split("|"), linearr[14], linearr[13]))
-            self.expression_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
-                                                                                      ontology=self.expression_ontology)
+            self.expression_associations = DataManager.create_annot_set_from_legacy_assocs(
+                assocs=associations, ontology=self.expression_ontology)
             self.expression_associations = self.remove_blacklisted_annotations(
                 association_set=self.expression_associations, ontology=self.expression_ontology,
                 terms_blacklist=config.get_module_property(module=Module.EXPRESSION,
@@ -182,8 +182,8 @@ class WBDataManager(DataManager):
                         associations_wb.append(DataManager.create_annotation_record(
                             line, "WB:" + linearr[0], '', 'gene', '', linearr[1],
                             "", "D", "IEA", "", "WB", ""))
-            self.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations_wb,
-                                                                              ontology=self.do_ontology)
+            self.do_associations = DataManager.create_annot_set_from_legacy_assocs(assocs=associations_wb,
+                                                                                   ontology=self.do_ontology)
             if association_additional_cache_path and association_additional_url:
                 associations = []
                 for subj_associations in self.do_associations.associations_by_subj.values():
@@ -213,8 +213,8 @@ class WBDataManager(DataManager):
                                         linearr[20], linearr[19]))
                         else:
                             header = False
-                self.do_associations = AssociationSetFactory().create_from_assocs(assocs=associations,
-                                                                                  ontology=self.do_ontology)
+                self.do_associations = DataManager.create_annot_set_from_legacy_assocs(assocs=associations,
+                                                                                       ontology=self.do_ontology)
             self.do_associations = self.remove_blacklisted_annotations(
                 association_set=self.do_associations, ontology=self.do_ontology,
                 terms_blacklist=config.get_module_property(module=Module.DO_EXPERIMENTAL,
@@ -238,9 +238,9 @@ class WBDataManager(DataManager):
                     header = False
                 else:
                     ortholog_arr = line.strip().split("\t")
-                    if not ortholog_arr[1].startswith("PRJEB28388") and (not ortholog_arr[1].startswith("PRJNA13758") or
-                                                                         len(ortholog_arr) > 3 and
-                                                                         len(ortholog_arr[3].split(";")) > 2):
+                    if not ortholog_arr[1].startswith("PRJEB28388") and not (ortholog_arr[1].startswith("chr")) and \
+                        (not ortholog_arr[1].startswith("PRJNA13758") or len(ortholog_arr) > 3 and
+                         len(ortholog_arr[3].split(";")) > 2):
                         orthologs[ortholog_arr[0]].append(ortholog_arr[1:4])
 
     def get_best_orthologs_for_gene(self, gene_id: str, orth_species_full_name: List[str],
@@ -335,7 +335,7 @@ class WBDataManager(DataManager):
                 load_into_data[linearr[0]] = linearr[1:]
                 load_into_data[linearr[0]][2] = WBDataManager.get_replaced_terms_arr(
                     load_into_data[linearr[0]][2].split(","), terms_replacement_regex)
-                if load_into_data[linearr[0]] and load_into_data[linearr[0]][3]:
+                if load_into_data[linearr[0]] and len(load_into_data[linearr[0]]) > 3 and load_into_data[linearr[0]][3]:
                     load_into_data[linearr[0]][3] = [word.replace(" study", "").replace(" analysis", "") for word in
                                                      load_into_data[linearr[0]][3].split(",")]
                 if add_to_expression_ontology_annotations:
@@ -353,7 +353,7 @@ class WBDataManager(DataManager):
             else:
                 header = False
         if add_to_expression_ontology_annotations:
-            self.set_associations(DataType.EXPR, associations=AssociationSetFactory().create_from_assocs(
+            self.set_associations(DataType.EXPR, associations=DataManager.create_annot_set_from_legacy_assocs(
                 assocs=associations, ontology=self.expression_ontology), config=self.config)
 
     def load_expression_cluster_data(self):
@@ -396,7 +396,7 @@ class WBDataManager(DataManager):
             idx = 2
         elif feature == ExpressionClusterFeature.STUDIES:
             idx = 3
-        if target and gene_id in target and target[gene_id][idx]:
+        if target and gene_id in target and len(target[gene_id]) > idx and target[gene_id][idx]:
             return target[gene_id][idx]
         return None
 
