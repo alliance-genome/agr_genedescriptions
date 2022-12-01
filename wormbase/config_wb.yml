@@ -7,7 +7,7 @@ generic:
 
 # options for WormBase gene description generation - used when data_fetcher is set to 'wb_data_fetcher'
 wb_options:
-  release: "WS285"
+  release: "WS287"
   raw_files_source: "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases"
   agr_human_go_associations: "https://fms.alliancegenome.org/download/GAF_HUMAN.gaf.gz"
   agr_go_ontology: "https://fms.alliancegenome.org/download/ONTOLOGY_GO.obo.gz"
@@ -48,6 +48,7 @@ wb_options:
       main_sister_species: c_elegans
       ortholog:
         - c_elegans
+      ec_genereg_prefix: cbg
     c_elegans:
       full_name: "Caenorhabditis elegans"
       project_id: "PRJNA13758"
