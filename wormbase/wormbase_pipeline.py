@@ -191,14 +191,15 @@ def set_information_poor_sentence(orth_fullnames: List[str], selected_orthologs,
                                                                         human_func_sent[1:])
 
     protein_domains = dm.protein_domains[gene_desc.gene_id[3:]]
-    if protein_domains and len([ptdom[1] for ptdom in protein_domains if ptdom[1] != "" and ptdom[1] != " "]) > 0:
+    protein_domains_filtered = set([ptdom[1] for ptdom in protein_domains if ptdom[1] != "" and ptdom[1] != " "])
+    if protein_domains and len(protein_domains_filtered) > 0:
         dom_word = "domain"
-        if len([ptdom[1] for ptdom in protein_domains if ptdom[1] != "" and ptdom[1] != " "]) > 1:
+        if len(protein_domains_filtered) > 1:
             dom_word = "domains"
         gene_desc.set_or_extend_module_description_and_final_stats(
             module=Module.PROTEIN_DOMAIN,
             description="is predicted to encode a protein with the following " + dom_word + ": " +
-                        concatenate_words_with_oxford_comma([ptdom[1] for ptdom in protein_domains if ptdom[1] != "" and ptdom[1] != " "],
+                        concatenate_words_with_oxford_comma(list(protein_domains_filtered),
                                                             separator=conf_parser.get_terms_delimiter()))
 
 
