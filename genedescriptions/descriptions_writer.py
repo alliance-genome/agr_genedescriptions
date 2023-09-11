@@ -93,9 +93,9 @@ class DescriptionsWriter(object):
                     outfile.write("Automated_description\t\"" + genedesc.description +
                                   "\"\tInferred_automatically\t\"" + "This description was generated automatically by a"
                                                                      " script based on data from the " +
-                                  release_version + " version of WormBase\"\n\n")
+                                  release_version + " version of WormBase\"\n")
                     outfile.write("Automated_description\t\"" + genedesc.description +
-                                  "\"\tPaper_evidence\t\"WBPaper00065943\"\n")
+                                  "\"\tPaper_evidence\t\"WBPaper00065943\"\n\n")
 
     def write_plain_text(self, file_path):
         """write the descriptions to a plain text file
