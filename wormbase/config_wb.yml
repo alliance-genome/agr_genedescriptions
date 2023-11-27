@@ -1,6 +1,6 @@
 generic:
   cache_location: "gene_descriptions_cache"
-  output_dir: "./generated_descriptions"
+  output_dir: "/usr/caltech_curation_files/pub/gene_descriptions/WS292/pre-release"
   modules_delimiter: "."
   terms_delimiter: ";"
   # set 'data_fetcher' to 'agr_data_fetcher' to generate descriptions for AGR or 'wb_data_fetcher' for WormBase

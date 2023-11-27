@@ -3,7 +3,7 @@ import psycopg2 as psycopg2
 
 
 def main():
-    conn = psycopg2.connect("dbname='testdb' user='acedb' password='' host='tazendra.caltech.edu'")
+    conn = psycopg2.connect("dbname='caltech_curation' user='postgres' password='' host='172.17.0.1'")
     cur = conn.cursor()
     cur.execute("select g.con_wbgene, d.con_desctext, a.con_accession, c.con_curator_hst, p.con_paper, "
                 "l.con_lastupdate, per.con_person "
