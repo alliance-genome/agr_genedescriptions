@@ -1,0 +1,4 @@
+**/generated_descriptions
+**/gene_descriptions_cache
+venv/*
+.git/*
