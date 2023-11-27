@@ -104,8 +104,10 @@ class DataManager(object):
     def _get_cached_file(self, cache_path: str, file_source_url):
         if not os.path.isfile(cache_path):
             os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+            logger.info(f"downloading file {file_source_url}")
             urllib.request.urlretrieve(file_source_url, cache_path)
         elif not self.use_cache:
+            logger.info(f"downloading file {file_source_url}")
             urllib.request.urlretrieve(file_source_url, cache_path)
         file_path = cache_path
         if cache_path.endswith(".gz"):
