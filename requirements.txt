@@ -7,3 +7,4 @@ ontobio==2.7.14
 prefixcommons>=0.1.9
 num2words
 dacite
+psycopg2-binary
