@@ -4,7 +4,8 @@ WORKDIR /usr/src/gene_descriptions
 
 ADD . .
 
-RUN apk update && apk add make automake build-base gcc g++ gfortran openblas-dev python3-dev libffi-dev openjdk11 bash
+RUN apk update && apk add make automake build-base gcc g++ gfortran openblas-dev python3-dev libffi-dev openjdk11 bash tzdata
+ENV TZ="America/Los_Angeles"
 RUN pip install -r requirements.txt
 
 RUN wget https://github.com/owlcollab/owltools/releases/download/2020-04-06/owltools
