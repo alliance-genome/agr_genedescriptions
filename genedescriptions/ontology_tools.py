@@ -72,10 +72,10 @@ def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distan
             ancestors.items() if len(covered_nodes) > 1 or ancestor == covered_nodes[0]]
 
 
-def set_all_depths(ontology: Ontology, relations: List[str] = None, comparison_func=max):
+def set_all_depths(ontology: Ontology, root_node_ids: List[str], relations: List[str] = None, comparison_func=max):
     logger.info("Setting depth for all nodes")
     start_time = time.time()
-    for root_id in ontology.get_roots():
+    for root_id in root_node_ids:
         if "type" not in ontology.node(root_id) or ontology.node_type(root_id) == "CLASS":
             set_all_depths_in_subgraph(ontology=ontology, root_id=root_id, relations=relations,
                                        comparison_func=comparison_func)
@@ -111,31 +111,30 @@ def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List
         stack.extend([(child_id, current_depth + 1) for child_id in children])
 
 
-def set_ic_ontology_struct(ontology: Ontology, relations: List[str] = None):
+def set_ic_ontology_struct(ontology: Ontology, root_node_ids: List[str], relations: List[str] = None):
     logger.info("Setting information content values based on ontology structure")
     start_time = time.time()
-    roots = ontology.get_roots(relations=relations)
-    for root_id in roots:
+    for root_id in root_node_ids:
         if "num_subsumers" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
                                                               ontology.node_type(root_id) == "CLASS"):
             set_num_subsumers(ontology=ontology, root_id=root_id, relations=relations)
-    for root_id in roots:
+    for root_id in root_node_ids:
         if "num_leaves" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
                                                            ontology.node_type(root_id) == "CLASS"):
             set_leaf_sets(ontology=ontology, root_id=root_id, relations=relations)
             set_num_leaves(ontology=ontology, root_id=root_id, relations=relations)
-    for root_id in roots:
+    for root_id in root_node_ids:
         if "depth" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
                                                       ontology.node_type(root_id) == "CLASS"):
             set_all_depths_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
-    for root_id in roots:
+    for root_id in root_node_ids:
         if "type" not in ontology.node(root_id) or ontology.node_type(root_id) == "CLASS":
             set_information_content_in_subgraph(ontology=ontology, root_id=root_id,
                                                 maxleaves=ontology.node(root_id)["num_leaves"], relations=relations)
     logger.info(f"setting information content values based on ic took {time.time() - start_time} seconds")
 
 
-def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
+def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet, root_node_ids: List[str]):
     logger.info("Setting information content values based on annotation frequency")
     for node_id in ontology.nodes():
         node_prop = ontology.node(node_id)
@@ -145,7 +144,7 @@ def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
             del node_prop["tot_annot_genes"]
         if "IC" in node_prop:
             del node_prop["IC"]
-    for root_id in ontology.get_roots():
+    for root_id in root_node_ids:
         if "depth" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
                                                       ontology.node_type(root_id) == "CLASS"):
             set_all_depths_in_subgraph(ontology=ontology, root_id=root_id)
