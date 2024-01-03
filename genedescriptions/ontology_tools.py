@@ -81,7 +81,7 @@ def set_all_depths(ontology: Ontology, relations: List[str] = None, comparison_f
     for node_id, node_content in ontology.nodes().items():
         if "depth" not in node_content:
             node_content["depth"] = 0
-    logger.warning(f"setting all depths took {time.time() - start_time} seconds")
+    logger.info(f"setting all depths took {time.time() - start_time} seconds")
 
 
 def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None, comparison_func=max,
@@ -135,7 +135,7 @@ def set_ic_ontology_struct(ontology: Ontology, relations: List[str] = None):
         if "type" not in ontology.node(root_id) or ontology.node_type(root_id) == "CLASS":
             set_information_content_in_subgraph(ontology=ontology, root_id=root_id,
                                                 maxleaves=ontology.node(root_id)["num_leaves"], relations=relations)
-    logger.warning(f"setting information content values based on ic took {time.time() - start_time} seconds")
+    logger.info(f"setting information content values based on ic took {time.time() - start_time} seconds")
 
 
 def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
@@ -194,7 +194,7 @@ def set_tot_annots(ontology: Ontology, relations: List[str] = None):
                 if "tot_annot_genes" not in ontology.node(ancestor_id):
                     ontology.node(ancestor_id)["tot_annot_genes"] = set()
                 ontology.node(ancestor_id)["tot_annot_genes"].update(ontology.node(node_id)["rel_annot_genes"])
-    logger.warning(f"setting tot annotation counts took {time.time() - start_time} seconds")
+    logger.info(f"setting tot annotation counts took {time.time() - start_time} seconds")
 
 
 def set_num_subsumers(ontology: Ontology, root_id: str, relations: List[str] = None):
@@ -225,7 +225,7 @@ def set_num_subsumers(ontology: Ontology, root_id: str, relations: List[str] = N
             children.discard(node_id)
             stack.extend([(child_id, subsumers) for child_id in children])
             visited.add(node_id)
-    logger.warning(f"setting num subsumers took {time.time() - start_time} seconds")
+    logger.info(f"setting num subsumers took {time.time() - start_time} seconds")
 
 
 def set_leaf_sets(ontology: Ontology, root_id: str, relations: List[str] = None):
@@ -256,7 +256,7 @@ def set_leaf_sets(ontology: Ontology, root_id: str, relations: List[str] = None)
                 ontology.node(ancestor)["set_leaves"].add(node_id)
         else:
             stack.extend([child_id for child_id in children])
-    logger.warning(f"setting leaf sets took {time.time() - start_time} seconds")
+    logger.info(f"setting leaf sets took {time.time() - start_time} seconds")
 
 
 def set_num_leaves(ontology: Ontology, root_id: str, relations: List[str] = None):
@@ -274,7 +274,7 @@ def set_num_leaves(ontology: Ontology, root_id: str, relations: List[str] = None
             ontology.node(node_id)["num_leaves"] = len(ontology.node(node_id)["set_leaves"])
         else:
             ontology.node(node_id)["num_leaves"] = 0
-    logger.warning(f"setting num leaves took {time.time() - start_time} seconds")
+    logger.info(f"setting num leaves took {time.time() - start_time} seconds")
 
 
 def set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxleaves: int, relations: List[str] = None):
@@ -307,7 +307,7 @@ def set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxlea
         children = set(ontology.children(node=node_id, relations=relations))
         children.discard(node_id)
         stack.extend(list(children))
-    logger.warning(f"calculating ic values took {time.time() - start_time} seconds")
+    logger.info(f"calculating ic values took {time.time() - start_time} seconds")
 
 
 def node_is_in_branch(ontology: Ontology, node_id: str, branch_root_ids: List[str]):
