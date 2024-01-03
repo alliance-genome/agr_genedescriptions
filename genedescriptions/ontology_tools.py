@@ -117,11 +117,12 @@ def set_ic_ontology_struct(ontology: Ontology, relations: List[str] = None):
     for root_id in roots:
         if "num_subsumers" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
                                                               ontology.node_type(root_id) == "CLASS"):
-            _set_num_subsumers_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
+            set_num_subsumers(ontology=ontology, root_id=root_id, relations=relations)
     for root_id in roots:
         if "num_leaves" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
                                                            ontology.node_type(root_id) == "CLASS"):
-            _set_num_leaves_in_subgraph(ontology=ontology, root_id=root_id, relations=relations)
+            set_leaf_sets(ontology=ontology, root_id=root_id, relations=relations)
+            set_num_leaves(ontology=ontology, root_id=root_id, relations=relations)
     for root_id in roots:
         if "depth" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
                                                       ontology.node_type(root_id) == "CLASS"):
@@ -154,7 +155,7 @@ def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
         node_pr = ontology.node(node_id)
         node_pr["rel_annot_genes"] = node_gene_map[node_id]
     for root_id in ontology.get_roots():
-        _set_tot_annots_in_subgraph(ontology, root_id)
+        set_tot_annots(ontology, root_id)
     for node_prop in ontology.nodes().values():
         if "tot_annot_genes" not in node_prop:
             node_prop["tot_annot_genes"] = set()
@@ -169,7 +170,7 @@ def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
     logger.info("Finished setting information content values")
 
 
-def _set_tot_annots_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
+def set_tot_annots(ontology: Ontology, root_id: str, relations: List[str] = None):
     """
     Calculate the total number of annotated genes in a subgraph of the ontology
 
@@ -196,7 +197,7 @@ def _set_tot_annots_in_subgraph(ontology: Ontology, root_id: str, relations: Lis
     return ontology.node(root_id)["tot_annot_genes"]
 
 
-def _set_num_subsumers_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
+def set_num_subsumers(ontology: Ontology, root_id: str, relations: List[str] = None):
     """
     Calculate the number of subsumers for a node in a subgraph of the ontology
 
@@ -223,9 +224,9 @@ def _set_num_subsumers_in_subgraph(ontology: Ontology, root_id: str, relations: 
             stack.extend([(child_id, subsumers) for child_id in children])
 
 
-def _set_num_leaves_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
+def set_leaf_sets(ontology: Ontology, root_id: str, relations: List[str] = None):
     """
-    Calculate the number of leaves for a node in a subgraph of the ontology
+    Set the set of leaves for each node in the ontology
 
     Args:
         ontology (Ontology): the ontology
@@ -233,9 +234,9 @@ def _set_num_leaves_in_subgraph(ontology: Ontology, root_id: str, relations: Lis
         relations (List[str]): list of relations to consider
     """
     visited = set()
-    stack = [(root_id, set())]
+    stack = [root_id]
     while stack:
-        node_id, leaves = stack.pop()
+        node_id = stack.pop()
         if node_id in visited:
             continue
         visited.add(node_id)
@@ -244,15 +245,35 @@ def _set_num_leaves_in_subgraph(ontology: Ontology, root_id: str, relations: Lis
         children = set(ontology.children(node=node_id, relations=relations))
         children.discard(node_id)
         if not children:
-            leaves.add(node_id)
-            ontology.node(node_id)["num_leaves"] = 1
+            for ancestor in ontology.ancestors(node=node_id, relations=relations):
+                ontology.node(ancestor)["set_leaves"].update(node_id)
         else:
-            stack.extend([(child_id, leaves) for child_id in children])
-            ontology.node(node_id)["num_leaves"] = sum(ontology.node(child_id)["num_leaves"] for child_id in children)
-            leaves.update(ontology.node(child_id)["set_leaves"] for child_id in children)
-            leaves.add(node_id)
-        ontology.node(node_id)["set_leaves"] = leaves
-    return leaves
+            stack.extend([child_id for child_id in children])
+
+
+def set_num_leaves(ontology: Ontology, root_id: str, relations: List[str] = None):
+    """
+    Set the set of leaves for each node in the ontology
+
+    Args:
+        ontology (Ontology): the ontology
+        root_id (str): the ID of the root term of the subgraph to process
+        relations (List[str]): list of relations to consider
+    """
+    visited = set()
+    stack = [root_id]
+    while stack:
+        node_id = stack.pop()
+        if node_id in visited:
+            continue
+        visited.add(node_id)
+        if "set_leaves" in ontology.node(node_id):
+            ontology.node(node_id)["num_leaves"] = len(ontology.node(node_id)["set_leaves"])
+        else:
+            ontology.node(node_id)["num_leaves"] = 0
+        children = set(ontology.children(node=node_id, relations=relations))
+        children.discard(node_id)
+        stack.extend([child_id for child_id in children])
 
 
 def _set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxleaves: int, relations: List[str] = None):
