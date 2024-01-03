@@ -72,38 +72,35 @@ def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distan
 
 
 def set_all_depths(ontology: Ontology, relations: List[str] = None, comparison_func=max):
-    for root_id in ontology.get_roots():
-        if "type" not in ontology.node(root_id) or ontology.node_type(root_id) == "CLASS":
-            set_all_depths_in_subgraph(ontology=ontology, root_id=root_id, relations=relations,
-                                       comparison_func=comparison_func)
-    for node_id, node_content in ontology.nodes().items():
-        if "depth" not in node_content:
-            node_content["depth"] = 0
-
-
-def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None, comparison_func=max,
-                               current_depth: int = 0):
-    """calculate and set max_depth and min_depth (maximum and minimum distances from root terms in the ontology)
-    recursively for all terms in a branch of the ontology
+    """
+    Calculate and set max_depth and min_depth (maximum and minimum distances from root terms in the ontology)
+    for all nodes in the ontology
 
     Args:
         ontology (Ontology): the ontology
-        root_id (str): the ID of the root term of the branch to process
         relations (List[str]): list of relations to consider
         comparison_func: a comparison function to calculate the depth when multiple paths exist between the node and
             the root. max calculates the length of the longest path, min the one of the shortest
-        current_depth (int): the current depth in the ontology
     """
-    if "depth" not in ontology.node(root_id):
-        ontology.node(root_id)["depth"] = current_depth
-    else:
-        ontology.node(root_id)["depth"] = comparison_func(ontology.node(root_id)["depth"], current_depth)
-    children = set(ontology.children(node=root_id, relations=relations))
-    children.discard(root_id)
-    children = list(children)
-    for child_id in children:
-        set_all_depths_in_subgraph(ontology=ontology, root_id=child_id, relations=relations,
-                                   comparison_func=comparison_func, current_depth=current_depth + 1)
+    visited = set()
+    for root_id in ontology.get_roots():
+        if "type" not in ontology.node(root_id) or ontology.node_type(root_id) == "CLASS":
+            stack = [(root_id, 0)]
+            while stack:
+                node_id, current_depth = stack.pop()
+                if node_id in visited:
+                    continue
+                visited.add(node_id)
+                if "depth" not in ontology.node(node_id):
+                    ontology.node(node_id)["depth"] = current_depth
+                else:
+                    ontology.node(node_id)["depth"] = comparison_func(ontology.node(node_id)["depth"], current_depth)
+                children = set(ontology.children(node=node_id, relations=relations))
+                children.discard(node_id)
+                stack.extend([(child_id, current_depth + 1) for child_id in children])
+    for node_id, node_content in ontology.nodes().items():
+        if "depth" not in node_content:
+            node_content["depth"] = 0
 
 
 def set_ic_ontology_struct(ontology: Ontology, relations: List[str] = None):
