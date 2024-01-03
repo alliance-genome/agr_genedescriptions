@@ -259,20 +259,11 @@ def set_num_leaves(ontology: Ontology, root_id: str, relations: List[str] = None
         root_id (str): the ID of the root term of the subgraph to process
         relations (List[str]): list of relations to consider
     """
-    visited = set()
-    stack = [root_id]
-    while stack:
-        node_id = stack.pop()
-        if node_id in visited:
-            continue
-        visited.add(node_id)
+    for node_id in ontology.nodes():
         if "set_leaves" in ontology.node(node_id):
             ontology.node(node_id)["num_leaves"] = len(ontology.node(node_id)["set_leaves"])
         else:
             ontology.node(node_id)["num_leaves"] = 0
-        children = set(ontology.children(node=node_id, relations=relations))
-        children.discard(node_id)
-        stack.extend([child_id for child_id in children])
 
 
 def set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxleaves: int, relations: List[str] = None):
