@@ -286,9 +286,9 @@ def set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxlea
         relations (List[str]): list of relations to consider
     """
     visited = set()
-    stack = [(root_id, set())]
+    stack = [root_id]
     while stack:
-        node_id, children = stack.pop()
+        node_id = stack.pop()
         if node_id in visited:
             continue
         visited.add(node_id)
@@ -301,9 +301,9 @@ def set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxlea
             else:
                 logger.warning("Disconnected node: " + str(node_id))
                 node["IC"] = 0
-        children |= set(ontology.children(node=node_id, relations=relations))
+        children = set(ontology.children(node=node_id, relations=relations))
         children.discard(node_id)
-        stack.extend([(child_id, children) for child_id in children])
+        stack.extend(list(children))
 
 
 def node_is_in_branch(ontology: Ontology, node_id: str, branch_root_ids: List[str]):
