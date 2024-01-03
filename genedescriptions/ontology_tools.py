@@ -72,35 +72,43 @@ def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distan
 
 
 def set_all_depths(ontology: Ontology, relations: List[str] = None, comparison_func=max):
-    """
-    Calculate and set max_depth and min_depth (maximum and minimum distances from root terms in the ontology)
-    for all nodes in the ontology
-
-    Args:
-        ontology (Ontology): the ontology
-        relations (List[str]): list of relations to consider
-        comparison_func: a comparison function to calculate the depth when multiple paths exist between the node and
-            the root. max calculates the length of the longest path, min the one of the shortest
-    """
-    visited = set()
     for root_id in ontology.get_roots():
         if "type" not in ontology.node(root_id) or ontology.node_type(root_id) == "CLASS":
-            stack = [(root_id, 0)]
-            while stack:
-                node_id, current_depth = stack.pop()
-                if node_id in visited:
-                    continue
-                visited.add(node_id)
-                if "depth" not in ontology.node(node_id):
-                    ontology.node(node_id)["depth"] = current_depth
-                else:
-                    ontology.node(node_id)["depth"] = comparison_func(ontology.node(node_id)["depth"], current_depth)
-                children = set(ontology.children(node=node_id, relations=relations))
-                children.discard(node_id)
-                stack.extend([(child_id, current_depth + 1) for child_id in children])
+            set_all_depths_in_subgraph(ontology=ontology, root_id=root_id, relations=relations,
+                                       comparison_func=comparison_func)
     for node_id, node_content in ontology.nodes().items():
         if "depth" not in node_content:
             node_content["depth"] = 0
+
+
+def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None, comparison_func=max,
+                               current_depth: int = 0):
+    """
+    Calculate and set max_depth and min_depth (maximum and minimum distances from root terms in the ontology)
+    for all nodes in a branch of the ontology
+
+    Args:
+        ontology (Ontology): the ontology
+        root_id (str): the ID of the root term of the branch to process
+        relations (List[str]): list of relations to consider
+        comparison_func: a comparison function to calculate the depth when multiple paths exist between the node and
+            the root. max calculates the length of the longest path, min the one of the shortest
+        current_depth (int): the current depth in the ontology
+    """
+    visited = set()
+    stack = [(root_id, current_depth)]
+    while stack:
+        node_id, current_depth = stack.pop()
+        if node_id in visited:
+            continue
+        visited.add(node_id)
+        if "depth" not in ontology.node(node_id):
+            ontology.node(node_id)["depth"] = current_depth
+        else:
+            ontology.node(node_id)["depth"] = comparison_func(ontology.node(node_id)["depth"], current_depth)
+        children = set(ontology.children(node=node_id, relations=relations))
+        children.discard(node_id)
+        stack.extend([(child_id, current_depth + 1) for child_id in children])
 
 
 def set_ic_ontology_struct(ontology: Ontology, relations: List[str] = None):
@@ -162,64 +170,120 @@ def set_ic_annot_freq(ontology: Ontology, annotations: AssociationSet):
 
 
 def _set_tot_annots_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
-    if "tot_annot_genes" not in ontology.node(root_id):
-        children = set(ontology.children(root_id, relations=relations))
-        children.discard(root_id)
-        children = list(children)
-        ontology.node(root_id)["tot_annot_genes"] = ontology.node(root_id)["rel_annot_genes"] | set(
-            [annot_gene for child_id in children for annot_gene in
-             _set_tot_annots_in_subgraph(ontology, child_id)])
+    """
+    Calculate the total number of annotated genes in a subgraph of the ontology
+
+    Args:
+        ontology (Ontology): the ontology
+        root_id (str): the ID of the root term of the subgraph to process
+        relations (List[str]): list of relations to consider
+
+    Returns:
+        Set[str]: the set of all annotated genes in the subgraph
+    """
+    visited = set()
+    stack = [(root_id, set())]
+    while stack:
+        node_id, annot_genes = stack.pop()
+        if node_id in visited:
+            continue
+        visited.add(node_id)
+        if "tot_annot_genes" not in ontology.node(node_id):
+            children = set(ontology.children(node_id, relations=relations))
+            children.discard(node_id)
+            stack.extend([(child_id, annot_genes | ontology.node(node_id)["rel_annot_genes"]) for child_id in children])
+        ontology.node(node_id)["tot_annot_genes"] = annot_genes | ontology.node(node_id)["rel_annot_genes"]
     return ontology.node(root_id)["tot_annot_genes"]
 
 
 def _set_num_subsumers_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
-    if "num_subsumers" not in ontology.node(root_id):
-        parents = set(ontology.parents(root_id))
-        parents.discard(root_id)
+    """
+    Calculate the number of subsumers for a node in a subgraph of the ontology
+
+    Args:
+        ontology (Ontology): the ontology
+        root_id (str): the ID of the root term of the subgraph to process
+        relations (List[str]): list of relations to consider
+    """
+    visited = set()
+    stack = [(root_id, set())]
+    while stack:
+        node_id, subsumers = stack.pop()
+        if node_id in visited:
+            continue
+        visited.add(node_id)
+        parents = set(ontology.parents(node_id))
+        parents.discard(node_id)
         parents = list(parents)
         if not parents or all(["set_subsumers" in ontology.node(parent) for parent in parents]):
-            subsumers = {subsumer for parent in parents for subsumer in ontology.node(parent)["set_subsumers"]} | \
-                        {root_id}
-            ontology.node(root_id)["num_subsumers"] = len(subsumers)
-            ontology.node(root_id)["set_subsumers"] = subsumers
-            for child_id in ontology.children(node=root_id):
-                _set_num_subsumers_in_subgraph(ontology, child_id, relations)
+            subsumers |= {subsumer for parent in parents for subsumer in ontology.node(parent)["set_subsumers"]} | {node_id}
+            ontology.node(node_id)["num_subsumers"] = len(subsumers)
+            ontology.node(node_id)["set_subsumers"] = subsumers
+            children = ontology.children(node=node_id)
+            stack.extend([(child_id, subsumers) for child_id in children])
 
 
 def _set_num_leaves_in_subgraph(ontology: Ontology, root_id: str, relations: List[str] = None):
-    if "set_leaves" in ontology.node(root_id):
-        return ontology.node(root_id)["set_leaves"]
-    children = set(ontology.children(node=root_id))
-    children.discard(root_id)
-    children = list(children)
-    if not children:
-        leaves = {root_id}
-        num_leaves = 0
-    else:
-        leaves = {leaf for child_id in children for leaf in
-                  _set_num_leaves_in_subgraph(ontology=ontology, root_id=child_id, relations=relations)}
-        num_leaves = len(leaves)
-    ontology.node(root_id)["num_leaves"] = num_leaves
-    ontology.node(root_id)["set_leaves"] = leaves
+    """
+    Calculate the number of leaves for a node in a subgraph of the ontology
+
+    Args:
+        ontology (Ontology): the ontology
+        root_id (str): the ID of the root term of the subgraph to process
+        relations (List[str]): list of relations to consider
+    """
+    visited = set()
+    stack = [(root_id, set())]
+    while stack:
+        node_id, leaves = stack.pop()
+        if node_id in visited:
+            continue
+        visited.add(node_id)
+        if "set_leaves" in ontology.node(node_id):
+            continue
+        children = set(ontology.children(node=node_id, relations=relations))
+        children.discard(node_id)
+        if not children:
+            leaves.add(node_id)
+            ontology.node(node_id)["num_leaves"] = 1
+        else:
+            stack.extend([(child_id, leaves) for child_id in children])
+            ontology.node(node_id)["num_leaves"] = sum(ontology.node(child_id)["num_leaves"] for child_id in children)
+            leaves.update(ontology.node(child_id)["set_leaves"] for child_id in children)
+            leaves.add(node_id)
+        ontology.node(node_id)["set_leaves"] = leaves
     return leaves
 
 
 def _set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxleaves: int, relations: List[str] = None):
-    node = ontology.node(root_id)
-    if str(root_id) == root_id and "ARTIFICIAL_NODE:" in root_id:
-        node["IC"] = 0
-    else:
-        if "num_leaves" in node and "num_subsumers" in node:
-            node["IC"] = -math.log((float(node["num_leaves"]) / node["num_subsumers"] + 1) / (maxleaves + 1))
-        else:
-            logger.warning("Disconnected node: " + root_id)
+    """
+    Calculate the information content for a node in a subgraph of the ontology
+
+    Args:
+        ontology (Ontology): the ontology
+        root_id (str): the ID of the root term of the subgraph to process
+        maxleaves (int): the maximum number of leaves in the subgraph
+        relations (List[str]): list of relations to consider
+    """
+    visited = set()
+    stack = [(root_id, set())]
+    while stack:
+        node_id, children = stack.pop()
+        if node_id in visited:
+            continue
+        visited.add(node_id)
+        node = ontology.node(node_id)
+        if str(node_id) == node_id and "ARTIFICIAL_NODE:" in node_id:
             node["IC"] = 0
-    children = set(ontology.children(node=root_id, relations=relations))
-    children.discard(root_id)
-    children = list(children)
-    for child_id in children:
-        _set_information_content_in_subgraph(ontology=ontology, root_id=child_id, maxleaves=maxleaves,
-                                             relations=relations)
+        else:
+            if "num_leaves" in node and "num_subsumers" in node:
+                node["IC"] = -math.log((float(node["num_leaves"]) / node["num_subsumers"] + 1) / (maxleaves + 1))
+            else:
+                logger.warning("Disconnected node: " + node_id)
+                node["IC"] = 0
+        children |= set(ontology.children(node=node_id, relations=relations))
+        children.discard(node_id)
+        stack.extend([(child_id, children) for child_id in children])
 
 
 def node_is_in_branch(ontology: Ontology, node_id: str, branch_root_ids: List[str]):
