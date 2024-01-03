@@ -99,13 +99,9 @@ def set_all_depths_in_subgraph(ontology: Ontology, root_id: str, relations: List
             the root. max calculates the length of the longest path, min the one of the shortest
         current_depth (int): the current depth in the ontology
     """
-    visited = set()
     stack = [(root_id, current_depth)]
     while stack:
         node_id, current_depth = stack.pop()
-        if node_id in visited:
-            continue
-        visited.add(node_id)
         if "depth" not in ontology.node(node_id):
             ontology.node(node_id)["depth"] = current_depth
         else:
