@@ -73,6 +73,7 @@ def get_all_common_ancestors(node_ids: List[str], ontology: Ontology, min_distan
 
 
 def set_all_depths(ontology: Ontology, relations: List[str] = None, comparison_func=max):
+    logger.info("Setting depth for all nodes")
     start_time = time.time()
     for root_id in ontology.get_roots():
         if "type" not in ontology.node(root_id) or ontology.node_type(root_id) == "CLASS":
@@ -184,6 +185,7 @@ def set_tot_annots(ontology: Ontology, relations: List[str] = None):
     Returns:
         Set[str]: the set of all annotated genes in the subgraph
     """
+    logger.info("Setting total annotation counts")
     start_time = time.time()
     for node_id in ontology.nodes():
         if "rel_annot_genes" in ontology.node(node_id) and ontology.node(node_id)["rel_annot_genes"]:
@@ -206,6 +208,7 @@ def set_num_subsumers(ontology: Ontology, root_id: str, relations: List[str] = N
         root_id (str): the ID of the root term of the subgraph to process
         relations (List[str]): list of relations to consider
     """
+    logger.info("Setting number of subsumers")
     start_time = time.time()
     visited = set()
     stack = [(root_id, set())]
@@ -237,6 +240,7 @@ def set_leaf_sets(ontology: Ontology, root_id: str, relations: List[str] = None)
         root_id (str): the ID of the root term of the subgraph to process
         relations (List[str]): list of relations to consider
     """
+    logger.info("Setting leaf sets")
     start_time = time.time()
     visited = set()
     stack = [root_id]
@@ -268,6 +272,7 @@ def set_num_leaves(ontology: Ontology, root_id: str, relations: List[str] = None
         root_id (str): the ID of the root term of the subgraph to process
         relations (List[str]): list of relations to consider
     """
+    logger.info("Setting number of leaves")
     start_time = time.time()
     for node_id in ontology.nodes():
         if "set_leaves" in ontology.node(node_id):
@@ -287,6 +292,7 @@ def set_information_content_in_subgraph(ontology: Ontology, root_id: str, maxlea
         maxleaves (int): the maximum number of leaves in the subgraph
         relations (List[str]): list of relations to consider
     """
+    logger.info("Calculating IC values")
     start_time = time.time()
     visited = set()
     stack = [root_id]
