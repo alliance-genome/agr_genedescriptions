@@ -204,7 +204,7 @@ class DataManager(object):
         if terms_replacement_regex:
             self.rename_ontology_terms(ontology=ontology, terms_replacement_regex=terms_replacement_regex)
         root_nodes = [n for n in ontology.nodes() if len(
-            list(g.predecessors(n))) == 0 and len(list(ontology.successors(n))) > 0]
+            list(ontology.predecessors(n))) == 0 and len(list(ontology.successors(n))) > 0]
         set_all_depths(ontology=ontology, root_node_ids=root_nodes, relations=self.get_relations(ontology_type))
         if config.get_module_property(module=module,
                                       prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "ic":
