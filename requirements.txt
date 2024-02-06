@@ -3,6 +3,6 @@ namedlist
 inflect
 pyyaml>=4.2b1
 numpy
-git+https://github.com/biolink/ontobio.git@patch-qc-iba-go-refontobio#egg=ontobio
+git+https://github.com/biolink/ontobio.git@patch-qc-iba-go-ref#egg=ontobio
 num2words
 dacite
