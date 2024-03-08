@@ -1,13 +1,13 @@
 generic:
   cache_location: "gene_descriptions_cache"
-  output_dir: "/usr/caltech_curation_files/pub/gene_descriptions/WS292/pre-release"
+  output_dir: "/usr/caltech_curation_files/pub/gene_descriptions/WS293/pre-release"
   modules_delimiter: "."
   terms_delimiter: ";"
   # set 'data_fetcher' to 'agr_data_fetcher' to generate descriptions for AGR or 'wb_data_fetcher' for WormBase
 
 # options for WormBase gene description generation - used when data_fetcher is set to 'wb_data_fetcher'
 wb_options:
-  release: "WS291"
+  release: "WS292"
   raw_files_source: "ftp://ftp.ebi.ac.uk/pub/databases/wormbase/releases"
   agr_human_go_associations: "https://fms.alliancegenome.org/download/GAF_HUMAN.gaf.gz"
   agr_go_ontology: "https://fms.alliancegenome.org/download/ONTOLOGY_GO.obo.gz"

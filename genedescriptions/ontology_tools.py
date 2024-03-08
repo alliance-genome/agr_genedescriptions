@@ -119,10 +119,8 @@ def set_ic_ontology_struct(ontology: Ontology, root_node_ids: List[str], relatio
                                                               ontology.node_type(root_id) == "CLASS"):
             set_num_subsumers(ontology=ontology, root_id=root_id, relations=relations)
     for root_id in root_node_ids:
-        if "num_leaves" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
-                                                           ontology.node_type(root_id) == "CLASS"):
-            set_leaf_sets(ontology=ontology, root_id=root_id, relations=relations)
-            set_num_leaves(ontology=ontology, root_id=root_id, relations=relations)
+        set_leaf_sets(ontology=ontology, root_id=root_id, relations=relations)
+        set_num_leaves(ontology=ontology, root_id=root_id, relations=relations)
     for root_id in root_node_ids:
         if "depth" not in ontology.node(root_id) and ("type" not in ontology.node(root_id) or
                                                       ontology.node_type(root_id) == "CLASS"):
@@ -244,8 +242,6 @@ def set_leaf_sets(ontology: Ontology, root_id: str, relations: List[str] = None)
         if node_id in visited:
             continue
         visited.add(node_id)
-        if "set_leaves" in ontology.node(node_id):
-            continue
         children = set(ontology.children(node=node_id, relations=relations))
         children.discard(node_id)
         if not children:

@@ -3,7 +3,7 @@ namedlist
 inflect
 pyyaml>=4.2b1
 numpy
-ontobio==2.7.14
+ontobio==2.8.22
 prefixcommons>=0.1.9
 num2words
 dacite
