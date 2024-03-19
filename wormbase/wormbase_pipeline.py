@@ -158,9 +158,24 @@ def set_expression_cluster_sentence(dm: WBDataManager, conf_parser: GenedescConf
             additional_postfix_final_word="studies", use_single_form=True)
 
 
-def set_information_poor_sentence(orth_fullnames: List[str], selected_orthologs,
-                                  conf_parser: GenedescConfigParser, human_df_agr: DataManager,
-                                  gene_desc: GeneDescription, dm: WBDataManager, gene: Gene):
+def set_protein_domain_sentence(conf_parser: GenedescConfigParser,
+                                gene_desc: GeneDescription, dm: WBDataManager):
+    protein_domains = dm.protein_domains[gene_desc.gene_id[3:]]
+    protein_domains_filtered = set([ptdom[1] for ptdom in protein_domains if ptdom[1] != "" and ptdom[1] != " "])
+    if protein_domains and len(protein_domains_filtered) > 0:
+        dom_word = "domain"
+        if len(protein_domains_filtered) > 1:
+            dom_word = "domains"
+        gene_desc.set_or_extend_module_description_and_final_stats(
+            module=Module.PROTEIN_DOMAIN,
+            description="is predicted to encode a protein with the following " + dom_word + ": " +
+                        concatenate_words_with_oxford_comma(list(protein_domains_filtered),
+                                                            separator=conf_parser.get_terms_delimiter()))
+
+
+def set_human_go_functional_experimental_sentence(orth_fullnames: List[str], selected_orthologs,
+                                                  human_df_agr: DataManager, conf_parser: GenedescConfigParser,
+                                                  gene_desc: GeneDescription):
     if len(orth_fullnames) == 1 and orth_fullnames[0] == "Homo sapiens":
         best_orth = get_best_human_ortholog_for_info_poor(selected_orthologs,
                                                           conf_parser.get_annotations_priority(module=Module.GO),
@@ -175,32 +190,26 @@ def set_information_poor_sentence(orth_fullnames: List[str], selected_orthologs,
                 aspect='F', qualifier="contributes_to", merge_groups_with_same_prefix=True, keep_only_best_group=True)
             human_func_sent = human_func_module_sentences.get_description()
             if human_func_sent:
+                human_func_sent = "human " + human_df_agr.go_associations.subject_label_map[
+                    best_orth] + " " + human_func_sent[0].lower() + human_func_sent[1:]
+                human_func_sent = human_func_sent.replace(". Contributes as a structural constituent",
+                                                          ". Human " + human_df_agr.go_associations.subject_label_map[
+                                                              best_orth] + " contributes as a structural constituent")
                 gene_desc.set_or_extend_module_description_and_final_stats(
-                    module=Module.INFO_POOR_HUMAN_FUNCTION, description="human " +
-                                                                        human_df_agr.go_associations.subject_label_map[
-                                                                            best_orth] + " " + human_func_sent)
+                    module=Module.INFO_POOR_HUMAN_FUNCTION, description=human_func_sent)
             human_func_module_sentences = human_go_sent_generator.get_module_sentences(
                 aspect='F', qualifier="enables", merge_groups_with_same_prefix=True, keep_only_best_group=True)
             human_func_sent = human_func_module_sentences.get_description()
             if human_func_sent:
+                if human_func_sent.startswith("A structural constituent"):
+                    human_func_sent = "Is a" + human_func_sent[1:]
+                human_func_sent = "human " + human_df_agr.go_associations.subject_label_map[
+                    best_orth] + " " + human_func_sent[0].lower() + human_func_sent[1:]
+                human_func_sent = human_func_sent.replace(". A structural constituent",
+                                                          ". Human " + human_df_agr.go_associations.subject_label_map[
+                                                              best_orth] + " is a structural constituent")
                 gene_desc.set_or_extend_module_description_and_final_stats(
-                    module=Module.INFO_POOR_HUMAN_FUNCTION, description="human " +
-                                                                        human_df_agr.go_associations.subject_label_map[
-                                                                            best_orth] + " " +
-                                                                        human_func_sent[0].lower() +
-                                                                        human_func_sent[1:])
-
-    protein_domains = dm.protein_domains[gene_desc.gene_id[3:]]
-    protein_domains_filtered = set([ptdom[1] for ptdom in protein_domains if ptdom[1] != "" and ptdom[1] != " "])
-    if protein_domains and len(protein_domains_filtered) > 0:
-        dom_word = "domain"
-        if len(protein_domains_filtered) > 1:
-            dom_word = "domains"
-        gene_desc.set_or_extend_module_description_and_final_stats(
-            module=Module.PROTEIN_DOMAIN,
-            description="is predicted to encode a protein with the following " + dom_word + ": " +
-                        concatenate_words_with_oxford_comma(list(protein_domains_filtered),
-                                                            separator=conf_parser.get_terms_delimiter()))
+                    module=Module.INFO_POOR_HUMAN_FUNCTION, description=human_func_sent)
 
 
 def set_sister_species_sentence(dm: WBDataManager, conf_parser: GenedescConfigParser, sister_sp_fullname,
@@ -270,11 +279,16 @@ def main():
                 set_expression_cluster_sentence(dm=dm, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene,
                                                 api_manager=api_manager)
             set_disease_module(df=dm, conf_parser=conf_parser, gene=gene, gene_desc=gene_desc)
+            info_poor = False
             if not gene_desc.go_description:
-                set_information_poor_sentence(orth_fullnames=dm.orth_fullnames,
-                                              selected_orthologs=selected_orthologs, conf_parser=conf_parser,
-                                              human_df_agr=df_agr, gene_desc=gene_desc, dm=dm, gene=gene)
+                info_poor = True
+                set_protein_domain_sentence(conf_parser=conf_parser, gene_desc=gene_desc, dm=dm)
             gene_desc.set_or_extend_module_description_and_final_stats(module=Module.ORTHOLOGY, description=orth_sent)
+            if info_poor:
+                set_human_go_functional_experimental_sentence(orth_fullnames=dm.orth_fullnames,
+                                                              selected_orthologs=selected_orthologs,
+                                                              human_df_agr=df_agr, conf_parser=conf_parser,
+                                                              gene_desc=gene_desc)
             if "main_sister_species" in species[organism] and species[organism]["main_sister_species"] and \
                     dm.get_best_orthologs_for_gene(gene.id, orth_species_full_name=[dm.sister_sp_fullname],
                                                    sister_species_data_fetcher=sister_df,
