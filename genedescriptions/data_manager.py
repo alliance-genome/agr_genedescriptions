@@ -358,13 +358,18 @@ class DataManager(object):
             ontology = self.expression_ontology
         if dataset is not None and ontology is not None:
             priority_map = dict(zip(priority_list, reversed(range(len(list(priority_list))))))
-            annotations = [annotation for annotation in dataset.associations(gene_id) if
-                           ontology.has_node(annotation["object"]["id"]) and (
-                               include_obsolete or ("deprecated" not in ontology.node(annotation["object"]["id"]) or
-                                                    not ontology.node(annotation["object"]["id"])["deprecated"]))
-                           and (include_negative_results or ("NOT" not in annotation["qualifiers"] and
-                                                             not annotation["negated"]))
-                           and ontology.label(annotation["object"]["id"])]
+            annotations = []
+            for annotation in dataset.associations(gene_id):
+                if not ontology.has_node(annotation["object"]["id"]):
+                    continue
+                if (not include_obsolete and "deprecated" in ontology.node(annotation["object"]["id"])["meta"] and
+                        ontology.node(annotation["object"]["id"])["meta"]["deprecated"]):
+                    continue
+                if not include_negative_results and ("NOT" in annotation["qualifiers"] or annotation["negated"]):
+                    continue
+                if not ontology.label(annotation["object"]["id"]):
+                    continue
+                annotations.append(annotation)
             id_selected_annotation = {}
             for annotation in annotations:
                 if annotation["evidence"]["type"] in priority_map.keys():
