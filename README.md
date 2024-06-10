@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This software generates gene descriptions for Model Organism Databases within the Alliance of Genome Resources project.
+This software generates gene summaries for Model Organisms part of the Alliance of Genome Resources project.
 
 ## Installation
 
@@ -13,9 +13,9 @@ root directory of the project:
 $ pip3 install .
 ```
 
-## Generating Descriptions
+## Generating summaries for WormBase
 
-To generate gene descriptions for WormBase, run the `exec_all_pipelines.sh` shell script in the `wormbase` folder.
+To generate gene summaries for WormBase, run the `exec_all_pipelines.sh` shell script in the `wormbase` folder.
 
 ### Configuring the main script
 
