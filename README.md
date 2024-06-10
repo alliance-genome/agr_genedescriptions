@@ -2,10 +2,7 @@
 
 ## Introduction
 
-This project generates gene descriptions for Model Organism Databases within the Alliance of Genome Resources project.
-
-The complete documentation of the project can be found on
-[ReadTheDocs](http://wb-genedescriptions.readthedocs.io/en/latest/)
+This software generates gene descriptions for Model Organism Databases within the Alliance of Genome Resources project.
 
 ## Installation
 
@@ -18,13 +15,11 @@ $ pip3 install .
 
 ## Generating Descriptions
 
-TBD
+To generate gene descriptions for WormBase, run the `exec_all_pipelines.sh` shell script in the `wormbase` folder.
 
 ### Configuring the main script
 
 the main script can be configured through a configuration file in .yaml format. The default file is *genedesc.yaml*,
 but a different file can be provided by using the argument -c.
 
-#### Species
-
-#### Other options
+To configure the WormBase pipeline, modify the file `config_wb.yml` in the `wormbase` folder.
