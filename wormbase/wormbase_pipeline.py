@@ -282,7 +282,8 @@ def main():
             info_poor = False
             if not gene_desc.go_description:
                 info_poor = True
-                set_protein_domain_sentence(conf_parser=conf_parser, gene_desc=gene_desc, dm=dm)
+                if not gene_desc.tissue_expression_description:
+                    set_protein_domain_sentence(conf_parser=conf_parser, gene_desc=gene_desc, dm=dm)
             gene_desc.set_or_extend_module_description_and_final_stats(module=Module.ORTHOLOGY, description=orth_sent)
             if info_poor:
                 set_human_go_functional_experimental_sentence(orth_fullnames=dm.orth_fullnames,
