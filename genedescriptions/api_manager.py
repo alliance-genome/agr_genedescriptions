@@ -3,6 +3,7 @@ import logging
 import os
 import ssl
 import urllib.request
+from http.client import HTTPException
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +32,16 @@ class APIManager(object):
             data = json.dumps({"token": self.textpresso_api_token, "query": {
                 "keywords": keyword, "type": "document", "corpora": ["C. elegans and Suppl"]}})
             data = data.encode('utf-8')
-            req = urllib.request.Request(self.tpc_api_endpoint, data, headers={'Content-type': 'application/json',
-                                                                               'Accept': 'application/json'})
-            res = urllib.request.urlopen(req)
+            res = None
+            num_tries = 0
+            try:
+                num_tries += 1
+                req = urllib.request.Request(self.tpc_api_endpoint, data, headers={'Content-type': 'application/json',
+                                                                                   'Accept': 'application/json'})
+                res = urllib.request.urlopen(req)
+            except HTTPException:
+                if num_tries > 5:
+                    raise HTTPException
             logger.debug("Sending request to Textpresso Central API")
             popularity = int(json.loads(res.read().decode('utf-8')))
             self.tpc_cache[keyword] = popularity
