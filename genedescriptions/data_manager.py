@@ -200,10 +200,13 @@ class DataManager(object):
         terms_replacement_regex = config.get_module_property(module=module, prop=ConfigModuleProperty.RENAME_TERMS)
         if terms_replacement_regex:
             self.rename_ontology_terms(ontology=ontology, terms_replacement_regex=terms_replacement_regex)
-        set_all_depths(ontology=ontology, relations=self.get_relations(ontology_type))
+        root_nodes = [n for n in ontology.nodes() if len(
+            list(ontology.parents(n))) == 0 and len(list(ontology.children(n))) > 0]
+        set_all_depths(ontology=ontology, root_node_ids=root_nodes, relations=self.get_relations(ontology_type))
         if config.get_module_property(module=module,
                                       prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "ic":
-            set_ic_ontology_struct(ontology=ontology, relations=self.get_relations(ontology_type))
+            set_ic_ontology_struct(ontology=ontology, relations=self.get_relations(ontology_type),
+                                   root_node_ids=root_nodes)
         if slim_cache_path:
             slim_url = config.get_module_property(module=module, prop=ConfigModuleProperty.SLIM_URL)
             self.load_slim(module=module, slim_url=slim_url, slim_cache_path=slim_cache_path)
@@ -302,7 +305,11 @@ class DataManager(object):
             self.expression_associations = assocs
         if config.get_module_property(module=get_module_from_data_type(associations_type),
                                       prop=ConfigModuleProperty.TRIMMING_ALGORITHM) == "icGO":
-            set_ic_annot_freq(self.get_ontology(associations_type), self.get_associations(associations_type))
+            ontology = self.get_ontology(associations_type)
+            root_nodes = [n for n in ontology if len(
+                list(ontology.parents(n))) == 0 and len(list(ontology.children(n))) > 0]
+            set_ic_annot_freq(self.get_ontology(associations_type), self.get_associations(associations_type),
+                              root_nodes)
 
     def load_associations_from_file(self, associations_type: DataType, associations_url: str,
                                     associations_cache_path: str, config: GenedescConfigParser) -> None:
