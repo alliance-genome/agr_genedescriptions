@@ -1,7 +1,7 @@
 annotated-types==0.6.0
 antlr4-python3-runtime==4.9.3
 bidict==0.22.1
-certifi==2024.2.2
+certifi==2024.7.4
 cffi==1.16.0
 CFGraph==0.2.1
 chardet==5.2.0
