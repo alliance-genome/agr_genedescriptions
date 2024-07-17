@@ -71,7 +71,7 @@ rdflib==7.0.0
 rdflib-jsonld==0.6.1
 rdflib-shim==1.0.3
 readme-renderer==42.0
-requests==2.31.0
+requests==2.32.2
 requests-toolbelt==1.0.0
 rfc3986==2.0.0
 rich==13.7.0
