@@ -4,7 +4,7 @@ WORKDIR /usr/src/gene_descriptions
 
 ADD . .
 
-RUN apt-get update && apt-get install -y openjdk-11-jdk tzdata wget
+RUN apt-get update && apt-get install -y tzdata wget
 ENV TZ="America/Los_Angeles"
 RUN pip install -r requirements.txt
 
