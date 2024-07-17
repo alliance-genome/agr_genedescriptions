@@ -8,3 +8,4 @@ prefixcommons>=0.1.9
 num2words
 dacite
 psycopg2-binary
+gast==0.2.2
