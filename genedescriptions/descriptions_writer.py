@@ -96,6 +96,8 @@ class DescriptionsWriter(object):
                                   release_version + " version of WormBase\"\n")
                     outfile.write("Automated_description\t\"" + genedesc.description +
                                   "\"\tPaper_evidence\t\"WBPaper00065943\"\n\n")
+                    outfile.write("Automated_description\t\"" + genedesc.description +
+                                  "\"\tPaper_evidence\t\"WBPaper00067038\"\n\n")
 
     def write_plain_text(self, file_path):
         """write the descriptions to a plain text file

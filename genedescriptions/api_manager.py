@@ -34,15 +34,18 @@ class APIManager(object):
             data = data.encode('utf-8')
             res = None
             num_tries = 0
-            try:
-                num_tries += 1
-                req = urllib.request.Request(self.tpc_api_endpoint, data, headers={'Content-type': 'application/json',
-                                                                                   'Accept': 'application/json'})
-                res = urllib.request.urlopen(req)
-            except HTTPException:
-                if num_tries > 5:
-                    raise HTTPException
-            logger.debug("Sending request to Textpresso Central API")
+            while num_tries < 5:
+                try:
+                    num_tries += 1
+                    logger.debug("Sending request to Textpresso Central API")
+                    req = urllib.request.Request(self.tpc_api_endpoint, data, headers={'Content-type': 'application/json',
+                                                                                       'Accept': 'application/json'})
+                    res = urllib.request.urlopen(req)
+                    break
+                except Exception:
+                    pass
+            if num_tries >= 5:
+                raise HTTPException
             popularity = int(json.loads(res.read().decode('utf-8')))
             self.tpc_cache[keyword] = popularity
             return popularity
