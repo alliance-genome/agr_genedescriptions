@@ -1,10 +1,10 @@
-FROM python:3.8-alpine3.16
+FROM python:3.8-slim
 
 WORKDIR /usr/src/gene_descriptions
 
 ADD . .
 
-RUN apk update && apk add make automake build-base gcc g++ gfortran openblas-dev python3-dev libffi-dev openjdk11 bash tzdata
+RUN apt-get update && apt-get install -y openjdk-11-jdk tzdata
 ENV TZ="America/Los_Angeles"
 RUN pip install -r requirements.txt
 
