@@ -95,7 +95,7 @@ class DescriptionsWriter(object):
                                                                      " script based on data from the " +
                                   release_version + " version of WormBase\"\n")
                     outfile.write("Automated_description\t\"" + genedesc.description +
-                                  "\"\tPaper_evidence\t\"WBPaper00065943\"\n\n")
+                                  "\"\tPaper_evidence\t\"WBPaper00065943\"\n")
                     outfile.write("Automated_description\t\"" + genedesc.description +
                                   "\"\tPaper_evidence\t\"WBPaper00067038\"\n\n")
 
