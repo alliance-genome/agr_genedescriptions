@@ -200,18 +200,30 @@ go_sentences_options:
     IBD:
       group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
       priority: 17
+    IKR:
+      group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
+      priority: 18
+    IRD:
+      group: PHYLOGENETIC_ANALYSIS_AND_SEQUENCE_BASED_ANALYSIS
+      priority: 19
     TAS:
       group: INFERRED_BY_CURATORS_AND_AUTHORS
-      priority: 18
+      priority: 20
     IC:
       group: INFERRED_BY_CURATORS_AND_AUTHORS
-      priority: 19
+      priority: 21
+    NAS:
+      group: INFERRED_BY_CURATORS_AND_AUTHORS
+      priority: 22
+    IGC:
+      group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
+      priority: 23
     RCA:
       group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
-      priority: 21
+      priority: 25
     IEA:
       group: ELECTRONIC_AND_COMPUTATIONAL_ANALYSIS
-      priority: 20
+      priority: 24
   group_priority:
     EXPERIMENTAL: 1
     HIGH_THROUGHPUT_EXPERIMENTAL: 2
