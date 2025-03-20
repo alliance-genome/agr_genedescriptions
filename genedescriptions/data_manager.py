@@ -1,21 +1,21 @@
 import gzip
 import logging
-import urllib.request
-import shutil
 import os
 import re
-import inflect
-
-from enum import Enum
+import shutil
+import urllib.request
 from collections import defaultdict
+from enum import Enum
 from typing import List, Iterable, Dict
+
+import inflect
 from ontobio import AssociationSetFactory
+from ontobio.assocmodel import AssociationSet
 from ontobio.io.assocparser import AssocParserConfig
 from ontobio.io.gafparser import GafParser
-from ontobio.model.association import GoAssociation
-from ontobio.ontol_factory import OntologyFactory
 from ontobio.ontol import Ontology
-from ontobio.assocmodel import AssociationSet
+from ontobio.ontol_factory import OntologyFactory
+
 from genedescriptions.commons import Gene, DataType, Module, get_module_from_data_type
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.ontology_tools import set_all_depths, set_ic_annot_freq, set_ic_ontology_struct
