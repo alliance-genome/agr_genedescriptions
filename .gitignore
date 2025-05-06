@@ -7,5 +7,5 @@ docs/_build/*
 venv/*
 generated_descriptions/*
 tests/cache/*
-/wormbase/generated_descriptions/
-/wormbase/gene_descriptions_cache/
+/pipelines/wormbase/generated_descriptions/
+/pipelines/wormbase/gene_descriptions_cache/

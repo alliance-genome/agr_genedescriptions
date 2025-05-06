@@ -10,7 +10,7 @@ from num2words import num2words
 
 from genedescriptions.api_manager import APIManager
 from genedescriptions.commons import DataType, Module, Gene
-from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
+from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.data_manager import DataManager, ExpressionClusterType, ExpressionClusterFeature
 from genedescriptions.gene_description import GeneDescription
 from genedescriptions.descriptions_generator import OntologySentenceGenerator
@@ -19,7 +19,7 @@ from genedescriptions.precanned_modules import set_gene_ontology_module, set_dis
     generate_ortholog_sentence_wormbase_human, generate_ortholog_sentence_wormbase_non_c_elegans
 from genedescriptions.sentence_generation_functions import concatenate_words_with_oxford_comma, \
     get_best_human_ortholog_for_info_poor
-from wormbase.wb_data_manager import WBDataManager
+from pipelines.wormbase.wb_data_manager import WBDataManager
 
 
 USE_CACHE = True
