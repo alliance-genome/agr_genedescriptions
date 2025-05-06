@@ -1,8 +1,11 @@
 import argparse
 import logging
 
-from genedescriptions.commons import DataType
+from genedescriptions.commons import DataType, Gene
 from genedescriptions.config_parser import GenedescConfigParser
+from genedescriptions.gene_description import GeneDescription
+from genedescriptions.precanned_modules import set_expression_module
+from genedescriptions.descriptions_writer import DescriptionsWriter
 from pipelines.alliance.alliance_data_manager import AllianceDataManager
 
 
@@ -24,8 +27,20 @@ def main():
     data_manager.load_ontology_from_persistent_store(ontology_type=DataType.EXPR, provider="WB")
     data_manager.load_annotations_from_persistent_store(associations_type=DataType.EXPR,
                                                         taxon_id="NCBITaxon:6239", provider="WB")
+    json_desc_writer = DescriptionsWriter()
+    for gene_info in data_manager.get_gene_data():
+        gene = Gene(id=gene_info["gene_id"], name=gene_info["gene_symbol"], dead=False, pseudo=False)
+        gene_desc = GeneDescription(gene_id=gene.id,
+                                    gene_name=gene.name,
+                                    add_gene_name=False,
+                                    config=conf_parser)
+        set_expression_module(df=data_manager,
+                              conf_parser=conf_parser,
+                              gene_desc=gene_desc,
+                              gene=gene)
+        json_desc_writer.add_gene_desc(gene_desc)
 
-
+    json_desc_writer.write_json(file_path="wormbase.json", pretty=True, include_single_gene_stats=False)
 
 
 if __name__ == '__main__':
