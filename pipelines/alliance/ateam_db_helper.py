@@ -33,10 +33,13 @@ def get_gene_data(provider: str):
             JOIN organization org ON be.dataprovider_id = org.id
         WHERE
             slota.obsolete = false
-        AND org.abbreviation = :provider;
+        AND
+            slota.slotannotationtype = 'GeneSymbolSlotAnnotation'
+        AND
+            org.abbreviation = :provider;
         """)
-        rows = session.execute(sql_query, {'provider': tuple(provider)}).fetchall()
-        return [{"gene_id": row["gene_id"], "gene_symbol": row["gene_symbol"]} for row in rows]
+        rows = session.execute(sql_query, {'provider': provider}).fetchall()
+        return [{"gene_id": row[0], "gene_symbol": row[1]} for row in rows]
     finally:
         session.close()
 
@@ -62,8 +65,8 @@ def get_expression_annotations(taxon_id: str):
             slota.obsolete = false
         AND ot_taxon.curie = :taxon_id;
         """)
-        rows = session.execute(sql_query, {'taxon_id': tuple(taxon_id)}).fetchall()
-        return [{"gene_id": row["geneId"], "anatomy_id": row["anatomyId"]} for row in rows]
+        rows = session.execute(sql_query, {'taxon_id': taxon_id}).fetchall()
+        return [{"gene_id": row[0], "gene_symbol": row[1], "anatomy_id": row[2]} for row in rows]
     finally:
         session.close()
 
@@ -75,27 +78,31 @@ def get_ontology_pairs(curie_prefix: str):
         SELECT
             otc.curie parentCurie,
             otc.name parentName,
+            otc.namespace parentType,
             otc.obsolete parentIsObsolete,
             otp.curie childCurie,
             otp.name childName,
+            otp.namespace childType,
             otp.obsolete childIsObsolete,
             'IS_A' relType
         FROM
             ontologyterm otp JOIN ontologyterm_isa_parent_children otpc ON otp.id = otpc.isaparents_id
                              JOIN ontologyterm otc ON otpc.isachildren_id = otc.id
         WHERE
-            otp.curie LIKE ':curieprefix%';
+            otp.curie LIKE :curieprefix;
         """)
-        rows = session.execute(sql_query, {'curieprefix': tuple(curie_prefix)}).fetchall()
+        rows = session.execute(sql_query, {'curieprefix': f"{curie_prefix}%"}).fetchall()
         return [
             {
-                "parent_curie": row["parentCurie"],
-                "parent_name": row["parentName"],
-                "parent_is_obsolete": row["parentIsObsolete"],
-                "child_curie": row["childCurie"],
-                "child_name": row["childName"],
-                "child_is_obsolete": row["childIsObsolete"],
-                "rel_type": row["relType"]
+                "parent_curie": row[0],
+                "parent_name": row[1],
+                "parent_type": row[2],
+                "parent_is_obsolete": row[3],
+                "child_curie": row[4],
+                "child_name": row[5],
+                "child_type": row[6],
+                "child_is_obsolete": row[7],
+                "rel_type": row[8]
             } for row in rows]
     finally:
         session.close()

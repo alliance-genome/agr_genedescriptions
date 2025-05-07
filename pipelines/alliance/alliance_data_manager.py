@@ -1,7 +1,9 @@
 import logging
 from typing import List
 
-from genedescriptions.commons import DataType, Module
+from ontobio import Ontology
+
+from genedescriptions.commons import DataType, Module, Gene
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import DataManager
 from pipelines.alliance.ateam_db_helper import get_expression_annotations, get_ontology_pairs, get_gene_data
@@ -45,15 +47,49 @@ class AllianceDataManager(DataManager):
                 terms_blacklist=self.config.get_module_property(module=Module.EXPRESSION,
                                                                 prop=ConfigModuleProperty.EXCLUDE_TERMS))
 
+    @staticmethod
+    def add_neo_term_to_ontobio_ontology_if_not_exists(term_id, term_label, term_type, is_obsolete, ontology):
+        """Add Term to Ontobio Ontology If Not Exists."""
+        if not ontology.has_node(term_id) and term_label:
+            if is_obsolete in ["true", "True"]:
+                meta = {
+                    "deprecated": True, "basicPropertyValues": [
+                        {"pred": "OIO:hasOBONamespace", "val": term_type}]
+                }
+            else:
+                meta = {
+                    "basicPropertyValues": [
+                        {"pred": "OIO:hasOBONamespace", "val": term_type}]
+                }
+            ontology.add_node(id=term_id, label=term_label, meta=meta)
+
     def load_ontology_from_persistent_store(self, ontology_type: DataType, provider: str = None):
         curie_prefix = ""
+        ontology = Ontology()
         if ontology_type == DataType.GO:
             pass
         elif ontology_type == DataType.EXPR:
             if provider == "WB":
                 curie_prefix = "WBbt"
-            ontology = get_ontology_pairs(curie_prefix=curie_prefix)
+            ontology_pairs = get_ontology_pairs(curie_prefix=curie_prefix)
+            for onto_pair in ontology_pairs:
+                self.add_neo_term_to_ontobio_ontology_if_not_exists(
+                    term_id=onto_pair["parent_curie"],
+                    term_label=onto_pair["parent_name"],
+                    term_type=onto_pair["parent_type"],
+                    is_obsolete=onto_pair["parent_is_obsolete"],
+                    ontology=ontology)
+                self.add_neo_term_to_ontobio_ontology_if_not_exists(
+                    term_id=onto_pair["child_curie"],
+                    term_label=onto_pair["child_name"],
+                    term_type=onto_pair["child_type"],
+                    is_obsolete=onto_pair["child_is_obsolete"],
+                    ontology=ontology)
+                ontology.add_parent(id=onto_pair["child_curie"], pid=onto_pair["parent_curie"],
+                                    relation="subClassOf" if onto_pair["rel_type"] == "IS_A" else "BFO:0000050")
             self.set_ontology(ontology_type=ontology_type, ontology=ontology, config=self.config)
 
     def load_gene_data_from_persistent_store(self, provider: str):
-        self.gene_data = get_gene_data(provider=provider)
+        genes = get_gene_data(provider=provider)
+        for gene in genes:
+            self.gene_data[gene["gene_id"]] = Gene(gene["gene_id"], gene["gene_symbol"], False, False)

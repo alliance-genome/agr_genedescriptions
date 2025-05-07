@@ -23,13 +23,15 @@ def main():
     conf_parser = GenedescConfigParser(args.config_file)
 
     data_manager = AllianceDataManager(config=conf_parser)
+    logger.info("Loading gene data")
     data_manager.load_gene_data_from_persistent_store(provider="WB")
+    logger.info("Loading anatomy ontology data")
     data_manager.load_ontology_from_persistent_store(ontology_type=DataType.EXPR, provider="WB")
+    logger.info("Loading expression annotations")
     data_manager.load_annotations_from_persistent_store(associations_type=DataType.EXPR,
                                                         taxon_id="NCBITaxon:6239", provider="WB")
     json_desc_writer = DescriptionsWriter()
-    for gene_info in data_manager.get_gene_data():
-        gene = Gene(id=gene_info["gene_id"], name=gene_info["gene_symbol"], dead=False, pseudo=False)
+    for gene in data_manager.get_gene_data():
         gene_desc = GeneDescription(gene_id=gene.id,
                                     gene_name=gene.name,
                                     add_gene_name=False,
@@ -40,7 +42,8 @@ def main():
                               gene=gene)
         json_desc_writer.add_gene_desc(gene_desc)
 
-    json_desc_writer.write_json(file_path="wormbase.json", pretty=True, include_single_gene_stats=False)
+    json_desc_writer.write_json(file_path="wormbase.json", pretty=True, include_single_gene_stats=False,
+                                data_manager=data_manager)
 
 
 if __name__ == '__main__':
