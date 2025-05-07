@@ -63,6 +63,10 @@ def get_expression_annotations(taxon_id: str):
                                          JOIN slotannotation slota ON g.id = slota.singlegene_id
         WHERE
             slota.obsolete = false
+        AND
+            slota.slotannotationtype = 'GeneSymbolSlotAnnotation'
+        AND
+            ot.curie <> 'WBbt:0000100'
         AND ot_taxon.curie = :taxon_id;
         """)
         rows = session.execute(sql_query, {'taxon_id': taxon_id}).fetchall()

@@ -42,8 +42,7 @@ def main():
                               gene=gene)
         json_desc_writer.add_gene_desc(gene_desc)
 
-    json_desc_writer.write_json(file_path="wormbase.json", pretty=True, include_single_gene_stats=False,
-                                data_manager=data_manager)
+    json_desc_writer.write_json(file_path="wormbase.json", include_single_gene_stats=False, data_manager=data_manager)
 
 
 if __name__ == '__main__':
