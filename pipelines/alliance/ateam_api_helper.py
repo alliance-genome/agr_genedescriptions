@@ -43,6 +43,9 @@ def get_ontology_node_children(node_curie: str):
                 logger.debug("Request successful")
                 res = get_response.read().decode('utf-8')
                 json_res = json.loads(res)
+                if "entities" not in json_res:
+                    logger.warning("No entities found in response for ontology get children api")
+                    return []
                 return [entity for entity in json_res["entities"] if not entity["obsolete"]]
             else:
                 logger.error("Request error")

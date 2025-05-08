@@ -1,4 +1,6 @@
+import concurrent.futures
 import logging
+import time
 
 from ontobio import Ontology
 
@@ -69,7 +71,7 @@ class AllianceDataManager(DataManager):
         curie_prefix = ""
         ontology = Ontology()
         if ontology_type == DataType.GO:
-            pass
+            return
         elif ontology_type == DataType.EXPR:
             if provider == "WB":
                 curie_prefix = "WBbt"
@@ -85,24 +87,33 @@ class AllianceDataManager(DataManager):
                     ontology=ontology,
                     check_exists=False)
             nodes = roots
-            visited_nodes = set()
-            while nodes:
-                logger.debug(f"Number of visited nodes: {str(len(visited_nodes))}")
-                node = nodes.pop(0)
-                if node["descendantCount"] > 0:
-                    children = get_ontology_node_children(node_curie=node["curie"])
-                    for child in children:
-                        if child["curie"] not in visited_nodes:
-                            self.add_node_to_ontobio_ontology_if_not_exists(
-                                term_id=child["curie"],
-                                term_label=child["name"],
-                                term_type="anatomy",
-                                is_obsolete=False,
-                                ontology=ontology,
-                                check_exists=False)
-                            nodes.append(child)
-                            visited_nodes.add(child["curie"])
-                        ontology.add_parent(id=child["curie"], pid=node["curie"], relation="subClassOf")
+            visited_nodes = set(root["curie"] for root in roots)
+
+            def process_node(node):
+                children = get_ontology_node_children(node_curie=node["curie"])
+                new_children = []
+                for child in children:
+                    if child["curie"] not in visited_nodes:
+                        self.add_node_to_ontobio_ontology_if_not_exists(
+                            term_id=child["curie"],
+                            term_label=child["name"],
+                            term_type="anatomy",
+                            is_obsolete=False,
+                            ontology=ontology,
+                            check_exists=False)
+                        new_children.append(child)
+                        visited_nodes.add(child["curie"])
+                    ontology.add_parent(id=child["curie"], pid=node["curie"], relation="subClassOf")
+                return new_children
+
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                while nodes:
+                    logger.debug(f"Number of visited nodes: {len(visited_nodes)}")
+                    future_to_node = {executor.submit(process_node, node): node for node in nodes}
+                    nodes = []
+                    for future in concurrent.futures.as_completed(future_to_node):
+                        nodes.extend([node for node in future.result() if node["childCount"] > 0])
+        self.set_ontology(ontology_type=ontology_type, ontology=ontology, config=self.config)
 
     def load_ontology_from_persistent_store(self, ontology_type: DataType, provider: str = None):
         curie_prefix = ""
@@ -113,19 +124,26 @@ class AllianceDataManager(DataManager):
             if provider == "WB":
                 curie_prefix = "WBbt"
             ontology_pairs = get_ontology_pairs(curie_prefix=curie_prefix)
+            added_nodes = set()
             for onto_pair in ontology_pairs:
-                self.add_node_to_ontobio_ontology_if_not_exists(
-                    term_id=onto_pair["parent_curie"],
-                    term_label=onto_pair["parent_name"],
-                    term_type=onto_pair["parent_type"],
-                    is_obsolete=onto_pair["parent_is_obsolete"],
-                    ontology=ontology)
-                self.add_node_to_ontobio_ontology_if_not_exists(
-                    term_id=onto_pair["child_curie"],
-                    term_label=onto_pair["child_name"],
-                    term_type=onto_pair["child_type"],
-                    is_obsolete=onto_pair["child_is_obsolete"],
-                    ontology=ontology)
+                if onto_pair["parent_curie"] not in added_nodes:
+                    self.add_node_to_ontobio_ontology_if_not_exists(
+                        term_id=onto_pair["parent_curie"],
+                        term_label=onto_pair["parent_name"],
+                        term_type=onto_pair["parent_type"],
+                        is_obsolete=onto_pair["parent_is_obsolete"],
+                        ontology=ontology,
+                        check_exists=False)
+                    added_nodes.add(onto_pair["parent_curie"])
+                if onto_pair["child_curie"] not in added_nodes:
+                    self.add_node_to_ontobio_ontology_if_not_exists(
+                        term_id=onto_pair["child_curie"],
+                        term_label=onto_pair["child_name"],
+                        term_type=onto_pair["child_type"],
+                        is_obsolete=onto_pair["child_is_obsolete"],
+                        ontology=ontology,
+                        check_exists=False)
+                    added_nodes.add(onto_pair["child_curie"])
                 ontology.add_parent(id=onto_pair["child_curie"], pid=onto_pair["parent_curie"],
                                     relation="subClassOf" if onto_pair["rel_type"] == "IS_A" else "BFO:0000050")
             self.set_ontology(ontology_type=ontology_type, ontology=ontology, config=self.config)

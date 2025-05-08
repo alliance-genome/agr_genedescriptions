@@ -2,6 +2,8 @@ import argparse
 import logging
 import time
 
+from ontobio import Ontology
+
 from genedescriptions.commons import DataType, Gene
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.gene_description import GeneDescription
@@ -29,19 +31,8 @@ def main():
 
     data_manager = AllianceDataManager(config=conf_parser)
     logger.info("Loading anatomy ontology data")
-    logger.info("Measuring time to load ontology from API")
-    start_time_api = time.time()
-    data_manager.load_ontology_from_ateam_api(ontology_type=DataType.EXPR, provider="WB")
-    end_time_api = time.time()
-    time_api = end_time_api - start_time_api
-    logger.info(f"Time to load ontology from API: {time_api:.2f} seconds")
-
-    logger.info("Measuring time to load ontology from persistent store")
-    start_time_store = time.time()
+    # data_manager.load_ontology_from_ateam_api(ontology_type=DataType.EXPR, provider="WB")
     data_manager.load_ontology_from_persistent_store(ontology_type=DataType.EXPR, provider="WB")
-    end_time_store = time.time()
-    time_store = end_time_store - start_time_store
-    logger.info(f"Time to load ontology from persistent store: {time_store:.2f} seconds")
 
     logger.info("Loading gene data")
     data_manager.load_gene_data_from_persistent_store(provider="WB")

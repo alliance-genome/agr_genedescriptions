@@ -80,14 +80,14 @@ def get_ontology_pairs(curie_prefix: str):
     try:
         sql_query = text("""
         SELECT
-            otc.curie parentCurie,
-            otc.name parentName,
-            otc.namespace parentType,
-            otc.obsolete parentIsObsolete,
-            otp.curie childCurie,
-            otp.name childName,
-            otp.namespace childType,
-            otp.obsolete childIsObsolete,
+            otp.curie parentCurie,
+            otp.name parentName,
+            otp.namespace parentType,
+            otp.obsolete parentIsObsolete,
+            otc.curie childCurie,
+            otc.name childName,
+            otc.namespace childType,
+            otc.obsolete childIsObsolete,
             'IS_A' relType
         FROM
             ontologyterm otp JOIN ontologyterm_isa_parent_children otpc ON otp.id = otpc.isaparents_id
