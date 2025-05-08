@@ -1,11 +1,11 @@
 import logging
-from typing import List
 
 from ontobio import Ontology
 
 from genedescriptions.commons import DataType, Module, Gene
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import DataManager
+from pipelines.alliance.ateam_api_helper import get_anatomy_ontologies_roots, get_ontology_node_children
 from pipelines.alliance.ateam_db_helper import get_expression_annotations, get_ontology_pairs, get_gene_data
 
 logger = logging.getLogger(__name__)
@@ -19,6 +19,7 @@ class AllianceDataManager(DataManager):
 
     def __init__(self, config: GenedescConfigParser, alliance_release_version: str = None):
         self.config = config
+        self.anatomy_ontologies_roots = None
         super().__init__()
 
     def load_annotations_from_persistent_store(self, associations_type: DataType, taxon_id: str, provider: str):
@@ -48,9 +49,10 @@ class AllianceDataManager(DataManager):
                                                                 prop=ConfigModuleProperty.EXCLUDE_TERMS))
 
     @staticmethod
-    def add_neo_term_to_ontobio_ontology_if_not_exists(term_id, term_label, term_type, is_obsolete, ontology):
+    def add_node_to_ontobio_ontology_if_not_exists(term_id, term_label, term_type, is_obsolete, ontology,
+                                                   check_exists: bool = True):
         """Add Term to Ontobio Ontology If Not Exists."""
-        if not ontology.has_node(term_id) and term_label:
+        if not check_exists or (not ontology.has_node(term_id) and term_label):
             if is_obsolete in ["true", "True"]:
                 meta = {
                     "deprecated": True, "basicPropertyValues": [
@@ -63,6 +65,45 @@ class AllianceDataManager(DataManager):
                 }
             ontology.add_node(id=term_id, label=term_label, meta=meta)
 
+    def load_ontology_from_ateam_api(self, ontology_type: DataType, provider: str = None):
+        curie_prefix = ""
+        ontology = Ontology()
+        if ontology_type == DataType.GO:
+            pass
+        elif ontology_type == DataType.EXPR:
+            if provider == "WB":
+                curie_prefix = "WBbt"
+            if self.anatomy_ontologies_roots is None:
+                self.anatomy_ontologies_roots = get_anatomy_ontologies_roots()
+            roots = [root for root in self.anatomy_ontologies_roots if root["curie"].startswith(curie_prefix)]
+            for root in roots:
+                self.add_node_to_ontobio_ontology_if_not_exists(
+                    term_id=root["curie"],
+                    term_label=root["name"],
+                    term_type="anatomy",
+                    is_obsolete=False,
+                    ontology=ontology,
+                    check_exists=False)
+            nodes = roots
+            visited_nodes = set()
+            while nodes:
+                logger.debug(f"Number of visited nodes: {str(len(visited_nodes))}")
+                node = nodes.pop(0)
+                if node["descendantCount"] > 0:
+                    children = get_ontology_node_children(node_curie=node["curie"])
+                    for child in children:
+                        if child["curie"] not in visited_nodes:
+                            self.add_node_to_ontobio_ontology_if_not_exists(
+                                term_id=child["curie"],
+                                term_label=child["name"],
+                                term_type="anatomy",
+                                is_obsolete=False,
+                                ontology=ontology,
+                                check_exists=False)
+                            nodes.append(child)
+                            visited_nodes.add(child["curie"])
+                        ontology.add_parent(id=child["curie"], pid=node["curie"], relation="subClassOf")
+
     def load_ontology_from_persistent_store(self, ontology_type: DataType, provider: str = None):
         curie_prefix = ""
         ontology = Ontology()
@@ -73,13 +114,13 @@ class AllianceDataManager(DataManager):
                 curie_prefix = "WBbt"
             ontology_pairs = get_ontology_pairs(curie_prefix=curie_prefix)
             for onto_pair in ontology_pairs:
-                self.add_neo_term_to_ontobio_ontology_if_not_exists(
+                self.add_node_to_ontobio_ontology_if_not_exists(
                     term_id=onto_pair["parent_curie"],
                     term_label=onto_pair["parent_name"],
                     term_type=onto_pair["parent_type"],
                     is_obsolete=onto_pair["parent_is_obsolete"],
                     ontology=ontology)
-                self.add_neo_term_to_ontobio_ontology_if_not_exists(
+                self.add_node_to_ontobio_ontology_if_not_exists(
                     term_id=onto_pair["child_curie"],
                     term_label=onto_pair["child_name"],
                     term_type=onto_pair["child_type"],
