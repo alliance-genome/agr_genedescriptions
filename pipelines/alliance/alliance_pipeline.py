@@ -34,11 +34,13 @@ def main():
     # data_manager.load_ontology_from_ateam_api(ontology_type=DataType.EXPR, provider="WB")
     data_manager.load_ontology_from_persistent_store(ontology_type=DataType.EXPR, provider="WB")
 
-    logger.info("Loading gene data")
-    data_manager.load_gene_data_from_persistent_store(provider="WB")
     logger.info("Loading expression annotations")
     data_manager.load_annotations_from_persistent_store(associations_type=DataType.EXPR,
                                                         taxon_id="NCBITaxon:6239", provider="WB")
+
+    logger.info("Loading gene data")
+    data_manager.load_gene_data_from_persistent_store(provider="WB")
+
     json_desc_writer = DescriptionsWriter()
     for gene in data_manager.get_gene_data():
         gene_desc = GeneDescription(gene_id=gene.id,

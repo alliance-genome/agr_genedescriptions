@@ -53,3 +53,39 @@ def get_ontology_node_children(node_curie: str):
     except requests.exceptions.RequestException as e:
         logger.error(f"Error occurred: {e}")
         return False
+
+
+def get_expression_annotations_from_api(data_provider: str):
+    """Get expression annotations from the A-team API."""
+    token = get_authentication_token()
+    headers = generate_headers(token)
+    data = {"expressionAnnotationSubject.dataProvider.abbreviation": data_provider}
+    page = 0
+    page_size = 5000
+    annotations = []
+    try:
+        while True:
+            url = f'{ATEAM_API}/gene-expression-annotation/findForPublic?limit={page_size}&page={page}&view=ForPublic'
+            get_request = urllib.request.Request(url=url, method='POST', headers=headers,
+                                                 data=json.dumps(data).encode('utf-8'))
+            with urllib.request.urlopen(get_request) as get_response:
+                if get_response.getcode() == 200:
+                    logger.debug("Request successful")
+                    res = get_response.read().decode('utf-8')
+                    json_res = json.loads(res)
+                    if json_res["returnedRecords"] == 0:
+                        break
+                    annotations.extend([{"gene_id": row["expressionAnnotationSubject"]["primaryExternalId"],
+                                         "gene_symbol": row["expressionAnnotationSubject"]["geneSymbol"]["displayText"],
+                                         "anatomy_id": row["expressionPattern"]["whereExpressed"][
+                                             "anatomicalStructure"]["curie"]} for row in json_res["results"]
+                                        if "expressionPattern" in row
+                                        ])
+                    page += 1
+                else:
+                    logger.error("Request error")
+                    return False
+        return annotations
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error occurred: {e}")
+        return False
