@@ -10,7 +10,7 @@ from genedescriptions.gene_description import GeneDescription
 from genedescriptions.precanned_modules import set_expression_module
 from genedescriptions.descriptions_writer import DescriptionsWriter
 from pipelines.alliance.alliance_data_manager import AllianceDataManager
-
+from pipelines.alliance.ateam_api_helper import get_gene_data_from_api
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +30,7 @@ def main():
     conf_parser = GenedescConfigParser(args.config_file)
 
     data_manager = AllianceDataManager(config=conf_parser)
+
     logger.info("Loading anatomy ontology data")
     # data_manager.load_ontology_from_ateam_api(ontology_type=DataType.EXPR, provider="WB")
     data_manager.load_ontology_from_persistent_store(ontology_type=DataType.EXPR, provider="WB")

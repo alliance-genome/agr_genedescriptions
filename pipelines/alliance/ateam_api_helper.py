@@ -89,3 +89,35 @@ def get_expression_annotations_from_api(data_provider: str):
     except requests.exceptions.RequestException as e:
         logger.error(f"Error occurred: {e}")
         return False
+
+
+def get_gene_data_from_api(data_provider: str):
+    """Get gene data from the A-team API."""
+    page = 0
+    page_size = 5000
+    token = get_authentication_token()
+    headers = generate_headers(token)
+    req_data = {"dataProvider.abbreviation": data_provider}
+    genes = []
+    try:
+        while True:
+            url = f'{ATEAM_API}/gene/find?limit={page_size}&page={page}'
+            request = urllib.request.Request(url=url, method='POST', headers=headers,
+                                             data=json.dumps(req_data).encode('utf-8'))
+            with urllib.request.urlopen(request) as get_response:
+                if get_response.getcode() == 200:
+                    logger.debug("Request successful")
+                    res = get_response.read().decode('utf-8')
+                    json_res = json.loads(res)
+                    if json_res["returnedRecords"] == 0:
+                        break
+                    genes.extend([{"gene_id": row["primaryExternalId"], "gene_symbol": row["geneSymbol"]["displayText"]}
+                                  for row in json_res["results"]])
+                    page += 1
+                else:
+                    logger.error("Request error")
+                    return False
+        return genes
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error occurred: {e}")
+        return False
