@@ -44,7 +44,8 @@ class DescriptionsWriter(object):
             self.general_stats.calculate_stats(gene_descriptions=self.data)
             for gene_desc in self.data:
                 gene_desc.stats.delete_extra_info()
-                del gene_desc.config
+        for gene_desc in self.data:
+            del gene_desc.config
         json_serializable_self = copy.deepcopy(self)
         json_serializable_self.overall_properties = vars(json_serializable_self.overall_properties)
         if include_single_gene_stats:

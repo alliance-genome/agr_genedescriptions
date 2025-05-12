@@ -2,16 +2,14 @@ import logging
 import unittest
 import os
 
-from ontobio import AssociationSetFactory, OntologyFactory
+from ontobio import AssociationSetFactory
 
-from genedescriptions.commons import Module, Gene
-from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
+from genedescriptions.commons import Gene
+from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.data_manager import DataManager, DataType
-from genedescriptions.descriptions_generator import OntologySentenceGenerator
 from genedescriptions.gene_description import GeneDescription
-from genedescriptions.ontology_tools import set_ic_ontology_struct, get_all_common_ancestors, set_ic_annot_freq
+from genedescriptions.ontology_tools import set_ic_ontology_struct
 from genedescriptions.precanned_modules import set_expression_module, set_gene_ontology_module
-from wormbase.wb_data_manager import WBDataManager
 
 logger = logging.getLogger(__name__)
 
