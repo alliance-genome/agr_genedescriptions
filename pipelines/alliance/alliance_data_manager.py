@@ -8,8 +8,9 @@ from genedescriptions.commons import DataType, Module, Gene
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import DataManager
 from pipelines.alliance.ateam_api_helper import get_anatomy_ontologies_roots, get_ontology_node_children, \
-    get_expression_annotations_from_api
-from pipelines.alliance.ateam_db_helper import get_expression_annotations, get_ontology_pairs, get_gene_data
+    get_expression_annotations_from_api, get_data_providers_from_api
+from pipelines.alliance.ateam_db_helper import get_expression_annotations, get_ontology_pairs, get_gene_data, \
+    get_data_providers
 
 logger = logging.getLogger(__name__)
 
@@ -146,36 +147,44 @@ class AllianceDataManager(DataManager):
         curie_prefix = ""
         ontology = Ontology()
         if ontology_type == DataType.GO:
-            pass
+            curie_prefix = "GO"
         elif ontology_type == DataType.EXPR:
             if provider == "WB":
                 curie_prefix = "WBbt"
-            ontology_pairs = get_ontology_pairs(curie_prefix=curie_prefix)
-            added_nodes = set()
-            for onto_pair in ontology_pairs:
-                if onto_pair["parent_curie"] not in added_nodes:
-                    self.add_node_to_ontobio_ontology_if_not_exists(
-                        term_id=onto_pair["parent_curie"],
-                        term_label=onto_pair["parent_name"],
-                        term_type=onto_pair["parent_type"],
-                        is_obsolete=onto_pair["parent_is_obsolete"],
-                        ontology=ontology,
-                        check_exists=False)
-                    added_nodes.add(onto_pair["parent_curie"])
-                if onto_pair["child_curie"] not in added_nodes:
-                    self.add_node_to_ontobio_ontology_if_not_exists(
-                        term_id=onto_pair["child_curie"],
-                        term_label=onto_pair["child_name"],
-                        term_type=onto_pair["child_type"],
-                        is_obsolete=onto_pair["child_is_obsolete"],
-                        ontology=ontology,
-                        check_exists=False)
-                    added_nodes.add(onto_pair["child_curie"])
-                ontology.add_parent(id=onto_pair["child_curie"], pid=onto_pair["parent_curie"],
-                                    relation="subClassOf" if onto_pair["rel_type"] == "IS_A" else "BFO:0000050")
-            self.set_ontology(ontology_type=ontology_type, ontology=ontology, config=self.config)
+            else:
+                return
+        ontology_pairs = get_ontology_pairs(curie_prefix=curie_prefix)
+        added_nodes = set()
+        for onto_pair in ontology_pairs:
+            if onto_pair["parent_curie"] not in added_nodes:
+                self.add_node_to_ontobio_ontology_if_not_exists(
+                    term_id=onto_pair["parent_curie"],
+                    term_label=onto_pair["parent_name"],
+                    term_type=onto_pair["parent_type"],
+                    is_obsolete=onto_pair["parent_is_obsolete"],
+                    ontology=ontology,
+                    check_exists=False)
+                added_nodes.add(onto_pair["parent_curie"])
+            if onto_pair["child_curie"] not in added_nodes:
+                self.add_node_to_ontobio_ontology_if_not_exists(
+                    term_id=onto_pair["child_curie"],
+                    term_label=onto_pair["child_name"],
+                    term_type=onto_pair["child_type"],
+                    is_obsolete=onto_pair["child_is_obsolete"],
+                    ontology=ontology,
+                    check_exists=False)
+                added_nodes.add(onto_pair["child_curie"])
+            ontology.add_parent(id=onto_pair["child_curie"], pid=onto_pair["parent_curie"],
+                                relation="subClassOf" if onto_pair["rel_type"] == "IS_A" else "BFO:0000050")
+        self.set_ontology(ontology_type=ontology_type, ontology=ontology, config=self.config)
 
     def load_gene_data_from_persistent_store(self, provider: str):
         genes = get_gene_data(provider=provider)
         for gene in genes:
             self.gene_data[gene["gene_id"]] = Gene(gene["gene_id"], gene["gene_symbol"], False, False)
+
+    def load_data_providers_from_api(self):
+        return get_data_providers_from_api()
+
+    def load_data_providers_from_persistent_store(self):
+        return get_data_providers()

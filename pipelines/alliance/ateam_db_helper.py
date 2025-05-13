@@ -110,3 +110,25 @@ def get_ontology_pairs(curie_prefix: str):
             } for row in rows]
     finally:
         session.close()
+
+
+def get_data_providers():
+    """Get data providers from the A-team database."""
+    session = create_ateam_db_session()
+    try:
+        sql_query = text("""
+        SELECT
+            s.displayName, t.curie
+        FROM
+            species s
+        JOIN
+            ontologyterm t ON s.taxon_id = t.id
+        WHERE
+            s.obsolete = false
+        AND
+            s.assembly_curie is not null
+        """)
+        rows = session.execute(sql_query).fetchall()
+        return [(row[0], row[1]) for row in rows]
+    finally:
+        session.close()

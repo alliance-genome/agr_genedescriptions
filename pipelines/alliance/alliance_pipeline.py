@@ -31,30 +31,40 @@ def main():
 
     data_manager = AllianceDataManager(config=conf_parser)
 
-    logger.info("Loading anatomy ontology data")
-    # data_manager.load_ontology_from_ateam_api(ontology_type=DataType.EXPR, provider="WB")
-    data_manager.load_ontology_from_persistent_store(ontology_type=DataType.EXPR, provider="WB")
+    logger.info("Loading data providers")
+    data_providers = data_manager.load_data_providers_from_persistent_store()
 
-    logger.info("Loading expression annotations")
-    data_manager.load_annotations_from_persistent_store(associations_type=DataType.EXPR,
-                                                        taxon_id="NCBITaxon:6239", provider="WB")
+    logger.info("Loading GO ontology")
+    data_manager.load_ontology_from_persistent_store(ontology_type=DataType.GO)
 
-    logger.info("Loading gene data")
-    data_manager.load_gene_data_from_persistent_store(provider="WB")
+    for data_provider, species_taxon in data_providers:
+        logger.info(f"Generating gene descriptions for {data_provider}")
+        logger.info("Loading anatomy ontology data")
+        # data_manager.load_ontology_from_ateam_api(ontology_type=DataType.EXPR, provider="WB")
+        data_manager.load_ontology_from_persistent_store(ontology_type=DataType.EXPR,
+                                                         provider=data_provider)
 
-    json_desc_writer = DescriptionsWriter()
-    for gene in data_manager.get_gene_data():
-        gene_desc = GeneDescription(gene_id=gene.id,
-                                    gene_name=gene.name,
-                                    add_gene_name=False,
-                                    config=conf_parser)
-        set_expression_module(df=data_manager,
-                              conf_parser=conf_parser,
-                              gene_desc=gene_desc,
-                              gene=gene)
-        json_desc_writer.add_gene_desc(gene_desc)
+        logger.info("Loading expression annotations")
+        data_manager.load_annotations_from_persistent_store(associations_type=DataType.EXPR,
+                                                            taxon_id=species_taxon, provider=data_provider)
 
-    json_desc_writer.write_json(file_path="wormbase.json", include_single_gene_stats=False, data_manager=data_manager)
+        logger.info("Loading gene data")
+        data_manager.load_gene_data_from_persistent_store(provider=data_provider)
+
+        json_desc_writer = DescriptionsWriter()
+        for gene in data_manager.get_gene_data():
+            gene_desc = GeneDescription(gene_id=gene.id,
+                                        gene_name=gene.name,
+                                        add_gene_name=False,
+                                        config=conf_parser)
+            set_expression_module(df=data_manager,
+                                  conf_parser=conf_parser,
+                                  gene_desc=gene_desc,
+                                  gene=gene)
+            json_desc_writer.add_gene_desc(gene_desc)
+
+        json_desc_writer.write_json(file_path=f"{data_provider}.json", include_single_gene_stats=False, data_manager=data_manager)
+        json_desc_writer.write_tsv(file_path=f"{data_provider}.tsv")
 
 
 if __name__ == '__main__':

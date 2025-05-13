@@ -91,6 +91,27 @@ def get_expression_annotations_from_api(data_provider: str):
         return False
 
 
+def get_data_providers_from_api():
+    """Get data providers from the A-team API."""
+    url = f'{ATEAM_API}/species/findForPublic?limit=100&page=0&view=ForPublic'
+    token = get_authentication_token()
+    headers = generate_headers(token)
+    try:
+        get_request = urllib.request.Request(url=url, method='GET', headers=headers)
+        with urllib.request.urlopen(get_request) as get_response:
+            if get_response.getcode() == 200:
+                logger.debug("Request successful")
+                res = get_response.read().decode('utf-8')
+                json_res = json.loads(res)
+                return [species["abbreviation"] for species in json_res["results"]]
+            else:
+                logger.error("Request error")
+                return False
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error occurred: {e}")
+        return False
+
+
 def get_gene_data_from_api(data_provider: str):
     """Get gene data from the A-team API."""
     page = 0
