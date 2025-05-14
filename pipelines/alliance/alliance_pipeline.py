@@ -33,25 +33,27 @@ def main():
 
     logger.info("Loading data providers")
     data_providers = data_manager.load_data_providers(source="db")
+    data_providers.append(["HUMAN", "9606"])
 
     logger.info("Loading GO ontology")
     data_manager.load_ontology(ontology_type=DataType.GO, source="db")
 
     for data_provider, species_taxon in data_providers:
         logger.info(f"Generating gene descriptions for {data_provider}")
-        logger.info("Loading anatomy ontology data")
 
         json_desc_writer = DescriptionsWriter()
         if data_provider in provider_to_expression_curie_prefix:
+            logger.info(f"Loading anatomy ontology data for {data_provider}")
             data_manager.load_ontology(ontology_type=DataType.EXPR, provider=data_provider, source="db")
 
-            logger.info("Loading expression annotations")
+            logger.info(f"Loading expression annotations for {data_provider}")
             data_manager.load_annotations(associations_type=DataType.EXPR, taxon_id=species_taxon,
                                           provider=data_provider, source="db")
 
-        logger.info("Loading gene data")
-        data_manager.load_gene_data(provider=data_provider, source="db")
+        logger.info(f"Loading gene data for {data_provider}")
+        data_manager.load_gene_data(species_taxon=species_taxon, source="db")
 
+        logger.info(f"Generating text summaries for {data_provider}")
         for gene in data_manager.get_gene_data():
             gene_desc = GeneDescription(gene_id=gene.id,
                                         gene_name=gene.name,
@@ -64,7 +66,9 @@ def main():
                                       gene=gene)
             json_desc_writer.add_gene_desc(gene_desc)
 
-        json_desc_writer.write_json(file_path=f"generated_descriptions/{data_provider}.json", include_single_gene_stats=False,
+        logger.info(f"Saving gene descriptions for {data_provider}")
+        json_desc_writer.write_json(file_path=f"generated_descriptions/{data_provider}.json",
+                                    include_single_gene_stats=False,
                                     data_manager=data_manager)
         json_desc_writer.write_tsv(file_path=f"generated_descriptions/{data_provider}.tsv")
 

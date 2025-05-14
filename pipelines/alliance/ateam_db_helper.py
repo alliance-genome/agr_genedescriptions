@@ -20,7 +20,7 @@ def create_ateam_db_session():
     return session
 
 
-def get_gene_data(provider: str):
+def get_gene_data(species_taxon: str):
     """Get genes from the A-team database."""
     session = create_ateam_db_session()
     try:
@@ -30,15 +30,15 @@ def get_gene_data(provider: str):
             slota.displaytext geneSymbol
         FROM
             biologicalentity be JOIN slotannotation slota ON be.id = slota.singlegene_id
-            JOIN organization org ON be.dataprovider_id = org.id
+            JOIN ontologyterm taxon ON be.taxon_id = taxon.id
         WHERE
             slota.obsolete = false
         AND
             slota.slotannotationtype = 'GeneSymbolSlotAnnotation'
         AND
-            org.abbreviation = :provider;
+            taxon.curie = :species_taxon;
         """)
-        rows = session.execute(sql_query, {'provider': provider}).fetchall()
+        rows = session.execute(sql_query, {'species_taxon': species_taxon}).fetchall()
         return [{"gene_id": row[0], "gene_symbol": row[1]} for row in rows]
     finally:
         session.close()

@@ -1,6 +1,5 @@
 import concurrent.futures
 import logging
-import time
 
 from ontobio import Ontology
 
@@ -18,7 +17,7 @@ logger = logging.getLogger(__name__)
 provider_to_expression_curie_prefix = {
     "WB": "WBbt",
     "ZFIN": "ZFA",
-    "FB": "FBBT",
+    "FB": "FBbt",
     "MGI": "EMAPA",
     "XBXL": "XAO",
     "XBXT": "XAO"
@@ -207,11 +206,11 @@ class AllianceDataManager(DataManager):
                                 "FBbt:10000000",
                                 relation="subClassOf")
 
-    def load_gene_data(self, provider: str, source: str = "db"):
+    def load_gene_data(self, species_taxon: str, source: str = "db"):
         if source not in ["db", "api"]:
             raise ValueError("source must be either 'db' or 'api'")
         if source == "db":
-            genes = get_gene_data(provider=provider)
+            genes = get_gene_data(species_taxon=species_taxon)
             self.gene_data = {}
             for gene in genes:
                 self.gene_data[gene["gene_id"]] = Gene(gene["gene_id"], gene["gene_symbol"], False, False)
