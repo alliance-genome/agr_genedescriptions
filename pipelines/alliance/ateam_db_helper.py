@@ -79,7 +79,7 @@ def get_ontology_pairs(curie_prefix: str):
     session = create_ateam_db_session()
     try:
         sql_query = text("""
-        SELECT
+        SELECT DISTINCT
             otp.curie parentCurie,
             otp.name parentName,
             otp.namespace parentType,
@@ -88,12 +88,16 @@ def get_ontology_pairs(curie_prefix: str):
             otc.name childName,
             otc.namespace childType,
             otc.obsolete childIsObsolete,
-            'IS_A' relType
+            jsonb_array_elements_text(otpc.closuretypes) AS relType
         FROM
-            ontologyterm otp JOIN ontologyterm_isa_parent_children otpc ON otp.id = otpc.isaparents_id
-                             JOIN ontologyterm otc ON otpc.isachildren_id = otc.id
+            ontologyterm otc JOIN ontologytermclosure otpc ON otc.id = otpc.closuresubject_id
+                             JOIN ontologyterm otp ON otpc.closureobject_id = otp.id
         WHERE
-            otp.curie LIKE :curieprefix;
+            otp.curie LIKE :curieprefix
+        AND
+            otpc.distance = 1
+        AND
+            otpc.closuretypes in ('["part_of"]', '["is_a"]')
         """)
         rows = session.execute(sql_query, {'curieprefix': f"{curie_prefix}%"}).fetchall()
         return [
