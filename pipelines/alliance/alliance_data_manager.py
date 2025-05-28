@@ -2,6 +2,7 @@ import concurrent.futures
 import logging
 import os
 import requests
+import tempfile
 
 from ontobio import Ontology
 
@@ -39,7 +40,6 @@ class AllianceDataManager(DataManager):
 
     def load_annotations(self, associations_type: DataType, taxon_id: str, provider: str, source: str = "db"):
         if associations_type == DataType.GO:
-            # Assume ALLIANCE_RELEASE_VERSION is set in the environment
             release_version = os.environ.get("ALLIANCE_RELEASE_VERSION")
             if not release_version:
                 raise RuntimeError("ALLIANCE_RELEASE_VERSION not set in environment")
@@ -60,11 +60,19 @@ class AllianceDataManager(DataManager):
             if not gaf_url:
                 raise RuntimeError(f"No download URL found for GAF file for provider {provider}")
             logger.info(f"GAF file for provider {provider}: {gaf_url}")
-            # Download and process the GAF file as needed
-            # gaf_response = requests.get(gaf_url)
-            # with open(f"/tmp/{provider}.gaf.gz", "wb") as f:
-            #     f.write(gaf_response.content)
-            pass
+            # Download the GAF file to a temp location
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".gaf.gz") as tmp_gaf:
+                gaf_response = requests.get(gaf_url)
+                tmp_gaf.write(gaf_response.content)
+                tmp_gaf_path = tmp_gaf.name
+            # Use DataManager's load_associations_from_file to load the GAF file
+            self.load_associations_from_file(
+                associations_type=associations_type,
+                associations_url=gaf_url,
+                associations_cache_path=tmp_gaf_path,
+                config=self.config
+            )
+            return tmp_gaf_path
         elif associations_type == DataType.EXPR:
             associations = []
             if source == "db":
@@ -93,6 +101,7 @@ class AllianceDataManager(DataManager):
                 association_set=self.expression_associations, ontology=self.expression_ontology,
                 terms_blacklist=self.config.get_module_property(module=Module.EXPRESSION,
                                                                 prop=ConfigModuleProperty.EXCLUDE_TERMS))
+        return None
 
     @staticmethod
     def add_node_to_ontobio_ontology_if_not_exists(term_id, term_label, term_type, is_obsolete, ontology,
