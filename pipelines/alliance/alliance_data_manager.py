@@ -1,5 +1,7 @@
 import concurrent.futures
 import logging
+import os
+import requests
 
 from ontobio import Ontology
 
@@ -37,6 +39,31 @@ class AllianceDataManager(DataManager):
 
     def load_annotations(self, associations_type: DataType, taxon_id: str, provider: str, source: str = "db"):
         if associations_type == DataType.GO:
+            # Assume ALLIANCE_RELEASE_VERSION is set in the environment
+            release_version = os.environ.get("ALLIANCE_RELEASE_VERSION")
+            if not release_version:
+                raise RuntimeError("ALLIANCE_RELEASE_VERSION not set in environment")
+            fms_url = f"https://fms.alliancegenome.org/api/snapshot/release/{release_version}"
+            response = requests.get(fms_url)
+            if response.status_code != 200:
+                raise RuntimeError(f"Failed to fetch FMS API: {response.status_code}")
+            snapshot = response.json().get("snapShot", {})
+            data_files = snapshot.get("dataFiles", [])
+            gaf_file = None
+            for f in data_files:
+                if f.get("dataType", {}).get("name") == "GAF" and f.get("dataSubType", {}).get("name") == provider:
+                    gaf_file = f
+                    break
+            if not gaf_file:
+                raise RuntimeError(f"No GAF file found for provider {provider} in release {release_version}")
+            gaf_url = gaf_file.get("s3Url") or gaf_file.get("stableURL")
+            if not gaf_url:
+                raise RuntimeError(f"No download URL found for GAF file for provider {provider}")
+            logger.info(f"GAF file for provider {provider}: {gaf_url}")
+            # Download and process the GAF file as needed
+            # gaf_response = requests.get(gaf_url)
+            # with open(f"/tmp/{provider}.gaf.gz", "wb") as f:
+            #     f.write(gaf_response.content)
             pass
         elif associations_type == DataType.EXPR:
             associations = []
