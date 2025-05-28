@@ -6,7 +6,7 @@ from ontobio import Ontology
 from genedescriptions.commons import DataType, Module, Gene
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import DataManager
-from pipelines.alliance.ateam_api_helper import get_anatomy_ontologies_roots, get_ontology_node_children, \
+from pipelines.alliance.ateam_api_helper import get_ontology_roots, get_ontology_node_children, \
     get_expression_annotations_from_api, get_data_providers_from_api
 from pipelines.alliance.ateam_db_helper import get_expression_annotations, get_ontology_pairs, get_gene_data, \
     get_data_providers
@@ -93,8 +93,14 @@ class AllianceDataManager(DataManager):
         if not curie_prefix:
             return None
 
-        if ontology_type == DataType.EXPR and source == "api":
-            self._load_expression_ontology_from_api(ontology, curie_prefix, provider)
+        node_type = ""
+        if ontology_type == DataType.GO:
+            node_type = "goterm"
+        elif ontology_type == DataType.EXPR:
+            node_type = "anatomyterm"
+
+        if source == "api":
+            self._load_ontology_from_api(ontology, curie_prefix, node_type)
         elif source == "db":
             self._load_ontology_from_db(ontology, curie_prefix)
 
@@ -109,36 +115,37 @@ class AllianceDataManager(DataManager):
             return provider_to_expression_curie_prefix.get(provider, "")
         return ""
 
-    def _load_expression_ontology_from_api(self, ontology, curie_prefix: str, provider: str):
-        if self.anatomy_ontologies_roots is None:
-            self.anatomy_ontologies_roots = get_anatomy_ontologies_roots()
-        roots = [root for root in self.anatomy_ontologies_roots if root["curie"].startswith(curie_prefix)]
+    def _load_ontology_from_api(self, ontology, curie_prefix: str, node_type: str):
+        roots = get_ontology_roots(node_type=node_type)
+        roots = [root for root in roots if root["curie"].startswith(curie_prefix)]
+        visited_nodes = set(root["curie"] for root in roots)
+
         for root in roots:
             self.add_node_to_ontobio_ontology_if_not_exists(
                 term_id=root["curie"],
                 term_label=root["name"],
-                term_type="anatomy",
+                term_type=root["namespace"],
                 is_obsolete=False,
                 ontology=ontology,
                 check_exists=False)
         nodes = roots
-        visited_nodes = set(root["curie"] for root in roots)
 
         def process_node(node):
-            children = get_ontology_node_children(node_curie=node["curie"])
             new_children = []
-            for child in children:
-                if child["curie"] not in visited_nodes:
-                    self.add_node_to_ontobio_ontology_if_not_exists(
-                        term_id=child["curie"],
-                        term_label=child["name"],
-                        term_type="anatomy",
-                        is_obsolete=False,
-                        ontology=ontology,
-                        check_exists=False)
-                    new_children.append(child)
-                    visited_nodes.add(child["curie"])
-                ontology.add_parent(id=child["curie"], pid=node["curie"], relation="subClassOf")
+            if node["descendantCount"] > 0:
+                children = get_ontology_node_children(node_curie=node["curie"], node_type=node_type)
+                for child in children:
+                    if child["curie"] not in visited_nodes:
+                        self.add_node_to_ontobio_ontology_if_not_exists(
+                            term_id=child["curie"],
+                            term_label=child["name"],
+                            term_type=child["namespace"],
+                            is_obsolete=False,
+                            ontology=ontology,
+                            check_exists=False)
+                        new_children.append(child)
+                        visited_nodes.add(child["curie"])
+                    ontology.add_parent(id=child["curie"], pid=node["curie"], relation="subClassOf")
             return new_children
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -147,7 +154,7 @@ class AllianceDataManager(DataManager):
                 future_to_node = {executor.submit(process_node, node): node for node in nodes}
                 nodes = []
                 for future in concurrent.futures.as_completed(future_to_node):
-                    nodes.extend([node for node in future.result() if node["childCount"] > 0])
+                    nodes.extend([node for node in future.result() if node.get("childCount", 0) > 0])
 
     def _load_ontology_from_db(self, ontology, curie_prefix: str):
         ontology_pairs = get_ontology_pairs(curie_prefix=curie_prefix)
@@ -172,7 +179,7 @@ class AllianceDataManager(DataManager):
                     check_exists=False)
                 added_nodes.add(onto_pair["child_curie"])
             ontology.add_parent(id=onto_pair["child_curie"], pid=onto_pair["parent_curie"],
-                                relation="subClassOf" if onto_pair["rel_type"] == "IS_A" else "BFO:0000050")
+                                relation="subClassOf" if onto_pair["rel_type"].upper() == "IS_A" else "BFO:0000050")
 
     def _add_artificial_nodes(self, ontology, ontology_type: DataType, provider: str):
         if ontology_type == DataType.EXPR and provider == "MGI":

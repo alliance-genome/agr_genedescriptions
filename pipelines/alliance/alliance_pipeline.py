@@ -12,6 +12,8 @@ from pipelines.alliance.alliance_data_manager import AllianceDataManager, provid
 
 logger = logging.getLogger(__name__)
 
+DATA_SOURCE = "db"
+
 
 def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider: str, species_taxon: str):
     if data_provider in provider_to_expression_curie_prefix:
@@ -20,10 +22,10 @@ def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider:
 
         logger.info(f"Loading expression annotations for {data_provider}")
         data_manager.load_annotations(associations_type=DataType.EXPR, taxon_id=species_taxon,
-                                      provider=data_provider, source="db")
+                                      provider=data_provider, source=DATA_SOURCE)
 
     logger.info(f"Loading gene data for {data_provider}")
-    data_manager.load_gene_data(species_taxon=species_taxon, source="db")
+    data_manager.load_gene_data(species_taxon=species_taxon, source=DATA_SOURCE)
 
 
 def generate_gene_descriptions(data_manager: AllianceDataManager, data_provider: str,
@@ -84,11 +86,11 @@ def main():
     data_manager = AllianceDataManager(config=conf_parser)
 
     logger.info("Loading data providers")
-    data_providers = data_manager.load_data_providers(source="db")
+    data_providers = data_manager.load_data_providers(source=DATA_SOURCE)
     data_providers.append(["HUMAN", "9606"])
 
     logger.info("Loading GO ontology")
-    data_manager.load_ontology(ontology_type=DataType.GO, source="db")
+    data_manager.load_ontology(ontology_type=DataType.GO, source=DATA_SOURCE)
 
     if args.parallel:
         logger.info("Processing data providers in parallel")

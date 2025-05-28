@@ -12,8 +12,8 @@ ATEAM_API = os.environ.get("ATEAM_API", "https://curation.alliancegenome.org/api
 logger = logging.getLogger(__name__)
 
 
-def get_anatomy_ontologies_roots():
-    url = f'{ATEAM_API}/anatomicalterm/rootNodes'
+def get_ontology_roots(node_type: str):
+    url = f'{ATEAM_API}/{node_type}/rootNodes'
     token = get_authentication_token()
     headers = generate_headers(token)
     try:
@@ -32,8 +32,8 @@ def get_anatomy_ontologies_roots():
         return False
 
 
-def get_ontology_node_children(node_curie: str):
-    url = f'{ATEAM_API}/ontologyterm/{node_curie}/children'
+def get_ontology_node_children(node_curie: str, node_type: str):
+    url = f'{ATEAM_API}/{node_type}/{node_curie}/children'
     token = get_authentication_token()
     headers = generate_headers(token)
     try:
@@ -96,12 +96,14 @@ def get_data_providers_from_api():
     url = f'{ATEAM_API}/species/findForPublic?limit=100&page=0&view=ForPublic'
     token = get_authentication_token()
     headers = generate_headers(token)
+    req_data = {}
     try:
-        get_request = urllib.request.Request(url=url, method='GET', headers=headers)
-        with urllib.request.urlopen(get_request) as get_response:
-            if get_response.getcode() == 200:
+        request = urllib.request.Request(url=url, method='POST', data=json.dumps(req_data).encode('utf-8'),
+                                         headers=headers)
+        with urllib.request.urlopen(request) as response:
+            if response.getcode() == 200:
                 logger.debug("Request successful")
-                res = get_response.read().decode('utf-8')
+                res = response.read().decode('utf-8')
                 json_res = json.loads(res)
                 return [species["abbreviation"] for species in json_res["results"]]
             else:
