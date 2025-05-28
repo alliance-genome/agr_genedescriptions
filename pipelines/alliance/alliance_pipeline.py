@@ -7,7 +7,7 @@ from genedescriptions.commons import DataType
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.descriptions_writer import DescriptionsWriter
 from genedescriptions.gene_description import GeneDescription
-from genedescriptions.precanned_modules import set_expression_module
+from genedescriptions.precanned_modules import set_expression_module, set_gene_ontology_module
 from pipelines.alliance.alliance_data_manager import AllianceDataManager, provider_to_expression_curie_prefix
 
 logger = logging.getLogger(__name__)
@@ -38,6 +38,7 @@ def generate_gene_descriptions(data_manager: AllianceDataManager, data_provider:
                                     gene_name=gene.name,
                                     add_gene_name=False,
                                     config=conf_parser)
+        set_gene_ontology_module(dm=data_manager, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene)
         if data_provider in provider_to_expression_curie_prefix:
             set_expression_module(df=data_manager,
                                   conf_parser=conf_parser,
