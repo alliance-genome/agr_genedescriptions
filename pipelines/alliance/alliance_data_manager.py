@@ -40,6 +40,8 @@ class AllianceDataManager(DataManager):
 
     def load_annotations(self, associations_type: DataType, taxon_id: str, provider: str, source: str = "db"):
         if associations_type == DataType.GO:
+            if provider in ["XBXT", "XBXL"]:
+                provider = "XB"
             release_version = os.environ.get("ALLIANCE_RELEASE_VERSION")
             if not release_version:
                 raise RuntimeError("ALLIANCE_RELEASE_VERSION not set in environment")
