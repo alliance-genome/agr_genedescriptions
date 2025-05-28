@@ -74,7 +74,8 @@ class AllianceDataManager(DataManager):
                 associations_cache_path=tmp_gaf_path,
                 config=self.config
             )
-            return tmp_gaf_path
+            os.remove(tmp_gaf_path)
+            return None
         elif associations_type == DataType.EXPR:
             associations = []
             if source == "db":

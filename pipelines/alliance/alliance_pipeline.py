@@ -29,6 +29,10 @@ def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider:
 
     logger.info(f"Loading gene data for {data_provider}")
     data_manager.load_gene_data(species_taxon=species_taxon, source=DATA_SOURCE)
+    if data_provider == "MGI":
+        for gene in data_manager.get_gene_data():
+            if gene.id.startswith("MGI:"):
+                gene.id = gene.id.replace("MGI:", "MGI:MGI:")
 
 
 def generate_gene_descriptions(data_manager: AllianceDataManager, data_provider: str,
