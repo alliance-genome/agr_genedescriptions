@@ -3,7 +3,7 @@ import concurrent.futures
 import logging
 import time
 
-from genedescriptions.commons import DataType
+from genedescriptions.commons import DataType, Gene
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.descriptions_writer import DescriptionsWriter
 from genedescriptions.gene_description import GeneDescription
@@ -29,10 +29,19 @@ def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider:
 
     logger.info(f"Loading gene data for {data_provider}")
     data_manager.load_gene_data(species_taxon=species_taxon, source=DATA_SOURCE)
+
+    # Prepend 'RGD:' to all gene ids if provider is HUMAN
+    if data_provider == "HUMAN":
+        for gene_id in list(data_manager.gene_data.keys()):
+            gene = data_manager.gene_data[gene_id]
+            new_gene_id = f"RGD:{gene.id}"
+            data_manager.gene_data[new_gene_id] = gene._replace(id=new_gene_id)
+            del data_manager.gene_data[gene_id]
+
     if data_provider == "MGI":
-        for gene in data_manager.get_gene_data():
-            if gene.id.startswith("MGI:"):
-                gene.id = gene.id.replace("MGI:", "MGI:MGI:")
+        data_manager.gene_data = {gene_id.replace("MGI:", "MGI:MGI:"): Gene(gene_id.replace("MGI:", "MGI:MGI:"),
+                                                                            gene.name, gene.dead, gene.pseudo)
+                                  for gene_id, gene in data_manager.gene_data.items()}
 
 
 def generate_gene_descriptions(data_manager: AllianceDataManager, data_provider: str,
@@ -127,3 +136,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
