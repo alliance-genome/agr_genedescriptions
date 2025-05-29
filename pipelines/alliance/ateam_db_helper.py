@@ -152,38 +152,40 @@ def get_disease_annotations(taxon_id: str):
         # Direct gene -> DO term annotations
         direct_query = text("""
             SELECT
-                g.primaryexternalid AS geneId,
+                be.primaryexternalid AS geneId,
                 ot.curie AS doId
             FROM
                 diseaseannotation da
             JOIN diseaseannotation_gene dag ON da.id = dag.diseaseannotation_id
             JOIN gene g ON dag.with_id = g.id
+            JOIN biologicalentity be ON g.id = be.id
             JOIN diseaseannotation_ontologyterm daot ON da.id = daot.diseaseannotation_id
             JOIN ontologyterm ot ON daot.ontologyterm_id = ot.id
             WHERE
                 da.obsolete = false
             AND ot.namespace = 'disease_ontology'
-            AND g.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
+            AND be.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
         """)
         direct_rows = session.execute(direct_query, {"taxon_id": taxon_id}).fetchall()
 
         # Indirect gene -> allele -> DO term annotations (only if gene has a single allele)
         indirect_query = text("""
             SELECT
-                g.primaryexternalid AS geneId,
+                be.primaryexternalid AS geneId,
                 ot.curie AS doId
             FROM
                 allelediseaseannotation ada
             JOIN allelediseaseannotation_gene adag ON ada.id = adag.allelediseaseannotation_id
-            JOIN gene g ON adag.inferredgene_id = g.id
+            JOIN gene g ON adag.assertedgenes_id = g.id
+            JOIN biologicalentity be ON g.id = be.id
             JOIN allelediseaseannotation_ontologyterm adaot ON ada.id = adaot.allelediseaseannotation_id
             JOIN ontologyterm ot ON adaot.ontologyterm_id = ot.id
             WHERE
                 ada.obsolete = false
             AND ot.namespace = 'disease_ontology'
-            AND g.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
+            AND be.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
             AND (
-                SELECT COUNT(*) FROM allelediseaseannotation_gene adag2 WHERE adag2.inferredgene_id = g.id
+                SELECT COUNT(*) FROM allelediseaseannotation_gene adag2 WHERE adag2.assertedgenes_id = g.id
             ) = 1
         """)
         indirect_rows = session.execute(indirect_query, {"taxon_id": taxon_id}).fetchall()
