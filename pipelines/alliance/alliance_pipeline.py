@@ -3,11 +3,11 @@ import concurrent.futures
 import logging
 import time
 
-from genedescriptions.commons import DataType
+from genedescriptions.commons import DataType, Gene
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.descriptions_writer import DescriptionsWriter
 from genedescriptions.gene_description import GeneDescription
-from genedescriptions.precanned_modules import set_expression_module
+from genedescriptions.precanned_modules import set_expression_module, set_gene_ontology_module
 from pipelines.alliance.alliance_data_manager import AllianceDataManager, provider_to_expression_curie_prefix
 
 logger = logging.getLogger(__name__)
@@ -16,6 +16,9 @@ DATA_SOURCE = "db"
 
 
 def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider: str, species_taxon: str):
+    logger.info(f"Loading GAF file for {data_provider}")
+    data_manager.load_annotations(associations_type=DataType.GO, taxon_id=species_taxon, provider=data_provider,
+                                  source=DATA_SOURCE)
     if data_provider in provider_to_expression_curie_prefix:
         logger.info(f"Loading anatomy ontology data for {data_provider}")
         data_manager.load_ontology(ontology_type=DataType.EXPR, provider=data_provider, source="db")
@@ -27,6 +30,14 @@ def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider:
     logger.info(f"Loading gene data for {data_provider}")
     data_manager.load_gene_data(species_taxon=species_taxon, source=DATA_SOURCE)
 
+    # Prepend 'RGD:' to all gene ids if provider is HUMAN
+    if data_provider == "HUMAN":
+        for gene_id in list(data_manager.gene_data.keys()):
+            gene = data_manager.gene_data[gene_id]
+            new_gene_id = f"RGD:{gene.id}"
+            data_manager.gene_data[new_gene_id] = gene._replace(id=new_gene_id)
+            del data_manager.gene_data[gene_id]
+
 
 def generate_gene_descriptions(data_manager: AllianceDataManager, data_provider: str,
                                conf_parser: GenedescConfigParser, json_desc_writer: DescriptionsWriter):
@@ -35,6 +46,7 @@ def generate_gene_descriptions(data_manager: AllianceDataManager, data_provider:
                                     gene_name=gene.name,
                                     add_gene_name=False,
                                     config=conf_parser)
+        set_gene_ontology_module(dm=data_manager, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene)
         if data_provider in provider_to_expression_curie_prefix:
             set_expression_module(df=data_manager,
                                   conf_parser=conf_parser,
@@ -87,7 +99,6 @@ def main():
 
     logger.info("Loading data providers")
     data_providers = data_manager.load_data_providers(source=DATA_SOURCE)
-    data_providers.append(["HUMAN", "9606"])
 
     logger.info("Loading GO ontology")
     data_manager.load_ontology(ontology_type=DataType.GO, source=DATA_SOURCE)
@@ -119,3 +130,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+

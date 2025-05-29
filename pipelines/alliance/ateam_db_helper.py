@@ -34,6 +34,8 @@ def get_gene_data(species_taxon: str):
         WHERE
             slota.obsolete = false
         AND
+            be.obsolete = false
+        AND
             slota.slotannotationtype = 'GeneSymbolSlotAnnotation'
         AND
             taxon.curie = :species_taxon;
@@ -63,6 +65,8 @@ def get_expression_annotations(taxon_id: str):
                                          JOIN slotannotation slota ON g.id = slota.singlegene_id
         WHERE
             slota.obsolete = false
+        AND
+            be.obsolete = false
         AND
             slota.slotannotationtype = 'GeneSymbolSlotAnnotation'
         AND

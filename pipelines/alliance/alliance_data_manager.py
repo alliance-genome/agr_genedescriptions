@@ -1,5 +1,8 @@
 import concurrent.futures
 import logging
+import os
+import requests
+import tempfile
 
 from ontobio import Ontology
 
@@ -37,7 +40,51 @@ class AllianceDataManager(DataManager):
 
     def load_annotations(self, associations_type: DataType, taxon_id: str, provider: str, source: str = "db"):
         if associations_type == DataType.GO:
-            pass
+            if provider in ["XBXT", "XBXL"]:
+                provider = "XB"
+            release_version = os.environ.get("ALLIANCE_RELEASE_VERSION")
+            if not release_version:
+                raise RuntimeError("ALLIANCE_RELEASE_VERSION not set in environment")
+            fms_url = f"https://fms.alliancegenome.org/api/snapshot/release/{release_version}"
+            response = requests.get(fms_url)
+            if response.status_code != 200:
+                raise RuntimeError(f"Failed to fetch FMS API: {response.status_code}")
+            snapshot = response.json().get("snapShot", {})
+            data_files = snapshot.get("dataFiles", [])
+            gaf_file = None
+            for f in data_files:
+                if f.get("dataType", {}).get("name") == "GAF" and f.get("dataSubType", {}).get("name") == provider:
+                    gaf_file = f
+                    break
+            if not gaf_file:
+                raise RuntimeError(f"No GAF file found for provider {provider} in release {release_version}")
+            gaf_url = gaf_file.get("s3Url") or gaf_file.get("stableURL")
+            if not gaf_url:
+                raise RuntimeError(f"No download URL found for GAF file for provider {provider}")
+            logger.info(f"GAF file for provider {provider}: {gaf_url}")
+            # Download the GAF file to a temp location
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".gaf.gz") as tmp_gaf:
+                gaf_response = requests.get(gaf_url)
+                tmp_gaf.write(gaf_response.content)
+                tmp_gaf_path = tmp_gaf.name
+            # Use DataManager's load_associations_from_file to load the GAF file
+            self.load_associations_from_file(
+                associations_type=associations_type,
+                associations_url=gaf_url,
+                associations_cache_path=tmp_gaf_path,
+                config=self.config
+            )
+            os.remove(tmp_gaf_path)
+            renamed_associations = []
+            for subj_associations in self.go_associations.associations_by_subj.values():
+                for association in subj_associations:
+                    parts = association["subject"]["id"].split(":")
+                    if len(parts) > 2 and parts[0] == parts[1]:
+                        association["subject"]["id"] = f"{parts[0]}:{parts[2]}"
+                    renamed_associations.append(association)
+            self.go_associations = DataManager.create_annot_set_from_legacy_assocs(assocs=renamed_associations,
+                                                                                   ontology=self.go_ontology)
+            return None
         elif associations_type == DataType.EXPR:
             associations = []
             if source == "db":
@@ -66,6 +113,7 @@ class AllianceDataManager(DataManager):
                 association_set=self.expression_associations, ontology=self.expression_ontology,
                 terms_blacklist=self.config.get_module_property(module=Module.EXPRESSION,
                                                                 prop=ConfigModuleProperty.EXCLUDE_TERMS))
+        return None
 
     @staticmethod
     def add_node_to_ontobio_ontology_if_not_exists(term_id, term_label, term_type, is_obsolete, ontology,
