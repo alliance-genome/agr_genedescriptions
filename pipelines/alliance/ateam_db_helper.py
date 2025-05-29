@@ -153,14 +153,16 @@ def get_disease_annotations(taxon_id: str):
         direct_query = text("""
             SELECT
                 be.primaryexternalid AS geneId,
-                ot.curie AS doId
+                ot.curie AS doId,
+                evot.curie AS evidenceCode
             FROM
                 diseaseannotation da
             JOIN diseaseannotation_gene dag ON da.id = dag.diseaseannotation_id
             JOIN gene g ON dag.with_id = g.id
             JOIN biologicalentity be ON g.id = be.id
             JOIN diseaseannotation_ontologyterm daot ON da.id = daot.diseaseannotation_id
-            JOIN ontologyterm ot ON daot.ontologyterm_id = ot.id
+            JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
+            JOIN ontologyterm evot ON daot.evidencecodes_id = evot.id
             WHERE
                 da.obsolete = false
             AND ot.namespace = 'disease_ontology'
@@ -179,7 +181,7 @@ def get_disease_annotations(taxon_id: str):
             JOIN gene g ON adag.assertedgenes_id = g.id
             JOIN biologicalentity be ON g.id = be.id
             JOIN allelediseaseannotation_ontologyterm adaot ON ada.id = adaot.allelediseaseannotation_id
-            JOIN ontologyterm ot ON adaot.ontologyterm_id = ot.id
+            JOIN ontologyterm ot ON ada.allelediseaseannotationobject_id = ot.id
             WHERE
                 ada.obsolete = false
             AND ot.namespace = 'disease_ontology'
