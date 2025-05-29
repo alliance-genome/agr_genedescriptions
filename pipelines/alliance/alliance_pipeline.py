@@ -99,7 +99,6 @@ def main():
 
     logger.info("Loading data providers")
     data_providers = data_manager.load_data_providers(source=DATA_SOURCE)
-    data_providers.append(["HUMAN", "9606"])
 
     logger.info("Loading GO ontology")
     data_manager.load_ontology(ontology_type=DataType.GO, source=DATA_SOURCE)
