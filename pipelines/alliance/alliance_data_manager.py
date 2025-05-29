@@ -75,6 +75,15 @@ class AllianceDataManager(DataManager):
                 config=self.config
             )
             os.remove(tmp_gaf_path)
+            renamed_associations = []
+            for subj_associations in self.go_associations.associations_by_subj.values():
+                for association in subj_associations:
+                    parts = association["subject"]["id"].split(":")
+                    if len(parts) > 2 and parts[0] == parts[1]:
+                        association["subject"]["id"] = f"{parts[0]}:{parts[2]}"
+                    renamed_associations.append(association)
+            self.go_associations = DataManager.create_annot_set_from_legacy_assocs(assocs=renamed_associations,
+                                                                                   ontology=self.go_ontology)
             return None
         elif associations_type == DataType.EXPR:
             associations = []

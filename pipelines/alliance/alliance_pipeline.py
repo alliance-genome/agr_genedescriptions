@@ -38,11 +38,6 @@ def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider:
             data_manager.gene_data[new_gene_id] = gene._replace(id=new_gene_id)
             del data_manager.gene_data[gene_id]
 
-    if data_provider == "MGI":
-        data_manager.gene_data = {gene_id.replace("MGI:", "MGI:MGI:"): Gene(gene_id.replace("MGI:", "MGI:MGI:"),
-                                                                            gene.name, gene.dead, gene.pseudo)
-                                  for gene_id, gene in data_manager.gene_data.items()}
-
 
 def generate_gene_descriptions(data_manager: AllianceDataManager, data_provider: str,
                                conf_parser: GenedescConfigParser, json_desc_writer: DescriptionsWriter):
