@@ -3,7 +3,7 @@ import concurrent.futures
 import logging
 import time
 
-from genedescriptions.commons import DataType, Gene
+from genedescriptions.commons import DataType
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.descriptions_writer import DescriptionsWriter
 from genedescriptions.gene_description import GeneDescription
@@ -18,6 +18,8 @@ DATA_SOURCE = "db"
 def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider: str, species_taxon: str):
     logger.info(f"Loading GAF file for {data_provider}")
     data_manager.load_annotations(associations_type=DataType.GO, taxon_id=species_taxon, provider=data_provider,
+                                  source=DATA_SOURCE)
+    data_manager.load_annotations(associations_type=DataType.DO, taxon_id=species_taxon, provider=data_provider,
                                   source=DATA_SOURCE)
     if data_provider in provider_to_expression_curie_prefix:
         logger.info(f"Loading anatomy ontology data for {data_provider}")
@@ -102,6 +104,9 @@ def main():
 
     logger.info("Loading GO ontology")
     data_manager.load_ontology(ontology_type=DataType.GO, source=DATA_SOURCE)
+
+    logger.info("Loading DO ontology")
+    data_manager.load_ontology(ontology_type=DataType.DO, source=DATA_SOURCE)
 
     if args.parallel:
         logger.info("Processing data providers in parallel")

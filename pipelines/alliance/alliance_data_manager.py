@@ -146,6 +146,8 @@ class AllianceDataManager(DataManager):
             node_type = "goterm"
         elif ontology_type == DataType.EXPR:
             node_type = "anatomyterm"
+        if ontology_type == DataType.DO:
+            node_type = "doterm"
 
         if source == "api":
             self._load_ontology_from_api(ontology, curie_prefix, node_type)
@@ -161,6 +163,8 @@ class AllianceDataManager(DataManager):
             return "GO"
         elif ontology_type == DataType.EXPR:
             return provider_to_expression_curie_prefix.get(provider, "")
+        elif ontology_type == DataType.DO:
+            return "DOID"
         return ""
 
     def _load_ontology_from_api(self, ontology, curie_prefix: str, node_type: str):
