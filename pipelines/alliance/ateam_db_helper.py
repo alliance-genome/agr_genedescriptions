@@ -167,7 +167,7 @@ def get_disease_annotations(taxon_id: str):
             JOIN vocabulariterm rel ON daot.relationship_id = rel.id
             WHERE
                 da.obsolete = false
-                da.negated = false
+            AND da.negated = false
             AND ot.namespace = 'disease_ontology'
             AND be.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
         """)
@@ -190,7 +190,7 @@ def get_disease_annotations(taxon_id: str):
             JOIN vocabulariterm rel ON daot.relationship_id = rel.id
             WHERE
                 da.obsolete = false
-                da.negated = false
+            AND da.negated = false
             AND ot.namespace = 'disease_ontology'
             AND be.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
             AND ada.diseaseannotationsubject_id IN (
