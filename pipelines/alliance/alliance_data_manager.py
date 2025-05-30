@@ -126,8 +126,8 @@ class AllianceDataManager(DataManager):
                     taxon_id=taxon_id,
                     object_id=doa["do_id"],
                     qualifiers=["Verified"],
-                    aspect="A",
-                    ecode=doa["evidence_code"],
+                    aspect="D",
+                    ecode="BMK" if doa["relationship_type"] == "is_marker_for" else "EXP",
                     references="",
                     prvdr=provider,
                     date=None))
