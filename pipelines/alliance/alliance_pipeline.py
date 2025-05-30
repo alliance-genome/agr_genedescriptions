@@ -7,7 +7,7 @@ from genedescriptions.commons import DataType
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.descriptions_writer import DescriptionsWriter
 from genedescriptions.gene_description import GeneDescription
-from genedescriptions.precanned_modules import set_expression_module, set_gene_ontology_module
+from genedescriptions.precanned_modules import set_expression_module, set_gene_ontology_module, set_disease_module
 from pipelines.alliance.alliance_data_manager import AllianceDataManager, provider_to_expression_curie_prefix
 
 logger = logging.getLogger(__name__)
@@ -54,6 +54,8 @@ def generate_gene_descriptions(data_manager: AllianceDataManager, data_provider:
                                   conf_parser=conf_parser,
                                   gene_desc=gene_desc,
                                   gene=gene)
+        set_disease_module(df=data_manager, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene,
+                           human=data_provider == "HUMAN")
         json_desc_writer.add_gene_desc(gene_desc)
 
 
