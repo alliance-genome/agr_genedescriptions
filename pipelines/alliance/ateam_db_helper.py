@@ -155,7 +155,7 @@ def get_disease_annotations(taxon_id: str):
                 be.primaryexternalid AS geneId,
                 slota.displaytext geneSymbol,
                 ot.curie AS doId,
-                evot.curie AS evidenceCode
+                rel.name as relationshipType
             FROM
                 diseaseannotation da
             JOIN diseaseannotation_gene dag ON da.id = dag.diseaseannotation_id
@@ -163,22 +163,23 @@ def get_disease_annotations(taxon_id: str):
             JOIN biologicalentity be ON g.id = be.id
             JOIN diseaseannotation_ontologyterm daot ON da.id = daot.diseaseannotation_id
             JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
-            JOIN ontologyterm evot ON daot.evidencecodes_id = evot.id
             JOIN slotannotation slota ON g.id = slota.singlegene_id
+            JOIN vocabulariterm rel ON daot.relationship_id = rel.id
             WHERE
                 da.obsolete = false
+                da.negated = false
             AND ot.namespace = 'disease_ontology'
             AND be.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
         """)
         direct_rows = session.execute(direct_query, {"taxon_id": taxon_id}).fetchall()
 
-        # Indirect gene -> allele -> DO term annotations (only if gene has a single allele)
+        # Indirect gene -> allele -> DO term annotations (only if allele has a single inferred gene)
         indirect_query = text("""
             SELECT
                 be.primaryexternalid AS geneId,
                 slota.displaytext geneSymbol,
                 ot.curie AS doId,
-                evot.curie AS evidenceCode
+                rel.name as relationshipType
             FROM
                 allelediseaseannotation ada
             JOIN diseaseannotation da ON ada.id = da.id
@@ -186,9 +187,10 @@ def get_disease_annotations(taxon_id: str):
             JOIN slotannotation slota ON be.id = slota.singlegene_id
             JOIN diseaseannotation_ontologyterm daot ON da.id = daot.diseaseannotation_id
             JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
-            JOIN ontologyterm evot ON daot.evidencecodes_id = evot.id
+            JOIN vocabulariterm rel ON daot.relationship_id = rel.id
             WHERE
                 da.obsolete = false
+                da.negated = false
             AND ot.namespace = 'disease_ontology'
             AND be.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
             AND ada.diseaseannotationsubject_id IN (
@@ -210,7 +212,7 @@ def get_disease_annotations(taxon_id: str):
                     "gene_id": row["geneId"],
                     "gene_symbol": row["geneSymbol"],
                     "do_id": row["doId"],
-                    "evidence_code": row["evidenceCode"]
+                    "relationship_type": row["relationshipType"]
                 })
                 seen.add(key)
         return results
