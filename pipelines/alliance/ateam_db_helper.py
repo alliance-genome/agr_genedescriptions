@@ -153,6 +153,7 @@ def get_disease_annotations(taxon_id: str):
         direct_query = text("""
             SELECT
                 be.primaryexternalid AS geneId,
+                slota.displaytext geneSymbol,
                 ot.curie AS doId,
                 evot.curie AS evidenceCode
             FROM
@@ -163,6 +164,7 @@ def get_disease_annotations(taxon_id: str):
             JOIN diseaseannotation_ontologyterm daot ON da.id = daot.diseaseannotation_id
             JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
             JOIN ontologyterm evot ON daot.evidencecodes_id = evot.id
+            JOIN slotannotation slota ON g.id = slota.singlegene_id
             WHERE
                 da.obsolete = false
             AND ot.namespace = 'disease_ontology'
@@ -174,12 +176,14 @@ def get_disease_annotations(taxon_id: str):
         indirect_query = text("""
             SELECT
                 be.primaryexternalid AS geneId,
+                slota.displaytext geneSymbol,
                 ot.curie AS doId,
                 evot.curie AS evidenceCode
             FROM
                 allelediseaseannotation ada
             JOIN diseaseannotation da ON ada.id = da.id
             JOIN biologicalentity be ON ada.inferredgene_id = be.id
+            JOIN slotannotation slota ON be.id = slota.singlegene_id
             JOIN diseaseannotation_ontologyterm daot ON da.id = daot.diseaseannotation_id
             JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
             JOIN ontologyterm evot ON daot.evidencecodes_id = evot.id
@@ -200,9 +204,14 @@ def get_disease_annotations(taxon_id: str):
         seen = set()
         results = []
         for row in list(direct_rows) + list(indirect_rows):
-            key = (row["geneId"], row["doId"], row["evidenceCode"])
+            key = (row["geneId"], row["geneSymbol"], row["doId"], row["evidenceCode"])
             if key not in seen:
-                results.append({"gene_id": row["geneId"], "do_id": row["doId"], "evidence_code": row["evidenceCode"]})
+                results.append({
+                    "gene_id": row["geneId"],
+                    "gene_symbol": row["geneSymbol"],
+                    "do_id": row["doId"],
+                    "evidence_code": row["evidenceCode"]
+                })
                 seen.add(key)
         return results
     finally:

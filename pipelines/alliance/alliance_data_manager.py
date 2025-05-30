@@ -12,7 +12,7 @@ from genedescriptions.data_manager import DataManager
 from pipelines.alliance.ateam_api_helper import get_ontology_roots, get_ontology_node_children, \
     get_expression_annotations_from_api, get_data_providers_from_api
 from pipelines.alliance.ateam_db_helper import get_expression_annotations, get_ontology_pairs, get_gene_data, \
-    get_data_providers
+    get_data_providers, get_disease_annotations
 
 logger = logging.getLogger(__name__)
 
@@ -38,81 +38,109 @@ class AllianceDataManager(DataManager):
         self.anatomy_ontologies_roots = None
         super().__init__()
 
-    def load_annotations(self, associations_type: DataType, taxon_id: str, provider: str, source: str = "db"):
-        if associations_type == DataType.GO:
-            if provider in ["XBXT", "XBXL"]:
-                provider = "XB"
-            release_version = os.environ.get("ALLIANCE_RELEASE_VERSION")
-            if not release_version:
-                raise RuntimeError("ALLIANCE_RELEASE_VERSION not set in environment")
-            fms_url = f"https://fms.alliancegenome.org/api/snapshot/release/{release_version}"
-            response = requests.get(fms_url)
-            if response.status_code != 200:
-                raise RuntimeError(f"Failed to fetch FMS API: {response.status_code}")
-            snapshot = response.json().get("snapShot", {})
-            data_files = snapshot.get("dataFiles", [])
-            gaf_file = None
-            for f in data_files:
-                if f.get("dataType", {}).get("name") == "GAF" and f.get("dataSubType", {}).get("name") == provider:
-                    gaf_file = f
-                    break
-            if not gaf_file:
-                raise RuntimeError(f"No GAF file found for provider {provider} in release {release_version}")
-            gaf_url = gaf_file.get("s3Url") or gaf_file.get("stableURL")
-            if not gaf_url:
-                raise RuntimeError(f"No download URL found for GAF file for provider {provider}")
-            logger.info(f"GAF file for provider {provider}: {gaf_url}")
-            # Download the GAF file to a temp location
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".gaf.gz") as tmp_gaf:
-                gaf_response = requests.get(gaf_url)
-                tmp_gaf.write(gaf_response.content)
-                tmp_gaf_path = tmp_gaf.name
-            # Use DataManager's load_associations_from_file to load the GAF file
-            self.load_associations_from_file(
-                associations_type=associations_type,
-                associations_url=gaf_url,
-                associations_cache_path=tmp_gaf_path,
-                config=self.config
-            )
-            os.remove(tmp_gaf_path)
-            renamed_associations = []
-            for subj_associations in self.go_associations.associations_by_subj.values():
-                for association in subj_associations:
-                    parts = association["subject"]["id"].split(":")
-                    if len(parts) > 2 and parts[0] == parts[1]:
-                        association["subject"]["id"] = f"{parts[0]}:{parts[2]}"
-                    renamed_associations.append(association)
-            self.go_associations = DataManager.create_annot_set_from_legacy_assocs(assocs=renamed_associations,
-                                                                                   ontology=self.go_ontology)
-            return None
-        elif associations_type == DataType.EXPR:
+    def _load_go_annotations(self, provider: str):
+        if provider in ["XBXT", "XBXL"]:
+            provider = "XB"
+        release_version = os.environ.get("ALLIANCE_RELEASE_VERSION")
+        if not release_version:
+            raise RuntimeError("ALLIANCE_RELEASE_VERSION not set in environment")
+        fms_url = f"https://fms.alliancegenome.org/api/snapshot/release/{release_version}"
+        response = requests.get(fms_url)
+        if response.status_code != 200:
+            raise RuntimeError(f"Failed to fetch FMS API: {response.status_code}")
+        snapshot = response.json().get("snapShot", {})
+        data_files = snapshot.get("dataFiles", [])
+        gaf_file = None
+        for f in data_files:
+            if f.get("dataType", {}).get("name") == "GAF" and f.get("dataSubType", {}).get("name") == provider:
+                gaf_file = f
+                break
+        if not gaf_file:
+            raise RuntimeError(f"No GAF file found for provider {provider} in release {release_version}")
+        gaf_url = gaf_file.get("s3Url") or gaf_file.get("stableURL")
+        if not gaf_url:
+            raise RuntimeError(f"No download URL found for GAF file for provider {provider}")
+        logger.info(f"GAF file for provider {provider}: {gaf_url}")
+        # Download the GAF file to a temp location
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".gaf.gz") as tmp_gaf:
+            gaf_response = requests.get(gaf_url)
+            tmp_gaf.write(gaf_response.content)
+            tmp_gaf_path = tmp_gaf.name
+        # Use DataManager's load_associations_from_file to load the GAF file
+        self.load_associations_from_file(
+            associations_type=DataType.GO,
+            associations_url=gaf_url,
+            associations_cache_path=tmp_gaf_path,
+            config=self.config
+        )
+        os.remove(tmp_gaf_path)
+        renamed_associations = []
+        for subj_associations in self.go_associations.associations_by_subj.values():
+            for association in subj_associations:
+                parts = association["subject"]["id"].split(":")
+                if len(parts) > 2 and parts[0] == parts[1]:
+                    association["subject"]["id"] = f"{parts[0]}:{parts[2]}"
+                renamed_associations.append(association)
+        self.go_associations = DataManager.create_annot_set_from_legacy_assocs(assocs=renamed_associations,
+                                                                               ontology=self.go_ontology)
+
+    def _load_expression_annotations(self, taxon_id: str, provider: str, source: str = "db"):
+        associations = []
+        if source == "db":
+            gea_list = get_expression_annotations(taxon_id=taxon_id)
+        elif source == "api":
+            gea_list = get_expression_annotations_from_api(data_provider=provider)
+        else:
+            raise ValueError("source must be either 'db' or 'api'")
+        for gea in gea_list:
+            associations.append(DataManager.create_annotation_record(
+                source_line="",
+                gene_id=gea["gene_id"],
+                gene_symbol=gea["gene_symbol"],
+                gene_type="gene",
+                taxon_id=taxon_id,
+                object_id=gea["anatomy_id"],
+                qualifiers=["Verified"],
+                aspect="A",
+                ecode="EXP",
+                references="",
+                prvdr=provider,
+                date=None))
+        self.expression_associations = DataManager.create_annot_set_from_legacy_assocs(
+            assocs=associations, ontology=self.expression_ontology)
+        self.expression_associations = self.remove_blacklisted_annotations(
+            association_set=self.expression_associations, ontology=self.expression_ontology,
+            terms_blacklist=self.config.get_module_property(module=Module.EXPRESSION,
+                                                            prop=ConfigModuleProperty.EXCLUDE_TERMS))
+
+    def _load_do_annotations(self, taxon_id: str, provider: str, source: str = "db"):
+        if source == "db":
             associations = []
-            if source == "db":
-                gea_list = get_expression_annotations(taxon_id=taxon_id)
-            elif source == "api":
-                gea_list = get_expression_annotations_from_api(data_provider=provider)
-            else:
-                raise ValueError("source must be either 'db' or 'api'")
-            for gea in gea_list:
+            doa_list = get_disease_annotations(taxon_id=taxon_id)
+            for doa in doa_list:
                 associations.append(DataManager.create_annotation_record(
                     source_line="",
-                    gene_id=gea["gene_id"],
-                    gene_symbol=gea["gene_symbol"],
+                    gene_id=doa["gene_id"],
+                    gene_symbol=doa["gene_symbol"],
                     gene_type="gene",
                     taxon_id=taxon_id,
-                    object_id=gea["anatomy_id"],
+                    object_id=doa["do_id"],
                     qualifiers=["Verified"],
                     aspect="A",
-                    ecode="EXP",
+                    ecode=doa["evidence_code"],
                     references="",
                     prvdr=provider,
                     date=None))
-            self.expression_associations = DataManager.create_annot_set_from_legacy_assocs(
-                assocs=associations, ontology=self.expression_ontology)
-            self.expression_associations = self.remove_blacklisted_annotations(
-                association_set=self.expression_associations, ontology=self.expression_ontology,
-                terms_blacklist=self.config.get_module_property(module=Module.EXPRESSION,
-                                                                prop=ConfigModuleProperty.EXCLUDE_TERMS))
+            self.do_associations = DataManager.create_annot_set_from_legacy_assocs(
+                assocs=associations, ontology=self.do_ontology)
+
+    def load_annotations(self, associations_type: DataType, taxon_id: str, provider: str, source: str = "db"):
+        if associations_type == DataType.GO:
+            self._load_go_annotations(provider=provider)
+        elif associations_type == DataType.EXPR:
+            self._load_expression_annotations(taxon_id=taxon_id, provider=provider, source=source)
+        elif associations_type == DataType.DO:
+            self._load_do_annotations(taxon_id=taxon_id, source=source)
         return None
 
     @staticmethod
@@ -287,3 +315,5 @@ class AllianceDataManager(DataManager):
             logger.info("Loading data providers from DB")
             return get_data_providers()
         return None
+
+
