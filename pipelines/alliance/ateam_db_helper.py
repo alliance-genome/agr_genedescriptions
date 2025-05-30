@@ -174,21 +174,25 @@ def get_disease_annotations(taxon_id: str):
         indirect_query = text("""
             SELECT
                 be.primaryexternalid AS geneId,
-                ot.curie AS doId
+                ot.curie AS doId,
+                evot.curie AS evidenceCode
             FROM
                 allelediseaseannotation ada
-            JOIN allelediseaseannotation_gene adag ON ada.id = adag.allelediseaseannotation_id
-            JOIN gene g ON adag.assertedgenes_id = g.id
-            JOIN biologicalentity be ON g.id = be.id
-            JOIN allelediseaseannotation_ontologyterm adaot ON ada.id = adaot.allelediseaseannotation_id
-            JOIN ontologyterm ot ON ada.allelediseaseannotationobject_id = ot.id
+            JOIN diseaseannotation da ON ada.id = da.id
+            JOIN biologicalentity be ON ada.inferredgene_id = be.id
+            JOIN diseaseannotation_ontologyterm daot ON da.id = daot.diseaseannotation_id
+            JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
+            JOIN ontologyterm evot ON daot.evidencecodes_id = evot.id
             WHERE
-                ada.obsolete = false
+                da.obsolete = false
             AND ot.namespace = 'disease_ontology'
             AND be.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
-            AND (
-                SELECT COUNT(*) FROM allelediseaseannotation_gene adag2 WHERE adag2.assertedgenes_id = g.id
-            ) = 1
+            AND ada.diseaseannotationsubject_id IN (
+                SELECT ada2.diseaseannotationsubject_id
+                FROM allelediseaseannotation ada2
+                GROUP BY ada2.diseaseannotationsubject_id
+                HAVING COUNT(*) = 1
+            )
         """)
         indirect_rows = session.execute(indirect_query, {"taxon_id": taxon_id}).fetchall()
 
