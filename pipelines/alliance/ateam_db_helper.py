@@ -200,7 +200,7 @@ def get_disease_annotations(taxon_id: str):
         seen = set()
         results = []
         for row in list(direct_rows) + list(indirect_rows):
-            key = (row["geneId"], row["doId"])
+            key = (row["geneId"], row["doId"], row["evidenceCode"])
             if key not in seen:
                 results.append({"gene_id": row["geneId"], "do_id": row["doId"], "evidence_code": row["evidenceCode"]})
                 seen.add(key)
