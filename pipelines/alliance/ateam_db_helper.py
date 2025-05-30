@@ -164,7 +164,7 @@ def get_disease_annotations(taxon_id: str):
             JOIN diseaseannotation_ontologyterm daot ON da.id = daot.diseaseannotation_id
             JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
             JOIN slotannotation slota ON g.id = slota.singlegene_id
-            JOIN vocabulariterm rel ON daot.relationship_id = rel.id
+            JOIN vocabularyterm rel ON daot.relationship_id = rel.id
             WHERE
                 da.obsolete = false
             AND da.negated = false
@@ -187,7 +187,7 @@ def get_disease_annotations(taxon_id: str):
             JOIN slotannotation slota ON be.id = slota.singlegene_id
             JOIN diseaseannotation_ontologyterm daot ON da.id = daot.diseaseannotation_id
             JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
-            JOIN vocabulariterm rel ON daot.relationship_id = rel.id
+            JOIN vocabularyterm rel ON daot.relationship_id = rel.id
             WHERE
                 da.obsolete = false
             AND da.negated = false
