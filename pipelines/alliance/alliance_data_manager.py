@@ -140,7 +140,7 @@ class AllianceDataManager(DataManager):
         elif associations_type == DataType.EXPR:
             self._load_expression_annotations(taxon_id=taxon_id, provider=provider, source=source)
         elif associations_type == DataType.DO:
-            self._load_do_annotations(taxon_id=taxon_id, source=source)
+            self._load_do_annotations(taxon_id=taxon_id, source=source, provider=provider)
         return None
 
     @staticmethod
