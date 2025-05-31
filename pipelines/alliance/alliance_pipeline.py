@@ -19,6 +19,7 @@ def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider:
     logger.info(f"Loading GAF file for {data_provider}")
     data_manager.load_annotations(associations_type=DataType.GO, taxon_id=species_taxon, provider=data_provider,
                                   source=DATA_SOURCE)
+    logger.info(f"Loading disease annotations for {data_provider}")
     data_manager.load_annotations(associations_type=DataType.DO, taxon_id=species_taxon, provider=data_provider,
                                   source=DATA_SOURCE)
     if data_provider in provider_to_expression_curie_prefix:
