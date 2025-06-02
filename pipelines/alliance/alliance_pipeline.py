@@ -82,7 +82,9 @@ def process_provider(data_provider, species_taxon, data_manager, conf_parser):
     logger.info(f"Loading all data for {data_provider}")
     load_all_data_for_provider(data_manager, data_provider, species_taxon)
     logger.info(f"Loading best human orthologs for {data_provider}")
-    best_orthologs = data_manager.get_best_human_orthologs(species_taxon=species_taxon, source=DATA_SOURCE)
+
+    if data_provider != "HUMAN":
+        best_orthologs = data_manager.get_best_human_orthologs(species_taxon=species_taxon, source=DATA_SOURCE)
 
     logger.info(f"Generating text summaries for {data_provider}")
     generate_gene_descriptions(data_manager, best_orthologs, data_provider, conf_parser, json_desc_writer)
