@@ -221,17 +221,26 @@ def get_disease_annotations(taxon_id: str):
         session.close()
 
 
-def get_human_orthologs_for_taxon(taxon_curie: str):
-    """Get human orthologs for all genes from a given species taxon curie."""
+def get_best_human_orthologs_for_taxon(taxon_curie: str):
+    """
+    Get best human orthologs for all genes from a given species taxon curie.
+    Only consider orthologs predicted by methods that pass the strict filter (strictfilter=true).
+    For each gene, return the ortholog(s) predicted by the largest number of such methods.
+    """
     session = create_ateam_db_session()
     try:
         sql_query = text("""
         SELECT
+            gto.subjectgene_id,
+            gto.objectgene_id,
             subj_be.primaryexternalid AS gene_id,
             subj_slota.displaytext AS gene_symbol,
             obj_be.primaryexternalid AS ortho_id,
-            obj_slota.displaytext AS ortho_symbol
+            obj_slota.displaytext AS ortho_symbol,
+            COUNT(DISTINCT pm.predictionmethodsmatched_id) AS method_count
         FROM genetogeneorthology gto
+        JOIN genetogeneorthologygenerated gtog ON gto.id = gtog.id AND gtog.strictfilter = true
+        JOIN genetogeneorthologygenerated_predictionmethodsmatched pm ON gtog.id = pm.genetogeneorthologygenerated_id
         JOIN gene subj_gene ON gto.subjectgene_id = subj_gene.id
         JOIN biologicalentity subj_be ON subj_gene.id = subj_be.id
         JOIN slotannotation subj_slota ON subj_gene.id = subj_slota.singlegene_id AND subj_slota.slotannotationtype = 'GeneSymbolSlotAnnotation' AND subj_slota.obsolete = false
@@ -246,15 +255,24 @@ def get_human_orthologs_for_taxon(taxon_curie: str):
           AND obj_slota.obsolete = false
           AND subj_be.obsolete = false
           AND obj_be.obsolete = false
+        GROUP BY gto.subjectgene_id, gto.objectgene_id, subj_be.primaryexternalid, subj_slota.displaytext, obj_be.primaryexternalid, obj_slota.displaytext
         """)
         rows = session.execute(sql_query, {'taxon_curie': taxon_curie}).fetchall()
-        result = {}
+        # Organize by gene, find max method count per gene
+        from collections import defaultdict
+        gene_orthologs = defaultdict(list)
         for row in rows:
             gene_id = row['gene_id']
             ortho_info = [row['ortho_id'], row['ortho_symbol'], None]  # No name available
-            if gene_id not in result:
-                result[gene_id] = []
-            result[gene_id].append(ortho_info)
+            method_count = row['method_count']
+            gene_orthologs[gene_id].append((ortho_info, method_count))
+        result = {}
+        for gene_id, ortho_list in gene_orthologs.items():
+            if not ortho_list:
+                continue
+            max_count = max(x[1] for x in ortho_list)
+            best_orthos = [x[0] for x in ortho_list if x[1] == max_count]
+            result[gene_id] = best_orthos
         return result
     finally:
         session.close()

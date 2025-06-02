@@ -12,7 +12,7 @@ from genedescriptions.data_manager import DataManager
 from pipelines.alliance.ateam_api_helper import get_ontology_roots, get_ontology_node_children, \
     get_expression_annotations_from_api, get_data_providers_from_api
 from pipelines.alliance.ateam_db_helper import get_expression_annotations, get_ontology_pairs, get_gene_data, \
-    get_data_providers, get_disease_annotations, get_human_orthologs_for_data_provider
+    get_data_providers, get_disease_annotations, get_best_human_orthologs_for_taxon
 
 logger = logging.getLogger(__name__)
 
@@ -316,14 +316,14 @@ class AllianceDataManager(DataManager):
             return get_data_providers()
         return None
 
-    def get_best_human_orthologs(self, data_provider_curie: str, source: str = "db"):
+    def get_best_human_orthologs(self, species_taxon: str, source: str = "db"):
         """Get best human orthologs for all genes from a given data provider."""
         if source not in ["db", "api"]:
             raise ValueError("source must be either 'db' or 'api'")
         if source == "api":
             raise NotImplementedError("API loading for human orthologs is not implemented yet")
         else:
-            orthologs = get_human_orthologs_for_data_provider(data_provider_curie)
+            orthologs = get_best_human_orthologs_for_taxon(species_taxon)
         best_orthologs = {}
         for gene_id, ortho_list in orthologs.items():
             # For now, just return all orthologs (no algorithm filter available in current schema)
