@@ -83,6 +83,7 @@ def process_provider(data_provider, species_taxon, data_manager, conf_parser):
     load_all_data_for_provider(data_manager, data_provider, species_taxon)
     logger.info(f"Loading best human orthologs for {data_provider}")
 
+    best_orthologs = {}
     if data_provider != "HUMAN":
         best_orthologs = data_manager.get_best_human_orthologs(species_taxon=species_taxon, source=DATA_SOURCE)
 
