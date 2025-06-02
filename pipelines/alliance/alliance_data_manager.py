@@ -323,9 +323,4 @@ class AllianceDataManager(DataManager):
         if source == "api":
             raise NotImplementedError("API loading for human orthologs is not implemented yet")
         else:
-            orthologs = get_best_human_orthologs_for_taxon(species_taxon)
-        best_orthologs = {}
-        for gene_id, ortho_list in orthologs.items():
-            # For now, just return all orthologs (no algorithm filter available in current schema)
-            best_orthologs[gene_id] = [ortho_list, False]  # False: no ambiguity flag
-        return best_orthologs
+            return get_best_human_orthologs_for_taxon(species_taxon)
