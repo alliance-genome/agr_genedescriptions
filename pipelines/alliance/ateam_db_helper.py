@@ -174,6 +174,7 @@ def get_disease_annotations(taxon_id: str):
         direct_rows = session.execute(direct_query, {"taxon_id": taxon_id}).fetchall()
 
         # Indirect gene -> allele -> DO term annotations (only if allele has a single inferred gene)
+        # TODO: there are no inferred genes for WB - check that the query is ok
         indirect_query = text("""
             SELECT
                 be.primaryexternalid AS geneId,
