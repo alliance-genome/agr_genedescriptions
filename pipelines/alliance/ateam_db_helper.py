@@ -171,7 +171,7 @@ def get_disease_annotations(taxon_id: str):
             AND ot.namespace = 'disease_ontology'
             AND be.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
         """)
-        direct_rows = session.execute(direct_query, {"taxon_id": taxon_id}).fetchall()
+        direct_rows = session.execute(direct_query, {"taxon_id": taxon_id}).mappings().all()
 
         # Indirect gene -> allele -> DO term annotations (only if allele has a single inferred gene)
         # TODO: there are no inferred genes for WB - check that the query is ok
@@ -201,13 +201,13 @@ def get_disease_annotations(taxon_id: str):
                 HAVING COUNT(*) = 1
             )
         """)
-        indirect_rows = session.execute(indirect_query, {"taxon_id": taxon_id}).fetchall()
+        indirect_rows = session.execute(indirect_query, {"taxon_id": taxon_id}).mappings().all()
 
         # Combine and deduplicate
         seen = set()
         results = []
         for row in list(direct_rows) + list(indirect_rows):
-            key = (row["geneId"], row["geneSymbol"], row["doId"], row["evidenceCode"])
+            key = (row["geneId"], row["geneSymbol"], row["doId"], row["relationshipType"])
             if key not in seen:
                 results.append({
                     "gene_id": row["geneId"],
@@ -274,4 +274,5 @@ def get_best_human_orthologs_for_taxon(taxon_curie: str):
         return result
     finally:
         session.close()
+
 
