@@ -316,9 +316,14 @@ class AllianceDataManager(DataManager):
             return get_data_providers()
         return None
 
-    def get_best_human_orthologs(self, data_provider_curie: str):
+    def get_best_human_orthologs(self, data_provider_curie: str, source: str = "db"):
         """Get best human orthologs for all genes from a given data provider."""
-        orthologs = get_human_orthologs_for_data_provider(data_provider_curie)
+        if source not in ["db", "api"]:
+            raise ValueError("source must be either 'db' or 'api'")
+        if source == "api":
+            raise NotImplementedError("API loading for human orthologs is not implemented yet")
+        else:
+            orthologs = get_human_orthologs_for_data_provider(data_provider_curie)
         best_orthologs = {}
         for gene_id, ortho_list in orthologs.items():
             # For now, just return all orthologs (no algorithm filter available in current schema)
