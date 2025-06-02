@@ -143,26 +143,30 @@ def get_data_providers():
 
 
 def get_disease_annotations(taxon_id: str):
-    """Get direct and indirect disease ontology (DO) annotations from the A-team database.
-    - Direct: gene -> DO term (via diseaseannotation_gene)
-    - Indirect: gene -> allele -> DO term (via allelediseaseannotation_gene, only if gene has a single allele)
+    """
+    Get direct and indirect disease ontology (DO) annotations from the A-team database.
+    - Direct: gene -> DO term (via genediseaseannotation)
+    - Indirect from allele: gene from inferredgene_id (if present)
+    - Indirect from allele: gene from asserted genes (from allelediseaseannotation_gene)
+    - Indirect from AGM: gene from inferredgene_id (if present)
+    - Indirect from AGM: gene from asserted genes (from agmdiseaseannotation_gene)
     """
     session = create_ateam_db_session()
     try:
         # Direct gene -> DO term annotations
         direct_query = text("""
             SELECT
-                be.primaryexternalid AS geneId,
-                slota.displaytext geneSymbol,
-                ot.curie AS doId,
-                rel.name as relationshipType
+                be.primaryexternalid AS "geneId",
+                slota.displaytext AS "geneSymbol",
+                ot.curie AS "doId",
+                rel.name AS "relationshipType"
             FROM
                 diseaseannotation da
             JOIN genediseaseannotation gda ON da.id = gda.id
             JOIN gene g ON gda.diseaseannotationsubject_id = g.id
             JOIN biologicalentity be ON g.id = be.id
             JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
-            JOIN slotannotation slota ON g.id = slota.singlegene_id
+            JOIN slotannotation slota ON g.id = slota.singlegene_id AND slota.slotannotationtype = 'GeneSymbolSlotAnnotation'
             JOIN vocabularyterm rel ON da.relation_id = rel.id
             WHERE
                 da.obsolete = false
@@ -172,19 +176,18 @@ def get_disease_annotations(taxon_id: str):
         """)
         direct_rows = session.execute(direct_query, {"taxon_id": taxon_id}).mappings().all()
 
-        # Indirect gene -> allele -> DO term annotations (only if allele has a single inferred gene)
-        # TODO: there are no inferred genes for WB - check that the query is ok
-        indirect_query = text("""
+        # Allele disease annotations: inferred gene (at most one)
+        allele_inferred_query = text("""
             SELECT
-                be.primaryexternalid AS geneId,
-                slota.displaytext geneSymbol,
-                ot.curie AS doId,
-                rel.name as relationshipType
+                be.primaryexternalid AS "geneId",
+                slota.displaytext AS "geneSymbol",
+                ot.curie AS "doId",
+                rel.name AS "relationshipType"
             FROM
                 allelediseaseannotation ada
             JOIN diseaseannotation da ON ada.id = da.id
             JOIN biologicalentity be ON ada.inferredgene_id = be.id
-            JOIN slotannotation slota ON be.id = slota.singlegene_id
+            JOIN slotannotation slota ON be.id = slota.singlegene_id AND slota.slotannotationtype = 'GeneSymbolSlotAnnotation'
             JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
             JOIN vocabularyterm rel ON da.relation_id = rel.id
             WHERE
@@ -192,26 +195,112 @@ def get_disease_annotations(taxon_id: str):
             AND da.negated = false
             AND ot.namespace = 'disease_ontology'
             AND be.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
-            AND ada.diseaseannotationsubject_id IN (
-                SELECT ada2.diseaseannotationsubject_id
-                FROM allelediseaseannotation ada2
-                GROUP BY ada2.diseaseannotationsubject_id
+            AND ada.inferredgene_id IS NOT NULL
+        """)
+        allele_inferred_rows = session.execute(allele_inferred_query, {"taxon_id": taxon_id}).mappings().all()
+
+        # Allele disease annotations: asserted gene (only if exactly one)
+        allele_asserted_query = text("""
+            SELECT
+                be.primaryexternalid AS "geneId",
+                slota.displaytext AS "geneSymbol",
+                ot.curie AS "doId",
+                rel.name AS "relationshipType"
+            FROM
+                allelediseaseannotation ada
+            JOIN diseaseannotation da ON ada.id = da.id
+            JOIN allelediseaseannotation_gene adg ON ada.id = adg.allelediseaseannotation_id
+            JOIN biologicalentity be ON adg.assertedgenes_id = be.id
+            JOIN slotannotation slota ON be.id = slota.singlegene_id AND slota.slotannotationtype = 'GeneSymbolSlotAnnotation'
+            JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
+            JOIN vocabularyterm rel ON da.relation_id = rel.id
+            WHERE
+                da.obsolete = false
+            AND da.negated = false
+            AND ot.namespace = 'disease_ontology'
+            AND be.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
+            AND ada.id IN (
+                SELECT adg2.allelediseaseannotation_id
+                FROM allelediseaseannotation_gene adg2
+                GROUP BY adg2.allelediseaseannotation_id
                 HAVING COUNT(*) = 1
             )
         """)
-        indirect_rows = session.execute(indirect_query, {"taxon_id": taxon_id}).mappings().all()
+        allele_asserted_rows = session.execute(allele_asserted_query, {"taxon_id": taxon_id}).mappings().all()
+
+        # AGM disease annotations: inferred gene (at most one)
+        agm_inferred_query = text("""
+            SELECT
+                be.primaryexternalid AS "geneId",
+                slota.displaytext AS "geneSymbol",
+                ot.curie AS "doId",
+                rel.name AS "relationshipType"
+            FROM
+                agmdiseaseannotation agmda
+            JOIN diseaseannotation da ON agmda.id = da.id
+            JOIN biologicalentity be ON agmda.inferredgene_id = be.id
+            JOIN slotannotation slota ON be.id = slota.singlegene_id AND slota.slotannotationtype = 'GeneSymbolSlotAnnotation'
+            JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
+            JOIN vocabularyterm rel ON da.relation_id = rel.id
+            WHERE
+                da.obsolete = false
+            AND da.negated = false
+            AND ot.namespace = 'disease_ontology'
+            AND be.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
+            AND agmda.inferredgene_id IS NOT NULL
+        """)
+        agm_inferred_rows = session.execute(agm_inferred_query, {"taxon_id": taxon_id}).mappings().all()
+
+        # AGM disease annotations: asserted gene (only if exactly one)
+        agm_asserted_query = text("""
+            SELECT
+                be.primaryexternalid AS "geneId",
+                slota.displaytext AS "geneSymbol",
+                ot.curie AS "doId",
+                rel.name AS "relationshipType"
+            FROM
+                agmdiseaseannotation agmda
+            JOIN diseaseannotation da ON agmda.id = da.id
+            JOIN agmdiseaseannotation_gene agmg ON agmda.id = agmg.agmdiseaseannotation_id
+            JOIN biologicalentity be ON agmg.assertedgenes_id = be.id
+            JOIN slotannotation slota ON be.id = slota.singlegene_id AND slota.slotannotationtype = 'GeneSymbolSlotAnnotation'
+            JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
+            JOIN vocabularyterm rel ON da.relation_id = rel.id
+            WHERE
+                da.obsolete = false
+            AND da.negated = false
+            AND ot.namespace = 'disease_ontology'
+            AND be.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
+            AND agmda.id IN (
+                SELECT agmg2.agmdiseaseannotation_id
+                FROM agmdiseaseannotation_gene agmg2
+                GROUP BY agmg2.agmdiseaseannotation_id
+                HAVING COUNT(*) = 1
+            )
+        """)
+        agm_asserted_rows = session.execute(agm_asserted_query, {"taxon_id": taxon_id}).mappings().all()
 
         # Combine and deduplicate
         seen = set()
         results = []
-        for row in list(direct_rows) + list(indirect_rows):
-            key = (row["geneId"], row["geneSymbol"], row["doId"], row["relationshipType"])
+        for row in (
+            list(direct_rows)
+            + list(allele_inferred_rows)
+            + list(allele_asserted_rows)
+            + list(agm_inferred_rows)
+            + list(agm_asserted_rows)
+        ):
+            gene_id = row["geneId"]
+            gene_symbol = row["geneSymbol"]
+            do_id = row["doId"]
+            relationship_type = row["relationshipType"]
+            key = (gene_id, gene_symbol, do_id, relationship_type)
             if key not in seen:
                 results.append({
-                    "gene_id": row["geneId"],
-                    "gene_symbol": row["geneSymbol"],
-                    "do_id": row["doId"],
-                    "relationship_type": row["relationshipType"]
+                    "gene_id": gene_id,
+                    "gene_symbol": gene_symbol,
+                    "do_id": do_id,
+                    "relationship_type": relationship_type
                 })
                 seen.add(key)
         return results
