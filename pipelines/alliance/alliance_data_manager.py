@@ -125,7 +125,7 @@ class AllianceDataManager(DataManager):
                     gene_type="gene",
                     taxon_id=taxon_id,
                     object_id=doa["do_id"],
-                    qualifiers=["Verified"],
+                    qualifiers=[""],
                     aspect="D",
                     ecode="BMK" if doa["relationship_type"] == "is_marker_for" else "EXP",
                     references="",
