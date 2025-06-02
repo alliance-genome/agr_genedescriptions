@@ -255,12 +255,12 @@ def get_best_human_orthologs_for_taxon(taxon_curie: str):
           AND obj_be.obsolete = false
         GROUP BY gto.subjectgene_id, gto.objectgene_id, subj_be.primaryexternalid, subj_slota.displaytext, obj_be.primaryexternalid, obj_slota.displaytext
         """)
-        rows = session.execute(sql_query, {'taxon_curie': taxon_curie}).fetchall()
+        rows = session.execute(sql_query, {'taxon_curie': taxon_curie}).mappings().all()
         from collections import defaultdict
         gene_orthologs = defaultdict(list)
         for row in rows:
             gene_id = row['gene_id']
-            ortho_info = [row['ortho_id'], row['ortho_symbol'], None]  # No name available
+            ortho_info = [row['ortho_id'], row['ortho_symbol'], "Extended name"]
             method_count = row['method_count']
             gene_orthologs[gene_id].append((ortho_info, method_count))
         result = {}
