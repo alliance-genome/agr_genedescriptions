@@ -235,6 +235,7 @@ def get_best_human_orthologs_for_taxon(taxon_curie: str):
             subj_slota.displaytext AS gene_symbol,
             obj_be.primaryexternalid AS ortho_id,
             obj_slota.displaytext AS ortho_symbol,
+            obj_full_name_slota.displaytext AS ortho_full_name,
             COUNT(DISTINCT pm.predictionmethodsmatched_id) AS method_count
         FROM genetogeneorthology gto
         JOIN genetogeneorthologygenerated gtog ON gto.id = gtog.id AND gtog.strictfilter = true
@@ -245,6 +246,7 @@ def get_best_human_orthologs_for_taxon(taxon_curie: str):
         JOIN gene obj_gene ON gto.objectgene_id = obj_gene.id
         JOIN biologicalentity obj_be ON obj_gene.id = obj_be.id
         JOIN slotannotation obj_slota ON obj_gene.id = obj_slota.singlegene_id AND obj_slota.slotannotationtype = 'GeneSymbolSlotAnnotation' AND obj_slota.obsolete = false
+        JOIN slotannotation obj_full_name_slota ON obj_gene.id = obj_full_name_slota.singlegene_id AND obj_full_name_slota.slotannotationtype = 'GeneFullNameSlotAnnotation' AND obj_full_name_slota.obsolete = false
         JOIN ontologyterm obj_taxon ON obj_be.taxon_id = obj_taxon.id
         JOIN ontologyterm subj_taxon ON subj_be.taxon_id = subj_taxon.id
         WHERE subj_taxon.curie = :taxon_curie
@@ -253,14 +255,14 @@ def get_best_human_orthologs_for_taxon(taxon_curie: str):
           AND obj_slota.obsolete = false
           AND subj_be.obsolete = false
           AND obj_be.obsolete = false
-        GROUP BY gto.subjectgene_id, gto.objectgene_id, subj_be.primaryexternalid, subj_slota.displaytext, obj_be.primaryexternalid, obj_slota.displaytext
+        GROUP BY gto.subjectgene_id, gto.objectgene_id, subj_be.primaryexternalid, subj_slota.displaytext, obj_be.primaryexternalid, obj_slota.displaytext, obj_full_name_slota.displaytext
         """)
         rows = session.execute(sql_query, {'taxon_curie': taxon_curie}).mappings().all()
         from collections import defaultdict
         gene_orthologs = defaultdict(list)
         for row in rows:
             gene_id = row['gene_id']
-            ortho_info = [row['ortho_id'], row['ortho_symbol'], "Extended name"]
+            ortho_info = [row['ortho_id'], row['ortho_symbol'], row['ortho_full_name']]
             method_count = row['method_count']
             gene_orthologs[gene_id].append((ortho_info, method_count))
         result = {}
@@ -274,5 +276,4 @@ def get_best_human_orthologs_for_taxon(taxon_curie: str):
         return result
     finally:
         session.close()
-
 
