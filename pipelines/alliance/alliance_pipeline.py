@@ -7,7 +7,8 @@ from genedescriptions.commons import DataType
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.descriptions_writer import DescriptionsWriter
 from genedescriptions.gene_description import GeneDescription
-from genedescriptions.precanned_modules import set_expression_module, set_gene_ontology_module, set_disease_module
+from genedescriptions.precanned_modules import set_expression_module, set_gene_ontology_module, set_disease_module, \
+    set_alliance_human_orthology_module
 from pipelines.alliance.alliance_data_manager import AllianceDataManager, provider_to_expression_curie_prefix
 
 logger = logging.getLogger(__name__)
@@ -42,7 +43,7 @@ def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider:
             del data_manager.gene_data[gene_id]
 
 
-def generate_gene_descriptions(data_manager: AllianceDataManager, data_provider: str,
+def generate_gene_descriptions(data_manager: AllianceDataManager, best_orthologs, data_provider: str,
                                conf_parser: GenedescConfigParser, json_desc_writer: DescriptionsWriter):
     for gene in data_manager.get_gene_data():
         gene_desc = GeneDescription(gene_id=gene.id,
@@ -57,6 +58,12 @@ def generate_gene_descriptions(data_manager: AllianceDataManager, data_provider:
                                   gene=gene)
         set_disease_module(df=data_manager, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene,
                            human=data_provider == "HUMAN")
+        if gene.id in best_orthologs:
+            gene_desc.stats.set_best_orthologs = best_orthologs[gene.id][0]
+            set_alliance_human_orthology_module(orthologs=best_orthologs[gene.id][0],
+                                                excluded_orthologs=best_orthologs[gene.id][1],
+                                                gene_desc=gene_desc,
+                                                config=conf_parser)
         json_desc_writer.add_gene_desc(gene_desc)
 
 
@@ -73,9 +80,10 @@ def process_provider(data_provider, species_taxon, data_manager, conf_parser):
 
     logger.info(f"Loading all data for {data_provider}")
     load_all_data_for_provider(data_manager, data_provider, species_taxon)
+    best_orthologs = data_manager.get_best_human_orthologs(species_taxon=species_taxon, source=DATA_SOURCE)
 
     logger.info(f"Generating text summaries for {data_provider}")
-    generate_gene_descriptions(data_manager, data_provider, conf_parser, json_desc_writer)
+    generate_gene_descriptions(data_manager, best_orthologs, data_provider, conf_parser, json_desc_writer)
 
     logger.info(f"Saving gene descriptions for {data_provider}")
     save_gene_descriptions(data_manager, json_desc_writer, data_provider)

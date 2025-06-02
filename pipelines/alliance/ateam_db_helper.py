@@ -225,7 +225,7 @@ def get_best_human_orthologs_for_taxon(taxon_curie: str):
     """
     Get best human orthologs for all genes from a given species taxon curie.
     Only consider orthologs predicted by methods that pass the strict filter (strictfilter=true).
-    For each gene, return the ortholog(s) predicted by the largest number of such methods.
+    For each gene, return a tuple: (list of best orthologs, bool indicating if any orthologs were excluded).
     """
     session = create_ateam_db_session()
     try:
@@ -256,7 +256,6 @@ def get_best_human_orthologs_for_taxon(taxon_curie: str):
         GROUP BY gto.subjectgene_id, gto.objectgene_id, subj_be.primaryexternalid, subj_slota.displaytext, obj_be.primaryexternalid, obj_slota.displaytext
         """)
         rows = session.execute(sql_query, {'taxon_curie': taxon_curie}).fetchall()
-        # Organize by gene, find max method count per gene
         from collections import defaultdict
         gene_orthologs = defaultdict(list)
         for row in rows:
@@ -270,7 +269,8 @@ def get_best_human_orthologs_for_taxon(taxon_curie: str):
                 continue
             max_count = max(x[1] for x in ortho_list)
             best_orthos = [x[0] for x in ortho_list if x[1] == max_count]
-            result[gene_id] = best_orthos
+            excluded = len(ortho_list) > len(best_orthos)
+            result[gene_id] = (best_orthos, excluded)
         return result
     finally:
         session.close()
