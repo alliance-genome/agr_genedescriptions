@@ -231,8 +231,6 @@ def get_best_human_orthologs_for_taxon(taxon_curie: str):
     try:
         sql_query = text("""
         SELECT
-            gto.subjectgene_id,
-            gto.objectgene_id,
             subj_be.primaryexternalid AS gene_id,
             subj_slota.displaytext AS gene_symbol,
             obj_be.primaryexternalid AS ortho_id,
