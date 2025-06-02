@@ -221,8 +221,8 @@ def get_disease_annotations(taxon_id: str):
         session.close()
 
 
-def get_human_orthologs_for_data_provider(data_provider_curie: str):
-    """Get human orthologs for all genes from a given data provider."""
+def get_human_orthologs_for_taxon(taxon_curie: str):
+    """Get human orthologs for all genes from a given species taxon curie."""
     session = create_ateam_db_session()
     try:
         sql_query = text("""
@@ -240,14 +240,14 @@ def get_human_orthologs_for_data_provider(data_provider_curie: str):
         JOIN slotannotation obj_slota ON obj_gene.id = obj_slota.singlegene_id AND obj_slota.slotannotationtype = 'GeneSymbolSlotAnnotation' AND obj_slota.obsolete = false
         JOIN ontologyterm obj_taxon ON obj_be.taxon_id = obj_taxon.id
         JOIN ontologyterm subj_taxon ON subj_be.taxon_id = subj_taxon.id
-        WHERE subj_be.dataprovider_id = (SELECT id FROM organization WHERE curie = :data_provider_curie)
+        WHERE subj_taxon.curie = :taxon_curie
           AND obj_taxon.curie = 'NCBITaxon:9606'
           AND subj_slota.obsolete = false
           AND obj_slota.obsolete = false
           AND subj_be.obsolete = false
           AND obj_be.obsolete = false
         """)
-        rows = session.execute(sql_query, {'data_provider_curie': data_provider_curie}).fetchall()
+        rows = session.execute(sql_query, {'taxon_curie': taxon_curie}).fetchall()
         result = {}
         for row in rows:
             gene_id = row['gene_id']
