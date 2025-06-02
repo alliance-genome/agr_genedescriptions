@@ -2,6 +2,7 @@ import argparse
 import concurrent.futures
 import logging
 import time
+import traceback  # <-- add this import
 
 from genedescriptions.commons import DataType
 from genedescriptions.config_parser import GenedescConfigParser
@@ -132,13 +133,11 @@ def main():
                     future.result()
                 except Exception as e:
                     logger.error(f"Error processing data provider: {e}")
+                    logger.error(traceback.format_exc())
     else:
         logger.info("Processing data providers sequentially")
         for data_provider, species_taxon in data_providers:
-            try:
-                process_provider(data_provider, species_taxon, data_manager, conf_parser)
-            except Exception as e:
-                logger.error(f"Error processing data provider: {e}")
+            process_provider(data_provider, species_taxon, data_manager, conf_parser)
 
     elapsed_time = time.time() - start_time
     formatted_time = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
@@ -147,5 +146,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
