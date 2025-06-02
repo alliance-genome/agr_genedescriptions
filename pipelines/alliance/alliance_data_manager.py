@@ -12,7 +12,7 @@ from genedescriptions.data_manager import DataManager
 from pipelines.alliance.ateam_api_helper import get_ontology_roots, get_ontology_node_children, \
     get_expression_annotations_from_api, get_data_providers_from_api
 from pipelines.alliance.ateam_db_helper import get_expression_annotations, get_ontology_pairs, get_gene_data, \
-    get_data_providers, get_disease_annotations
+    get_data_providers, get_disease_annotations, get_human_orthologs_for_data_provider
 
 logger = logging.getLogger(__name__)
 
@@ -316,4 +316,11 @@ class AllianceDataManager(DataManager):
             return get_data_providers()
         return None
 
-
+    def get_best_human_orthologs(self, data_provider_curie: str):
+        """Get best human orthologs for all genes from a given data provider."""
+        orthologs = get_human_orthologs_for_data_provider(data_provider_curie)
+        best_orthologs = {}
+        for gene_id, ortho_list in orthologs.items():
+            # For now, just return all orthologs (no algorithm filter available in current schema)
+            best_orthologs[gene_id] = [ortho_list, False]  # False: no ambiguity flag
+        return best_orthologs

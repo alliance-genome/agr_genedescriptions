@@ -220,3 +220,42 @@ def get_disease_annotations(taxon_id: str):
     finally:
         session.close()
 
+
+def get_human_orthologs_for_data_provider(data_provider_curie: str):
+    """Get human orthologs for all genes from a given data provider."""
+    session = create_ateam_db_session()
+    try:
+        sql_query = text("""
+        SELECT
+            subj_be.primaryexternalid AS gene_id,
+            subj_slota.displaytext AS gene_symbol,
+            obj_be.primaryexternalid AS ortho_id,
+            obj_slota.displaytext AS ortho_symbol
+        FROM genetogeneorthology gto
+        JOIN gene subj_gene ON gto.subjectgene_id = subj_gene.id
+        JOIN biologicalentity subj_be ON subj_gene.id = subj_be.id
+        JOIN slotannotation subj_slota ON subj_gene.id = subj_slota.singlegene_id AND subj_slota.slotannotationtype = 'GeneSymbolSlotAnnotation' AND subj_slota.obsolete = false
+        JOIN gene obj_gene ON gto.objectgene_id = obj_gene.id
+        JOIN biologicalentity obj_be ON obj_gene.id = obj_be.id
+        JOIN slotannotation obj_slota ON obj_gene.id = obj_slota.singlegene_id AND obj_slota.slotannotationtype = 'GeneSymbolSlotAnnotation' AND obj_slota.obsolete = false
+        JOIN ontologyterm obj_taxon ON obj_be.taxon_id = obj_taxon.id
+        JOIN ontologyterm subj_taxon ON subj_be.taxon_id = subj_taxon.id
+        WHERE subj_be.dataprovider_id = (SELECT id FROM organization WHERE curie = :data_provider_curie)
+          AND obj_taxon.curie = 'NCBITaxon:9606'
+          AND subj_slota.obsolete = false
+          AND obj_slota.obsolete = false
+          AND subj_be.obsolete = false
+          AND obj_be.obsolete = false
+        """)
+        rows = session.execute(sql_query, {'data_provider_curie': data_provider_curie}).fetchall()
+        result = {}
+        for row in rows:
+            gene_id = row['gene_id']
+            ortho_info = [row['ortho_id'], row['ortho_symbol'], None]  # No name available
+            if gene_id not in result:
+                result[gene_id] = []
+            result[gene_id].append(ortho_info)
+        return result
+    finally:
+        session.close()
+
