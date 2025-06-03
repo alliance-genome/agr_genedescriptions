@@ -2,12 +2,14 @@ import argparse
 import concurrent.futures
 import logging
 import time
+import traceback  # <-- add this import
 
-from genedescriptions.commons import DataType, Gene
+from genedescriptions.commons import DataType
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.descriptions_writer import DescriptionsWriter
 from genedescriptions.gene_description import GeneDescription
-from genedescriptions.precanned_modules import set_expression_module, set_gene_ontology_module
+from genedescriptions.precanned_modules import set_expression_module, set_gene_ontology_module, set_disease_module, \
+    set_alliance_human_orthology_module
 from pipelines.alliance.alliance_data_manager import AllianceDataManager, provider_to_expression_curie_prefix
 
 logger = logging.getLogger(__name__)
@@ -18,6 +20,9 @@ DATA_SOURCE = "db"
 def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider: str, species_taxon: str):
     logger.info(f"Loading GAF file for {data_provider}")
     data_manager.load_annotations(associations_type=DataType.GO, taxon_id=species_taxon, provider=data_provider,
+                                  source=DATA_SOURCE)
+    logger.info(f"Loading disease annotations for {data_provider}")
+    data_manager.load_annotations(associations_type=DataType.DO, taxon_id=species_taxon, provider=data_provider,
                                   source=DATA_SOURCE)
     if data_provider in provider_to_expression_curie_prefix:
         logger.info(f"Loading anatomy ontology data for {data_provider}")
@@ -39,7 +44,7 @@ def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider:
             del data_manager.gene_data[gene_id]
 
 
-def generate_gene_descriptions(data_manager: AllianceDataManager, data_provider: str,
+def generate_gene_descriptions(data_manager: AllianceDataManager, best_orthologs, data_provider: str,
                                conf_parser: GenedescConfigParser, json_desc_writer: DescriptionsWriter):
     for gene in data_manager.get_gene_data():
         gene_desc = GeneDescription(gene_id=gene.id,
@@ -52,6 +57,14 @@ def generate_gene_descriptions(data_manager: AllianceDataManager, data_provider:
                                   conf_parser=conf_parser,
                                   gene_desc=gene_desc,
                                   gene=gene)
+        set_disease_module(df=data_manager, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene,
+                           human=data_provider == "HUMAN")
+        if gene.id in best_orthologs:
+            gene_desc.stats.set_best_orthologs = best_orthologs[gene.id][0]
+            set_alliance_human_orthology_module(orthologs=best_orthologs[gene.id][0],
+                                                excluded_orthologs=best_orthologs[gene.id][1],
+                                                gene_desc=gene_desc,
+                                                config=conf_parser)
         json_desc_writer.add_gene_desc(gene_desc)
 
 
@@ -68,9 +81,14 @@ def process_provider(data_provider, species_taxon, data_manager, conf_parser):
 
     logger.info(f"Loading all data for {data_provider}")
     load_all_data_for_provider(data_manager, data_provider, species_taxon)
+    logger.info(f"Loading best human orthologs for {data_provider}")
+
+    best_orthologs = {}
+    if data_provider != "HUMAN":
+        best_orthologs = data_manager.get_best_human_orthologs(species_taxon=species_taxon, source=DATA_SOURCE)
 
     logger.info(f"Generating text summaries for {data_provider}")
-    generate_gene_descriptions(data_manager, data_provider, conf_parser, json_desc_writer)
+    generate_gene_descriptions(data_manager, best_orthologs, data_provider, conf_parser, json_desc_writer)
 
     logger.info(f"Saving gene descriptions for {data_provider}")
     save_gene_descriptions(data_manager, json_desc_writer, data_provider)
@@ -103,6 +121,9 @@ def main():
     logger.info("Loading GO ontology")
     data_manager.load_ontology(ontology_type=DataType.GO, source=DATA_SOURCE)
 
+    logger.info("Loading DO ontology")
+    data_manager.load_ontology(ontology_type=DataType.DO, source=DATA_SOURCE)
+
     if args.parallel:
         logger.info("Processing data providers in parallel")
         with concurrent.futures.ProcessPoolExecutor(max_workers=args.max_workers) as executor:
@@ -115,13 +136,11 @@ def main():
                     future.result()
                 except Exception as e:
                     logger.error(f"Error processing data provider: {e}")
+                    logger.error(traceback.format_exc())
     else:
         logger.info("Processing data providers sequentially")
         for data_provider, species_taxon in data_providers:
-            try:
-                process_provider(data_provider, species_taxon, data_manager, conf_parser)
-            except Exception as e:
-                logger.error(f"Error processing data provider: {e}")
+            process_provider(data_provider, species_taxon, data_manager, conf_parser)
 
     elapsed_time = time.time() - start_time
     formatted_time = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
@@ -130,5 +149,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
