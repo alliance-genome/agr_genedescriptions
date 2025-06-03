@@ -153,8 +153,9 @@ def get_disease_annotations(taxon_id: str):
     """
     session = create_ateam_db_session()
     try:
-        # Direct gene -> DO term annotations
-        direct_query = text("""
+        # Combined query using UNION to get all disease annotations in one go
+        union_query = text("""
+            -- Direct gene -> DO term annotations
             SELECT
                 be.primaryexternalid AS "geneId",
                 slota.displaytext AS "geneSymbol",
@@ -173,11 +174,10 @@ def get_disease_annotations(taxon_id: str):
             AND da.negated = false
             AND ot.namespace = 'disease_ontology'
             AND be.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
-        """)
-        direct_rows = session.execute(direct_query, {"taxon_id": taxon_id}).mappings().all()
 
-        # Allele disease annotations: inferred gene (at most one)
-        allele_inferred_query = text("""
+            UNION
+
+            -- Allele disease annotations: inferred gene (at most one)
             SELECT
                 be.primaryexternalid AS "geneId",
                 slota.displaytext AS "geneSymbol",
@@ -196,11 +196,10 @@ def get_disease_annotations(taxon_id: str):
             AND ot.namespace = 'disease_ontology'
             AND be.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
             AND ada.inferredgene_id IS NOT NULL
-        """)
-        allele_inferred_rows = session.execute(allele_inferred_query, {"taxon_id": taxon_id}).mappings().all()
 
-        # Allele disease annotations: asserted gene (only if exactly one)
-        allele_asserted_query = text("""
+            UNION
+
+            -- Allele disease annotations: asserted gene (only if exactly one)
             SELECT
                 be.primaryexternalid AS "geneId",
                 slota.displaytext AS "geneSymbol",
@@ -225,11 +224,10 @@ def get_disease_annotations(taxon_id: str):
                 GROUP BY adg2.allelediseaseannotation_id
                 HAVING COUNT(*) = 1
             )
-        """)
-        allele_asserted_rows = session.execute(allele_asserted_query, {"taxon_id": taxon_id}).mappings().all()
 
-        # AGM disease annotations: inferred gene (at most one)
-        agm_inferred_query = text("""
+            UNION
+
+            -- AGM disease annotations: inferred gene (at most one)
             SELECT
                 be.primaryexternalid AS "geneId",
                 slota.displaytext AS "geneSymbol",
@@ -248,11 +246,10 @@ def get_disease_annotations(taxon_id: str):
             AND ot.namespace = 'disease_ontology'
             AND be.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
             AND agmda.inferredgene_id IS NOT NULL
-        """)
-        agm_inferred_rows = session.execute(agm_inferred_query, {"taxon_id": taxon_id}).mappings().all()
 
-        # AGM disease annotations: asserted gene (only if exactly one)
-        agm_asserted_query = text("""
+            UNION
+
+            -- AGM disease annotations: asserted gene (only if exactly one)
             SELECT
                 be.primaryexternalid AS "geneId",
                 slota.displaytext AS "geneSymbol",
@@ -278,18 +275,14 @@ def get_disease_annotations(taxon_id: str):
                 HAVING COUNT(*) = 1
             )
         """)
-        agm_asserted_rows = session.execute(agm_asserted_query, {"taxon_id": taxon_id}).mappings().all()
 
-        # Combine and deduplicate
+        # Execute the combined query
+        rows = session.execute(union_query, {"taxon_id": taxon_id}).mappings().all()
+
+        # UNION automatically removes duplicates, but we'll still use seen set to be safe
         seen = set()
         results = []
-        for row in (
-            list(direct_rows)
-            + list(allele_inferred_rows)
-            + list(allele_asserted_rows)
-            + list(agm_inferred_rows)
-            + list(agm_asserted_rows)
-        ):
+        for row in rows:
             gene_id = row["geneId"]
             gene_symbol = row["geneSymbol"]
             do_id = row["doId"]
