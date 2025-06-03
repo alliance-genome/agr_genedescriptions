@@ -310,9 +310,14 @@ def get_disease_annotations(taxon_id: str):
 
 def get_best_human_orthologs_for_taxon(taxon_curie: str):
     """
-    Get best human orthologs for all genes from a given species taxon curie.
-    Only consider orthologs predicted by methods that pass the strict filter (strictfilter=true).
-    For each gene, return a tuple: (list of best orthologs, bool indicating if any orthologs were excluded).
+    Get the best human orthologs for all genes from a given species taxon curie.
+
+    Args:
+        taxon_curie (str): The taxon curie of the species for which to find orthologs.
+
+    Returns:
+        dict: Maps each gene ID to a tuple: (list of best human orthologs, bool indicating if any orthologs were excluded).
+              Each ortholog is represented as a list: [ortholog_id, ortholog_symbol, ortholog_full_name].
     """
     session = create_ateam_db_session()
     try:
