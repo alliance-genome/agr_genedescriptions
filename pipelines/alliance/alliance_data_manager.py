@@ -174,7 +174,7 @@ class AllianceDataManager(DataManager):
             node_type = "goterm"
         elif ontology_type == DataType.EXPR:
             node_type = "anatomyterm"
-        if ontology_type == DataType.DO:
+        elif ontology_type == DataType.DO:
             node_type = "doterm"
 
         if source == "api":
