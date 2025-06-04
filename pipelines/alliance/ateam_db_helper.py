@@ -285,22 +285,21 @@ def get_disease_annotations(taxon_id: str):
                 ot.curie AS "doId",
                 'implicated_via_orthology' AS "relationshipType"
             FROM
-                diseaseannotation_gene dag
-            JOIN diseaseannotation da ON dag.diseaseannotation_id = da.id
-            JOIN genediseaseannotation gda ON da.id = gda.id
-            JOIN gene g_subject ON gda.diseaseannotationsubject_id = g_subject.id
+                genetogeneorthology ggo
+            JOIN gene g_subject ON ggo.subjectgene_id = g_subject.id
+            JOIN gene g_human ON ggo.objectgene_id = g_human.id
             JOIN biologicalentity be_subject ON g_subject.id = be_subject.id
-            JOIN slotannotation slota_subject ON g_subject.id = slota_subject.singlegene_id AND slota_subject.slotannotationtype = 'GeneSymbolSlotAnnotation'
-            JOIN biologicalentity be_with ON dag.with_id = be_with.id
-            JOIN ontologyterm ot_with ON be_with.taxon_id = ot_with.id
-            JOIN ontologyterm ot_subject ON be_subject.taxon_id = ot_subject.id
+            JOIN biologicalentity be_human ON g_human.id = be_human.id
+            JOIN genediseaseannotation gda ON g_human.id = gda.diseaseannotationsubject_id
+            JOIN diseaseannotation da ON gda.id = da.id
             JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
+            JOIN slotannotation slota_subject ON g_subject.id = slota_subject.singlegene_id AND slota_subject.slotannotationtype = 'GeneSymbolSlotAnnotation'
             WHERE
                 da.obsolete = false
             AND da.negated = false
             AND ot.namespace = 'disease_ontology'
-            AND ot_subject.curie = :taxon_id
-            AND ot_with.curie = 'NCBITaxon:9606'
+            AND be_subject.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
+            AND be_human.taxon_id = (SELECT id FROM ontologyterm WHERE curie = 'NCBITaxon:9606')
             AND slota_subject.obsolete = false
             AND be_subject.obsolete = false
         """)
