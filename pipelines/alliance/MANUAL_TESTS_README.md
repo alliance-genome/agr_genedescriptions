@@ -81,6 +81,27 @@ Some genes may have multiple categories, providing comprehensive coverage.
 - **p53**: Tumor suppressor (used to study - cancer)
 - **Snca**: Alpha-synuclein (used to study - neurodegenerative diseases)
 
+### Human (HUMAN)
+- **TP53**: "Guardian of the genome" tumor suppressor (used to study + biomarker - cancer)
+- **BRCA1**: DNA repair gene (biomarker + used to study - breast/ovarian cancer)
+- **KRAS**: Major oncogene (used to study - cancer, RAS signaling)
+- **MYC**: Master transcriptional regulator (used to study + biomarker - cancer)
+- **EGFR**: Growth factor receptor (used to study - cancer, drug target)
+
+### Xenopus laevis (XBXL)
+- **tbx1.L**: T-box transcription factor (disease via orthology - DiGeorge syndrome)
+- **tbxt.L**: Brachyury/T (used to study - mesoderm formation, axis specification)
+- **csnk1a1.L**: Casein kinase (disease via orthology - Alzheimer's disease)
+- **hba1.S**: Hemoglobin alpha (disease via orthology - thalassemia, anemia)
+- **hoxc6.L**: Homeobox gene (used to study - development, body patterning)
+
+### Xenopus tropicalis (XBXT)
+- **tbx1**: T-box transcription factor (disease via orthology - DiGeorge syndrome)
+- **tbxt**: Brachyury/T (used to study - mesoderm formation, axis specification)
+- **csnk1a1**: Casein kinase (disease via orthology - Alzheimer's disease)
+- **shh**: Sonic hedgehog (used to study - development, morphogenesis)
+- **pax6**: Paired box 6 (used to study - eye development, neural development)
+
 ## Expected Patterns
 
 The tests look for these flexible patterns in descriptions:
@@ -205,6 +226,12 @@ agr_genedescriptions/pipelines/alliance/
     ├── WB.json                   # C. elegans descriptions
     ├── MGI.json                  # Mouse descriptions  
     ├── SGD.json                  # Yeast descriptions
+    ├── RGD.json                  # Rat descriptions
+    ├── ZFIN.json                 # Zebrafish descriptions
+    ├── FB.json                   # Drosophila descriptions
+    ├── HUMAN.json                # Human descriptions
+    ├── XBXL.json                 # Xenopus laevis descriptions
+    ├── XBXT.json                 # Xenopus tropicalis descriptions
     └── ...                       # Other data providers
 ```
 
@@ -212,12 +239,14 @@ agr_genedescriptions/pipelines/alliance/
 
 ### Potential Additions
 - **Coverage metrics**: Track what percentage of genes have descriptions
-- **Category completeness**: Monitor which description categories are most/least populated
+- **Category completeness**: Monitor which description categories are most/least populated across all data types
 - **Historical tracking**: Compare description quality over time
 - **Provider-specific patterns**: Customize expected patterns per data provider
 - **Automated alerts**: Flag significant drops in description quality
+- **Cross-category validation**: Ensure genes have balanced coverage across GO, disease, expression, and orthology
 
 ### Integration Possibilities
 - **CI/CD integration**: Run tests after description generation
 - **Quality dashboards**: Visualize description quality metrics
 - **Data provider feedback**: Report quality issues back to source databases
+- **Category completeness metrics**: Track which data types are most/least populated per provider

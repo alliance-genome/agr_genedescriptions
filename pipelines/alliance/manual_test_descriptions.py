@@ -280,7 +280,7 @@ def define_test_genes() -> Dict[str, List[TestGene]]:
             ),
             # Biomarker potential - APP homolog, Alzheimer's research
             TestGene(
-                gene_id='WB:WBGene00000094',
+                gene_id='WB:WBGene00000149',
                 gene_symbol='apl-1',
                 expected_patterns=go_patterns + disease_biomarker_patterns + disease_used_to_study_patterns,
                 description_categories=common_categories
@@ -349,7 +349,7 @@ def define_test_genes() -> Dict[str, List[TestGene]]:
             ),
             # Used to study cancer - DNA repair, BRCA1 ortholog
             TestGene(
-                gene_id='SGD:S000000304',
+                gene_id='SGD:S000000897',
                 gene_symbol='RAD51',
                 expected_patterns=go_patterns + disease_used_to_study_patterns + orthology_patterns,
                 description_categories=common_categories
@@ -403,6 +403,120 @@ def define_test_genes() -> Dict[str, List[TestGene]]:
                 gene_id='FB:FBgn0283521',
                 gene_symbol='Snca',
                 expected_patterns=go_patterns + disease_used_to_study_patterns + expression_patterns,
+                description_categories=common_categories
+            ),
+        ],
+        
+        'HUMAN': [  # Human - HGNC
+            # Used to study + biomarker cancer - "guardian of the genome"
+            TestGene(
+                gene_id='RGD:HGNC:11998',
+                gene_symbol='TP53',
+                expected_patterns=go_patterns + disease_used_to_study_patterns + disease_biomarker_patterns,
+                description_categories=common_categories
+            ),
+            # Biomarker for breast cancer - BRCA1
+            TestGene(
+                gene_id='RGD:HGNC:1100',
+                gene_symbol='BRCA1',
+                expected_patterns=go_patterns + disease_biomarker_patterns + disease_used_to_study_patterns,
+                description_categories=common_categories
+            ),
+            # Used to study cancer - oncogene
+            TestGene(
+                gene_id='RGD:HGNC:6407',
+                gene_symbol='KRAS',
+                expected_patterns=go_patterns + disease_used_to_study_patterns,
+                description_categories=common_categories
+            ),
+            # Used to study cancer + biomarker - transcription factor
+            TestGene(
+                gene_id='RGD:HGNC:7553',
+                gene_symbol='MYC',
+                expected_patterns=go_patterns + disease_used_to_study_patterns + disease_biomarker_patterns,
+                description_categories=common_categories
+            ),
+            # Used to study cancer - growth factor receptor
+            TestGene(
+                gene_id='RGD:HGNC:3236',
+                gene_symbol='EGFR',
+                expected_patterns=go_patterns + disease_used_to_study_patterns,
+                description_categories=common_categories
+            ),
+        ],
+        
+        'XBXL': [  # Xenopus laevis - XenBase
+            # Disease via orthology - TBX1, DiGeorge syndrome
+            TestGene(
+                gene_id='Xenbase:XB-GENE-478088',
+                gene_symbol='tbx1.L',
+                expected_patterns=go_patterns + disease_orthology_patterns + expression_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
+            # Used to study development - brachyury/T
+            TestGene(
+                gene_id='Xenbase:XB-GENE-6255736',
+                gene_symbol='tbxt.L',
+                expected_patterns=go_patterns + disease_orthology_patterns + expression_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
+            # Disease via orthology - casein kinase, Alzheimer's
+            TestGene(
+                gene_id='Xenbase:XB-GENE-478125',
+                gene_symbol='csnk1a1.L',
+                expected_patterns=go_patterns + disease_orthology_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
+            # Disease via orthology - hemoglobin alpha
+            TestGene(
+                gene_id='Xenbase:XB-GENE-865144',
+                gene_symbol='hba1.S',
+                expected_patterns=go_patterns + disease_orthology_patterns + expression_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
+            # Used to study development - homeobox gene
+            TestGene(
+                gene_id='Xenbase:XB-GENE-17337706',
+                gene_symbol='hoxc6.L',
+                expected_patterns=go_patterns + expression_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
+        ],
+        
+        'XBXT': [  # Xenopus tropicalis - XenBase
+            # Disease via orthology - TBX1, DiGeorge syndrome
+            TestGene(
+                gene_id='Xenbase:XB-GENE-478084',
+                gene_symbol='tbx1',
+                expected_patterns=go_patterns + disease_orthology_patterns + expression_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
+            # Used to study development - brachyury/T
+            TestGene(
+                gene_id='Xenbase:XB-GENE-478789',
+                gene_symbol='tbxt',
+                expected_patterns=go_patterns + disease_orthology_patterns + expression_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
+            # Disease via orthology - casein kinase, Alzheimer's
+            TestGene(
+                gene_id='Xenbase:XB-GENE-478121',
+                gene_symbol='csnk1a1',
+                expected_patterns=go_patterns + disease_orthology_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
+            # Used to study development - sonic hedgehog
+            TestGene(
+                gene_id='Xenbase:XB-GENE-488039',
+                gene_symbol='shh',
+                expected_patterns=go_patterns + disease_orthology_patterns + expression_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
+            # Used to study development - master eye regulator
+            TestGene(
+                gene_id='Xenbase:XB-GENE-484088',
+                gene_symbol='pax6',
+                expected_patterns=go_patterns + disease_orthology_patterns + expression_patterns + orthology_patterns,
                 description_categories=common_categories
             ),
         ]
