@@ -283,7 +283,7 @@ def get_disease_annotations(taxon_id: str):
                 be_subject.primaryexternalid AS "geneId",
                 slota_subject.displaytext AS "geneSymbol",
                 ot.curie AS "doId",
-                'DVO' AS "relationshipType"
+                'implicated_via_orthology' AS "relationshipType"
             FROM
                 diseaseannotation_gene dag
             JOIN diseaseannotation da ON dag.diseaseannotation_id = da.id

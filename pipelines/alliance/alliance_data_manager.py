@@ -118,6 +118,11 @@ class AllianceDataManager(DataManager):
             associations = []
             doa_list = get_disease_annotations(taxon_id=taxon_id)
             for doa in doa_list:
+                ecode = "EXP"
+                if doa["relationship_type"] == "is_marker_for":
+                    ecode = "BMK"
+                elif doa["relationship_type"] == "implicated_via_orthology":
+                    ecode = "DVO"
                 associations.append(DataManager.create_annotation_record(
                     source_line="",
                     gene_id=doa["gene_id"],
@@ -127,7 +132,7 @@ class AllianceDataManager(DataManager):
                     object_id=doa["do_id"],
                     qualifiers=[""],
                     aspect="D",
-                    ecode="BMK" if doa["relationship_type"] == "is_marker_for" else "EXP",
+                    ecode=ecode,
                     references="",
                     prvdr=provider,
                     date=None))
