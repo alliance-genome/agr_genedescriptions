@@ -9,3 +9,4 @@ generated_descriptions/*
 tests/cache/*
 /pipelines/wormbase/generated_descriptions/
 /pipelines/wormbase/gene_descriptions_cache/
+/pipelines/alliance/generated_descriptions/
