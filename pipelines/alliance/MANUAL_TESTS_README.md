@@ -69,26 +69,30 @@ The test suite now includes **two complementary validation approaches**:
 - **lin-12**: Notch receptor (disease via orthology - cancer)
 - **apl-1**: APP homolog (biomarker - Alzheimer's disease)
 
-### Mouse (MGI)
+### Mouse (MGI) - 5 genes
 - **Kras**: Oncogene (used to study - cancer)
 - **Max**: MYC binding partner (biomarker - MYC pathway)
 - **Mycn**: Oncogene (used to study - neuroblastoma)
 - **Trp53**: Tumor suppressor (used to study + biomarker - cancer)
 - **Brca1**: Tumor suppressor (biomarker - breast cancer)
 
-### Yeast (SGD)
+### Yeast (SGD) - 4 genes
 - **DIT2**: Cytochrome P450 (disease via orthology - drug metabolism)
 - **MRP17**: Mitochondrial ribosome (used to study - mitochondrial diseases)
 - **YIA6**: NAD transporter (disease via orthology - metabolic disorders)
 - **RAD51**: DNA repair (used to study - cancer, BRCA1 ortholog)
 
-### Rat (RGD) 
-- **Tp53**: Tumor suppressor (used to study + biomarker - cancer)
+### Rat (RGD) - 4 genes (diverse pathways)
 - **Ren**: Renin (biomarker - cardiovascular disease)
+- **Fgfr1**: Growth factor receptor (development/disease research)
+- **Dnmt3b**: DNA methyltransferase (epigenetics pathway)
+- **Hoxa1**: Homeobox transcription factor (gene regulation/development)
 
-### Zebrafish (ZFIN)
-- **tp53**: Tumor suppressor (used to study - cancer)
+### Zebrafish (ZFIN) - 4 genes (diverse pathways)
 - **shha**: Sonic hedgehog (used to study - development and disease)
+- **pdx1**: Pancreatic development (diabetes research)
+- **tcf7l2**: Wnt signaling (diabetes/metabolic disease)
+- **jag2b**: Notch signaling (developmental patterning)
 
 ### Drosophila (FB) - 4 genes (diverse pathways)
 - **arm**: Armadillo/β-catenin (Wnt signaling, cell adhesion)
@@ -96,7 +100,7 @@ The test suite now includes **two complementary validation approaches**:
 - **Wdr82**: Chromatin regulation (development)
 - **Snca**: Alpha-synuclein (used to study - neurodegenerative diseases)
 
-### Human (HUMAN)
+### Human (HUMAN) - 5 genes
 - **TP53**: "Guardian of the genome" tumor suppressor (used to study + biomarker - cancer)
 - **BRCA1**: DNA repair gene (biomarker + used to study - breast/ovarian cancer)
 - **KRAS**: Major oncogene (used to study - cancer, RAS signaling)
