@@ -69,10 +69,10 @@ def generate_gene_descriptions(data_manager: AllianceDataManager, best_orthologs
 
 
 def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: DescriptionsWriter, data_provider: str):
-    json_desc_writer.write_json(file_path=f"generated_descriptions/{data_provider}.json",
+    json_desc_writer.write_json(file_path=f"pipelines/alliance/generated_descriptions/{data_provider}.json",
                                 include_single_gene_stats=False,
                                 data_manager=data_manager)
-    json_desc_writer.write_tsv(file_path=f"generated_descriptions/{data_provider}.tsv")
+    json_desc_writer.write_tsv(file_path=f"pipelines/alliance/generated_descriptions/{data_provider}.tsv")
 
 
 def process_provider(data_provider, species_taxon, data_manager, conf_parser):

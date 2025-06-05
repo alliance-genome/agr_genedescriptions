@@ -150,6 +150,7 @@ def get_disease_annotations(taxon_id: str):
     - Indirect from allele: gene from asserted genes (from allelediseaseannotation_gene)
     - Indirect from AGM: gene from inferredgene_id (if present)
     - Indirect from AGM: gene from asserted genes (from agmdiseaseannotation_gene)
+    - Disease via orthology: gene -> DO term via human orthologs (from diseaseannotation_gene with human orthologs)
     """
     session = create_ateam_db_session()
     try:
@@ -274,6 +275,34 @@ def get_disease_annotations(taxon_id: str):
                 GROUP BY agmg2.agmdiseaseannotation_id
                 HAVING COUNT(*) = 1
             )
+
+            UNION
+
+            -- Disease via orthology annotations: gene -> DO term via human orthologs
+            SELECT
+                be_subject.primaryexternalid AS "geneId",
+                slota_subject.displaytext AS "geneSymbol",
+                ot.curie AS "doId",
+                'implicated_via_orthology' AS "relationshipType"
+            FROM
+                genetogeneorthology ggo
+            JOIN genetogeneorthologygenerated gtog ON ggo.id = gtog.id AND gtog.strictfilter = true
+            JOIN gene g_subject ON ggo.subjectgene_id = g_subject.id
+            JOIN gene g_human ON ggo.objectgene_id = g_human.id
+            JOIN biologicalentity be_subject ON g_subject.id = be_subject.id
+            JOIN biologicalentity be_human ON g_human.id = be_human.id
+            JOIN genediseaseannotation gda ON g_human.id = gda.diseaseannotationsubject_id
+            JOIN diseaseannotation da ON gda.id = da.id
+            JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
+            JOIN slotannotation slota_subject ON g_subject.id = slota_subject.singlegene_id AND slota_subject.slotannotationtype = 'GeneSymbolSlotAnnotation'
+            WHERE
+                da.obsolete = false
+            AND da.negated = false
+            AND ot.namespace = 'disease_ontology'
+            AND be_subject.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
+            AND be_human.taxon_id = (SELECT id FROM ontologyterm WHERE curie = 'NCBITaxon:9606')
+            AND slota_subject.obsolete = false
+            AND be_subject.obsolete = false
         """)
 
         # Execute the combined query
@@ -361,4 +390,3 @@ def get_best_human_orthologs_for_taxon(taxon_curie: str):
         return result
     finally:
         session.close()
-
