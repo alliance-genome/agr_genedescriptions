@@ -173,9 +173,8 @@ The tests look for these patterns in descriptions, extracted directly from the `
 #### Human-Specific Disease Patterns
 - `"implicated in"` - Direct disease implication (for human genes)
 
-### Orthology Patterns (from config)
-- `"human ortholog(s) of this gene implicated in"` - Human orthology with disease link
-- `"ortholog(s) of this gene implicated in"` - General orthology with disease link
+### Orthology Patterns
+- `"Orthologous to human"` - General orthology relationships (non-disease specific)
 
 ## Coverage Threshold Tests
 

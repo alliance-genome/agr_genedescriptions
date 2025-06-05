@@ -347,8 +347,7 @@ def define_test_genes() -> Dict[str, List[TestGene]]:
                         disease_orthology_patterns + disease_human_patterns)
 
     orthology_patterns = [
-        r"human ortholog\(s\) of this gene implicated in",
-        r"ortholog\(s\) of this gene implicated in"
+        r"Orthologous to human"
     ]
 
     # Common description categories to check - including all three disease categories
