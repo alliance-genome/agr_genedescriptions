@@ -17,6 +17,18 @@ from dataclasses import dataclass
 
 
 @dataclass
+class CoverageThreshold:
+    """Represents expected coverage thresholds for a data provider."""
+    provider: str
+    total_genes: int
+    description_threshold: float  # Percentage (0-100)
+    go_threshold: float
+    disease_threshold: float
+    expression_threshold: float
+    orthology_threshold: float
+
+
+@dataclass
 class TestGene:
     """Represents a gene to test with expected description patterns."""
     gene_id: str
@@ -172,6 +184,85 @@ class DescriptionValidator:
         
         print(f"Results: {results['passed']}/{results['total_genes']} tests passed")
         return results
+    
+    def test_coverage_thresholds(self, provider: str, thresholds: CoverageThreshold) -> Dict:
+        """Test that description coverage meets minimum thresholds."""
+        print(f"\n{'='*60}")
+        print(f"Testing {provider} coverage thresholds")
+        print(f"{'='*60}")
+        
+        try:
+            descriptions = self.load_descriptions(provider)
+        except FileNotFoundError as e:
+            print(f"❌ Error: {e}")
+            return {'provider': provider, 'error': str(e)}
+        
+        total_genes = len(descriptions)
+        
+        # Calculate actual coverage
+        actual_coverage = {
+            'description': sum(1 for gene in descriptions.values() if gene.get('description')) / total_genes * 100,
+            'go': sum(1 for gene in descriptions.values() if gene.get('go_description')) / total_genes * 100,
+            'disease': sum(1 for gene in descriptions.values() if gene.get('do_description')) / total_genes * 100,
+            'expression': sum(1 for gene in descriptions.values() if gene.get('tissue_expression_description')) / total_genes * 100,
+            'orthology': sum(1 for gene in descriptions.values() if gene.get('orthology_description')) / total_genes * 100
+        }
+        
+        results = {
+            'provider': provider,
+            'total_genes': total_genes,
+            'passed_thresholds': 0,
+            'failed_thresholds': 0,
+            'coverage_tests': []
+        }
+        
+        # Test each threshold
+        thresholds_to_test = [
+            ('Description', actual_coverage['description'], thresholds.description_threshold),
+            ('GO', actual_coverage['go'], thresholds.go_threshold),
+            ('Disease', actual_coverage['disease'], thresholds.disease_threshold),
+            ('Expression', actual_coverage['expression'], thresholds.expression_threshold),
+            ('Orthology', actual_coverage['orthology'], thresholds.orthology_threshold)
+        ]
+        
+        for category, actual, threshold in thresholds_to_test:
+            passed = actual >= threshold
+            if passed:
+                results['passed_thresholds'] += 1
+                status = "✅ PASS"
+            else:
+                results['failed_thresholds'] += 1
+                status = "❌ FAIL"
+            
+            result = {
+                'category': category,
+                'actual': actual,
+                'threshold': threshold,
+                'passed': passed
+            }
+            results['coverage_tests'].append(result)
+            
+            print(f"{status} {category}: {actual:.1f}% (threshold: {threshold:.1f}%)")
+        
+        success_rate = results['passed_thresholds'] / len(thresholds_to_test) * 100
+        print(f"\nThreshold tests: {results['passed_thresholds']}/{len(thresholds_to_test)} passed ({success_rate:.1f}%)")
+        
+        return results
+
+
+def define_coverage_thresholds() -> Dict[str, CoverageThreshold]:
+    """Define minimum coverage thresholds (20% lower than current levels)."""
+    return {
+        'WB': CoverageThreshold('WB', 49538, 24.9, 23.5, 10.5, 9.6, 12.0),
+        'MGI': CoverageThreshold('MGI', 81450, 22.1, 20.5, 7.0, 15.1, 19.8),
+        'SGD': CoverageThreshold('SGD', 8097, 61.3, 61.2, 23.9, 0.0, 32.6),
+        'RGD': CoverageThreshold('RGD', 61335, 31.9, 29.7, 9.3, 0.0, 26.9),
+        'ZFIN': CoverageThreshold('ZFIN', 37912, 48.1, 43.8, 18.3, 21.9, 38.7),
+        'FB': CoverageThreshold('FB', 32141, 34.1, 31.7, 15.1, 22.0, 20.7),
+        'HUMAN': CoverageThreshold('HUMAN', 43736, 38.5, 38.5, 0.0, 0.0, 0.0),
+        'XBXL': CoverageThreshold('XBXL', 26822, 71.5, 56.8, 24.5, 8.5, 66.5),
+        'XBXT': CoverageThreshold('XBXT', 21566, 75.8, 71.1, 28.0, 2.1, 60.5),
+    }
 
 
 def define_test_genes() -> Dict[str, List[TestGene]]:
@@ -235,7 +326,7 @@ def define_test_genes() -> Dict[str, List[TestGene]]:
     ]
     
     return {
-        'WB': [  # C. elegans - WormBase
+        'WB': [  # C. elegans - WormBase (4 genes - balanced)
             # Disease via orthology - insulin receptor, aging/longevity research
             TestGene(
                 gene_id='WB:WBGene00000898',
@@ -250,32 +341,11 @@ def define_test_genes() -> Dict[str, List[TestGene]]:
                 expected_patterns=go_patterns + disease_used_to_study_patterns + expression_patterns,
                 description_categories=common_categories
             ),
-            # Used to study - FGFR signaling, development
-            TestGene(
-                gene_id='WB:WBGene00001184',
-                gene_symbol='egl-15',
-                expected_patterns=go_patterns + disease_used_to_study_patterns,
-                description_categories=common_categories
-            ),
-            # Disease via orthology - calcium channel, epilepsy research
-            TestGene(
-                gene_id='WB:WBGene00001187',
-                gene_symbol='egl-19',
-                expected_patterns=go_patterns + disease_orthology_patterns + disease_used_to_study_patterns,
-                description_categories=common_categories
-            ),
             # Disease via orthology - Notch pathway, cancer research
             TestGene(
                 gene_id='WB:WBGene00003001',
                 gene_symbol='lin-12',
                 expected_patterns=go_patterns + disease_orthology_patterns + expression_patterns,
-                description_categories=common_categories
-            ),
-            # Used to study - spectrin, developmental disorders
-            TestGene(
-                gene_id='WB:WBGene00004855',
-                gene_symbol='sma-1',
-                expected_patterns=go_patterns + expression_patterns + disease_used_to_study_patterns,
                 description_categories=common_categories
             ),
             # Biomarker potential - APP homolog, Alzheimer's research
@@ -356,14 +426,7 @@ def define_test_genes() -> Dict[str, List[TestGene]]:
             ),
         ],
         
-        'RGD': [  # Rat - RGD
-            # Used to study cancer, biomarker - tumor suppressor
-            TestGene(
-                gene_id='RGD:2894',
-                gene_symbol='Tp53',
-                expected_patterns=go_patterns + disease_used_to_study_patterns + disease_biomarker_patterns,
-                description_categories=common_categories
-            ),
+        'RGD': [  # Rat - RGD (4 genes - diverse pathways)
             # Biomarker for cardiovascular disease - renin
             TestGene(
                 gene_id='RGD:3555',
@@ -371,16 +434,30 @@ def define_test_genes() -> Dict[str, List[TestGene]]:
                 expected_patterns=go_patterns + disease_biomarker_patterns,
                 description_categories=common_categories
             ),
-        ],
-        
-        'ZFIN': [  # Zebrafish - ZFIN
-            # Used to study cancer - tumor suppressor
+            # FGFR1 - growth factor receptor, development/disease
             TestGene(
-                gene_id='ZFIN:ZDB-GENE-990415-8',
-                gene_symbol='tp53',
-                expected_patterns=go_patterns + disease_used_to_study_patterns + expression_patterns,
+                gene_id='RGD:620713',
+                gene_symbol='Fgfr1',
+                expected_patterns=go_patterns + disease_biomarker_patterns + disease_used_to_study_patterns,
                 description_categories=common_categories
             ),
+            # DNA methylation - epigenetics pathway
+            TestGene(
+                gene_id='RGD:1303274',
+                gene_symbol='Dnmt3b',
+                expected_patterns=go_patterns + disease_used_to_study_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
+            # Transcription factor - gene regulation
+            TestGene(
+                gene_id='RGD:11414885',
+                gene_symbol='Hoxa1',
+                expected_patterns=go_patterns + expression_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
+        ],
+        
+        'ZFIN': [  # Zebrafish - ZFIN (4 genes - diverse pathways)
             # Used to study development and disease - sonic hedgehog
             TestGene(
                 gene_id='ZFIN:ZDB-GENE-980526-166',
@@ -388,14 +465,49 @@ def define_test_genes() -> Dict[str, List[TestGene]]:
                 expected_patterns=go_patterns + disease_used_to_study_patterns + expression_patterns,
                 description_categories=common_categories
             ),
+            # PDX1 - pancreatic development, diabetes research
+            TestGene(
+                gene_id='ZFIN:ZDB-GENE-990415-122',
+                gene_symbol='pdx1',
+                expected_patterns=go_patterns + disease_orthology_patterns + expression_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
+            # TCF7L2 - Wnt signaling, diabetes/metabolic disease
+            TestGene(
+                gene_id='ZFIN:ZDB-GENE-991110-8',
+                gene_symbol='tcf7l2',
+                expected_patterns=go_patterns + disease_orthology_patterns + expression_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
+            # Notch signaling - developmental patterning
+            TestGene(
+                gene_id='ZFIN:ZDB-GENE-011128-3',
+                gene_symbol='jag2b',
+                expected_patterns=go_patterns + expression_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
         ],
         
-        'FB': [  # Drosophila - FlyBase
-            # Used to study cancer - tumor suppressor
+        'FB': [  # Drosophila - FlyBase (4 genes - diverse pathways)
+            # Wnt signaling - developmental patterning
             TestGene(
-                gene_id='FB:FBgn0003996',
-                gene_symbol='p53',
-                expected_patterns=go_patterns + disease_used_to_study_patterns + expression_patterns,
+                gene_id='FB:FBgn0031903',
+                gene_symbol='Wnt10',
+                expected_patterns=go_patterns + expression_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
+            # Growth factor signaling - hemocyte biology
+            TestGene(
+                gene_id='FB:FBgn0031972',
+                gene_symbol='Wwox',
+                expected_patterns=go_patterns + expression_patterns + orthology_patterns,
+                description_categories=common_categories
+            ),
+            # Chromatin regulation - development
+            TestGene(
+                gene_id='FB:FBgn0032030',
+                gene_symbol='Wdr82',
+                expected_patterns=go_patterns + expression_patterns + orthology_patterns,
                 description_categories=common_categories
             ),
             # Used to study neurodegenerative diseases - alpha-synuclein
@@ -524,21 +636,26 @@ def define_test_genes() -> Dict[str, List[TestGene]]:
 
 
 def main():
-    """Run all manual tests."""
+    """Run all manual tests and coverage threshold tests."""
     print("Manual Gene Description Validation Tests")
     print("=" * 60)
     print("This script tests that well-known genes have appropriate descriptions")
-    print("with expected patterns and data categories.")
+    print("with expected patterns and data categories, plus coverage thresholds.")
     print()
     
     validator = DescriptionValidator()
     test_genes = define_test_genes()
+    coverage_thresholds = define_coverage_thresholds()
     
+    # Run gene-specific tests
     all_results = {}
     total_passed = 0
     total_tests = 0
     
-    # Run tests for each provider
+    print("\n" + "="*80)
+    print("PART 1: GENE-SPECIFIC VALIDATION TESTS")
+    print("="*80)
+    
     for provider, genes in test_genes.items():
         result = validator.run_tests(provider, genes)
         all_results[provider] = result
@@ -547,30 +664,60 @@ def main():
             total_passed += result['passed']
             total_tests += result['total_genes']
     
-    # Summary
-    print(f"\n{'='*60}")
-    print("SUMMARY")
-    print(f"{'='*60}")
-    print(f"Total tests: {total_tests}")
-    print(f"Total passed: {total_passed}")
-    print(f"Total failed: {total_tests - total_passed}")
-    print(f"Success rate: {total_passed/total_tests*100:.1f}%" if total_tests > 0 else "N/A")
+    # Run coverage threshold tests
+    coverage_results = {}
+    total_coverage_passed = 0
+    total_coverage_tests = 0
+    
+    print("\n" + "="*80)
+    print("PART 2: COVERAGE THRESHOLD TESTS")
+    print("="*80)
+    
+    for provider, thresholds in coverage_thresholds.items():
+        if provider in test_genes:  # Only test providers we have gene tests for
+            result = validator.test_coverage_thresholds(provider, thresholds)
+            coverage_results[provider] = result
+            
+            if 'error' not in result:
+                total_coverage_passed += result['passed_thresholds']
+                total_coverage_tests += len(result['coverage_tests'])
+    
+    # Combined Summary
+    print(f"\n{'='*80}")
+    print("OVERALL SUMMARY")
+    print(f"{'='*80}")
+    
+    print("\nGene-Specific Tests:")
+    print(f"  Total tests: {total_tests}")
+    print(f"  Total passed: {total_passed}")
+    print(f"  Success rate: {total_passed/total_tests*100:.1f}%" if total_tests > 0 else "N/A")
+    
+    print("\nCoverage Threshold Tests:")
+    print(f"  Total threshold tests: {total_coverage_tests}")
+    print(f"  Total passed: {total_coverage_passed}")
+    print(f"  Success rate: {total_coverage_passed/total_coverage_tests*100:.1f}%" if total_coverage_tests > 0 else "N/A")
     
     # Provider breakdown
     print("\nBy provider:")
-    for provider, result in all_results.items():
-        if 'error' in result:
-            print(f"  {provider}: ERROR - {result['error']}")
+    for provider in test_genes.keys():
+        gene_result = all_results.get(provider, {})
+        coverage_result = coverage_results.get(provider, {})
+        
+        if 'error' in gene_result:
+            print(f"  {provider}: GENE ERROR - {gene_result['error']}")
+        elif 'error' in coverage_result:
+            print(f"  {provider}: COVERAGE ERROR - {coverage_result['error']}")
         else:
-            success_rate = result['passed']/result['total_genes']*100 if result['total_genes'] > 0 else 0
-            print(f"  {provider}: {result['passed']}/{result['total_genes']} ({success_rate:.1f}%)")
+            gene_rate = gene_result.get('passed', 0) / gene_result.get('total_genes', 1) * 100
+            coverage_rate = coverage_result.get('passed_thresholds', 0) / len(coverage_result.get('coverage_tests', [1])) * 100
+            print(f"  {provider}: Genes {gene_result.get('passed', 0)}/{gene_result.get('total_genes', 0)} ({gene_rate:.1f}%), Coverage {coverage_result.get('passed_thresholds', 0)}/{len(coverage_result.get('coverage_tests', []))} ({coverage_rate:.1f}%)")
     
-    print(f"\n{'='*60}")
+    print(f"\n{'='*80}")
     print("Notes:")
-    print("- Tests check for flexible patterns that may evolve over time")
-    print("- 'Predicted' annotations may become 'experimental' with new data")
-    print("- Missing patterns don't always indicate problems if other categories are present")
-    print("- Genes without descriptions are expected for some less-studied genes")
+    print("- Gene tests check for flexible patterns that may evolve over time")
+    print("- Coverage tests ensure minimum description levels are maintained")
+    print("- Thresholds are set 20% below current coverage levels")
+    print("- Some categories (expression, disease) vary by MOD data availability")
 
 
 if __name__ == "__main__":

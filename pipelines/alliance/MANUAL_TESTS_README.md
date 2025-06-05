@@ -40,20 +40,32 @@ The `manual_test_descriptions.py` script validates that well-known, well-studied
 
 ## Test Gene Selection
 
-Genes are selected to cover all three disease annotation categories:
-- **Biomarker**: Genes that serve as indicators or markers for diseases
-- **Used to Study**: Genes used as research models for human diseases
-- **Disease via Orthology**: Genes linked to disease through human orthologs
+Genes are selected to ensure comprehensive coverage across **all major data categories** with **balanced representation** across MODs:
 
-Some genes may have multiple categories, providing comprehensive coverage.
+### Primary Selection Criteria:
+1. **Gene Ontology (GO)**: Well-annotated genes with molecular function, biological process, and cellular component data
+2. **Disease Associations**: Genes with disease annotations across three categories (where available by MOD):
+   - **Biomarker**: Genes that serve as indicators or markers for diseases
+   - **Used to Study**: Genes used as research models for human diseases
+   - **Disease via Orthology**: Genes linked to disease through human orthologs
+3. **Expression Data**: Genes with tissue/anatomical expression information
+4. **Orthology**: Genes with well-established cross-species orthologous relationships
 
-### C. elegans (WB)
+### Balanced Selection Strategy:
+- **4-5 genes per MOD**: Ensures fair representation across all data providers
+- **Pathway diversity**: Avoids over-representation of single gene families (e.g., TP53 orthologs)
+- **MOD-appropriate selection**: Accounts for data availability differences (e.g., some MODs don't capture biomarker data)
+- **Biological relevance**: Focus on genes famous in their respective research domains
+
+### Test Structure:
+The test suite now includes **two complementary validation approaches**:
+1. **Gene-Specific Tests**: Validate that well-known genes have rich, appropriate descriptions
+2. **Coverage Threshold Tests**: Ensure minimum description coverage levels are maintained across all categories
+
+### C. elegans (WB) - 4 genes
 - **daf-2**: Insulin receptor (disease via orthology - aging/longevity)
 - **egl-10**: RGS protein (used to study - behavioral phenotypes)
-- **egl-15**: FGFR (used to study - development)
-- **egl-19**: Calcium channel (disease via orthology - epilepsy)
 - **lin-12**: Notch receptor (disease via orthology - cancer)
-- **sma-1**: Spectrin (used to study - developmental disorders)
 - **apl-1**: APP homolog (biomarker - Alzheimer's disease)
 
 ### Mouse (MGI)
@@ -141,6 +153,29 @@ The tests look for these flexible patterns in descriptions:
 - `"Orthologous to"` - General orthology
 - `"Human ortholog"` - Specific human orthology
 
+## Coverage Threshold Tests
+
+In addition to gene-specific validation, the test suite includes **automated coverage threshold tests** that ensure minimum description coverage levels are maintained across all data categories.
+
+### Threshold Methodology
+- **Baseline calculation**: Current non-null description counts for each category
+- **Threshold setting**: 20% below current coverage levels to allow for normal fluctuation
+- **Categories tested**: Description, GO, Disease, Expression, Orthology coverage
+- **MOD-specific**: Accounts for data availability differences (e.g., some MODs don't have expression data)
+
+### Coverage Validation
+The tests validate that each MOD maintains:
+- **Overall descriptions**: Genes with non-null main descriptions
+- **GO annotations**: Gene Ontology coverage (function, process, component)
+- **Disease annotations**: Disease ontology coverage (direct, biomarker, orthology-based)
+- **Expression data**: Tissue/anatomical expression information
+- **Orthology data**: Cross-species orthologous relationships
+
+### Threshold Examples
+- **WB**: 24.9% descriptions, 23.5% GO, 10.5% disease, 9.6% expression, 12.0% orthology
+- **ZFIN**: 48.1% descriptions, 43.8% GO, 18.3% disease, 21.9% expression, 38.7% orthology
+- **XBXT**: 75.8% descriptions, 71.1% GO, 28.0% disease, 2.1% expression, 60.5% orthology
+
 ## Running the Tests
 
 ### Basic Usage
@@ -155,6 +190,8 @@ python3 manual_test_descriptions.py
 - No additional dependencies required
 
 ### Output Format
+
+**Gene-Specific Test Output:**
 ```
 Testing WB descriptions
 ============================================================
@@ -167,6 +204,19 @@ Testing WB descriptions
     Description: No description available
     Missing patterns: Predicted to enable, Involved in...
     Missing categories: go_description, do_description...
+```
+
+**Coverage Threshold Test Output:**
+```
+Testing WB coverage thresholds
+============================================================
+✅ PASS Description: 31.2% (threshold: 24.9%)
+✅ PASS GO: 29.4% (threshold: 23.5%)
+✅ PASS Disease: 13.2% (threshold: 10.5%)
+❌ FAIL Expression: 8.0% (threshold: 9.6%)
+✅ PASS Orthology: 15.0% (threshold: 12.0%)
+
+Threshold tests: 4/5 passed (80.0%)
 ```
 
 ## Test Success Criteria
