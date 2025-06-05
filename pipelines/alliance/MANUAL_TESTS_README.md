@@ -23,7 +23,8 @@ The `manual_test_descriptions.py` script validates that well-known, well-studied
 
 ### Well-Known Gene Selection
 - Selected genes are **famous and well-studied** in their respective organisms
-- These genes should consistently have rich descriptions
+- **Comprehensive annotation requirement**: Good candidate genes have annotations across **all (or most) major categories** including GO, expression, orthology, and disease data
+- These genes should consistently have rich descriptions across multiple data types
 - If these genes lack descriptions, it indicates a systemic issue
 
 ### Data Category Focus
@@ -89,8 +90,10 @@ The test suite now includes **two complementary validation approaches**:
 - **tp53**: Tumor suppressor (used to study - cancer)
 - **shha**: Sonic hedgehog (used to study - development and disease)
 
-### Drosophila (FB)
-- **p53**: Tumor suppressor (used to study - cancer)
+### Drosophila (FB) - 4 genes (diverse pathways)
+- **arm**: Armadillo/β-catenin (Wnt signaling, cell adhesion)
+- **Delta**: Notch signaling ligand (development, cell fate)
+- **Wdr82**: Chromatin regulation (development)
 - **Snca**: Alpha-synuclein (used to study - neurodegenerative diseases)
 
 ### Human (HUMAN)

@@ -489,17 +489,17 @@ def define_test_genes() -> Dict[str, List[TestGene]]:
         ],
         
         'FB': [  # Drosophila - FlyBase (4 genes - diverse pathways)
-            # Wnt signaling - developmental patterning
+            # Armadillo/beta-catenin - Wnt signaling, cell adhesion
             TestGene(
-                gene_id='FB:FBgn0031903',
-                gene_symbol='Wnt10',
+                gene_id='FB:FBgn0000117',
+                gene_symbol='arm',
                 expected_patterns=go_patterns + expression_patterns + orthology_patterns,
                 description_categories=common_categories
             ),
-            # Growth factor signaling - hemocyte biology
+            # Delta - Notch signaling ligand, development
             TestGene(
-                gene_id='FB:FBgn0031972',
-                gene_symbol='Wwox',
+                gene_id='FB:FBgn0000463',
+                gene_symbol='Delta',
                 expected_patterns=go_patterns + expression_patterns + orthology_patterns,
                 description_categories=common_categories
             ),
