@@ -31,7 +31,7 @@ The `manual_test_descriptions.py` script validates that well-known, well-studied
 - Tests check for presence of key description categories:
   - `go_description` - Gene Ontology annotations
   - `go_function_description` - Molecular function
-  - `go_process_description` - Biological process  
+  - `go_process_description` - Biological process
   - `go_component_description` - Cellular component
   - `do_description` - Direct disease ontology annotations
   - `do_biomarker_description` - Disease biomarker annotations
@@ -165,8 +165,8 @@ The tests look for these flexible patterns in descriptions:
 In addition to gene-specific validation, the test suite includes **automated coverage threshold tests** that ensure minimum description coverage levels are maintained across all data categories.
 
 ### Threshold Methodology
-- **Baseline calculation**: Current non-null description counts for each category
-- **Threshold setting**: 20% below current coverage levels to allow for normal fluctuation
+- **Baseline calculation**: non-null description counts for each category
+- **Threshold setting**: 20% below initially calculated coverage levels to allow for normal fluctuation
 - **Categories tested**: Description, GO, Disease, Expression, Orthology coverage
 - **MOD-specific**: Accounts for data availability differences (e.g., some MODs don't have expression data)
 
@@ -281,7 +281,7 @@ agr_genedescriptions/pipelines/alliance/
 ├── MANUAL_TESTS_README.md         # This documentation
 └── generated_descriptions/        # Description files to test
     ├── WB.json                   # C. elegans descriptions
-    ├── MGI.json                  # Mouse descriptions  
+    ├── MGI.json                  # Mouse descriptions
     ├── SGD.json                  # Yeast descriptions
     ├── RGD.json                  # Rat descriptions
     ├── ZFIN.json                 # Zebrafish descriptions
