@@ -123,42 +123,59 @@ The test suite now includes **two complementary validation approaches**:
 
 ## Expected Patterns
 
-The tests look for these flexible patterns in descriptions:
+The tests look for these patterns in descriptions, extracted directly from the `config_alliance.yml` configuration file to ensure 100% consistency with the actual sentence generation logic:
 
-### Gene Ontology Patterns
-- `"Predicted to enable"` - Molecular function predictions
-- `"Involved in"` - Biological process involvement
-- `"Located in"` - Cellular component location
-- `"Part of"` - Component membership
-- `"Acts upstream"` - Pathway relationships
+### Gene Ontology Patterns (from config)
+- `"exhibits"` - Function exhibition
+- `"enables"` - Function enablement
+- `"contributes to"` - Functional contribution
+- `"contributes as a"` / `"contributes as an"` - Specific contribution types
+- `"colocalizes with"` / `"colocalizes with a"` / `"colocalizes with an"` - Colocalization
+- `"predicted to have"` - Predicted functions
+- `"predicted to be a"` / `"predicted to be an"` - Predicted types
+- `"predicted to enable"` - Predicted function enablement
+- `"predicted to contribute to"` - Predicted contributions
+- `"predicted to contribute as a"` / `"predicted to contribute as an"` - Predicted specific contributions
+- `"predicted to colocalize with"` - Predicted colocalization
+- `"involved in"` - Process involvement
+- `"predicted to be involved in"` - Predicted process involvement
+- `"acts upstream of with a positive effect on"` - Positive upstream regulation
+- `"acts upstream of with a negative effect on"` - Negative upstream regulation
+- `"acts upstream of or within"` - General upstream or within regulation
+- `"acts upstream of or within with a negative effect on"` - Negative upstream or within regulation
+- `"acts upstream of or within with a positive effect on"` - Positive upstream or within regulation
+- `"predicted to act upstream of..."` - Predicted regulatory relationships
+- `"localizes to"` - Cellular localization
+- `"located in"` - Cellular location
+- `"part of"` - Component membership
+- `"is active in"` - Activity location
+- `"predicted to localize to"` - Predicted localization
+- `"predicted to be located in"` - Predicted location
+- `"predicted to be part of"` - Predicted component membership
+- `"predicted to be active in"` - Predicted activity location
 
-### Expression Patterns
-- `"Is expressed in"` - Tissue/cell expression
-- `"Expressed in"` - Alternative expression phrasing
+### Expression Patterns (from config)
+- `"is expressed in"` - Tissue/cell expression
+- `"is enriched in"` - Expression enrichment
 
-### Disease Patterns
+### Disease Patterns (from config)
 
 #### Biomarker Patterns
-- `"biomarker.*for"` - Biomarker for disease
-- `"marker.*for"` - Marker for condition
-- `"indicator.*of"` - Indicator of disease
-- `"associated.*with.*disease"` - Disease association
+- `"biomarker of"` - Disease biomarker
 
 #### Used to Study Patterns
-- `"Used to study"` - Research applications
-- `"Model.*for"` - Disease model
-- `"Research.*model"` - Research model
-- `"Study.*of"` - Study applications
+- `"used to study"` - Research model applications
 
 #### Disease via Orthology Patterns
-- `"Human ortholog.*implicated in"` - Disease via orthology
-- `"ortholog.*associated.*with"` - Ortholog disease association
-- `"Orthologous to human.*gene.*implicated"` - Orthology-based disease link
-- `"implicated.*via.*orthology"` - Explicit orthology connection
+- `"human ortholog(s) of this gene implicated in"` - Disease via human orthology
+- `"ortholog(s) of this gene implicated in"` - Disease via orthology (for humans)
 
-### Orthology Patterns
-- `"Orthologous to"` - General orthology
-- `"Human ortholog"` - Specific human orthology
+#### Human-Specific Disease Patterns
+- `"implicated in"` - Direct disease implication (for human genes)
+
+### Orthology Patterns (from config)
+- `"human ortholog(s) of this gene implicated in"` - Human orthology with disease link
+- `"ortholog(s) of this gene implicated in"` - General orthology with disease link
 
 ## Coverage Threshold Tests
 
@@ -182,6 +199,17 @@ The tests validate that each MOD maintains:
 - **WB**: 24.9% descriptions, 23.5% GO, 5.9% disease, 9.6% expression, 12.0% orthology
 - **ZFIN**: 48.1% descriptions, 43.8% GO, 15.0% disease, 21.9% expression, 38.7% orthology
 - **XBXT**: 75.8% descriptions, 71.1% GO, 21.8% disease, 2.1% expression, 60.5% orthology
+
+## Pattern Updates (2025)
+
+**Important**: The test patterns have been updated to match exactly the prefixes defined in `config_alliance.yml`. This ensures:
+
+1. **100% consistency** with actual sentence generation logic
+2. **No false negatives** due to pattern mismatches
+3. **Easier maintenance** - patterns sync with config changes
+4. **Accurate validation** - tests what the system actually produces
+
+The patterns now exclude very short prefixes (like "a", "an", "is") that are too generic for meaningful testing, while including all substantive prefixes that indicate specific biological relationships or evidence levels.
 
 ## Running the Tests
 
