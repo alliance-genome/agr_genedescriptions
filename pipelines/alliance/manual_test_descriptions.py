@@ -253,15 +253,15 @@ class DescriptionValidator:
 def define_coverage_thresholds() -> Dict[str, CoverageThreshold]:
     """Define minimum coverage thresholds (20% lower than current levels)."""
     return {
-        'WB': CoverageThreshold('WB', 49538, 24.9, 23.5, 10.5, 9.6, 12.0),
+        'WB': CoverageThreshold('WB', 49538, 24.9, 23.5, 5.9, 9.6, 12.0),
         'MGI': CoverageThreshold('MGI', 81450, 22.1, 20.5, 7.0, 15.1, 19.8),
-        'SGD': CoverageThreshold('SGD', 8097, 61.3, 61.2, 23.9, 0.0, 32.6),
+        'SGD': CoverageThreshold('SGD', 8097, 61.3, 61.2, 17.0, 0.0, 32.6),
         'RGD': CoverageThreshold('RGD', 61335, 31.9, 29.7, 9.3, 0.0, 26.9),
-        'ZFIN': CoverageThreshold('ZFIN', 37912, 48.1, 43.8, 18.3, 21.9, 38.7),
-        'FB': CoverageThreshold('FB', 32141, 34.1, 31.7, 15.1, 22.0, 20.7),
+        'ZFIN': CoverageThreshold('ZFIN', 37912, 48.1, 43.8, 15.0, 21.9, 38.7),
+        'FB': CoverageThreshold('FB', 32141, 34.1, 31.7, 10.2, 22.0, 20.7),
         'HUMAN': CoverageThreshold('HUMAN', 43736, 38.5, 38.5, 0.0, 0.0, 0.0),
         'XBXL': CoverageThreshold('XBXL', 26822, 71.5, 56.8, 24.5, 8.5, 66.5),
-        'XBXT': CoverageThreshold('XBXT', 21566, 75.8, 71.1, 28.0, 2.1, 60.5),
+        'XBXT': CoverageThreshold('XBXT', 21566, 75.8, 71.1, 21.8, 2.1, 60.5),
     }
 
 

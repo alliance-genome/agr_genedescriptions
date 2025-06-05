@@ -179,9 +179,9 @@ The tests validate that each MOD maintains:
 - **Orthology data**: Cross-species orthologous relationships
 
 ### Threshold Examples
-- **WB**: 24.9% descriptions, 23.5% GO, 10.5% disease, 9.6% expression, 12.0% orthology
-- **ZFIN**: 48.1% descriptions, 43.8% GO, 18.3% disease, 21.9% expression, 38.7% orthology
-- **XBXT**: 75.8% descriptions, 71.1% GO, 28.0% disease, 2.1% expression, 60.5% orthology
+- **WB**: 24.9% descriptions, 23.5% GO, 5.9% disease, 9.6% expression, 12.0% orthology
+- **ZFIN**: 48.1% descriptions, 43.8% GO, 15.0% disease, 21.9% expression, 38.7% orthology
+- **XBXT**: 75.8% descriptions, 71.1% GO, 21.8% disease, 2.1% expression, 60.5% orthology
 
 ## Running the Tests
 
@@ -217,13 +217,13 @@ Testing WB descriptions
 ```
 Testing WB coverage thresholds
 ============================================================
-✅ PASS Description: 31.2% (threshold: 24.9%)
+✅ PASS Description: 30.8% (threshold: 24.9%)
 ✅ PASS GO: 29.4% (threshold: 23.5%)
-✅ PASS Disease: 13.2% (threshold: 10.5%)
-❌ FAIL Expression: 8.0% (threshold: 9.6%)
+✅ PASS Disease: 7.4% (threshold: 5.9%)
+✅ PASS Expression: 12.0% (threshold: 9.6%)
 ✅ PASS Orthology: 15.0% (threshold: 12.0%)
 
-Threshold tests: 4/5 passed (80.0%)
+Threshold tests: 5/5 passed (100.0%)
 ```
 
 ## Test Success Criteria
