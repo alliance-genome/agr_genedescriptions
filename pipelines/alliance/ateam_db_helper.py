@@ -286,6 +286,7 @@ def get_disease_annotations(taxon_id: str):
                 'implicated_via_orthology' AS "relationshipType"
             FROM
                 genetogeneorthology ggo
+            JOIN genetogeneorthologygenerated gtog ON ggo.id = gtog.id AND gtog.strictfilter = true
             JOIN gene g_subject ON ggo.subjectgene_id = g_subject.id
             JOIN gene g_human ON ggo.objectgene_id = g_human.id
             JOIN biologicalentity be_subject ON g_subject.id = be_subject.id
