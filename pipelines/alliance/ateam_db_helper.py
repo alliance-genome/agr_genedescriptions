@@ -294,6 +294,7 @@ def get_disease_annotations(taxon_id: str):
             JOIN genediseaseannotation gda ON g_human.id = gda.diseaseannotationsubject_id
             JOIN diseaseannotation da ON gda.id = da.id
             JOIN ontologyterm ot ON da.diseaseannotationobject_id = ot.id
+            JOIN vocabularyterm rel ON da.relation_id = rel.id
             JOIN slotannotation slota_subject ON g_subject.id = slota_subject.singlegene_id AND slota_subject.slotannotationtype = 'GeneSymbolSlotAnnotation'
             WHERE
                 da.obsolete = false
@@ -301,6 +302,7 @@ def get_disease_annotations(taxon_id: str):
             AND ot.namespace = 'disease_ontology'
             AND be_subject.taxon_id = (SELECT id FROM ontologyterm WHERE curie = :taxon_id)
             AND be_human.taxon_id = (SELECT id FROM ontologyterm WHERE curie = 'NCBITaxon:9606')
+            AND rel.name = 'is_implicated_in'
             AND slota_subject.obsolete = false
             AND be_subject.obsolete = false
         """)
