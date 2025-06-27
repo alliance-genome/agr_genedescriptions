@@ -13,7 +13,7 @@ class APIManager(object):
         self.textpresso_api_token = textpresso_api_token
         self.tpc_cache = {}
         self.class_cache = {}
-        self.tpc_api_endpoint = "https://www.alliancegenome.org/textpresso/wb/v1/textpresso/api/get_documents_count"
+        self.tpc_api_endpoint = "https://wb-textoresso.alliancegenome.org/v1/textpresso/api/get_documents_count"
         if not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None):
             ssl._create_default_https_context = ssl._create_unverified_context
 
