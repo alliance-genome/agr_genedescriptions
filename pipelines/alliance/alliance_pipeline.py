@@ -2,7 +2,7 @@ import argparse
 import concurrent.futures
 import logging
 import time
-import traceback  # <-- add this import
+import traceback
 
 from genedescriptions.commons import DataType
 from genedescriptions.config_parser import GenedescConfigParser
@@ -14,7 +14,7 @@ from pipelines.alliance.alliance_data_manager import AllianceDataManager, provid
 
 logger = logging.getLogger(__name__)
 
-DATA_SOURCE = "db"
+DATA_SOURCE = "api"
 
 
 def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider: str, species_taxon: str):

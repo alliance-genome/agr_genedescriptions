@@ -6,7 +6,7 @@ import urllib.request
 import requests
 from fastapi_okta.okta_utils import get_authentication_token, generate_headers
 
-ATEAM_API = os.environ.get("ATEAM_API", "https://curation.alliancegenome.org/api")
+ATEAM_API = os.environ.get("ATEAM_API", "https://stage-curation.alliancegenome.org/api")
 
 
 logger = logging.getLogger(__name__)
@@ -33,6 +33,8 @@ def get_ontology_roots(node_type: str):
 
 
 def get_ontology_node_children(node_curie: str, node_type: str):
+    # TODO: try using the new ontology closure API
+    # /api/ontologytermclosure/find?limit=0&page=0 - specify term type?
     url = f'{ATEAM_API}/{node_type}/{node_curie}/children'
     token = get_authentication_token()
     headers = generate_headers(token)

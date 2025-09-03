@@ -81,6 +81,7 @@ def get_expression_annotations(taxon_id: str):
 
 def get_ontology_pairs(curie_prefix: str):
     session = create_ateam_db_session()
+    # TODO: use otp.ontologyTermType = 'DOTerm'
     try:
         sql_query = text("""
         SELECT DISTINCT
