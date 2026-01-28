@@ -14,7 +14,7 @@ from pipelines.alliance.alliance_data_manager import AllianceDataManager, provid
 
 logger = logging.getLogger(__name__)
 
-DATA_SOURCE = "api"
+DATA_SOURCE = "db"
 
 
 def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider: str, species_taxon: str):

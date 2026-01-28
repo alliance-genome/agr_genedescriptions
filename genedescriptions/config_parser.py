@@ -39,7 +39,11 @@ class GenedescConfigParser(object):
             #     'http://current.geneontology.org/ontology/subsets/gocheck_do_not_manually_annotate.json')
 
     def add_go_do_not_annotate_to_blacklist(self, slim_url):
-        response = urllib.request.urlopen(slim_url)
+        request = urllib.request.Request(
+            slim_url,
+            headers={'User-Agent': 'AGR-GeneDescriptions/1.0'}
+        )
+        response = urllib.request.urlopen(request)
         data = json.load(response)
         self.config["go_sentences_options"]["exclude_terms"].extend(
             [node['id'].replace('http://purl.obolibrary.org/obo/', '').replace('_', ':') for node in
