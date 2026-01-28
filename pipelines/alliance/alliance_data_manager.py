@@ -1,4 +1,3 @@
-import concurrent.futures
 import logging
 import os
 import requests
@@ -6,13 +5,10 @@ import tempfile
 
 from ontobio import Ontology
 
+from agr_curation_api import DatabaseMethods
 from genedescriptions.commons import DataType, Module, Gene
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import DataManager
-from pipelines.alliance.ateam_api_helper import get_ontology_roots, get_ontology_node_children, \
-    get_expression_annotations_from_api, get_data_providers_from_api
-from pipelines.alliance.ateam_db_helper import get_expression_annotations, get_ontology_pairs, get_gene_data, \
-    get_data_providers, get_disease_annotations, get_best_human_orthologs_for_taxon
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +32,21 @@ class AllianceDataManager(DataManager):
     def __init__(self, config: GenedescConfigParser, alliance_release_version: str = None):
         self.config = config
         self.anatomy_ontologies_roots = None
+        self._db = None  # Lazy-initialized DatabaseMethods instance
         super().__init__()
+
+    @property
+    def db(self) -> DatabaseMethods:
+        """Lazy initialization of DatabaseMethods instance."""
+        if self._db is None:
+            self._db = DatabaseMethods()
+        return self._db
+
+    def close(self):
+        """Clean up database connections."""
+        if self._db is not None:
+            self._db.close()
+            self._db = None
 
     def _load_go_annotations(self, provider: str):
         if provider in ["XBXT", "XBXL"]:
@@ -84,14 +94,9 @@ class AllianceDataManager(DataManager):
         self.go_associations = DataManager.create_annot_set_from_legacy_assocs(assocs=renamed_associations,
                                                                                ontology=self.go_ontology)
 
-    def _load_expression_annotations(self, taxon_id: str, provider: str, source: str = "db"):
+    def _load_expression_annotations(self, taxon_id: str, provider: str):
         associations = []
-        if source == "db":
-            gea_list = get_expression_annotations(taxon_id=taxon_id)
-        elif source == "api":
-            gea_list = get_expression_annotations_from_api(data_provider=provider)
-        else:
-            raise ValueError("source must be either 'db' or 'api'")
+        gea_list = self.db.get_expression_annotations(taxon_curie=taxon_id)
         for gea in gea_list:
             associations.append(DataManager.create_annotation_record(
                 source_line="",
@@ -113,39 +118,38 @@ class AllianceDataManager(DataManager):
             terms_blacklist=self.config.get_module_property(module=Module.EXPRESSION,
                                                             prop=ConfigModuleProperty.EXCLUDE_TERMS))
 
-    def _load_do_annotations(self, taxon_id: str, provider: str, source: str = "db"):
-        if source == "db":
-            associations = []
-            doa_list = get_disease_annotations(taxon_id=taxon_id)
-            for doa in doa_list:
-                relationship_to_ecode = {
-                    "is_marker_for": "BMK",
-                    "implicated_via_orthology": "DVO"
-                }
-                ecode = relationship_to_ecode.get(doa["relationship_type"], "EXP")
-                associations.append(DataManager.create_annotation_record(
-                    source_line="",
-                    gene_id=doa["gene_id"],
-                    gene_symbol=doa["gene_symbol"],
-                    gene_type="gene",
-                    taxon_id=taxon_id,
-                    object_id=doa["do_id"],
-                    qualifiers=[""],
-                    aspect="D",
-                    ecode=ecode,
-                    references="",
-                    prvdr=provider,
-                    date=None))
-            self.do_associations = DataManager.create_annot_set_from_legacy_assocs(
-                assocs=associations, ontology=self.do_ontology)
+    def _load_do_annotations(self, taxon_id: str, provider: str):
+        associations = []
+        doa_list = self.db.get_disease_annotations(taxon_curie=taxon_id)
+        for doa in doa_list:
+            relationship_to_ecode = {
+                "is_marker_for": "BMK",
+                "implicated_via_orthology": "DVO"
+            }
+            ecode = relationship_to_ecode.get(doa["relationship_type"], "EXP")
+            associations.append(DataManager.create_annotation_record(
+                source_line="",
+                gene_id=doa["gene_id"],
+                gene_symbol=doa["gene_symbol"],
+                gene_type="gene",
+                taxon_id=taxon_id,
+                object_id=doa["do_id"],
+                qualifiers=[""],
+                aspect="D",
+                ecode=ecode,
+                references="",
+                prvdr=provider,
+                date=None))
+        self.do_associations = DataManager.create_annot_set_from_legacy_assocs(
+            assocs=associations, ontology=self.do_ontology)
 
-    def load_annotations(self, associations_type: DataType, taxon_id: str, provider: str, source: str = "db"):
+    def load_annotations(self, associations_type: DataType, taxon_id: str, provider: str):
         if associations_type == DataType.GO:
             self._load_go_annotations(provider=provider)
         elif associations_type == DataType.EXPR:
-            self._load_expression_annotations(taxon_id=taxon_id, provider=provider, source=source)
+            self._load_expression_annotations(taxon_id=taxon_id, provider=provider)
         elif associations_type == DataType.DO:
-            self._load_do_annotations(taxon_id=taxon_id, source=source, provider=provider)
+            self._load_do_annotations(taxon_id=taxon_id, provider=provider)
         return None
 
     @staticmethod
@@ -165,28 +169,13 @@ class AllianceDataManager(DataManager):
                 }
             ontology.add_node(id=term_id, label=term_label, meta=meta)
 
-    def load_ontology(self, ontology_type: DataType, provider: str = None, source: str = "db"):
-        if source not in ["db", "api"]:
-            raise ValueError("source must be either 'db' or 'api'")
-
+    def load_ontology(self, ontology_type: DataType, provider: str = None):
         ontology = Ontology()
         curie_prefix = self._get_curie_prefix(ontology_type, provider)
         if not curie_prefix:
             return None
 
-        node_type = ""
-        if ontology_type == DataType.GO:
-            node_type = "goterm"
-        elif ontology_type == DataType.EXPR:
-            node_type = "anatomyterm"
-        elif ontology_type == DataType.DO:
-            node_type = "doterm"
-
-        if source == "api":
-            self._load_ontology_from_api(ontology, curie_prefix, node_type)
-        elif source == "db":
-            self._load_ontology_from_db(ontology, curie_prefix)
-
+        self._load_ontology_from_db(ontology, curie_prefix)
         self._add_artificial_nodes(ontology, ontology_type, provider)
         self.set_ontology(ontology_type=ontology_type, ontology=ontology, config=self.config)
 
@@ -200,49 +189,8 @@ class AllianceDataManager(DataManager):
             return "DOID"
         return ""
 
-    def _load_ontology_from_api(self, ontology, curie_prefix: str, node_type: str):
-        roots = get_ontology_roots(node_type=node_type)
-        roots = [root for root in roots if root["curie"].startswith(curie_prefix)]
-        visited_nodes = set(root["curie"] for root in roots)
-
-        for root in roots:
-            self.add_node_to_ontobio_ontology_if_not_exists(
-                term_id=root["curie"],
-                term_label=root["name"],
-                term_type=root["namespace"],
-                is_obsolete=False,
-                ontology=ontology,
-                check_exists=False)
-        nodes = roots
-
-        def process_node(node):
-            new_children = []
-            if node["descendantCount"] > 0:
-                children = get_ontology_node_children(node_curie=node["curie"], node_type=node_type)
-                for child in children:
-                    if child["curie"] not in visited_nodes:
-                        self.add_node_to_ontobio_ontology_if_not_exists(
-                            term_id=child["curie"],
-                            term_label=child["name"],
-                            term_type=child["namespace"],
-                            is_obsolete=False,
-                            ontology=ontology,
-                            check_exists=False)
-                        new_children.append(child)
-                        visited_nodes.add(child["curie"])
-                    ontology.add_parent(id=child["curie"], pid=node["curie"], relation="subClassOf")
-            return new_children
-
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            while nodes:
-                logger.debug(f"Number of visited nodes: {len(visited_nodes)}")
-                future_to_node = {executor.submit(process_node, node): node for node in nodes}
-                nodes = []
-                for future in concurrent.futures.as_completed(future_to_node):
-                    nodes.extend([node for node in future.result() if node.get("childCount", 0) > 0])
-
     def _load_ontology_from_db(self, ontology, curie_prefix: str):
-        ontology_pairs = get_ontology_pairs(curie_prefix=curie_prefix)
+        ontology_pairs = self.db.get_ontology_pairs(curie_prefix=curie_prefix)
         added_nodes = set()
         for onto_pair in ontology_pairs:
             if onto_pair["parent_curie"] not in added_nodes:
@@ -298,34 +246,21 @@ class AllianceDataManager(DataManager):
                                 "FBbt:10000000",
                                 relation="subClassOf")
 
-    def load_gene_data(self, species_taxon: str, source: str = "db"):
-        if source not in ["db", "api"]:
-            raise ValueError("source must be either 'db' or 'api'")
-        if source == "db":
-            genes = get_gene_data(species_taxon=species_taxon)
-            self.gene_data = {}
-            for gene in genes:
-                self.gene_data[gene["gene_id"]] = Gene(gene["gene_id"], gene["gene_symbol"], False, False)
-        elif source == "api":
-            raise NotImplementedError("API loading is not implemented yet")
+    def load_gene_data(self, species_taxon: str):
+        genes = self.db.get_genes_raw(taxon_curie=species_taxon)
+        self.gene_data = {}
+        for gene in genes:
+            self.gene_data[gene["gene_id"]] = Gene(gene["gene_id"], gene["gene_symbol"], False, False)
 
     @staticmethod
-    def load_data_providers(source: str = "db"):
-        if source not in ["db", "api"]:
-            raise ValueError("source must be either 'db' or 'api'")
-        if source == "api":
-            logger.info("Loading data providers from API")
-            return get_data_providers_from_api()
-        elif source == "db":
-            logger.info("Loading data providers from DB")
-            return get_data_providers()
-        return None
+    def load_data_providers():
+        logger.info("Loading data providers from DB")
+        db = DatabaseMethods()
+        try:
+            return db.get_data_providers()
+        finally:
+            db.close()
 
-    def get_best_human_orthologs(self, species_taxon: str, source: str = "db"):
+    def get_best_human_orthologs(self, species_taxon: str):
         """Get best human orthologs for all genes from a given data provider."""
-        if source not in ["db", "api"]:
-            raise ValueError("source must be either 'db' or 'api'")
-        if source == "api":
-            raise NotImplementedError("API loading for human orthologs is not implemented yet")
-        else:
-            return get_best_human_orthologs_for_taxon(species_taxon)
+        return self.db.get_best_human_orthologs_for_taxon(taxon_curie=species_taxon)

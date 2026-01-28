@@ -7,9 +7,6 @@ ontobio==2.8.22
 prefixcommons>=0.1.9
 num2words~=0.5.13
 dacite
-psycopg2-binary~=2.9.9
-fastapi-okta @ git+https://github.com/alliance-genome/agr_fastapi_okta@daeea0634ddd244e76fade7a53b4c97471613035
-
+agr-curation-api-client>=0.8.2
 setuptools~=69.5.1
-sqlalchemy~=2.0.34
 requests~=2.32.3

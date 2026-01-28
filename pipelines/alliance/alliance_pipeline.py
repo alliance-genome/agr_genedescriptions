@@ -14,26 +14,22 @@ from pipelines.alliance.alliance_data_manager import AllianceDataManager, provid
 
 logger = logging.getLogger(__name__)
 
-DATA_SOURCE = "db"
-
 
 def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider: str, species_taxon: str):
     logger.info(f"Loading GAF file for {data_provider}")
-    data_manager.load_annotations(associations_type=DataType.GO, taxon_id=species_taxon, provider=data_provider,
-                                  source=DATA_SOURCE)
+    data_manager.load_annotations(associations_type=DataType.GO, taxon_id=species_taxon, provider=data_provider)
     logger.info(f"Loading disease annotations for {data_provider}")
-    data_manager.load_annotations(associations_type=DataType.DO, taxon_id=species_taxon, provider=data_provider,
-                                  source=DATA_SOURCE)
+    data_manager.load_annotations(associations_type=DataType.DO, taxon_id=species_taxon, provider=data_provider)
     if data_provider in provider_to_expression_curie_prefix:
         logger.info(f"Loading anatomy ontology data for {data_provider}")
-        data_manager.load_ontology(ontology_type=DataType.EXPR, provider=data_provider, source="db")
+        data_manager.load_ontology(ontology_type=DataType.EXPR, provider=data_provider)
 
         logger.info(f"Loading expression annotations for {data_provider}")
         data_manager.load_annotations(associations_type=DataType.EXPR, taxon_id=species_taxon,
-                                      provider=data_provider, source=DATA_SOURCE)
+                                      provider=data_provider)
 
     logger.info(f"Loading gene data for {data_provider}")
-    data_manager.load_gene_data(species_taxon=species_taxon, source=DATA_SOURCE)
+    data_manager.load_gene_data(species_taxon=species_taxon)
 
     # Prepend 'RGD:' to all gene ids if provider is HUMAN
     if data_provider == "HUMAN":
@@ -85,7 +81,7 @@ def process_provider(data_provider, species_taxon, data_manager, conf_parser):
 
     best_orthologs = {}
     if data_provider != "HUMAN":
-        best_orthologs = data_manager.get_best_human_orthologs(species_taxon=species_taxon, source=DATA_SOURCE)
+        best_orthologs = data_manager.get_best_human_orthologs(species_taxon=species_taxon)
 
     logger.info(f"Generating text summaries for {data_provider}")
     generate_gene_descriptions(data_manager, best_orthologs, data_provider, conf_parser, json_desc_writer)
@@ -116,13 +112,17 @@ def main():
     data_manager = AllianceDataManager(config=conf_parser)
 
     logger.info("Loading data providers")
-    data_providers = data_manager.load_data_providers(source=DATA_SOURCE)
+    data_providers = data_manager.load_data_providers()
 
     logger.info("Loading GO ontology")
-    data_manager.load_ontology(ontology_type=DataType.GO, source=DATA_SOURCE)
+    data_manager.load_ontology(ontology_type=DataType.GO)
 
     logger.info("Loading DO ontology")
-    data_manager.load_ontology(ontology_type=DataType.DO, source=DATA_SOURCE)
+    data_manager.load_ontology(ontology_type=DataType.DO)
+
+    # Close DB connection before spawning subprocesses - each subprocess will create its own
+    # This is necessary because SQLAlchemy connections can't be pickled
+    data_manager.close()
 
     if args.parallel:
         logger.info("Processing data providers in parallel")
