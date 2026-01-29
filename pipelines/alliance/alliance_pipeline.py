@@ -69,6 +69,12 @@ def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: 
                                 include_single_gene_stats=False,
                                 data_manager=data_manager)
     json_desc_writer.write_tsv(file_path=f"pipelines/alliance/generated_descriptions/{data_provider}.tsv")
+    for gene_desc in json_desc_writer.data:
+        if gene_desc.description:
+            data_manager.write_gene_description_note(
+                gene_desc.gene_id, gene_desc.description
+            )
+    logger.info(f"Wrote gene description notes to database for {data_provider}")
 
 
 def process_provider(data_provider, species_taxon, data_manager, conf_parser):
@@ -119,6 +125,9 @@ def main():
 
     logger.info("Loading DO ontology")
     data_manager.load_ontology(ontology_type=DataType.DO)
+
+    logger.info("Deleting existing automated gene descriptions")
+    data_manager.delete_all_automated_gene_descriptions()
 
     # Close DB connection before spawning subprocesses - each subprocess will create its own
     # This is necessary because SQLAlchemy connections can't be pickled

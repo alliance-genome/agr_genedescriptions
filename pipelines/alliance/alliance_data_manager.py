@@ -4,6 +4,7 @@ import requests
 import tempfile
 
 from ontobio import Ontology
+from sqlalchemy import text
 
 from agr_curation_api import DatabaseMethods
 from genedescriptions.commons import DataType, Module, Gene
@@ -47,6 +48,91 @@ class AllianceDataManager(DataManager):
         if self._db is not None:
             self._db.close()
             self._db = None
+
+    def delete_all_automated_gene_descriptions(self):
+        """Delete all automated_gene_description notes and their biologicalentity_note links."""
+        session = self.db._create_session()
+        try:
+            session.execute(text("""
+                DELETE FROM biologicalentity_note
+                WHERE relatednotes_id IN (
+                    SELECT n.id FROM note n
+                    JOIN vocabularyterm vt ON n.notetype_id = vt.id
+                    WHERE vt.name = 'automated_gene_description'
+                )
+            """))
+            session.execute(text("""
+                DELETE FROM note
+                WHERE notetype_id = (
+                    SELECT id FROM vocabularyterm
+                    WHERE name = 'automated_gene_description'
+                )
+            """))
+            session.commit()
+            logger.info("Deleted all existing automated gene description notes")
+        except Exception as e:
+            session.rollback()
+            raise RuntimeError(
+                f"Failed to delete automated gene descriptions: {e}"
+            )
+        finally:
+            session.close()
+
+    def write_gene_description_note(self, gene_curie: str,
+                                    description_text: str):
+        """Write an automated_gene_description note attached to a gene.
+
+        Args:
+            gene_curie: The gene curie (e.g., 'WB:WBGene00000001')
+            description_text: The gene description text
+        """
+        session = self.db._create_session()
+        try:
+            result = session.execute(
+                text("SELECT id FROM biologicalentity WHERE curie = :curie"),
+                {"curie": gene_curie}
+            ).fetchone()
+            if not result:
+                logger.warning(
+                    f"Gene {gene_curie} not found in database, skipping note"
+                )
+                return
+            gene_id = result[0]
+
+            note_id_result = session.execute(
+                text("SELECT nextval('note_seq')")
+            ).fetchone()
+            note_id = note_id_result[0]
+
+            session.execute(text("""
+                INSERT INTO note (id, freetext, notetype_id, internal,
+                                  obsolete, dbdatecreated, dbdateupdated)
+                VALUES (
+                    :note_id,
+                    :freetext,
+                    (SELECT id FROM vocabularyterm
+                     WHERE name = 'automated_gene_description'),
+                    false,
+                    false,
+                    NOW(),
+                    NOW()
+                )
+            """), {"note_id": note_id, "freetext": description_text})
+
+            session.execute(text("""
+                INSERT INTO biologicalentity_note
+                    (submittedobject_id, relatednotes_id)
+                VALUES (:gene_id, :note_id)
+            """), {"gene_id": gene_id, "note_id": note_id})
+
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise RuntimeError(
+                f"Failed to write gene description note for {gene_curie}: {e}"
+            )
+        finally:
+            session.close()
 
     def _load_go_annotations(self, provider: str):
         if provider in ["XBXT", "XBXL"]:
