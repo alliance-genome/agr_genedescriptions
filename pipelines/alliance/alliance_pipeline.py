@@ -100,7 +100,12 @@ def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider:
 def generate_gene_descriptions(data_manager: AllianceDataManager, best_orthologs, data_provider: str,
                                conf_parser: GenedescConfigParser, json_desc_writer: DescriptionsWriter):
     for gene in data_manager.get_gene_data():
-        gene_desc = GeneDescription(gene_id=gene.id,
+        # For HUMAN genes, gene.id has 'RGD:' prefix for annotation matching
+        # but output files should use the original HGNC ID
+        output_gene_id = gene.id
+        if data_provider == "HUMAN" and gene.id.startswith("RGD:"):
+            output_gene_id = gene.id[4:]
+        gene_desc = GeneDescription(gene_id=output_gene_id,
                                     gene_name=gene.name,
                                     add_gene_name=False,
                                     config=conf_parser)
