@@ -15,6 +15,10 @@ RUN pip install --no-cache-dir -e .
 # Create output directory
 RUN mkdir -p pipelines/alliance/generated_descriptions
 
+# Environment variables for FMS upload
+ENV FMS_API_URL=https://fms.alliancegenome.org
+ENV API_KEY=""
+
 # Run the alliance pipeline in parallel mode
 CMD ["python", "-m", "pipelines.alliance.alliance_pipeline", \
      "-c", "pipelines/alliance/config_alliance.yml", \
