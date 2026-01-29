@@ -89,7 +89,8 @@ class AllianceDataManager(DataManager):
         session = self.db._create_session()
         try:
             result = session.execute(
-                text("SELECT id FROM biologicalentity WHERE curie = :curie"),
+                text("SELECT id FROM biologicalentity"
+                     " WHERE primaryexternalid = :curie"),
                 {"curie": gene_curie}
             ).fetchone()
             if not result:
