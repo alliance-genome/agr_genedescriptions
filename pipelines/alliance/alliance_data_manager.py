@@ -51,9 +51,9 @@ class AllianceDataManager(DataManager):
     def _load_go_annotations(self, provider: str):
         if provider in ["XBXT", "XBXL"]:
             provider = "XB"
-        release_version = os.environ.get("ALLIANCE_RELEASE_VERSION")
+        release_version = os.environ.get("ALLIANCE_RELEASE")
         if not release_version:
-            raise RuntimeError("ALLIANCE_RELEASE_VERSION not set in environment")
+            raise RuntimeError("ALLIANCE_RELEASE not set in environment")
         fms_url = f"https://fms.alliancegenome.org/api/snapshot/release/{release_version}"
         response = requests.get(fms_url)
         if response.status_code != 200:
