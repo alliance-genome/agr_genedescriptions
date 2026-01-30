@@ -1,6 +1,5 @@
 import datetime
 import json
-import copy
 
 from collections import OrderedDict
 from typing import List
@@ -35,35 +34,54 @@ class DescriptionsWriter(object):
             include_single_gene_stats (bool): whether to include statistics about the descriptions in the output file
             data_manager (DataManager): data manager containing the ontologies used to calculate onto stats
         """
-        indent = None
-        if pretty:
-            indent = 4
+        indent = 4 if pretty else None
         if include_single_gene_stats:
             for gene_desc in self.data:
                 gene_desc.stats.calculate_stats(data_manager=data_manager)
             self.general_stats.calculate_stats(gene_descriptions=self.data)
+
+        output = OrderedDict()
+        output['overall_properties'] = vars(self.overall_properties)
+        if include_single_gene_stats:
+            output['general_stats'] = vars(self.general_stats)
+
+        serialized_data = []
+        for gd in self.data:
+            entry = OrderedDict()
+            entry['gene_id'] = gd.gene_id
+            entry['gene_name'] = gd.gene_name
+            entry['description'] = gd.description
+            entry['go_description'] = gd.go_description
+            entry['go_function_description'] = gd.go_function_description
+            entry['go_process_description'] = gd.go_process_description
+            entry['go_component_description'] = gd.go_component_description
+            entry['do_description'] = gd.do_description
+            entry['do_experimental_description'] = gd.do_experimental_description
+            entry['do_biomarker_description'] = gd.do_biomarker_description
+            entry['do_orthology_description'] = gd.do_orthology_description
+            entry['orthology_description'] = gd.orthology_description
+            entry['tissue_expression_description'] = gd.tissue_expression_description
+            entry['gene_expression_cluster_description'] = gd.gene_expression_cluster_description
+            entry['molecule_expression_cluster_description'] = gd.molecule_expression_cluster_description
+            entry['anatomy_expression_cluster_description'] = gd.anatomy_expression_cluster_description
+            entry['protein_domain_description'] = gd.protein_domain_description
+            entry['human_gene_function_description'] = gd.human_gene_function_description
+            entry['sister_species_description'] = gd.sister_species_description
+            entry['publications'] = gd.publications
+            entry['refs'] = gd.refs
+            if include_single_gene_stats:
+                entry['stats'] = vars(gd.stats)
+            entry['paper_evidences'] = gd.paper_evidences
+            entry['accession_evidences'] = gd.accession_evidences
+            serialized_data.append(entry)
+        output['data'] = serialized_data
+
+        with open(file_path, "w") as outfile:
+            json.dump(output, outfile, indent=indent)
+
+        if include_single_gene_stats:
             for gene_desc in self.data:
                 gene_desc.stats.delete_extra_info()
-        for gene_desc in self.data:
-            del gene_desc.config
-        json_serializable_self = copy.deepcopy(self)
-        json_serializable_self.overall_properties = vars(json_serializable_self.overall_properties)
-        if include_single_gene_stats:
-            json_serializable_self.general_stats = vars(json_serializable_self.general_stats)
-            for gene_desc in json_serializable_self.data:
-                gene_desc.stats = vars(gene_desc.stats)
-        else:
-            for gene_desc in json_serializable_self.data:
-                gene_desc.stats = None
-            del json_serializable_self.general_stats
-        for gene_desc in json_serializable_self.data:
-            del gene_desc.add_gene_name
-        json_serializable_self.data = [vars(gene_desc) for gene_desc in json_serializable_self.data]
-        if not include_single_gene_stats:
-            for gene_desc in json_serializable_self.data:
-                del gene_desc["stats"]
-        with open(file_path, "w") as outfile:
-            json.dump(OrderedDict(vars(json_serializable_self)), outfile, indent=indent)
 
     def write_ace(self, file_path: str, curators_list: List[str], release_version: str):
         """write the descriptions to an ace file
@@ -100,26 +118,32 @@ class DescriptionsWriter(object):
                     outfile.write("Automated_description\t\"" + genedesc.description +
                                   "\"\tPaper_evidence\t\"WBPaper00067038\"\n\n")
 
-    def write_plain_text(self, file_path):
+    def write_plain_text(self, file_path, header=None):
         """write the descriptions to a plain text file
 
         Args:
             file_path (str): the path to the file to write
+            header (str): optional header to prepend to the file
         """
         with open(file_path, "w") as outfile:
+            if header:
+                outfile.write(header + "\n\n")
             for genedesc in self.data:
                 if genedesc.description:
                     outfile.write(genedesc.gene_id + "\t" + genedesc.gene_name + "\n" + genedesc.description + "\n\n")
                 else:
                     outfile.write(genedesc.gene_id + "\t" + genedesc.gene_name + "\nNo description available\n\n")
 
-    def write_tsv(self, file_path):
+    def write_tsv(self, file_path, header=None):
         """write the descriptions to a tsv file
 
         Args:
             file_path (str): the path to the file to write
+            header (str): optional header to prepend to the file
         """
         with open(file_path, "w") as outfile:
+            if header:
+                outfile.write(header + "\n\n")
             for genedesc in self.data:
                 if genedesc.description:
                     outfile.write(genedesc.gene_id + "\t" + genedesc.gene_name + "\t" + genedesc.description + "\n")
