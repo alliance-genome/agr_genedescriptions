@@ -176,6 +176,7 @@ def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: 
 
 def process_provider(data_provider, species_taxon, data_manager, conf_parser):
     logger.info(f"Processing provider: {data_provider}")
+    provider_start = time.time()
     json_desc_writer = DescriptionsWriter()
 
     logger.info(f"Loading all data for {data_provider}")
@@ -191,6 +192,11 @@ def process_provider(data_provider, species_taxon, data_manager, conf_parser):
 
     logger.info(f"Saving gene descriptions for {data_provider}")
     save_gene_descriptions(data_manager, json_desc_writer, data_provider)
+
+    elapsed = time.time() - provider_start
+    formatted = time.strftime("%H:%M:%S", time.gmtime(elapsed))
+    logger.info(f"===== {data_provider} DONE in {formatted} =====")
+    return data_provider, elapsed
 
 
 def main():
@@ -260,6 +266,8 @@ def main():
     # This is necessary because SQLAlchemy connections can't be pickled
     data_manager.close()
 
+    provider_times = {}
+
     if args.parallel:
         logger.info("Processing data providers in parallel")
         with concurrent.futures.ProcessPoolExecutor(max_workers=args.max_workers) as executor:
@@ -269,18 +277,30 @@ def main():
             ]
             for future in concurrent.futures.as_completed(futures):
                 try:
-                    future.result()
+                    provider, elapsed = future.result()
+                    provider_times[provider] = elapsed
                 except Exception as e:
                     logger.error(f"Error processing data provider: {e}")
                     logger.error(traceback.format_exc())
     else:
         logger.info("Processing data providers sequentially")
         for data_provider, species_taxon in data_providers:
-            process_provider(data_provider, species_taxon, data_manager, conf_parser)
+            provider, elapsed = process_provider(
+                data_provider, species_taxon, data_manager, conf_parser
+            )
+            provider_times[provider] = elapsed
 
     elapsed_time = time.time() - start_time
     formatted_time = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
-    logger.info(f"All data providers processed successfully in {formatted_time}")
+
+    logger.info("=" * 50)
+    logger.info("Processing times per provider:")
+    for provider, elapsed in sorted(provider_times.items(),
+                                    key=lambda x: x[1], reverse=True):
+        formatted = time.strftime("%H:%M:%S", time.gmtime(elapsed))
+        logger.info(f"  {provider:10s} {formatted}")
+    logger.info(f"Total pipeline time: {formatted_time}")
+    logger.info("=" * 50)
 
 
 if __name__ == '__main__':
