@@ -230,14 +230,11 @@ def main():
 
     logger.info("Environment variables:")
     for var in required_vars:
-        value = os.environ.get(var, "")
-        if "PASSWORD" in var:
-            value = "****"
-        logger.info(f"  {var}={value}")
+        logger.info(f"  {var}={os.environ.get(var, '')}")
     for var, default in optional_vars_defaults.items():
         value = os.environ.get(var, "")
         if value:
-            display = "****" if "KEY" in var or "PASSWORD" in var else value
+            display = value
         else:
             display = f"{default} (default)" if default else "(not set)"
         logger.info(f"  {var}={display}")
