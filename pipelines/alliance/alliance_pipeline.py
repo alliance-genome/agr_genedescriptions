@@ -98,10 +98,82 @@ def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider:
 
 
 def generate_gene_descriptions(data_manager: AllianceDataManager, best_orthologs, data_provider: str,
-                               conf_parser: GenedescConfigParser, json_desc_writer: DescriptionsWriter):
-    for gene in data_manager.get_gene_data():
-        # For HUMAN genes, gene.id has 'RGD:' prefix for annotation matching
-        # but output files should use the original HGNC ID
+                               conf_parser: GenedescConfigParser, json_desc_writer: DescriptionsWriter,
+                               gene_workers: int = 1, batch_size: int = 500):
+    genes = list(data_manager.get_gene_data())
+
+    if gene_workers > 1 and len(genes) > batch_size:
+        batches = [genes[i:i + batch_size]
+                   for i in range(0, len(genes), batch_size)]
+        logger.info(f"Processing {len(genes)} genes in {len(batches)} batches "
+                    f"with {gene_workers} workers")
+        with concurrent.futures.ProcessPoolExecutor(
+                max_workers=gene_workers,
+                initializer=_init_gene_worker,
+                initargs=(data_manager, best_orthologs,
+                          data_provider, conf_parser)) as executor:
+            for result_batch in executor.map(_process_gene_batch, batches):
+                for gene_desc in result_batch:
+                    json_desc_writer.add_gene_desc(gene_desc)
+    else:
+        logger.info(f"Processing {len(genes)} genes sequentially")
+        for gene in genes:
+            # For HUMAN genes, gene.id has 'RGD:' prefix for annotation matching
+            # but output files should use the original HGNC ID
+            output_gene_id = gene.id
+            if data_provider == "HUMAN" and gene.id.startswith("RGD:"):
+                output_gene_id = gene.id[4:]
+            gene_desc = GeneDescription(gene_id=output_gene_id,
+                                        gene_name=gene.name,
+                                        add_gene_name=False,
+                                        config=conf_parser)
+            set_gene_ontology_module(dm=data_manager, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene)
+            if data_provider in provider_to_expression_curie_prefix:
+                set_expression_module(df=data_manager,
+                                      conf_parser=conf_parser,
+                                      gene_desc=gene_desc,
+                                      gene=gene)
+            set_disease_module(df=data_manager, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene,
+                               human=data_provider == "HUMAN")
+            if gene.id in best_orthologs:
+                gene_desc.stats.set_best_orthologs = best_orthologs[gene.id][0]
+                set_alliance_human_orthology_module(orthologs=best_orthologs[gene.id][0],
+                                                    excluded_orthologs=best_orthologs[gene.id][1],
+                                                    gene_desc=gene_desc,
+                                                    config=conf_parser)
+            json_desc_writer.add_gene_desc(gene_desc)
+
+
+# --- Gene-level parallel processing support ---
+
+_worker_data = {}
+
+
+def _init_gene_worker(data_manager, best_orthologs, data_provider, conf_parser):
+    """Initializer for gene processing worker processes.
+
+    Called once per worker at pool creation. Stores shared read-only data
+    in a module-level global so it is available to _process_gene_batch
+    without per-task pickling overhead.
+    """
+    _worker_data['dm'] = data_manager
+    _worker_data['orthologs'] = best_orthologs
+    _worker_data['provider'] = data_provider
+    _worker_data['conf'] = conf_parser
+
+
+def _process_gene_batch(gene_batch):
+    """Process a batch of genes in a worker process.
+
+    Returns:
+        list[GeneDescription]: descriptions for all genes in the batch.
+    """
+    dm = _worker_data['dm']
+    best_orthologs = _worker_data['orthologs']
+    data_provider = _worker_data['provider']
+    conf_parser = _worker_data['conf']
+    results = []
+    for gene in gene_batch:
         output_gene_id = gene.id
         if data_provider == "HUMAN" and gene.id.startswith("RGD:"):
             output_gene_id = gene.id[4:]
@@ -109,21 +181,22 @@ def generate_gene_descriptions(data_manager: AllianceDataManager, best_orthologs
                                     gene_name=gene.name,
                                     add_gene_name=False,
                                     config=conf_parser)
-        set_gene_ontology_module(dm=data_manager, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene)
+        set_gene_ontology_module(dm=dm, conf_parser=conf_parser,
+                                 gene_desc=gene_desc, gene=gene)
         if data_provider in provider_to_expression_curie_prefix:
-            set_expression_module(df=data_manager,
-                                  conf_parser=conf_parser,
-                                  gene_desc=gene_desc,
-                                  gene=gene)
-        set_disease_module(df=data_manager, conf_parser=conf_parser, gene_desc=gene_desc, gene=gene,
+            set_expression_module(df=dm, conf_parser=conf_parser,
+                                  gene_desc=gene_desc, gene=gene)
+        set_disease_module(df=dm, conf_parser=conf_parser,
+                           gene_desc=gene_desc, gene=gene,
                            human=data_provider == "HUMAN")
         if gene.id in best_orthologs:
             gene_desc.stats.set_best_orthologs = best_orthologs[gene.id][0]
-            set_alliance_human_orthology_module(orthologs=best_orthologs[gene.id][0],
-                                                excluded_orthologs=best_orthologs[gene.id][1],
-                                                gene_desc=gene_desc,
-                                                config=conf_parser)
-        json_desc_writer.add_gene_desc(gene_desc)
+            set_alliance_human_orthology_module(
+                orthologs=best_orthologs[gene.id][0],
+                excluded_orthologs=best_orthologs[gene.id][1],
+                gene_desc=gene_desc, config=conf_parser)
+        results.append(gene_desc)
+    return results
 
 
 def add_header_to_file(file_path: str, data_format: str, data_provider: str):
@@ -174,7 +247,8 @@ def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: 
     logger.info(f"Wrote gene description notes to database for {data_provider}")
 
 
-def process_provider(data_provider, species_taxon, data_manager, conf_parser):
+def process_provider(data_provider, species_taxon, data_manager, conf_parser,
+                     gene_workers=1, batch_size=500):
     logger.info(f"Processing provider: {data_provider}")
     provider_start = time.time()
     json_desc_writer = DescriptionsWriter()
@@ -188,7 +262,8 @@ def process_provider(data_provider, species_taxon, data_manager, conf_parser):
         best_orthologs = data_manager.get_best_human_orthologs(species_taxon=species_taxon)
 
     logger.info(f"Generating text summaries for {data_provider}")
-    generate_gene_descriptions(data_manager, best_orthologs, data_provider, conf_parser, json_desc_writer)
+    generate_gene_descriptions(data_manager, best_orthologs, data_provider, conf_parser, json_desc_writer,
+                               gene_workers=gene_workers, batch_size=batch_size)
 
     logger.info(f"Saving gene descriptions for {data_provider}")
     save_gene_descriptions(data_manager, json_desc_writer, data_provider)
@@ -206,10 +281,16 @@ def main():
     parser.add_argument("-L", "--log-level", dest="log_level",
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], default="INFO",
                         help="set the logging level")
-    parser.add_argument("--parallel", dest="parallel", action="store_true",
-                        help="Run providers in parallel")
-    parser.add_argument("--max-workers", dest="max_workers", type=int, default=None,
-                        help="Maximum number of parallel executions (default: number of CPUs)")
+    parser.add_argument("--parallel-providers", dest="parallel_providers", action="store_true",
+                        help="Process data providers (MODs) in parallel")
+    parser.add_argument("--provider-workers", dest="provider_workers", type=int, default=None,
+                        help="Number of workers for provider-level parallelism (default: number of CPUs)")
+    parser.add_argument("--parallel-genes", dest="parallel_genes", action="store_true",
+                        help="Process genes within each provider in parallel batches")
+    parser.add_argument("--gene-workers", dest="gene_workers", type=int, default=None,
+                        help="Number of workers for gene-level parallelism (default: number of CPUs)")
+    parser.add_argument("--batch-size", dest="batch_size", type=int, default=500,
+                        help="Number of genes per batch for gene-level parallelism (default: 500)")
 
     args = parser.parse_args()
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
@@ -266,13 +347,22 @@ def main():
     # This is necessary because SQLAlchemy connections can't be pickled
     data_manager.close()
 
+    if args.parallel_genes:
+        gene_workers = args.gene_workers if args.gene_workers is not None else os.cpu_count()
+        batch_size = args.batch_size
+        logger.info(f"Gene-level parallelism: {gene_workers} workers, batch size {batch_size}")
+    else:
+        gene_workers = 1
+        batch_size = args.batch_size
+
     provider_times = {}
 
-    if args.parallel:
+    if args.parallel_providers:
         logger.info("Processing data providers in parallel")
-        with concurrent.futures.ProcessPoolExecutor(max_workers=args.max_workers) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=args.provider_workers) as executor:
             futures = [
-                executor.submit(process_provider, data_provider, species_taxon, data_manager, conf_parser)
+                executor.submit(process_provider, data_provider, species_taxon, data_manager, conf_parser,
+                                gene_workers=gene_workers, batch_size=batch_size)
                 for data_provider, species_taxon in data_providers
             ]
             for future in concurrent.futures.as_completed(futures):
@@ -286,7 +376,8 @@ def main():
         logger.info("Processing data providers sequentially")
         for data_provider, species_taxon in data_providers:
             provider, elapsed = process_provider(
-                data_provider, species_taxon, data_manager, conf_parser
+                data_provider, species_taxon, data_manager, conf_parser,
+                gene_workers=gene_workers, batch_size=batch_size
             )
             provider_times[provider] = elapsed
 
