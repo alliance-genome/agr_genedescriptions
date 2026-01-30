@@ -209,6 +209,37 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
     logging.getLogger(__name__).setLevel(logging.getLevelName(args.log_level))
 
+    # Check required environment variables
+    required_vars = [
+        "PERSISTENT_STORE_DB_USERNAME",
+        "PERSISTENT_STORE_DB_PASSWORD",
+        "PERSISTENT_STORE_DB_NAME",
+        "PERSISTENT_STORE_DB_HOST",
+        "ALLIANCE_RELEASE",
+    ]
+    optional_vars = [
+        "PERSISTENT_STORE_DB_PORT",
+        "FMS_API_URL",
+        "API_KEY",
+    ]
+    missing = [v for v in required_vars if not os.environ.get(v)]
+    if missing:
+        logger.error(f"Missing required environment variables: "
+                     f"{', '.join(missing)}")
+        raise SystemExit(1)
+
+    logger.info("Environment variables:")
+    for var in required_vars:
+        value = os.environ.get(var, "")
+        if "PASSWORD" in var:
+            value = "****"
+        logger.info(f"  {var}={value}")
+    for var in optional_vars:
+        value = os.environ.get(var, "(not set)")
+        if "KEY" in var and value != "(not set)":
+            value = "****"
+        logger.info(f"  {var}={value}")
+
     start_time = time.time()
     conf_parser = GenedescConfigParser(args.config_file)
 
