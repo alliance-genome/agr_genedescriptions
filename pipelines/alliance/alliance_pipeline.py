@@ -217,11 +217,11 @@ def main():
         "PERSISTENT_STORE_DB_HOST",
         "ALLIANCE_RELEASE",
     ]
-    optional_vars = [
-        "PERSISTENT_STORE_DB_PORT",
-        "FMS_API_URL",
-        "API_KEY",
-    ]
+    optional_vars_defaults = {
+        "PERSISTENT_STORE_DB_PORT": "5432",
+        "FMS_API_URL": "https://fms.alliancegenome.org",
+        "API_KEY": "",
+    }
     missing = [v for v in required_vars if not os.environ.get(v)]
     if missing:
         logger.error(f"Missing required environment variables: "
@@ -234,11 +234,13 @@ def main():
         if "PASSWORD" in var:
             value = "****"
         logger.info(f"  {var}={value}")
-    for var in optional_vars:
-        value = os.environ.get(var, "(not set)")
-        if "KEY" in var and value != "(not set)":
-            value = "****"
-        logger.info(f"  {var}={value}")
+    for var, default in optional_vars_defaults.items():
+        value = os.environ.get(var, "")
+        if value:
+            display = "****" if "KEY" in var or "PASSWORD" in var else value
+        else:
+            display = f"{default} (default)" if default else "(not set)"
+        logger.info(f"  {var}={display}")
 
     start_time = time.time()
     conf_parser = GenedescConfigParser(args.config_file)
