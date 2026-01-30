@@ -166,11 +166,11 @@ def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: 
         json.dump(vars(json_desc_writer.general_stats), stats_file)
     logger.info(f"Saved description files for {data_provider}")
 
-    for gene_desc in json_desc_writer.data:
-        if gene_desc.description:
-            data_manager.write_gene_description_note(
-                gene_desc.gene_id, gene_desc.description
-            )
+    gene_desc_pairs = [
+        (gd.gene_id, gd.description)
+        for gd in json_desc_writer.data if gd.description
+    ]
+    data_manager.write_gene_description_notes(gene_desc_pairs)
     logger.info(f"Wrote gene description notes to database for {data_provider}")
 
 

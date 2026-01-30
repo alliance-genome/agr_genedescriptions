@@ -78,59 +78,82 @@ class AllianceDataManager(DataManager):
         finally:
             session.close()
 
-    def write_gene_description_note(self, gene_curie: str,
-                                    description_text: str):
-        """Write an automated_gene_description note attached to a gene.
+    def write_gene_description_notes(self, gene_descriptions):
+        """Write automated_gene_description notes for a batch of genes.
+
+        Performs all inserts in a single transaction for performance.
 
         Args:
-            gene_curie: The gene curie (e.g., 'WB:WBGene00000001')
-            description_text: The gene description text
+            gene_descriptions: List of (gene_curie, description_text) tuples
         """
+        if not gene_descriptions:
+            return
+
         session = self.db._create_session()
         try:
-            result = session.execute(
-                text("SELECT id FROM biologicalentity"
-                     " WHERE primaryexternalid = :curie"),
-                {"curie": gene_curie}
-            ).fetchone()
-            if not result:
-                logger.warning(
-                    f"Gene {gene_curie} not found in database, skipping note"
+            # Look up the note type ID once
+            notetype_result = session.execute(text(
+                "SELECT id FROM vocabularyterm"
+                " WHERE name = 'automated_gene_description'"
+            )).fetchone()
+            if not notetype_result:
+                raise RuntimeError(
+                    "vocabularyterm 'automated_gene_description' not found"
                 )
-                return
-            gene_id = result[0]
+            notetype_id = notetype_result[0]
 
-            note_id_result = session.execute(
-                text("SELECT nextval('note_seq')")
-            ).fetchone()
-            note_id = note_id_result[0]
+            # Build a map of curie -> biologicalentity.id for all genes
+            curies = [curie for curie, _ in gene_descriptions]
+            gene_id_map = {}
+            batch_size = 1000
+            for i in range(0, len(curies), batch_size):
+                batch = curies[i:i + batch_size]
+                rows = session.execute(
+                    text("SELECT primaryexternalid, id"
+                         " FROM biologicalentity"
+                         " WHERE primaryexternalid = ANY(:curies)"),
+                    {"curies": batch}
+                ).fetchall()
+                for row in rows:
+                    gene_id_map[row[0]] = row[1]
 
-            session.execute(text("""
-                INSERT INTO note (id, freetext, notetype_id, internal,
-                                  obsolete, dbdatecreated, dbdateupdated)
-                VALUES (
-                    :note_id,
-                    :freetext,
-                    (SELECT id FROM vocabularyterm
-                     WHERE name = 'automated_gene_description'),
-                    false,
-                    false,
-                    NOW(),
-                    NOW()
-                )
-            """), {"note_id": note_id, "freetext": description_text})
+            skipped = 0
+            written = 0
+            for gene_curie, description_text in gene_descriptions:
+                if gene_curie not in gene_id_map:
+                    skipped += 1
+                    continue
+                be_id = gene_id_map[gene_curie]
 
-            session.execute(text("""
-                INSERT INTO biologicalentity_note
-                    (submittedobject_id, relatednotes_id)
-                VALUES (:gene_id, :note_id)
-            """), {"gene_id": gene_id, "note_id": note_id})
+                note_id = session.execute(
+                    text("SELECT nextval('note_seq')")
+                ).fetchone()[0]
+
+                session.execute(text("""
+                    INSERT INTO note (id, freetext, notetype_id, internal,
+                                      obsolete, dbdatecreated, dbdateupdated)
+                    VALUES (:note_id, :freetext, :notetype_id,
+                            false, false, NOW(), NOW())
+                """), {
+                    "note_id": note_id,
+                    "freetext": description_text,
+                    "notetype_id": notetype_id
+                })
+
+                session.execute(text("""
+                    INSERT INTO biologicalentity_note
+                        (submittedobject_id, relatednotes_id)
+                    VALUES (:gene_id, :note_id)
+                """), {"gene_id": be_id, "note_id": note_id})
+                written += 1
 
             session.commit()
+            logger.info(f"Wrote {written} gene description notes, "
+                        f"skipped {skipped} (not found in DB)")
         except Exception as e:
             session.rollback()
             raise RuntimeError(
-                f"Failed to write gene description note for {gene_curie}: {e}"
+                f"Failed to write gene description notes: {e}"
             )
         finally:
             session.close()

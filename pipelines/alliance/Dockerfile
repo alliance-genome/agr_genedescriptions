@@ -15,6 +15,14 @@ RUN pip install --no-cache-dir -e .
 # Create output directory
 RUN mkdir -p pipelines/alliance/generated_descriptions
 
+# Environment variables for database connection
+ENV PERSISTENT_STORE_DB_USERNAME=postgres
+ENV PERSISTENT_STORE_DB_PASSWORD=postgres
+ENV PERSISTENT_STORE_DB_NAME=curation
+ENV PERSISTENT_STORE_DB_HOST=localhost
+ENV PERSISTENT_STORE_DB_PORT=5432
+ENV ALLIANCE_RELEASE=""
+
 # Environment variables for FMS upload
 ENV FMS_API_URL=https://fms.alliancegenome.org
 ENV API_KEY=""
