@@ -119,6 +119,7 @@ class AllianceDataManager(DataManager):
 
             skipped = 0
             written = 0
+            commit_batch_size = 500
             for gene_curie, description_text in gene_descriptions:
                 if gene_curie not in gene_id_map:
                     skipped += 1
@@ -146,6 +147,11 @@ class AllianceDataManager(DataManager):
                     VALUES (:gene_id, :note_id)
                 """), {"gene_id": be_id, "note_id": note_id})
                 written += 1
+
+                if written % commit_batch_size == 0:
+                    session.commit()
+                    logger.info(f"Committed {written} gene description "
+                                f"notes so far...")
 
             session.commit()
             logger.info(f"Wrote {written} gene description notes, "
