@@ -1,9 +1,11 @@
 import argparse
 import concurrent.futures
 import datetime
+import enum
 import json
 import logging
 import os
+import threading
 import time
 import traceback
 from string import Template
@@ -72,6 +74,138 @@ FILE_README = (
 )
 
 
+class ProviderPhase(str, enum.Enum):
+    PENDING = "pending"
+    LOADING = "loading"
+    PROCESSING = "processing"
+    WRITING = "writing"
+    DONE = "done"
+    ERROR = "error"
+
+
+class ProgressTracker:
+    """Tracks per-provider progress through the pipeline.
+
+    Stores each provider's state as a JSON string in a dict.
+    Used only from the main process (not sent to subprocesses).
+    """
+
+    _PHASE_PCT_RANGES = {
+        ProviderPhase.PENDING: (0, 0),
+        ProviderPhase.LOADING: (0, 30),
+        ProviderPhase.PROCESSING: (30, 90),
+        ProviderPhase.WRITING: (90, 100),
+        ProviderPhase.DONE: (100, 100),
+        ProviderPhase.ERROR: (0, 0),
+    }
+
+    def __init__(self, providers):
+        self._data = {}
+        for provider in providers:
+            self._data[provider] = json.dumps({
+                "phase": ProviderPhase.PENDING.value,
+                "percentage": 0.0,
+                "total_genes": 0,
+                "genes_done": 0,
+                "batch_index": 0,
+                "total_batches": 0,
+                "detail": "",
+                "start_time": None,
+                "elapsed": None,
+            })
+
+    def _get(self, provider):
+        return json.loads(self._data[provider])
+
+    def _put(self, provider, state):
+        self._data[provider] = json.dumps(state)
+
+    def set_phase(self, provider, phase, detail="", total_genes=0):
+        state = self._get(provider)
+        state["phase"] = phase.value
+        lo, _ = self._PHASE_PCT_RANGES[phase]
+        state["percentage"] = float(lo)
+        state["detail"] = detail
+        if phase == ProviderPhase.LOADING and state["start_time"] is None:
+            state["start_time"] = time.time()
+        if total_genes:
+            state["total_genes"] = total_genes
+        if phase == ProviderPhase.DONE:
+            state["percentage"] = 100.0
+            if state["start_time"] is not None:
+                state["elapsed"] = time.time() - state["start_time"]
+            state["detail"] = "complete"
+        if phase == ProviderPhase.ERROR:
+            state["percentage"] = 0.0
+        self._put(provider, state)
+
+    def update_processing_progress(self, provider, batch_index, total_batches,
+                                   genes_done, total_genes):
+        state = self._get(provider)
+        state["batch_index"] = batch_index
+        state["total_batches"] = total_batches
+        state["genes_done"] = genes_done
+        state["total_genes"] = total_genes
+        lo, hi = self._PHASE_PCT_RANGES[ProviderPhase.PROCESSING]
+        fraction = genes_done / total_genes if total_genes else 0
+        state["percentage"] = lo + fraction * (hi - lo)
+        state["detail"] = (f"batch {batch_index}/{total_batches}, "
+                           f"{genes_done}/{total_genes} genes")
+        self._put(provider, state)
+
+    def get_all_states(self):
+        return {p: json.loads(v) for p, v in self._data.items()}
+
+    def get_overall_percentage(self):
+        states = self.get_all_states()
+        if not states:
+            return 0.0
+        return sum(s["percentage"] for s in states.values()) / len(states)
+
+
+class StatusLogger(threading.Thread):
+    """Daemon thread that periodically logs pipeline progress."""
+
+    def __init__(self, tracker, interval=30):
+        super().__init__(daemon=True)
+        self._tracker = tracker
+        self._interval = interval
+        self._stop_event = threading.Event()
+
+    def run(self):
+        while not self._stop_event.wait(self._interval):
+            self._log_status()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def _log_status(self):
+        states = self._tracker.get_all_states()
+        if not states:
+            return
+        lines = [
+            "=" * 65,
+            "  PIPELINE PROGRESS STATUS",
+            "-" * 65,
+        ]
+        for provider in sorted(states):
+            s = states[provider]
+            phase = s["phase"]
+            pct = s["percentage"]
+            detail = s["detail"]
+            if phase == ProviderPhase.DONE.value and s.get("elapsed"):
+                elapsed_str = time.strftime(
+                    "%H:%M:%S", time.gmtime(s["elapsed"]))
+                detail = f"complete ({elapsed_str})"
+            lines.append(
+                f"  {provider:10s}| {phase:12s}| {pct:5.1f}% | {detail}")
+        overall = self._tracker.get_overall_percentage()
+        lines.append("-" * 65)
+        lines.append(f"  OVERALL: {overall:.1f}%")
+        lines.append("=" * 65)
+        logger.info("\n" + "\n".join(lines))
+
+
 def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider: str, species_taxon: str):
     logger.info(f"Loading GAF file for {data_provider}")
     data_manager.load_annotations(associations_type=DataType.GO, taxon_id=species_taxon, provider=data_provider)
@@ -99,27 +233,40 @@ def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider:
 
 def generate_gene_descriptions(data_manager: AllianceDataManager, best_orthologs, data_provider: str,
                                conf_parser: GenedescConfigParser, json_desc_writer: DescriptionsWriter,
-                               gene_workers: int = 1, batch_size: int = 500):
+                               gene_workers: int = 1, batch_size: int = 500,
+                               progress_tracker=None):
     genes = list(data_manager.get_gene_data())
+    total_genes = len(genes)
 
-    if gene_workers > 1 and len(genes) > batch_size:
+    if gene_workers > 1 and total_genes > batch_size:
         batches = [genes[i:i + batch_size]
-                   for i in range(0, len(genes), batch_size)]
-        logger.info(f"Processing {len(genes)} genes in {len(batches)} batches "
+                   for i in range(0, total_genes, batch_size)]
+        total_batches = len(batches)
+        logger.info(f"Processing {total_genes} genes in {total_batches} batches "
                     f"with {gene_workers} workers")
+        genes_done = 0
         with concurrent.futures.ProcessPoolExecutor(
                 max_workers=gene_workers,
                 initializer=_init_gene_worker,
                 initargs=(data_manager, best_orthologs,
                           data_provider, conf_parser)) as executor:
-            for result_batch in executor.map(_process_gene_batch, batches):
+            for batch_idx, result_batch in enumerate(
+                    executor.map(_process_gene_batch, batches), start=1):
                 for gene_desc in result_batch:
                     json_desc_writer.add_gene_desc(gene_desc)
+                genes_done += len(batches[batch_idx - 1])
+                pct = genes_done / total_genes * 100 if total_genes else 0
+                logger.info(
+                    f"{data_provider}: batch {batch_idx}/{total_batches} "
+                    f"complete, {genes_done}/{total_genes} genes "
+                    f"({pct:.1f}%)")
+                if progress_tracker:
+                    progress_tracker.update_processing_progress(
+                        data_provider, batch_idx, total_batches,
+                        genes_done, total_genes)
     else:
-        logger.info(f"Processing {len(genes)} genes sequentially")
-        for gene in genes:
-            # For HUMAN genes, gene.id has 'RGD:' prefix for annotation matching
-            # but output files should use the original HGNC ID
+        logger.info(f"Processing {total_genes} genes sequentially")
+        for gene_idx, gene in enumerate(genes, start=1):
             output_gene_id = gene.id
             if data_provider == "HUMAN" and gene.id.startswith("RGD:"):
                 output_gene_id = gene.id[4:]
@@ -142,6 +289,17 @@ def generate_gene_descriptions(data_manager: AllianceDataManager, best_orthologs
                                                     gene_desc=gene_desc,
                                                     config=conf_parser)
             json_desc_writer.add_gene_desc(gene_desc)
+            if gene_idx % 1000 == 0 or gene_idx == total_genes:
+                pct = gene_idx / total_genes * 100 if total_genes else 0
+                logger.info(
+                    f"{data_provider}: {gene_idx}/{total_genes} genes "
+                    f"({pct:.1f}%)")
+                if progress_tracker:
+                    total_batches = (total_genes + 999) // 1000
+                    batch_idx = (gene_idx + 999) // 1000
+                    progress_tracker.update_processing_progress(
+                        data_provider, batch_idx, total_batches,
+                        gene_idx, total_genes)
 
 
 # --- Gene-level parallel processing support ---
@@ -248,30 +406,53 @@ def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: 
 
 
 def process_provider(data_provider, species_taxon, data_manager, conf_parser,
-                     gene_workers=1, batch_size=500):
-    logger.info(f"Processing provider: {data_provider}")
-    provider_start = time.time()
-    json_desc_writer = DescriptionsWriter()
+                     gene_workers=1, batch_size=500, progress_tracker=None):
+    try:
+        logger.info(f"Processing provider: {data_provider}")
+        provider_start = time.time()
+        json_desc_writer = DescriptionsWriter()
 
-    logger.info(f"Loading all data for {data_provider}")
-    load_all_data_for_provider(data_manager, data_provider, species_taxon)
-    logger.info(f"Loading best human orthologs for {data_provider}")
+        if progress_tracker:
+            progress_tracker.set_phase(data_provider, ProviderPhase.LOADING)
 
-    best_orthologs = {}
-    if data_provider != "HUMAN":
-        best_orthologs = data_manager.get_best_human_orthologs(species_taxon=species_taxon)
+        logger.info(f"Loading all data for {data_provider}")
+        load_all_data_for_provider(data_manager, data_provider, species_taxon)
+        logger.info(f"Loading best human orthologs for {data_provider}")
 
-    logger.info(f"Generating text summaries for {data_provider}")
-    generate_gene_descriptions(data_manager, best_orthologs, data_provider, conf_parser, json_desc_writer,
-                               gene_workers=gene_workers, batch_size=batch_size)
+        best_orthologs = {}
+        if data_provider != "HUMAN":
+            best_orthologs = data_manager.get_best_human_orthologs(species_taxon=species_taxon)
 
-    logger.info(f"Saving gene descriptions for {data_provider}")
-    save_gene_descriptions(data_manager, json_desc_writer, data_provider)
+        total_genes = len(list(data_manager.get_gene_data()))
+        if progress_tracker:
+            progress_tracker.set_phase(
+                data_provider, ProviderPhase.PROCESSING,
+                total_genes=total_genes)
 
-    elapsed = time.time() - provider_start
-    formatted = time.strftime("%H:%M:%S", time.gmtime(elapsed))
-    logger.info(f"===== {data_provider} DONE in {formatted} =====")
-    return data_provider, elapsed
+        logger.info(f"Generating text summaries for {data_provider}")
+        generate_gene_descriptions(data_manager, best_orthologs, data_provider, conf_parser, json_desc_writer,
+                                   gene_workers=gene_workers, batch_size=batch_size,
+                                   progress_tracker=progress_tracker)
+
+        if progress_tracker:
+            progress_tracker.set_phase(data_provider, ProviderPhase.WRITING)
+
+        logger.info(f"Saving gene descriptions for {data_provider}")
+        save_gene_descriptions(data_manager, json_desc_writer, data_provider)
+
+        if progress_tracker:
+            progress_tracker.set_phase(data_provider, ProviderPhase.DONE)
+
+        elapsed = time.time() - provider_start
+        formatted = time.strftime("%H:%M:%S", time.gmtime(elapsed))
+        logger.info(f"===== {data_provider} DONE in {formatted} =====")
+        return data_provider, elapsed
+    except Exception:
+        if progress_tracker:
+            progress_tracker.set_phase(
+                data_provider, ProviderPhase.ERROR,
+                detail=traceback.format_exc().splitlines()[-1])
+        raise
 
 
 def main():
@@ -291,6 +472,8 @@ def main():
                         help="Number of workers for gene-level parallelism (default: number of CPUs)")
     parser.add_argument("--batch-size", dest="batch_size", type=int, default=500,
                         help="Number of genes per batch for gene-level parallelism (default: 500)")
+    parser.add_argument("--status-interval", dest="status_interval", type=int, default=30,
+                        help="Seconds between progress status logs (default: 30, 0 to disable)")
 
     args = parser.parse_args()
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
@@ -355,31 +538,55 @@ def main():
         gene_workers = 1
         batch_size = args.batch_size
 
+    provider_names = [dp for dp, _ in data_providers]
+    # In parallel-providers mode the tracker can't be sent to subprocesses
+    # (Manager proxy contains unpicklable AuthenticationString), so we only
+    # use it from the main process to track high-level completion.
+    progress_tracker = ProgressTracker(provider_names)
+
+    status_logger = None
+    if args.status_interval > 0:
+        status_logger = StatusLogger(
+            progress_tracker, interval=args.status_interval)
+        status_logger.start()
+
     provider_times = {}
 
-    if args.parallel_providers:
-        logger.info("Processing data providers in parallel")
-        with concurrent.futures.ProcessPoolExecutor(max_workers=args.provider_workers) as executor:
-            futures = [
-                executor.submit(process_provider, data_provider, species_taxon, data_manager, conf_parser,
-                                gene_workers=gene_workers, batch_size=batch_size)
-                for data_provider, species_taxon in data_providers
-            ]
-            for future in concurrent.futures.as_completed(futures):
-                try:
-                    provider, elapsed = future.result()
-                    provider_times[provider] = elapsed
-                except Exception as e:
-                    logger.error(f"Error processing data provider: {e}")
-                    logger.error(traceback.format_exc())
-    else:
-        logger.info("Processing data providers sequentially")
-        for data_provider, species_taxon in data_providers:
-            provider, elapsed = process_provider(
-                data_provider, species_taxon, data_manager, conf_parser,
-                gene_workers=gene_workers, batch_size=batch_size
-            )
-            provider_times[provider] = elapsed
+    try:
+        if args.parallel_providers:
+            logger.info("Processing data providers in parallel")
+            # Mark all providers as processing in the main-process tracker
+            for dp, _ in data_providers:
+                progress_tracker.set_phase(dp, ProviderPhase.PROCESSING)
+            with concurrent.futures.ProcessPoolExecutor(max_workers=args.provider_workers) as executor:
+                future_to_provider = {
+                    executor.submit(process_provider, data_provider, species_taxon, data_manager, conf_parser,
+                                    gene_workers=gene_workers, batch_size=batch_size): data_provider
+                    for data_provider, species_taxon in data_providers
+                }
+                for future in concurrent.futures.as_completed(future_to_provider):
+                    dp = future_to_provider[future]
+                    try:
+                        provider, elapsed = future.result()
+                        provider_times[provider] = elapsed
+                        progress_tracker.set_phase(dp, ProviderPhase.DONE)
+                    except Exception as e:
+                        logger.error(f"Error processing data provider: {e}")
+                        logger.error(traceback.format_exc())
+                        progress_tracker.set_phase(
+                            dp, ProviderPhase.ERROR, detail=str(e))
+        else:
+            logger.info("Processing data providers sequentially")
+            for data_provider, species_taxon in data_providers:
+                provider, elapsed = process_provider(
+                    data_provider, species_taxon, data_manager, conf_parser,
+                    gene_workers=gene_workers, batch_size=batch_size,
+                    progress_tracker=progress_tracker
+                )
+                provider_times[provider] = elapsed
+    finally:
+        if status_logger:
+            status_logger.stop()
 
     elapsed_time = time.time() - start_time
     formatted_time = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
