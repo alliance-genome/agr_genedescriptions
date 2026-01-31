@@ -4,7 +4,6 @@ import datetime
 import enum
 import json
 import logging
-import multiprocessing
 import os
 import threading
 import time
@@ -15,7 +14,6 @@ from genedescriptions.commons import DataType
 from genedescriptions.config_parser import GenedescConfigParser
 from genedescriptions.descriptions_writer import DescriptionsWriter
 from genedescriptions.gene_description import GeneDescription
-from genedescriptions.ontology_cache import install_ontology_cache
 from genedescriptions.precanned_modules import set_expression_module, set_gene_ontology_module, set_disease_module, \
     set_alliance_human_orthology_module
 from pipelines.alliance.alliance_data_manager import AllianceDataManager, provider_to_expression_curie_prefix
@@ -78,12 +76,9 @@ FILE_README = (
 
 class ProviderPhase(str, enum.Enum):
     PENDING = "pending"
-    LOADING_DATA = "loading_data"
-    LOADING_ORTHOLOGS = "loading_ortho"
+    LOADING = "loading"
     PROCESSING = "processing"
-    WRITING_JSON = "writing_json"
-    WRITING_FILES = "writing_files"
-    WRITING_DB = "writing_db"
+    WRITING = "writing"
     DONE = "done"
     ERROR = "error"
 
@@ -91,58 +86,39 @@ class ProviderPhase(str, enum.Enum):
 class ProgressTracker:
     """Tracks per-provider progress through the pipeline.
 
-    Stores each provider's state as a JSON string inside a
-    ``multiprocessing.Array('c', ...)`` so the data lives in shared
-    memory and is visible across forked child processes without
-    pickling issues.
+    Stores each provider's state as a JSON string in a dict.
+    Used only from the main process (not sent to subprocesses).
     """
-
-    _STATE_BUF_SIZE = 512  # bytes per provider — plenty for JSON state
 
     _PHASE_PCT_RANGES = {
         ProviderPhase.PENDING: (0, 0),
-        ProviderPhase.LOADING_DATA: (0, 15),
-        ProviderPhase.LOADING_ORTHOLOGS: (15, 25),
-        ProviderPhase.PROCESSING: (25, 85),
-        ProviderPhase.WRITING_JSON: (85, 92),
-        ProviderPhase.WRITING_FILES: (92, 96),
-        ProviderPhase.WRITING_DB: (96, 100),
+        ProviderPhase.LOADING: (0, 30),
+        ProviderPhase.PROCESSING: (30, 90),
+        ProviderPhase.WRITING: (90, 100),
         ProviderPhase.DONE: (100, 100),
         ProviderPhase.ERROR: (0, 0),
     }
 
     def __init__(self, providers):
-        initial = json.dumps({
-            "phase": ProviderPhase.PENDING.value,
-            "percentage": 0.0,
-            "total_genes": 0,
-            "genes_done": 0,
-            "batch_index": 0,
-            "total_batches": 0,
-            "detail": "",
-            "start_time": None,
-            "elapsed": None,
-        })
-        self._buffers = {}
+        self._data = {}
         for provider in providers:
-            buf = multiprocessing.Array('c', self._STATE_BUF_SIZE)
-            encoded = initial.encode('utf-8')
-            buf[:len(encoded)] = encoded
-            self._buffers[provider] = buf
+            self._data[provider] = json.dumps({
+                "phase": ProviderPhase.PENDING.value,
+                "percentage": 0.0,
+                "total_genes": 0,
+                "genes_done": 0,
+                "batch_index": 0,
+                "total_batches": 0,
+                "detail": "",
+                "start_time": None,
+                "elapsed": None,
+            })
 
     def _get(self, provider):
-        raw = self._buffers[provider].raw
-        return json.loads(raw[:raw.index(b'\x00')].decode('utf-8'))
+        return json.loads(self._data[provider])
 
     def _put(self, provider, state):
-        buf = self._buffers[provider]
-        encoded = json.dumps(state).encode('utf-8')
-        if len(encoded) >= self._STATE_BUF_SIZE:
-            state["detail"] = state.get("detail", "")[:80]
-            encoded = json.dumps(state).encode('utf-8')
-        with buf.get_lock():
-            buf[:self._STATE_BUF_SIZE] = b'\x00' * self._STATE_BUF_SIZE
-            buf[:len(encoded)] = encoded
+        self._data[provider] = json.dumps(state)
 
     def set_phase(self, provider, phase, detail="", total_genes=0):
         state = self._get(provider)
@@ -150,7 +126,7 @@ class ProgressTracker:
         lo, _ = self._PHASE_PCT_RANGES[phase]
         state["percentage"] = float(lo)
         state["detail"] = detail
-        if phase == ProviderPhase.LOADING_DATA and state["start_time"] is None:
+        if phase == ProviderPhase.LOADING and state["start_time"] is None:
             state["start_time"] = time.time()
         if total_genes:
             state["total_genes"] = total_genes
@@ -161,15 +137,6 @@ class ProgressTracker:
             state["detail"] = "complete"
         if phase == ProviderPhase.ERROR:
             state["percentage"] = 0.0
-        self._put(provider, state)
-
-    def update_loading_progress(self, provider, completed, total, current_task=""):
-        """Update sub-progress within the LOADING_DATA phase."""
-        state = self._get(provider)
-        lo, hi = self._PHASE_PCT_RANGES[ProviderPhase.LOADING_DATA]
-        fraction = completed / total if total else 0
-        state["percentage"] = lo + fraction * (hi - lo)
-        state["detail"] = f"{completed}/{total} loads done" + (f", {current_task}" if current_task else "")
         self._put(provider, state)
 
     def update_processing_progress(self, provider, batch_index, total_batches,
@@ -187,7 +154,7 @@ class ProgressTracker:
         self._put(provider, state)
 
     def get_all_states(self):
-        return {p: self._get(p) for p in self._buffers}
+        return {p: json.loads(v) for p, v in self._data.items()}
 
     def get_overall_percentage(self):
         states = self.get_all_states()
@@ -217,9 +184,9 @@ class StatusLogger(threading.Thread):
         if not states:
             return
         lines = [
-            "=" * 70,
+            "=" * 65,
             "  PIPELINE PROGRESS STATUS",
-            "-" * 70,
+            "-" * 65,
         ]
         for provider in sorted(states):
             s = states[provider]
@@ -231,78 +198,29 @@ class StatusLogger(threading.Thread):
                     "%H:%M:%S", time.gmtime(s["elapsed"]))
                 detail = f"complete ({elapsed_str})"
             lines.append(
-                f"  {provider:10s}| {phase:15s}| {pct:5.1f}% | {detail}")
+                f"  {provider:10s}| {phase:12s}| {pct:5.1f}% | {detail}")
         overall = self._tracker.get_overall_percentage()
-        lines.append("-" * 70)
+        lines.append("-" * 65)
         lines.append(f"  OVERALL: {overall:.1f}%")
-        lines.append("=" * 70)
+        lines.append("=" * 65)
         logger.info("\n" + "\n".join(lines))
 
 
-_progress_tracker = None  # module-level; set before pool creation, inherited via fork
-
-
-def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider: str, species_taxon: str,
-                               parallel_loading=True):
-    has_expression = data_provider in provider_to_expression_curie_prefix
-    total_tasks = 5 if has_expression else 3  # GO, DO, genes [+ expr_onto, expr_annot]
-    completed = 0
-    _lock = threading.Lock()
-
-    def _on_task_done(task_name):
-        nonlocal completed
-        with _lock:
-            completed += 1
-            if _progress_tracker:
-                _progress_tracker.update_loading_progress(data_provider, completed, total_tasks, task_name)
-
-    def _load_go():
-        logger.info(f"Loading GAF file for {data_provider}")
-        data_manager.load_annotations(associations_type=DataType.GO, taxon_id=species_taxon, provider=data_provider)
-        _on_task_done("GO annotations loaded")
-
-    def _load_do():
-        logger.info(f"Loading disease annotations for {data_provider}")
-        data_manager.load_annotations(associations_type=DataType.DO, taxon_id=species_taxon, provider=data_provider)
-        _on_task_done("DO annotations loaded")
-
-    def _load_genes():
-        logger.info(f"Loading gene data for {data_provider}")
-        data_manager.load_gene_data(species_taxon=species_taxon)
-        _on_task_done("gene data loaded")
-
-    def _load_expr_ontology():
+def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider: str, species_taxon: str):
+    logger.info(f"Loading GAF file for {data_provider}")
+    data_manager.load_annotations(associations_type=DataType.GO, taxon_id=species_taxon, provider=data_provider)
+    logger.info(f"Loading disease annotations for {data_provider}")
+    data_manager.load_annotations(associations_type=DataType.DO, taxon_id=species_taxon, provider=data_provider)
+    if data_provider in provider_to_expression_curie_prefix:
         logger.info(f"Loading anatomy ontology data for {data_provider}")
         data_manager.load_ontology(ontology_type=DataType.EXPR, provider=data_provider)
-        _on_task_done("expression ontology loaded")
 
-    def _load_expr_annotations():
         logger.info(f"Loading expression annotations for {data_provider}")
         data_manager.load_annotations(associations_type=DataType.EXPR, taxon_id=species_taxon,
                                       provider=data_provider)
-        _on_task_done("expression annotations loaded")
 
-    if parallel_loading:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-            futures = [
-                executor.submit(_load_go),
-                executor.submit(_load_do),
-                executor.submit(_load_genes),
-            ]
-            if has_expression:
-                expr_onto_future = executor.submit(_load_expr_ontology)
-                expr_onto_future.result()
-                futures.append(executor.submit(_load_expr_annotations))
-
-            for f in futures:
-                f.result()
-    else:
-        _load_go()
-        _load_do()
-        if has_expression:
-            _load_expr_ontology()
-            _load_expr_annotations()
-        _load_genes()
+    logger.info(f"Loading gene data for {data_provider}")
+    data_manager.load_gene_data(species_taxon=species_taxon)
 
     # Prepend 'RGD:' to all gene ids if provider is HUMAN
     if data_provider == "HUMAN":
@@ -315,7 +233,8 @@ def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider:
 
 def generate_gene_descriptions(data_manager: AllianceDataManager, best_orthologs, data_provider: str,
                                conf_parser: GenedescConfigParser, json_desc_writer: DescriptionsWriter,
-                               gene_workers: int = 1, batch_size: int = 500):
+                               gene_workers: int = 1, batch_size: int = 500,
+                               progress_tracker=None):
     genes = list(data_manager.get_gene_data())
     total_genes = len(genes)
 
@@ -341,8 +260,8 @@ def generate_gene_descriptions(data_manager: AllianceDataManager, best_orthologs
                     f"{data_provider}: batch {batch_idx}/{total_batches} "
                     f"complete, {genes_done}/{total_genes} genes "
                     f"({pct:.1f}%)")
-                if _progress_tracker:
-                    _progress_tracker.update_processing_progress(
+                if progress_tracker:
+                    progress_tracker.update_processing_progress(
                         data_provider, batch_idx, total_batches,
                         genes_done, total_genes)
     else:
@@ -375,10 +294,10 @@ def generate_gene_descriptions(data_manager: AllianceDataManager, best_orthologs
                 logger.info(
                     f"{data_provider}: {gene_idx}/{total_genes} genes "
                     f"({pct:.1f}%)")
-                if _progress_tracker:
+                if progress_tracker:
                     total_batches = (total_genes + 999) // 1000
                     batch_idx = (gene_idx + 999) // 1000
-                    _progress_tracker.update_processing_progress(
+                    progress_tracker.update_processing_progress(
                         data_provider, batch_idx, total_batches,
                         gene_idx, total_genes)
 
@@ -470,8 +389,7 @@ def _build_file_header(data_format: str, data_provider: str) -> str:
     )
 
 
-def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: DescriptionsWriter,
-                           data_provider: str):
+def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: DescriptionsWriter, data_provider: str):
     base_path = f"pipelines/alliance/generated_descriptions/{data_provider}"
     alliance_release = os.environ.get("ALLIANCE_RELEASE", "")
     release_version = ".".join(alliance_release.split(".")[0:2])
@@ -480,16 +398,9 @@ def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: 
     json_desc_writer.overall_properties.release_version = release_version
     json_desc_writer.overall_properties.date = datetime.date.today().isoformat()
 
-    if _progress_tracker:
-        _progress_tracker.set_phase(data_provider, ProviderPhase.WRITING_JSON,
-                                    detail="writing JSON")
     json_desc_writer.write_json(file_path=base_path + ".json",
                                 include_single_gene_stats=True,
                                 data_manager=data_manager)
-
-    if _progress_tracker:
-        _progress_tracker.set_phase(data_provider, ProviderPhase.WRITING_FILES,
-                                    detail="writing TSV/TXT")
     json_desc_writer.write_tsv(file_path=base_path + ".tsv",
                                header=_build_file_header("tsv", data_provider))
     json_desc_writer.write_plain_text(file_path=base_path + ".txt",
@@ -499,9 +410,6 @@ def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: 
         json.dump(vars(json_desc_writer.general_stats), stats_file)
     logger.info(f"Saved description files for {data_provider}")
 
-    if _progress_tracker:
-        _progress_tracker.set_phase(data_provider, ProviderPhase.WRITING_DB,
-                                    detail="writing to database")
     gene_desc_pairs = [
         (gd.gene_id, gd.description)
         for gd in json_desc_writer.data if gd.description
@@ -511,50 +419,50 @@ def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: 
 
 
 def process_provider(data_provider, species_taxon, data_manager, conf_parser,
-                     gene_workers=1, batch_size=500, parallel_loading=True):
+                     gene_workers=1, batch_size=500, progress_tracker=None):
     try:
         logger.info(f"Processing provider: {data_provider}")
         provider_start = time.time()
         json_desc_writer = DescriptionsWriter()
 
-        if _progress_tracker:
-            _progress_tracker.set_phase(data_provider, ProviderPhase.LOADING_DATA)
+        if progress_tracker:
+            progress_tracker.set_phase(data_provider, ProviderPhase.LOADING)
 
         logger.info(f"Loading all data for {data_provider}")
-        load_all_data_for_provider(data_manager, data_provider, species_taxon,
-                                   parallel_loading=parallel_loading)
+        load_all_data_for_provider(data_manager, data_provider, species_taxon)
+        logger.info(f"Loading best human orthologs for {data_provider}")
 
         best_orthologs = {}
         if data_provider != "HUMAN":
-            if _progress_tracker:
-                _progress_tracker.set_phase(data_provider, ProviderPhase.LOADING_ORTHOLOGS,
-                                            detail="loading orthologs")
-            logger.info(f"Loading best human orthologs for {data_provider}")
             best_orthologs = data_manager.get_best_human_orthologs(species_taxon=species_taxon)
 
         total_genes = len(list(data_manager.get_gene_data()))
-        if _progress_tracker:
-            _progress_tracker.set_phase(
+        if progress_tracker:
+            progress_tracker.set_phase(
                 data_provider, ProviderPhase.PROCESSING,
                 total_genes=total_genes)
 
         logger.info(f"Generating text summaries for {data_provider}")
         generate_gene_descriptions(data_manager, best_orthologs, data_provider, conf_parser, json_desc_writer,
-                                   gene_workers=gene_workers, batch_size=batch_size)
+                                   gene_workers=gene_workers, batch_size=batch_size,
+                                   progress_tracker=progress_tracker)
+
+        if progress_tracker:
+            progress_tracker.set_phase(data_provider, ProviderPhase.WRITING)
 
         logger.info(f"Saving gene descriptions for {data_provider}")
         save_gene_descriptions(data_manager, json_desc_writer, data_provider)
 
-        if _progress_tracker:
-            _progress_tracker.set_phase(data_provider, ProviderPhase.DONE)
+        if progress_tracker:
+            progress_tracker.set_phase(data_provider, ProviderPhase.DONE)
 
         elapsed = time.time() - provider_start
         formatted = time.strftime("%H:%M:%S", time.gmtime(elapsed))
         logger.info(f"===== {data_provider} DONE in {formatted} =====")
         return data_provider, elapsed
     except Exception:
-        if _progress_tracker:
-            _progress_tracker.set_phase(
+        if progress_tracker:
+            progress_tracker.set_phase(
                 data_provider, ProviderPhase.ERROR,
                 detail=traceback.format_exc().splitlines()[-1])
         raise
@@ -614,8 +522,6 @@ def main():
             display = f"{default} (default)" if default else "(not set)"
         logger.info(f"  {var}={display}")
 
-    install_ontology_cache()
-
     start_time = time.time()
     conf_parser = GenedescConfigParser(args.config_file)
 
@@ -645,14 +551,15 @@ def main():
         gene_workers = 1
         batch_size = args.batch_size
 
-    global _progress_tracker
     provider_names = [dp for dp, _ in data_providers]
-    _progress_tracker = ProgressTracker(provider_names)
+    # In parallel-providers mode the tracker can't be sent to subprocesses
+    # so we only use it from the main process to track high-level completion.
+    progress_tracker = ProgressTracker(provider_names)
 
     status_logger = None
     if args.status_interval > 0:
         status_logger = StatusLogger(
-            _progress_tracker, interval=args.status_interval)
+            progress_tracker, interval=args.status_interval)
         status_logger.start()
 
     provider_times = {}
@@ -660,11 +567,13 @@ def main():
     try:
         if args.parallel_providers:
             logger.info("Processing data providers in parallel")
+            # Mark all providers as processing in the main-process tracker
+            for dp, _ in data_providers:
+                progress_tracker.set_phase(dp, ProviderPhase.PROCESSING)
             with concurrent.futures.ProcessPoolExecutor(max_workers=args.provider_workers) as executor:
                 future_to_provider = {
                     executor.submit(process_provider, data_provider, species_taxon, data_manager, conf_parser,
-                                    gene_workers=gene_workers, batch_size=batch_size,
-                                    parallel_loading=False): data_provider
+                                    gene_workers=gene_workers, batch_size=batch_size): data_provider
                     for data_provider, species_taxon in data_providers
                 }
                 for future in concurrent.futures.as_completed(future_to_provider):
@@ -672,17 +581,19 @@ def main():
                     try:
                         provider, elapsed = future.result()
                         provider_times[provider] = elapsed
+                        progress_tracker.set_phase(dp, ProviderPhase.DONE)
                     except Exception as e:
                         logger.error(f"Error processing data provider: {e}")
                         logger.error(traceback.format_exc())
-                        _progress_tracker.set_phase(
+                        progress_tracker.set_phase(
                             dp, ProviderPhase.ERROR, detail=str(e))
         else:
             logger.info("Processing data providers sequentially")
             for data_provider, species_taxon in data_providers:
                 provider, elapsed = process_provider(
                     data_provider, species_taxon, data_manager, conf_parser,
-                    gene_workers=gene_workers, batch_size=batch_size
+                    gene_workers=gene_workers, batch_size=batch_size,
+                    progress_tracker=progress_tracker
                 )
                 provider_times[provider] = elapsed
     finally:
