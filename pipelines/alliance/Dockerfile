@@ -31,4 +31,6 @@ ENV API_KEY=""
 CMD ["python", "-m", "pipelines.alliance.alliance_pipeline", \
      "-c", "pipelines/alliance/config_alliance.yml", \
      "-L", "INFO", \
-     "--parallel"]
+     "--parallel-providers", \
+     "--parallel-genes", \
+     "--batch-size", "500"]
