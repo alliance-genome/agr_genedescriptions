@@ -77,8 +77,16 @@ FILE_README = (
 class ProviderPhase(str, enum.Enum):
     PENDING = "pending"
     LOADING = "loading"
+    LOADING_GO = "loading GO"
+    LOADING_DO = "loading DO"
+    LOADING_EXPR = "loading expression"
+    LOADING_GENES = "loading genes"
+    LOADING_ORTHOLOGS = "loading orthologs"
     PROCESSING = "processing"
     WRITING = "writing"
+    WRITING_JSON = "writing JSON"
+    WRITING_TSV = "writing TSV/TXT"
+    WRITING_DB = "writing DB"
     DONE = "done"
     ERROR = "error"
 
@@ -92,9 +100,17 @@ class ProgressTracker:
 
     _PHASE_PCT_RANGES = {
         ProviderPhase.PENDING: (0, 0),
-        ProviderPhase.LOADING: (0, 30),
-        ProviderPhase.PROCESSING: (30, 90),
-        ProviderPhase.WRITING: (90, 100),
+        ProviderPhase.LOADING: (0, 5),
+        ProviderPhase.LOADING_GO: (5, 12),
+        ProviderPhase.LOADING_DO: (12, 18),
+        ProviderPhase.LOADING_EXPR: (18, 24),
+        ProviderPhase.LOADING_GENES: (24, 28),
+        ProviderPhase.LOADING_ORTHOLOGS: (28, 33),
+        ProviderPhase.PROCESSING: (33, 88),
+        ProviderPhase.WRITING: (88, 90),
+        ProviderPhase.WRITING_JSON: (90, 94),
+        ProviderPhase.WRITING_TSV: (94, 96),
+        ProviderPhase.WRITING_DB: (96, 100),
         ProviderPhase.DONE: (100, 100),
         ProviderPhase.ERROR: (0, 0),
     }
@@ -206,12 +222,21 @@ class StatusLogger(threading.Thread):
         logger.info("\n" + "\n".join(lines))
 
 
-def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider: str, species_taxon: str):
+def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider: str, species_taxon: str,
+                               progress_tracker=None):
+    if progress_tracker:
+        progress_tracker.set_phase(data_provider, ProviderPhase.LOADING_GO)
     logger.info(f"Loading GAF file for {data_provider}")
     data_manager.load_annotations(associations_type=DataType.GO, taxon_id=species_taxon, provider=data_provider)
+
+    if progress_tracker:
+        progress_tracker.set_phase(data_provider, ProviderPhase.LOADING_DO)
     logger.info(f"Loading disease annotations for {data_provider}")
     data_manager.load_annotations(associations_type=DataType.DO, taxon_id=species_taxon, provider=data_provider)
+
     if data_provider in provider_to_expression_curie_prefix:
+        if progress_tracker:
+            progress_tracker.set_phase(data_provider, ProviderPhase.LOADING_EXPR)
         logger.info(f"Loading anatomy ontology data for {data_provider}")
         data_manager.load_ontology(ontology_type=DataType.EXPR, provider=data_provider)
 
@@ -219,6 +244,8 @@ def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider:
         data_manager.load_annotations(associations_type=DataType.EXPR, taxon_id=species_taxon,
                                       provider=data_provider)
 
+    if progress_tracker:
+        progress_tracker.set_phase(data_provider, ProviderPhase.LOADING_GENES)
     logger.info(f"Loading gene data for {data_provider}")
     data_manager.load_gene_data(species_taxon=species_taxon)
 
@@ -389,7 +416,8 @@ def _build_file_header(data_format: str, data_provider: str) -> str:
     )
 
 
-def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: DescriptionsWriter, data_provider: str):
+def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: DescriptionsWriter,
+                           data_provider: str, progress_tracker=None):
     base_path = f"pipelines/alliance/generated_descriptions/{data_provider}"
     alliance_release = os.environ.get("ALLIANCE_RELEASE", "")
     release_version = ".".join(alliance_release.split(".")[0:2])
@@ -398,9 +426,14 @@ def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: 
     json_desc_writer.overall_properties.release_version = release_version
     json_desc_writer.overall_properties.date = datetime.date.today().isoformat()
 
+    if progress_tracker:
+        progress_tracker.set_phase(data_provider, ProviderPhase.WRITING_JSON)
     json_desc_writer.write_json(file_path=base_path + ".json",
                                 include_single_gene_stats=True,
                                 data_manager=data_manager)
+
+    if progress_tracker:
+        progress_tracker.set_phase(data_provider, ProviderPhase.WRITING_TSV)
     json_desc_writer.write_tsv(file_path=base_path + ".tsv",
                                header=_build_file_header("tsv", data_provider))
     json_desc_writer.write_plain_text(file_path=base_path + ".txt",
@@ -410,6 +443,8 @@ def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: 
         json.dump(vars(json_desc_writer.general_stats), stats_file)
     logger.info(f"Saved description files for {data_provider}")
 
+    if progress_tracker:
+        progress_tracker.set_phase(data_provider, ProviderPhase.WRITING_DB)
     gene_desc_pairs = [
         (gd.gene_id, gd.description)
         for gd in json_desc_writer.data if gd.description
@@ -429,7 +464,11 @@ def process_provider(data_provider, species_taxon, data_manager, conf_parser,
             progress_tracker.set_phase(data_provider, ProviderPhase.LOADING)
 
         logger.info(f"Loading all data for {data_provider}")
-        load_all_data_for_provider(data_manager, data_provider, species_taxon)
+        load_all_data_for_provider(data_manager, data_provider, species_taxon,
+                                   progress_tracker=progress_tracker)
+
+        if progress_tracker:
+            progress_tracker.set_phase(data_provider, ProviderPhase.LOADING_ORTHOLOGS)
         logger.info(f"Loading best human orthologs for {data_provider}")
 
         best_orthologs = {}
@@ -451,7 +490,8 @@ def process_provider(data_provider, species_taxon, data_manager, conf_parser,
             progress_tracker.set_phase(data_provider, ProviderPhase.WRITING)
 
         logger.info(f"Saving gene descriptions for {data_provider}")
-        save_gene_descriptions(data_manager, json_desc_writer, data_provider)
+        save_gene_descriptions(data_manager, json_desc_writer, data_provider,
+                               progress_tracker=progress_tracker)
 
         if progress_tracker:
             progress_tracker.set_phase(data_provider, ProviderPhase.DONE)
