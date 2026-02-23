@@ -87,6 +87,7 @@ class ProviderPhase(str, enum.Enum):
     WRITING_JSON = "writing JSON"
     WRITING_TSV = "writing TSV/TXT"
     WRITING_DB = "writing DB"
+    UPLOADING = "uploading FMS"
     DONE = "done"
     ERROR = "error"
 
@@ -110,7 +111,8 @@ class ProgressTracker:
         ProviderPhase.WRITING: (88, 90),
         ProviderPhase.WRITING_JSON: (90, 94),
         ProviderPhase.WRITING_TSV: (94, 96),
-        ProviderPhase.WRITING_DB: (96, 100),
+        ProviderPhase.WRITING_DB: (96, 98),
+        ProviderPhase.UPLOADING: (98, 100),
         ProviderPhase.DONE: (100, 100),
         ProviderPhase.ERROR: (0, 0),
     }
@@ -417,7 +419,8 @@ def _build_file_header(data_format: str, data_provider: str) -> str:
 
 
 def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: DescriptionsWriter,
-                           data_provider: str, progress_tracker=None):
+                           data_provider: str, skip_fms_upload: bool = False,
+                           progress_tracker=None):
     base_path = f"pipelines/alliance/generated_descriptions/{data_provider}"
     alliance_release = os.environ.get("ALLIANCE_RELEASE", "")
     release_version = ".".join(alliance_release.split(".")[0:2])
@@ -452,9 +455,19 @@ def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: 
     data_manager.write_gene_description_notes(gene_desc_pairs)
     logger.info(f"Wrote gene description notes to database for {data_provider}")
 
+    if not skip_fms_upload:
+        if progress_tracker:
+            progress_tracker.set_phase(data_provider, ProviderPhase.UPLOADING)
+        logger.info(f"Uploading gene description files to FMS for {data_provider}")
+        AllianceDataManager.upload_files_to_fms(base_path, data_provider)
+        logger.info(f"FMS upload complete for {data_provider}")
+    else:
+        logger.info(f"Skipping FMS upload for {data_provider} (--no-fms-upload)")
+
 
 def process_provider(data_provider, species_taxon, data_manager, conf_parser,
-                     gene_workers=1, batch_size=500, progress_tracker=None):
+                     gene_workers=1, batch_size=500, skip_fms_upload=False,
+                     progress_tracker=None):
     try:
         logger.info(f"Processing provider: {data_provider}")
         provider_start = time.time()
@@ -491,6 +504,7 @@ def process_provider(data_provider, species_taxon, data_manager, conf_parser,
 
         logger.info(f"Saving gene descriptions for {data_provider}")
         save_gene_descriptions(data_manager, json_desc_writer, data_provider,
+                               skip_fms_upload=skip_fms_upload,
                                progress_tracker=progress_tracker)
 
         if progress_tracker:
@@ -527,6 +541,8 @@ def main():
                         help="Number of genes per batch for gene-level parallelism (default: 500)")
     parser.add_argument("--status-interval", dest="status_interval", type=int, default=30,
                         help="Seconds between progress status logs (default: 30, 0 to disable)")
+    parser.add_argument("--no-fms-upload", dest="no_fms_upload", action="store_true",
+                        help="Skip uploading generated files to the Alliance FMS")
 
     args = parser.parse_args()
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
@@ -540,10 +556,11 @@ def main():
         "PERSISTENT_STORE_DB_HOST",
         "ALLIANCE_RELEASE",
     ]
+    if not args.no_fms_upload:
+        required_vars.append("API_KEY")
     optional_vars_defaults = {
         "PERSISTENT_STORE_DB_PORT": "5432",
         "FMS_API_URL": "https://fms.alliancegenome.org",
-        "API_KEY": "",
     }
     missing = [v for v in required_vars if not os.environ.get(v)]
     if missing:
@@ -553,7 +570,10 @@ def main():
 
     logger.info("Environment variables:")
     for var in required_vars:
-        logger.info(f"  {var}={os.environ.get(var, '')}")
+        value = os.environ.get(var, "")
+        if var in ("API_KEY", "PERSISTENT_STORE_DB_PASSWORD"):
+            value = value[:4] + "****" if value else ""
+        logger.info(f"  {var}={value}")
     for var, default in optional_vars_defaults.items():
         value = os.environ.get(var, "")
         if value:
@@ -613,7 +633,8 @@ def main():
             with concurrent.futures.ProcessPoolExecutor(max_workers=args.provider_workers) as executor:
                 future_to_provider = {
                     executor.submit(process_provider, data_provider, species_taxon, data_manager, conf_parser,
-                                    gene_workers=gene_workers, batch_size=batch_size): data_provider
+                                    gene_workers=gene_workers, batch_size=batch_size,
+                                    skip_fms_upload=args.no_fms_upload): data_provider
                     for data_provider, species_taxon in data_providers
                 }
                 for future in concurrent.futures.as_completed(future_to_provider):
@@ -633,6 +654,7 @@ def main():
                 provider, elapsed = process_provider(
                     data_provider, species_taxon, data_manager, conf_parser,
                     gene_workers=gene_workers, batch_size=batch_size,
+                    skip_fms_upload=args.no_fms_upload,
                     progress_tracker=progress_tracker
                 )
                 provider_times[provider] = elapsed
