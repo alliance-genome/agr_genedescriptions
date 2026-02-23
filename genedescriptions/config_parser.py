@@ -34,7 +34,7 @@ class GenedescConfigParser(object):
         with open(file_path) as conf_file:
             self.config = yaml.safe_load(conf_file)
             self.add_go_do_not_annotate_to_blacklist(
-                'http://current.geneontology.org/ontology/subsets/gocheck_do_not_annotate.json')
+                'https://current.geneontology.org/ontology/subsets/gocheck_do_not_annotate.json')
             # self.add_go_do_not_annotate_to_blacklist(
             #     'http://current.geneontology.org/ontology/subsets/gocheck_do_not_manually_annotate.json')
 
