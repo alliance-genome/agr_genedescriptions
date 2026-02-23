@@ -178,7 +178,7 @@ class AllianceDataManager(DataManager):
         """
         fms_api_url = os.environ.get("FMS_API_URL",
                                      "https://fms.alliancegenome.org")
-        api_key = os.environ.get("API_KEY", "")
+        api_key = os.environ.get("FMS_API_KEY", "")
         alliance_release = os.environ.get("ALLIANCE_RELEASE")
         if not alliance_release:
             raise RuntimeError("ALLIANCE_RELEASE not set in environment")
