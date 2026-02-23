@@ -25,7 +25,7 @@ ENV ALLIANCE_RELEASE=""
 
 # Environment variables for FMS upload
 ENV FMS_API_URL=https://fms.alliancegenome.org
-ENV API_KEY=""
+ENV FMS_API_KEY=""
 
 # Run the alliance pipeline in parallel mode
 CMD ["python", "-m", "pipelines.alliance.alliance_pipeline", \
