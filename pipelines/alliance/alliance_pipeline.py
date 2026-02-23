@@ -557,7 +557,7 @@ def main():
         "ALLIANCE_RELEASE",
     ]
     if not args.no_fms_upload:
-        required_vars.append("API_KEY")
+        required_vars.append("FMS_API_KEY")
     optional_vars_defaults = {
         "PERSISTENT_STORE_DB_PORT": "5432",
         "FMS_API_URL": "https://fms.alliancegenome.org",
@@ -571,7 +571,7 @@ def main():
     logger.info("Environment variables:")
     for var in required_vars:
         value = os.environ.get(var, "")
-        if var in ("API_KEY", "PERSISTENT_STORE_DB_PASSWORD"):
+        if var in ("FMS_API_KEY", "PERSISTENT_STORE_DB_PASSWORD"):
             value = value[:4] + "****" if value else ""
         logger.info(f"  {var}={value}")
     for var, default in optional_vars_defaults.items():
