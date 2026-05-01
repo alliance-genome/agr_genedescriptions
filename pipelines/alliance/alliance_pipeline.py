@@ -251,14 +251,6 @@ def load_all_data_for_provider(data_manager: AllianceDataManager, data_provider:
     logger.info(f"Loading gene data for {data_provider}")
     data_manager.load_gene_data(species_taxon=species_taxon)
 
-    # Prepend 'RGD:' to all gene ids if provider is HUMAN
-    if data_provider == "HUMAN":
-        for gene_id in list(data_manager.gene_data.keys()):
-            gene = data_manager.gene_data[gene_id]
-            new_gene_id = f"RGD:{gene.id}"
-            data_manager.gene_data[new_gene_id] = gene._replace(id=new_gene_id)
-            del data_manager.gene_data[gene_id]
-
 
 def generate_gene_descriptions(data_manager: AllianceDataManager, best_orthologs, data_provider: str,
                                conf_parser: GenedescConfigParser, json_desc_writer: DescriptionsWriter,
@@ -296,10 +288,7 @@ def generate_gene_descriptions(data_manager: AllianceDataManager, best_orthologs
     else:
         logger.info(f"Processing {total_genes} genes sequentially")
         for gene_idx, gene in enumerate(genes, start=1):
-            output_gene_id = gene.id
-            if data_provider == "HUMAN" and gene.id.startswith("RGD:"):
-                output_gene_id = gene.id[4:]
-            gene_desc = GeneDescription(gene_id=output_gene_id,
+            gene_desc = GeneDescription(gene_id=gene.id,
                                         gene_name=gene.name,
                                         add_gene_name=False,
                                         config=conf_parser)
@@ -361,10 +350,7 @@ def _process_gene_batch(gene_batch):
     conf_parser = _worker_data['conf']
     results = []
     for gene in gene_batch:
-        output_gene_id = gene.id
-        if data_provider == "HUMAN" and gene.id.startswith("RGD:"):
-            output_gene_id = gene.id[4:]
-        gene_desc = GeneDescription(gene_id=output_gene_id,
+        gene_desc = GeneDescription(gene_id=gene.id,
                                     gene_name=gene.name,
                                     add_gene_name=False,
                                     config=conf_parser)
@@ -420,6 +406,7 @@ def _build_file_header(data_format: str, data_provider: str) -> str:
 
 def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: DescriptionsWriter,
                            data_provider: str, skip_fms_upload: bool = False,
+                           skip_db_write: bool = False,
                            progress_tracker=None):
     base_path = f"pipelines/alliance/generated_descriptions/{data_provider}"
     alliance_release = os.environ.get("ALLIANCE_RELEASE", "")
@@ -446,14 +433,17 @@ def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: 
         json.dump(vars(json_desc_writer.general_stats), stats_file)
     logger.info(f"Saved description files for {data_provider}")
 
-    if progress_tracker:
-        progress_tracker.set_phase(data_provider, ProviderPhase.WRITING_DB)
-    gene_desc_pairs = [
-        (gd.gene_id, gd.description)
-        for gd in json_desc_writer.data if gd.description
-    ]
-    data_manager.write_gene_description_notes(gene_desc_pairs)
-    logger.info(f"Wrote gene description notes to database for {data_provider}")
+    if not skip_db_write:
+        if progress_tracker:
+            progress_tracker.set_phase(data_provider, ProviderPhase.WRITING_DB)
+        gene_desc_pairs = [
+            (gd.gene_id, gd.description)
+            for gd in json_desc_writer.data if gd.description
+        ]
+        data_manager.write_gene_description_notes(gene_desc_pairs)
+        logger.info(f"Wrote gene description notes to database for {data_provider}")
+    else:
+        logger.info(f"Skipping DB write for {data_provider} (--no-db-write)")
 
     if not skip_fms_upload:
         if progress_tracker:
@@ -467,6 +457,7 @@ def save_gene_descriptions(data_manager: AllianceDataManager, json_desc_writer: 
 
 def process_provider(data_provider, species_taxon, data_manager, conf_parser,
                      gene_workers=1, batch_size=500, skip_fms_upload=False,
+                     skip_db_write=False,
                      progress_tracker=None):
     try:
         logger.info(f"Processing provider: {data_provider}")
@@ -505,6 +496,7 @@ def process_provider(data_provider, species_taxon, data_manager, conf_parser,
         logger.info(f"Saving gene descriptions for {data_provider}")
         save_gene_descriptions(data_manager, json_desc_writer, data_provider,
                                skip_fms_upload=skip_fms_upload,
+                               skip_db_write=skip_db_write,
                                progress_tracker=progress_tracker)
 
         if progress_tracker:
@@ -543,6 +535,12 @@ def main():
                         help="Seconds between progress status logs (default: 30, 0 to disable)")
     parser.add_argument("--no-fms-upload", dest="no_fms_upload", action="store_true",
                         help="Skip uploading generated files to the Alliance FMS")
+    parser.add_argument("--no-db-write", dest="no_db_write", action="store_true",
+                        help="Read-only mode: skip deleting existing notes and "
+                             "skip writing gene description notes to the persistent store DB")
+    parser.add_argument("--providers", dest="providers", type=str, default=None,
+                        help="Comma-separated list of providers to run (e.g. 'HUMAN' "
+                             "or 'HUMAN,MGI'). Default: all providers loaded from DB.")
 
     args = parser.parse_args()
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
@@ -590,14 +588,28 @@ def main():
     logger.info("Loading data providers")
     data_providers = data_manager.load_data_providers()
 
+    if args.providers:
+        wanted = {p.strip() for p in args.providers.split(",") if p.strip()}
+        data_providers = [(dp, taxon) for dp, taxon in data_providers if dp in wanted]
+        logger.info(f"Filtered providers to: {[dp for dp, _ in data_providers]}")
+        if not data_providers:
+            logger.error(
+                f"No providers matched --providers={args.providers}. "
+                f"Known providers loaded from DB: "
+                f"{[dp for dp, _ in data_manager.load_data_providers()]}")
+            raise SystemExit(1)
+
     logger.info("Loading GO ontology")
     data_manager.load_ontology(ontology_type=DataType.GO)
 
     logger.info("Loading DO ontology")
     data_manager.load_ontology(ontology_type=DataType.DO)
 
-    logger.info("Deleting existing automated gene descriptions")
-    data_manager.delete_all_automated_gene_descriptions()
+    if not args.no_db_write:
+        logger.info("Deleting existing automated gene descriptions")
+        data_manager.delete_all_automated_gene_descriptions()
+    else:
+        logger.info("Skipping deletion of existing automated gene descriptions (--no-db-write)")
 
     # Close DB connection before spawning subprocesses - each subprocess will create its own
     # This is necessary because SQLAlchemy connections can't be pickled
@@ -634,7 +646,8 @@ def main():
                 future_to_provider = {
                     executor.submit(process_provider, data_provider, species_taxon, data_manager, conf_parser,
                                     gene_workers=gene_workers, batch_size=batch_size,
-                                    skip_fms_upload=args.no_fms_upload): data_provider
+                                    skip_fms_upload=args.no_fms_upload,
+                                    skip_db_write=args.no_db_write): data_provider
                     for data_provider, species_taxon in data_providers
                 }
                 for future in concurrent.futures.as_completed(future_to_provider):
@@ -655,6 +668,7 @@ def main():
                     data_provider, species_taxon, data_manager, conf_parser,
                     gene_workers=gene_workers, batch_size=batch_size,
                     skip_fms_upload=args.no_fms_upload,
+                    skip_db_write=args.no_db_write,
                     progress_tracker=progress_tracker
                 )
                 provider_times[provider] = elapsed

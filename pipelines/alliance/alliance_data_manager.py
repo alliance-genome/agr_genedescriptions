@@ -247,8 +247,13 @@ class AllianceDataManager(DataManager):
         for subj_associations in self.go_associations.associations_by_subj.values():
             for association in subj_associations:
                 parts = association["subject"]["id"].split(":")
-                if len(parts) > 2 and parts[0] == parts[1]:
-                    association["subject"]["id"] = f"{parts[0]}:{parts[2]}"
+                if len(parts) > 2:
+                    # Strip a redundant DB-source prefix wrapping a real CURIE.
+                    # AGR HUMAN GAF uses 'RGD:HGNC:...' (RGD is the source, HGNC is the curie)
+                    # and AGR MGI GAF uses 'MGI:MGI:...'. Both should collapse to the inner curie
+                    # so subject IDs match the persistent store DB primaryexternalid format.
+                    if parts[0] == parts[1] or (parts[0] == "RGD" and parts[1] == "HGNC"):
+                        association["subject"]["id"] = ":".join(parts[1:])
                 renamed_associations.append(association)
         self.go_associations = DataManager.create_annot_set_from_legacy_assocs(assocs=renamed_associations,
                                                                                ontology=self.go_ontology)
