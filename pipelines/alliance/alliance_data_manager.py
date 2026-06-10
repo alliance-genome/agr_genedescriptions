@@ -168,12 +168,12 @@ class AllianceDataManager(DataManager):
     def upload_files_to_fms(file_path: str, data_provider: str):
         """Upload gene description files to the Alliance File Management System.
 
-        Uploads JSON, TSV, TXT, and stats JSON files for a given data provider.
+        Uploads the JSON and stats JSON files for a given data provider.
 
         Args:
             file_path: Base path to the files (without extension).
-                       Expects {file_path}.json, {file_path}.tsv,
-                       {file_path}.txt, and {file_path}_stats.json to exist.
+                       Expects {file_path}.json and {file_path}_stats.json
+                       to exist.
             data_provider: The data provider name (e.g., 'WB', 'MGI')
         """
         fms_api_url = os.environ.get("FMS_API_URL",
@@ -184,13 +184,9 @@ class AllianceDataManager(DataManager):
             raise RuntimeError("ALLIANCE_RELEASE not set in environment")
 
         with open(file_path + ".json", "rb") as f_json, \
-             open(file_path + ".tsv", "rb") as f_tsv, \
-             open(file_path + ".txt", "rb") as f_txt, \
              open(file_path + "_stats.json", "rb") as f_stats:
             files_to_upload = {
                 f"{alliance_release}_GENE-DESCRIPTION-JSON_{data_provider}": f_json,
-                f"{alliance_release}_GENE-DESCRIPTION-TSV_{data_provider}": f_tsv,
-                f"{alliance_release}_GENE-DESCRIPTION-TXT_{data_provider}": f_txt,
                 f"{alliance_release}_GENE-DESCRIPTION-STATS_{data_provider}": f_stats,
             }
             headers = {"Authorization": f"Bearer {api_key}"}
