@@ -209,19 +209,34 @@ class AllianceDataManager(DataManager):
         release_version = os.environ.get("ALLIANCE_RELEASE")
         if not release_version:
             raise RuntimeError("ALLIANCE_RELEASE not set in environment")
-        fms_url = f"https://fms.alliancegenome.org/api/snapshot/release/{release_version}"
+        fms_api_url = os.environ.get("FMS_API_URL",
+                                     "https://fms.alliancegenome.org")
+        # Use the datafile endpoint with latest=true to fetch the most recent
+        # GAF file for the release, instead of a fixed release snapshot.
+        fms_url = (f"{fms_api_url}/api/datafile/by/{release_version}"
+                   f"/GAF/{provider}?latest=true")
         response = requests.get(fms_url)
         if response.status_code != 200:
             raise RuntimeError(f"Failed to fetch FMS API: {response.status_code}")
-        snapshot = response.json().get("snapShot", {})
-        data_files = snapshot.get("dataFiles", [])
-        gaf_file = None
-        for f in data_files:
-            if f.get("dataType", {}).get("name") == "GAF" and f.get("dataSubType", {}).get("name") == provider:
-                gaf_file = f
-                break
-        if not gaf_file:
+        data_files = response.json()
+        # The datafile endpoint with latest=true always returns a single file.
+        if not data_files:
             raise RuntimeError(f"No GAF file found for provider {provider} in release {release_version}")
+        gaf_file = data_files[0]
+        # Log the datafile metadata so the source data can be traced.
+        release_versions = ", ".join(
+            rv.get("releaseVersion", "")
+            for rv in gaf_file.get("releaseVersions", []))
+        logger.info(
+            f"FMS GAF datafile for provider {provider} "
+            f"(release {release_version}): id={gaf_file.get('id')}, "
+            f"s3Path={gaf_file.get('s3Path')}, "
+            f"md5Sum={gaf_file.get('md5Sum')}, "
+            f"valid={gaf_file.get('valid')}, "
+            f"uploadDate={gaf_file.get('uploadDate')}, "
+            f"releaseVersions=[{release_versions}], "
+            f"s3Url={gaf_file.get('s3Url')}, "
+            f"stableURL={gaf_file.get('stableURL')}")
         gaf_url = gaf_file.get("s3Url") or gaf_file.get("stableURL")
         if not gaf_url:
             raise RuntimeError(f"No download URL found for GAF file for provider {provider}")
