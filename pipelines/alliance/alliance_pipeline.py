@@ -450,6 +450,10 @@ def main():
     args = parser.parse_args()
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
     logging.getLogger(__name__).setLevel(logging.getLevelName(args.log_level))
+    # Also set the level for the first-party "pipelines" package so INFO logs
+    # from modules like alliance_data_manager (e.g. the GAF datafile metadata)
+    # are shown. Worker processes are forked after this point and inherit it.
+    logging.getLogger("pipelines").setLevel(logging.getLevelName(args.log_level))
 
     # Check required environment variables
     required_vars = [
