@@ -422,10 +422,53 @@ class AllianceDataManager(DataManager):
                                 relation="subClassOf")
 
     def load_gene_data(self, species_taxon: str):
-        genes = self.db.get_genes_raw(taxon_curie=species_taxon)
+        genes = self._get_genes_excluding_non_gene_features(species_taxon=species_taxon)
         self.gene_data = {}
         for gene in genes:
             self.gene_data[gene["gene_id"]] = Gene(gene["gene_id"], gene["gene_symbol"], False, False)
+
+    def _get_genes_excluding_non_gene_features(self, species_taxon: str):
+        """Load genes for a taxon, excluding non-gene sequence features.
+
+        The curation persistent store's ``gene`` table can contain genomic
+        sequence features (e.g. TF_binding_site, sequence_feature, TSS_region,
+        polyA_site, trans_splice_acceptor_site) that carry a
+        GeneSymbolSlotAnnotation but are not real genes. Left unfiltered these
+        inflate the gene count enormously (e.g. WB NCBITaxon:6239 returns ~778k
+        objects, of which only ~49.5k are genes; MGI is similarly affected).
+
+        This restricts the result to records whose SO gene type name ends in
+        "gene" (protein_coding_gene, ncRNA_gene, pseudogene, tRNA_gene,
+        transposable_element_gene, ...), which are exactly the real gene types;
+        none of the sequence-feature SO types end in "gene".
+
+        Returns a list of dicts with ``gene_id`` and ``gene_symbol`` keys,
+        matching the shape previously returned by ``db.get_genes_raw``.
+        """
+        session = self.db._create_session()
+        try:
+            rows = session.execute(text("""
+                SELECT
+                    be.primaryexternalid AS gene_id,
+                    slota.displaytext AS gene_symbol
+                FROM
+                    biologicalentity be
+                    JOIN slotannotation slota ON be.id = slota.singlegene_id
+                    JOIN ontologyterm taxon ON be.taxon_id = taxon.id
+                    JOIN gene g ON be.id = g.id
+                    JOIN ontologyterm gt ON g.genetype_id = gt.id
+                WHERE
+                    slota.obsolete = false
+                    AND be.obsolete = false
+                    AND slota.slotannotationtype = 'GeneSymbolSlotAnnotation'
+                    AND taxon.curie = :species_taxon
+                    AND gt.name LIKE '%gene'
+                ORDER BY
+                    be.primaryexternalid
+            """), {"species_taxon": species_taxon}).fetchall()
+            return [{"gene_id": row[0], "gene_symbol": row[1]} for row in rows]
+        finally:
+            session.close()
 
     @staticmethod
     def load_data_providers():
