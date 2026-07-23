@@ -332,7 +332,10 @@ class AllianceDataManager(DataManager):
                                                    check_exists: bool = True):
         """Add Term to Ontobio Ontology If Not Exists."""
         if not check_exists or (not ontology.has_node(term_id) and term_label):
-            if is_obsolete in ["true", "True"]:
+            # ``ontologyterm.obsolete`` is a boolean column in the curation
+            # store, so the value arrives here as a Python bool. Accept the
+            # string forms too for robustness against other callers.
+            if is_obsolete is True or (isinstance(is_obsolete, str) and is_obsolete.lower() == "true"):
                 meta = {
                     "deprecated": True, "basicPropertyValues": [
                         {"pred": "OIO:hasOBONamespace", "val": term_type}]
