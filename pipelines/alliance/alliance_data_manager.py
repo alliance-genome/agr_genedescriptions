@@ -6,13 +6,23 @@ import tempfile
 from ontobio import Ontology
 from sqlalchemy import text
 
-from agr_curation_api import DatabaseMethods
+from agr_curation_api import DatabaseMethods, GENE_LIKE_SO_TERM_CURIES
 from genedescriptions.commons import DataType, Module, Gene
 from genedescriptions.config_parser import GenedescConfigParser, ConfigModuleProperty
 from genedescriptions.data_manager import DataManager
 
 logger = logging.getLogger(__name__)
 
+
+# SO gene types that count as genes for gene descriptions. GENE_LIKE_SO_TERM_CURIES
+# is the curation API client's four-root include list: gene plus the three gene-like
+# roots that are not is_a descendants of it (pseudogene, gene_segment and
+# heritable_phenotypic_marker, the last two required by MGI). Restricting by gene type
+# keeps out the non-gene sequence features that also live in the curation
+# ``gene`` table (TF_binding_site, sequence_feature, TSS_region, polyA_site, ...) and
+# carry a GeneSymbolSlotAnnotation; unfiltered they inflate the gene count enormously
+# (WB NCBITaxon:6239 returns ~778k objects, of which only ~49.5k are genes).
+GENE_SO_TERMS = list(GENE_LIKE_SO_TERM_CURIES)
 
 provider_to_expression_curie_prefix = {
     "WB": "WBbt",
@@ -425,53 +435,10 @@ class AllianceDataManager(DataManager):
                                 relation="subClassOf")
 
     def load_gene_data(self, species_taxon: str):
-        genes = self._get_genes_excluding_non_gene_features(species_taxon=species_taxon)
+        genes = self.db.get_genes_raw(taxon_curie=species_taxon, so_terms=GENE_SO_TERMS)
         self.gene_data = {}
         for gene in genes:
             self.gene_data[gene["gene_id"]] = Gene(gene["gene_id"], gene["gene_symbol"], False, False)
-
-    def _get_genes_excluding_non_gene_features(self, species_taxon: str):
-        """Load genes for a taxon, excluding non-gene sequence features.
-
-        The curation persistent store's ``gene`` table can contain genomic
-        sequence features (e.g. TF_binding_site, sequence_feature, TSS_region,
-        polyA_site, trans_splice_acceptor_site) that carry a
-        GeneSymbolSlotAnnotation but are not real genes. Left unfiltered these
-        inflate the gene count enormously (e.g. WB NCBITaxon:6239 returns ~778k
-        objects, of which only ~49.5k are genes; MGI is similarly affected).
-
-        This restricts the result to records whose SO gene type name ends in
-        "gene" (protein_coding_gene, ncRNA_gene, pseudogene, tRNA_gene,
-        transposable_element_gene, ...), which are exactly the real gene types;
-        none of the sequence-feature SO types end in "gene".
-
-        Returns a list of dicts with ``gene_id`` and ``gene_symbol`` keys,
-        matching the shape previously returned by ``db.get_genes_raw``.
-        """
-        session = self.db._create_session()
-        try:
-            rows = session.execute(text("""
-                SELECT
-                    be.primaryexternalid AS gene_id,
-                    slota.displaytext AS gene_symbol
-                FROM
-                    biologicalentity be
-                    JOIN slotannotation slota ON be.id = slota.singlegene_id
-                    JOIN ontologyterm taxon ON be.taxon_id = taxon.id
-                    JOIN gene g ON be.id = g.id
-                    JOIN ontologyterm gt ON g.genetype_id = gt.id
-                WHERE
-                    slota.obsolete = false
-                    AND be.obsolete = false
-                    AND slota.slotannotationtype = 'GeneSymbolSlotAnnotation'
-                    AND taxon.curie = :species_taxon
-                    AND gt.name LIKE '%gene'
-                ORDER BY
-                    be.primaryexternalid
-            """), {"species_taxon": species_taxon}).fetchall()
-            return [{"gene_id": row[0], "gene_symbol": row[1]} for row in rows]
-        finally:
-            session.close()
 
     @staticmethod
     def load_data_providers():

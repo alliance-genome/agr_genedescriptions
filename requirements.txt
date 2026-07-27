@@ -7,6 +7,6 @@ ontobio==2.8.22
 prefixcommons>=0.1.9
 num2words~=0.5.13
 dacite
-agr-curation-api-client>=0.12.1
+agr-curation-api-client>=0.14.0
 setuptools~=69.5.1
 requests~=2.32.3
